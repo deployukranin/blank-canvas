@@ -9,9 +9,18 @@ interface VideoGalleryCarouselProps {
   isLoading?: boolean;
   onSelect: (videoId: string) => void;
   metaById?: Record<string, { isNew?: boolean; progressPercent?: number }>;
+  favoriteIds?: Set<string>;
+  onToggleFavorite?: (videoId: string) => void;
 }
 
-export function VideoGalleryCarousel({ videos, isLoading, onSelect, metaById }: VideoGalleryCarouselProps) {
+export function VideoGalleryCarousel({
+  videos,
+  isLoading,
+  onSelect,
+  metaById,
+  favoriteIds,
+  onToggleFavorite,
+}: VideoGalleryCarouselProps) {
   if (isLoading) {
     return (
       <div className="relative">
@@ -53,6 +62,8 @@ export function VideoGalleryCarousel({ videos, isLoading, onSelect, metaById }: 
                 onClick={() => onSelect(video.video_id)}
                 isNew={metaById?.[video.video_id]?.isNew}
                 progressPercent={metaById?.[video.video_id]?.progressPercent}
+                isFavorite={favoriteIds?.has(video.video_id)}
+                onToggleFavorite={onToggleFavorite}
               />
             </motion.div>
           </CarouselItem>

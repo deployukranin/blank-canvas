@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
@@ -9,10 +10,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
+import { useVideoFavorites } from '@/hooks/use-video-favorites';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
+
 const Index = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -32,11 +35,19 @@ const Index = () => {
     enabled: youtubeEnabled,
   });
 
-  const videos = useMemo(() => youtubeData?.videos?.slice(0, 8) ?? [], [youtubeData]);
+  const allVideos = useMemo(() => youtubeData?.videos ?? [], [youtubeData]);
+  const videos = useMemo(() => allVideos.slice(0, 8), [allVideos]);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const selectedVideo = useMemo(
-    () => videos.find((v) => v.video_id === selectedVideoId) ?? null,
-    [videos, selectedVideoId]
+    () => allVideos.find((v) => v.video_id === selectedVideoId) ?? null,
+    [allVideos, selectedVideoId]
+  );
+
+  // Favorites
+  const { favoriteIds, toggleFavorite, getFavoriteVideos } = useVideoFavorites();
+  const favoriteVideos = useMemo(
+    () => getFavoriteVideos(allVideos).slice(0, 6),
+    [getFavoriteVideos, allVideos]
   );
 
   return (
@@ -105,6 +116,32 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Favoritos */}
+        {youtubeEnabled && favoriteVideos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display font-semibold flex items-center gap-2">
+                <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                Meus Favoritos
+              </h3>
+              <Link to="/galeria-videos" className="text-primary text-sm font-medium">
+                Ver todos
+              </Link>
+            </div>
+            <VideoGalleryCarousel
+              videos={favoriteVideos}
+              isLoading={false}
+              onSelect={(videoId) => setSelectedVideoId(videoId)}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={toggleFavorite}
+            />
+          </motion.div>
+        )}
+
         {/* Vídeos em Destaque */}
         {youtubeEnabled && videos.length > 0 && (
           <motion.div
@@ -122,6 +159,8 @@ const Index = () => {
               videos={videos}
               isLoading={videosLoading}
               onSelect={(videoId) => setSelectedVideoId(videoId)}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={toggleFavorite}
             />
           </motion.div>
         )}
@@ -190,7 +229,7 @@ const Index = () => {
         onOpenChange={(open) => {
           if (!open) setSelectedVideoId(null);
         }}
-        videos={videos}
+        videos={allVideos}
         selectedVideo={selectedVideo}
         onSelectVideo={(videoId) => setSelectedVideoId(videoId)}
       />
