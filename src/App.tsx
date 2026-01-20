@@ -29,6 +29,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
+import AdminPagamentosPix from "./pages/admin/AdminPagamentosPix";
 import AdminVideosConfig from "./pages/admin/AdminVideosConfig";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/ideias" element={<AdminIdeias />} />
               <Route path="/admin/pedidos" element={<AdminPedidos />} />
+              <Route path="/admin/pagamentos-pix" element={<AdminPagamentosPix />} />
               <Route path="/admin/videos-config" element={<AdminVideosConfig />} />
               <Route path="/admin/usuarios" element={<AdminUsuarios />} />
               <Route path="/admin/conteudo" element={<AdminConteudo />} />

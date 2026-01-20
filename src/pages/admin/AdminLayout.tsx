@@ -13,7 +13,8 @@ import {
   X,
   ArrowLeft,
   Shield,
-  Crown
+  Crown,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const menuItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/ideias', icon: Lightbulb, label: 'Ideias' },
   { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
+  { path: '/admin/pagamentos-pix', icon: CreditCard, label: 'Pagamentos PIX' },
   { path: '/admin/videos-config', icon: FileText, label: 'Config. Vídeos' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
