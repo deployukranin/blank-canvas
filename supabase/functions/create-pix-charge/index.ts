@@ -158,6 +158,7 @@ Deno.serve(async (req) => {
     }
 
     console.log("Enviando para OpenPix:", JSON.stringify(openPixPayload, null, 2));
+    console.log("AppID (primeiros 20 chars):", OPENPIX_APP_ID?.substring(0, 20) + "...");
 
     const openPixResponse = await fetch("https://api.openpix.com.br/api/v1/charge", {
       method: "POST",
