@@ -114,10 +114,9 @@ export const SupportChat = ({ defaultCategory = 'general' }: SupportChatProps) =
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-hidden"
+              className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe"
             >
-              <GlassCard className="rounded-t-3xl rounded-b-none p-0 max-w-lg mx-auto">
-                {/* Header */}
+              <GlassCard className="rounded-t-3xl rounded-b-none p-0 w-full max-w-lg mx-auto">
                 <div className="flex items-center justify-between p-4 border-b border-white/10">
                   <div>
                     <h3 className="font-display font-semibold">Suporte</h3>
