@@ -768,6 +768,7 @@ const defaultConfig: WhiteLabelConfig = {
 
 interface WhiteLabelContextType {
   config: WhiteLabelConfig;
+  setConfig: (config: WhiteLabelConfig) => void;
   updateBranding: (branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'bannerImages' | 'logoImage'>>) => void;
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
@@ -991,6 +992,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     <WhiteLabelContext.Provider
       value={{
         config,
+        setConfig,
         updateBranding,
         updateColors,
         updateIcons,
@@ -1022,6 +1024,7 @@ export const useWhiteLabel = () => {
 
     return {
       config: defaultConfig,
+      setConfig: noop,
       updateBranding: noop,
       updateColors: noop,
       updateIcons: noop,
