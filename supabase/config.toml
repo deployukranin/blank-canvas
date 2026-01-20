@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.youtube-videos]
 verify_jwt = false
+
+[functions.mock-pix-webhook]
+verify_jwt = false
+
+[functions.sandbox-pix-test]
+verify_jwt = false
