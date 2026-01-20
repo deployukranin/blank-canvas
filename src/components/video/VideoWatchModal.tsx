@@ -18,6 +18,7 @@ interface VideoWatchModalProps {
   selectedVideo: YouTubeVideoItem | null;
   videos: YouTubeVideoItem[];
   onSelectVideo: (videoId: string) => void;
+  startAtSeconds?: number;
 }
 
 export const VideoWatchModal = ({
@@ -26,6 +27,7 @@ export const VideoWatchModal = ({
   selectedVideo,
   videos,
   onSelectVideo,
+  startAtSeconds,
 }: VideoWatchModalProps) => {
   const otherVideos = useMemo(() => {
     if (!selectedVideo) return [];
@@ -35,7 +37,7 @@ export const VideoWatchModal = ({
   }, [videos, selectedVideo]);
 
   const embedUrl = selectedVideo
-    ? `https://www.youtube.com/watch?v=${selectedVideo.video_id}`
+    ? `https://www.youtube.com/watch?v=${selectedVideo.video_id}${startAtSeconds ? `&t=${startAtSeconds}` : ''}`
     : "";
 
   return (

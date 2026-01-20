@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { VideoGalleryByCategory } from "@/components/video/VideoGalleryByCategory";
 import { VideoWatchModal } from "@/components/video/VideoWatchModal";
-
+import { ContinueWatching } from "@/components/video/ContinueWatching";
 type VideoGalleryPanelProps = {
   className?: string;
 };
@@ -29,7 +29,13 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
 
   const videos = useMemo(() => data?.videos ?? [], [data]);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [startAtSeconds, setStartAtSeconds] = useState<number | undefined>(undefined);
   const [query, setQuery] = useState("");
+
+  const handleSelectVideo = useCallback((videoId: string, startAt?: number) => {
+    setSelectedVideoId(videoId);
+    setStartAtSeconds(startAt);
+  }, []);
 
   const searchEnabled = config.youtube?.searchEnabled ?? true;
   const categoryPreviewLimit = config.youtube?.categoryPreviewLimit ?? 8;
@@ -66,6 +72,15 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
   return (
     <>
       <div className={className ?? "space-y-4"}>
+        {/* Continue Watching Section */}
+        {config.youtube?.enabled && channelId && videos.length > 0 && (
+          <ContinueWatching
+            videos={videos}
+            onSelectVideo={handleSelectVideo}
+            className="mb-4"
+          />
+        )}
+
         <header className="space-y-3">
           <div className="space-y-1">
             <h1 className="font-display text-lg font-semibold">{title}</h1>
@@ -109,7 +124,7 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
           <VideoGalleryByCategory
             videos={filteredVideos}
             isLoading={isLoading}
-            onSelect={(videoId) => setSelectedVideoId(videoId)}
+            onSelect={(videoId) => handleSelectVideo(videoId)}
             categorization={categorization}
             categoryPreviewLimit={categoryPreviewLimit}
           />
@@ -119,11 +134,15 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
       <VideoWatchModal
         open={Boolean(selectedVideo)}
         onOpenChange={(open) => {
-          if (!open) setSelectedVideoId(null);
+          if (!open) {
+            setSelectedVideoId(null);
+            setStartAtSeconds(undefined);
+          }
         }}
         videos={filteredVideos}
         selectedVideo={selectedVideo}
-        onSelectVideo={(videoId) => setSelectedVideoId(videoId)}
+        onSelectVideo={(videoId) => handleSelectVideo(videoId)}
+        startAtSeconds={startAtSeconds}
       />
     </>
   );
