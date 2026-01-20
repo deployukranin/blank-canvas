@@ -15,6 +15,7 @@ import {
   Eye,
   EyeOff,
   Youtube,
+  Shield,
 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -97,7 +98,7 @@ const CEOIntegracoes = () => {
 
   const videos = useMemo(() => ytData?.videos ?? [], [ytData]);
 
-  const handleTest = async (tokenKey: "supabase" | "openpix" | "support" | "accountStock") => {
+  const handleTest = async (tokenKey: "supabase" | "openpix" | "support" | "accountStock" | "moderation") => {
     setTestingConnection(tokenKey);
     const result = await testConnection(tokenKey);
     setConnectionResults((prev) => ({ ...prev, [tokenKey]: result }));
@@ -606,6 +607,80 @@ const CEOIntegracoes = () => {
                     <span className={`flex items-center gap-1 text-sm ${connectionResults.accountStock.success ? 'text-green-400' : 'text-red-400'}`}>
                       {connectionResults.accountStock.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                       {connectionResults.accountStock.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
+
+        {/* Moderation Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <GlassCard>
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-lg">Painel de Moderação</h3>
+                  <p className="text-sm text-muted-foreground">Enviar denúncias e suporte para projeto externo</p>
+                </div>
+              </div>
+              <Switch
+                checked={config.tokens.moderation.enabled}
+                onCheckedChange={(checked) => updateToken('moderation', { enabled: checked })}
+              />
+            </div>
+
+            {config.tokens.moderation.enabled && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Configure a URL e API Key do projeto de moderação para enviar denúncias e tickets de suporte automaticamente.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    No projeto de moderação, crie um registro em <code className="font-mono bg-background/50 px-1 rounded">connected_projects</code> com a API Key gerada.
+                  </p>
+                </div>
+                
+                <TokenInput
+                  label="URL da API de Moderação"
+                  value={config.tokens.moderation.apiUrl}
+                  onChange={(value) => updateToken('moderation', { apiUrl: value })}
+                  placeholder="https://seu-projeto-moderacao.supabase.co"
+                  isSecret={false}
+                />
+                <TokenInput
+                  label="API Key"
+                  value={config.tokens.moderation.apiKey}
+                  onChange={(value) => updateToken('moderation', { apiKey: value })}
+                  placeholder="Chave gerada no projeto de moderação"
+                />
+                <div className="flex items-center gap-3 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleTest('moderation')}
+                    disabled={testingConnection === 'moderation'}
+                    className="gap-2"
+                  >
+                    {testingConnection === 'moderation' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <TestTube className="w-4 h-4" />
+                    )}
+                    Testar Conexão
+                  </Button>
+                  {connectionResults.moderation && (
+                    <span className={`flex items-center gap-1 text-sm ${connectionResults.moderation.success ? 'text-green-400' : 'text-red-400'}`}>
+                      {connectionResults.moderation.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                      {connectionResults.moderation.message}
                     </span>
                   )}
                 </div>

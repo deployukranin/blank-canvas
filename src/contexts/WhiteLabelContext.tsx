@@ -683,6 +683,11 @@ export interface WhiteLabelConfig {
       apiKey: string;
       enabled: boolean;
     };
+    moderation: {
+      apiUrl: string;
+      apiKey: string;
+      enabled: boolean;
+    };
   };
 }
 
@@ -749,6 +754,11 @@ const defaultConfig: WhiteLabelConfig = {
       enabled: false,
     },
     accountStock: {
+      apiUrl: '',
+      apiKey: '',
+      enabled: false,
+    },
+    moderation: {
       apiUrl: '',
       apiKey: '',
       enabled: false,
@@ -958,6 +968,12 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           return { success: false, message: 'Configure URL e API Key primeiro' };
         }
         return { success: true, message: 'Estoque de contas conectado! 47 contas disponíveis.' };
+        
+      case 'moderation':
+        if (!token.enabled || !config.tokens.moderation.apiUrl || !config.tokens.moderation.apiKey) {
+          return { success: false, message: 'Configure URL e API Key primeiro' };
+        }
+        return { success: true, message: 'Painel de Moderação conectado!' };
         
       default:
         return { success: false, message: 'Integração desconhecida' };

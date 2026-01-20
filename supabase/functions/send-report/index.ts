@@ -7,6 +7,10 @@ const corsHeaders = {
 
 interface ReportPayload {
   type: 'report' | 'support';
+  moderationConfig?: {
+    apiUrl: string;
+    apiKey: string;
+  };
   data: {
     contentType?: string;
     contentId?: string;
@@ -36,8 +40,9 @@ Deno.serve(async (req) => {
     
     console.log('[send-report] Received payload:', JSON.stringify(body));
 
-    const moderationUrl = Deno.env.get('MODERATION_API_URL');
-    const apiKey = Deno.env.get('MODERATION_API_KEY');
+    // Check for moderation config from request body (CEO panel) or env vars
+    const moderationUrl = body.moderationConfig?.apiUrl || Deno.env.get('MODERATION_API_URL');
+    const apiKey = body.moderationConfig?.apiKey || Deno.env.get('MODERATION_API_KEY');
 
     // If moderation API is not configured, store locally in Supabase
     if (!moderationUrl || !apiKey) {
