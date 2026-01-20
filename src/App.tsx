@@ -45,6 +45,7 @@ import CEOExplorar from "./pages/ceo/CEOExplorar";
 import CEOComunidade from "./pages/ceo/CEOComunidade";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 import CEOLoja from "./pages/ceo/CEOLoja";
+import Setup from "./pages/Setup";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/setup" element={<Setup />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/ideias" element={<Ideias />} />
               <Route path="/loja" element={<Loja />} />
