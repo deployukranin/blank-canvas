@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, Settings, ChevronRight, HelpCircle, FileText, Shield, LayoutDashboard, Sparkles, Lightbulb, Package, Bell } from 'lucide-react';
+import { LogOut, Crown, Settings, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -126,49 +126,6 @@ const PerfilPage = () => {
             onHandleSet={() => refetchProfile()}
           />
         </motion.div>
-
-        {/* CEO/Admin Panel Links */}
-        {(user?.isCEO || user?.isAdmin) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="space-y-2"
-          >
-            {user?.isCEO && (
-              <Link to="/ceo">
-                <GlassCard className="p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border-amber-500/20" hover>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-amber-950" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm text-amber-100">Painel CEO</p>
-                      <p className="text-xs text-amber-400/70">White-Label & Integrações</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-amber-400" />
-                  </div>
-                </GlassCard>
-              </Link>
-            )}
-            {user?.isAdmin && (
-              <Link to="/admin">
-                <GlassCard className="p-4 bg-gradient-to-r from-purple-500/10 to-purple-600/5 border-purple-500/20" hover>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                      <LayoutDashboard className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Painel Admin</p>
-                      <p className="text-xs text-muted-foreground">Gerenciar conteúdo</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </GlassCard>
-              </Link>
-            )}
-          </motion.div>
-        )}
 
         {/* Quick Access - Ideias & VIP */}
         <motion.div
