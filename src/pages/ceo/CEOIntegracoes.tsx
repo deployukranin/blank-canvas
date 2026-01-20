@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Link2,
@@ -16,6 +16,8 @@ import {
   EyeOff,
   Youtube,
   Shield,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -28,6 +30,7 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
+import { exportConfig, importConfig } from '@/lib/config-export';
 
 interface TokenInputProps {
   label: string;
@@ -66,9 +69,10 @@ const TokenInput = ({ label, value, onChange, placeholder, isSecret = true }: To
 };
 
 const CEOIntegracoes = () => {
-  const { config, updateToken, testConnection, updateYouTube } = useWhiteLabel();
+  const { config, updateToken, testConnection, updateYouTube, setConfig } = useWhiteLabel();
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
-  const [connectionResults, setConnectionResults] = useState<Record<string, { success: boolean; message: string }>>({});
+  const [connectionResults, setConnectionResults] = useState<Record<string, { success: boolean; message: string }>>({}); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [youtubeDraft, setYoutubeDraft] = useState({
     enabled: config.youtube?.enabled ?? true,
@@ -116,9 +120,63 @@ const CEOIntegracoes = () => {
     toast.success("Configurações de integrações salvas!");
   };
 
+  const handleExport = () => {
+    exportConfig(config);
+    toast.success("Configurações exportadas com sucesso!");
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const importedConfig = await importConfig(file);
+      setConfig(importedConfig);
+      toast.success("Configurações importadas com sucesso! Recarregando...");
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      // Reload to apply all changes
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao importar configurações");
+    }
+  };
+
   return (
     <CEOLayout title="Integrações Externas">
       <div className="space-y-8 max-w-4xl">
+        {/* Export/Import Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap gap-3"
+        >
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Exportar Configurações
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Importar Configurações
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImport}
+            className="hidden"
+          />
+        </motion.div>
         {/* YouTube */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <GlassCard>
