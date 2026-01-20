@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { Headphones, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/badge';
 import { mockSubscriptions } from '@/lib/mock-data';
-import { useState, useEffect } from 'react';
-
+import { useState } from 'react';
+import { SupportChat } from '@/components/support/SupportChat';
 interface StoreTexts {
   pageTitle: string;
   pageSubtitle: string;
@@ -124,6 +124,9 @@ const LojaPage = () => {
         </div>
 
       </div>
+
+      {/* Support Chat Button */}
+      <SupportChat defaultCategory="payment" />
     </MobileLayout>
   );
 };
