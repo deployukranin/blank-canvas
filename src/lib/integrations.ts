@@ -79,6 +79,28 @@ export const getConfig = () => ({
 });
 
 /**
+ * Get moderation config from localStorage (CEO panel settings)
+ */
+const getModerationConfig = (): { apiUrl: string; apiKey: string; enabled: boolean } | null => {
+  try {
+    const saved = localStorage.getItem('whitelabel_config');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed?.tokens?.moderation?.enabled) {
+        return {
+          apiUrl: parsed.tokens.moderation.apiUrl || '',
+          apiKey: parsed.tokens.moderation.apiKey || '',
+          enabled: true,
+        };
+      }
+    }
+  } catch (e) {
+    console.error('[Integration] Failed to read moderation config:', e);
+  }
+  return null;
+};
+
+/**
  * Send report or support request to external moderation panel
  */
 const sendToModerationPanel = async (
@@ -88,8 +110,21 @@ const sendToModerationPanel = async (
   try {
     console.log(`[Integration] Sending ${type} to moderation panel:`, data);
 
+    // Get moderation config from CEO panel settings
+    const moderationConfig = getModerationConfig();
+    
+    const payload: Record<string, unknown> = { type, data };
+    
+    // Include moderation config if available and has required fields
+    if (moderationConfig?.enabled && moderationConfig.apiUrl && moderationConfig.apiKey) {
+      payload.moderationConfig = {
+        apiUrl: moderationConfig.apiUrl,
+        apiKey: moderationConfig.apiKey,
+      };
+    }
+
     const { data: result, error } = await supabase.functions.invoke('send-report', {
-      body: { type, data }
+      body: payload
     });
 
     if (error) {
