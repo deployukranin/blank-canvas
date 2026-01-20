@@ -820,6 +820,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         icons: { ...defaultIcons, ...parsed.icons },
         quickActions: parsed.quickActions || defaultQuickActions,
         community: { ...defaultCommunityConfig, ...parsed.community },
+        tokens: {
+          supabase: { ...defaultConfig.tokens.supabase, ...parsed.tokens?.supabase },
+          openpix: { ...defaultConfig.tokens.openpix, ...parsed.tokens?.openpix },
+          support: { ...defaultConfig.tokens.support, ...parsed.tokens?.support },
+          accountStock: { ...defaultConfig.tokens.accountStock, ...parsed.tokens?.accountStock },
+          moderation: { ...defaultConfig.tokens.moderation, ...parsed.tokens?.moderation },
+        },
       };
     }
     return defaultConfig;
