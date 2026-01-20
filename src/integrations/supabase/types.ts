@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pix_payments: {
+        Row: {
+          charge_id: string | null
+          correlation_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_taxid: string | null
+          expires_at: string | null
+          id: string
+          paid_at: string | null
+          pix_brcode: string | null
+          pix_qrcode: string | null
+          pix_qrcode_image: string | null
+          product_id: string | null
+          product_type: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          value: number
+        }
+        Insert: {
+          charge_id?: string | null
+          correlation_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_taxid?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          pix_brcode?: string | null
+          pix_qrcode?: string | null
+          pix_qrcode_image?: string | null
+          product_id?: string | null
+          product_type: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          value: number
+        }
+        Update: {
+          charge_id?: string | null
+          correlation_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_taxid?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          pix_brcode?: string | null
+          pix_qrcode?: string | null
+          pix_qrcode_image?: string | null
+          product_id?: string | null
+          product_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
