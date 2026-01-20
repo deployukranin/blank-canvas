@@ -142,22 +142,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: "Erro ao fazer login com Google" };
-    }
+    // Mock login for testing - creates a fake user session
+    const mockUser: User = {
+      id: `mock-user-${Date.now()}`,
+      email: "usuario.teste@gmail.com",
+      username: "Usuário Teste",
+      avatar: "https://ui-avatars.com/api/?name=Usuario+Teste&background=8b5cf6&color=fff",
+      isVIP: false,
+      isAdmin: false,
+      isCEO: false,
+      createdAt: new Date().toISOString(),
+    };
+    setUser(mockUser);
+    return { success: true };
   }, []);
 
   const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
