@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -7,9 +8,11 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
+import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
+import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
-
 const Index = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -19,6 +22,22 @@ const Index = () => {
 
   // Get quick actions from config, filter only enabled ones
   const quickActions = config.quickActions.filter(action => action.enabled);
+
+  // YouTube videos
+  const channelId = config.youtube?.channelId?.trim() || '';
+  const youtubeEnabled = Boolean(config.youtube?.enabled) && Boolean(channelId);
+
+  const { data: youtubeData, isLoading: videosLoading } = useYouTubeVideos({
+    channelId,
+    enabled: youtubeEnabled,
+  });
+
+  const videos = useMemo(() => youtubeData?.videos?.slice(0, 8) ?? [], [youtubeData]);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const selectedVideo = useMemo(
+    () => videos.find((v) => v.video_id === selectedVideoId) ?? null,
+    [videos, selectedVideoId]
+  );
 
   return (
     <MobileLayout>
@@ -86,6 +105,27 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Vídeos em Destaque */}
+        {youtubeEnabled && videos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display font-semibold">Vídeos Recentes</h3>
+              <Link to="/galeria-videos" className="text-primary text-sm font-medium">
+                Ver todos
+              </Link>
+            </div>
+            <VideoGalleryCarousel
+              videos={videos}
+              isLoading={videosLoading}
+              onSelect={(videoId) => setSelectedVideoId(videoId)}
+            />
+          </motion.div>
+        )}
+
         {/* Feed Preview */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -143,6 +183,17 @@ const Index = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Modal para assistir vídeo */}
+      <VideoWatchModal
+        open={Boolean(selectedVideoId)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedVideoId(null);
+        }}
+        videos={videos}
+        selectedVideo={selectedVideo}
+        onSelectVideo={(videoId) => setSelectedVideoId(videoId)}
+      />
     </MobileLayout>
   );
 };
