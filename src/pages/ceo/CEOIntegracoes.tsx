@@ -410,88 +410,51 @@ const CEOIntegracoes = () => {
               <div className="space-y-6 pt-4 border-t border-border">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <TokenInput
-                    label="App ID"
+                    label="App ID (API Key)"
                     value={config.tokens.openpix.appId}
                     onChange={(value) => updateToken('openpix', { appId: value })}
-                    placeholder="Seu App ID"
+                    placeholder="Seu App ID da OpenPix"
                   />
                   <TokenInput
-                    label="Secret Key"
-                    value={config.tokens.openpix.secretKey}
-                    onChange={(value) => updateToken('openpix', { secretKey: value })}
-                    placeholder="Sua Secret Key"
+                    label="Webhook Secret"
+                    value={config.tokens.openpix.webhookSecret}
+                    onChange={(value) => updateToken('openpix', { webhookSecret: value })}
+                    placeholder="Secret para validar webhooks"
                   />
                 </div>
 
-                {/* Split Configuration */}
+                {/* Environment Selection */}
                 <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Percent className="w-5 h-5 text-blue-400" />
-                      <span className="font-medium">Split de Pagamentos</span>
-                    </div>
-                    <Switch
-                      checked={config.tokens.openpix.splitConfig.enabled}
-                      onCheckedChange={(checked) => 
-                        updateToken('openpix', { 
-                          splitConfig: { ...config.tokens.openpix.splitConfig, enabled: checked } 
-                        })
-                      }
-                    />
+                  <div className="flex items-center gap-2 mb-3">
+                    <Percent className="w-5 h-5 text-blue-400" />
+                    <span className="font-medium">Ambiente</span>
                   </div>
-
-                  {config.tokens.openpix.splitConfig.enabled && (
-                    <div className="space-y-4 pt-4 border-t border-blue-500/20">
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Dono da Plataforma</span>
-                          <span className="font-mono font-bold text-blue-400">
-                            {config.tokens.openpix.splitConfig.ownerPercentage}%
-                          </span>
-                        </div>
-                        <Slider
-                          value={[config.tokens.openpix.splitConfig.ownerPercentage]}
-                          onValueChange={([value]) => 
-                            updateToken('openpix', { 
-                              splitConfig: { 
-                                ...config.tokens.openpix.splitConfig, 
-                                ownerPercentage: value,
-                                influencerPercentage: 100 - value
-                              } 
-                            })
-                          }
-                          max={100}
-                          step={1}
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Influencer</span>
-                          <span className="font-mono font-bold text-amber-400">
-                            {config.tokens.openpix.splitConfig.influencerPercentage}%
-                          </span>
-                        </div>
-                        <Slider
-                          value={[config.tokens.openpix.splitConfig.influencerPercentage]}
-                          onValueChange={([value]) => 
-                            updateToken('openpix', { 
-                              splitConfig: { 
-                                ...config.tokens.openpix.splitConfig, 
-                                influencerPercentage: value,
-                                ownerPercentage: 100 - value
-                              } 
-                            })
-                          }
-                          max={100}
-                          step={1}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Exemplo: Em uma venda de R$100, o dono recebe R${config.tokens.openpix.splitConfig.ownerPercentage} 
-                        e o influencer recebe R${config.tokens.openpix.splitConfig.influencerPercentage}
-                      </p>
-                    </div>
-                  )}
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="openpix-environment"
+                        checked={config.tokens.openpix.environment === 'sandbox'}
+                        onChange={() => updateToken('openpix', { environment: 'sandbox' })}
+                        className="accent-blue-500"
+                      />
+                      <span className="text-sm">Sandbox (Testes)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="openpix-environment"
+                        checked={config.tokens.openpix.environment === 'production'}
+                        onChange={() => updateToken('openpix', { environment: 'production' })}
+                        className="accent-blue-500"
+                      />
+                      <span className="text-sm">Production (Real)</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    O split de 20% plataforma / 80% influencer é calculado automaticamente no backend.
+                    Recebedores são configurados diretamente na OpenPix.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">

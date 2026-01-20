@@ -669,13 +669,9 @@ export interface WhiteLabelConfig {
     };
     openpix: {
       appId: string;
-      secretKey: string;
+      webhookSecret: string;
+      environment: 'sandbox' | 'production';
       enabled: boolean;
-      splitConfig: {
-        enabled: boolean;
-        ownerPercentage: number;
-        influencerPercentage: number;
-      };
     };
     support: {
       token: string;
@@ -743,13 +739,9 @@ const defaultConfig: WhiteLabelConfig = {
     },
     openpix: {
       appId: '',
-      secretKey: '',
+      webhookSecret: '',
+      environment: 'sandbox',
       enabled: false,
-      splitConfig: {
-        enabled: false,
-        ownerPercentage: 80,
-        influencerPercentage: 20,
-      },
     },
     support: {
       token: '',
@@ -950,8 +942,8 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return { success: true, message: 'Conexão Supabase estabelecida!' };
         
       case 'openpix':
-        if (!token.enabled || !config.tokens.openpix.appId || !config.tokens.openpix.secretKey) {
-          return { success: false, message: 'Configure App ID e Secret Key primeiro' };
+        if (!token.enabled || !config.tokens.openpix.appId) {
+          return { success: false, message: 'Configure App ID primeiro' };
         }
         return { success: true, message: 'OpenPix/Woovi conectado!' };
         

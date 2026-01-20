@@ -26,7 +26,7 @@ const CEODashboard = () => {
     {
       name: 'OpenPix/Woovi',
       enabled: config.tokens.openpix.enabled,
-      configured: !!(config.tokens.openpix.appId && config.tokens.openpix.secretKey),
+      configured: !!config.tokens.openpix.appId,
     },
     {
       name: 'Suporte Externo',
@@ -104,7 +104,7 @@ const CEODashboard = () => {
             </GlassCard>
           </motion.div>
 
-          {/* Split Payments */}
+          {/* Environment */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -112,14 +112,11 @@ const CEODashboard = () => {
           >
             <GlassCard className="text-center">
               <div className="w-8 h-8 mx-auto mb-3 rounded-full bg-amber-400/20 flex items-center justify-center">
-                <span className="text-amber-400 font-bold text-sm">%</span>
+                <span className="text-amber-400 font-bold text-sm">🔧</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">Split de Pagamento</p>
-              <p className="font-display font-bold text-lg">
-                {config.tokens.openpix.splitConfig.enabled 
-                  ? `${config.tokens.openpix.splitConfig.ownerPercentage}/${config.tokens.openpix.splitConfig.influencerPercentage}`
-                  : 'Desativado'
-                }
+              <p className="text-sm text-muted-foreground mb-1">Ambiente OpenPix</p>
+              <p className="font-display font-bold text-lg capitalize">
+                {config.tokens.openpix.environment || 'sandbox'}
               </p>
             </GlassCard>
           </motion.div>
