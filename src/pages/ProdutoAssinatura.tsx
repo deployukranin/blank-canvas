@@ -228,10 +228,10 @@ const ProdutoAssinatura = () => {
       </div>
 
       {/* Fixed Buy Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent pb-6">
+      <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-40">
         <Button 
           size="lg" 
-          className="w-full gap-2"
+          className="w-full gap-2 shadow-lg"
           onClick={handleBuy}
         >
           <ShoppingCart className="w-5 h-5" />
