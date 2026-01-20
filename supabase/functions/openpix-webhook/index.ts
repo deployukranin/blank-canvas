@@ -32,7 +32,6 @@ Deno.serve(async (req) => {
 
   console.log("=== OpenPix Webhook Recebido ===");
   console.log("Method:", req.method);
-  console.log("Headers:", Object.fromEntries(req.headers.entries()));
 
   try {
     const body: OpenPixWebhookPayload = await req.json();
@@ -57,10 +56,10 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Buscar pagamento pelo correlationID
+    // Buscar pagamento pelo correlationID com dados do influencer
     const { data: payment, error: findError } = await supabase
       .from("pix_payments")
-      .select("*")
+      .select("*, influencers(*)")
       .eq("correlation_id", correlationID)
       .maybeSingle();
 
@@ -81,6 +80,16 @@ Deno.serve(async (req) => {
     }
 
     console.log("Pagamento encontrado:", payment.id);
+
+    // Verificar idempotência - não processar novamente se já está pago
+    if (payment.status === "COMPLETED" && 
+        (body.event === "OPENPIX:CHARGE_COMPLETED" || body.event === "OPENPIX:TRANSACTION_RECEIVED")) {
+      console.log("Pagamento já processado (idempotência):", payment.id);
+      return new Response(
+        JSON.stringify({ success: true, message: "Pagamento já processado" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Mapear status do OpenPix para nosso status
     let newStatus = payment.status;
@@ -143,26 +152,51 @@ Deno.serve(async (req) => {
   }
 });
 
-async function handlePaymentCompleted(supabase: any, payment: any) {
-  console.log("Processando pagamento completado:", payment.product_type);
+async function handlePaymentCompleted(supabase: any, payment: Record<string, unknown>) {
+  console.log("=== Processando Pagamento Confirmado ===");
+  console.log("Payment ID:", payment.id);
+  console.log("Product Type:", payment.product_type);
+  console.log("User ID:", payment.user_id);
+  
+  // Log de split se houver influencer
+  if (payment.influencer_id) {
+    const influencer = payment.influencers as Record<string, unknown> | null;
+    console.log("=== Split Processado Automaticamente pela OpenPix ===");
+    console.log("Influencer ID:", payment.influencer_id);
+    console.log("Influencer Name:", influencer?.name || "N/A");
+    console.log("Charge ID:", payment.charge_id);
+    console.log("OpenPix Split ID:", payment.openpix_split_id);
+    console.log("Valor Total:", payment.value);
+    console.log("Valor Influencer:", payment.split_influencer_value);
+    console.log("Valor Plataforma:", payment.split_platform_value);
+  }
 
   // Ações específicas por tipo de produto
-  switch (payment.product_type) {
+  const productType = payment.product_type as string;
+  const userId = payment.user_id as string;
+
+  switch (productType) {
     case "VIP":
-      // Aqui você pode adicionar lógica para ativar VIP do usuário
-      console.log("Ativar VIP para usuário:", payment.user_id);
-      // Exemplo: atualizar tabela de usuários, enviar email, etc.
+      console.log("Ativar VIP para usuário:", userId);
+      // Implementar lógica de ativação VIP
       break;
 
     case "SUBSCRIPTION":
-      console.log("Ativar assinatura para usuário:", payment.user_id);
+      console.log("Ativar assinatura para usuário:", userId);
+      // Implementar lógica de assinatura
       break;
 
     case "CUSTOM_VIDEO":
-      console.log("Criar pedido de vídeo personalizado:", payment.product_id);
+      console.log("Liberar pedido de vídeo personalizado:", payment.product_id);
+      // Implementar lógica de liberação de conteúdo
+      break;
+
+    case "CONTENT":
+      console.log("Liberar conteúdo pago:", payment.product_id);
+      // Implementar lógica de liberação de conteúdo
       break;
 
     default:
-      console.log("Tipo de produto não requer ação especial:", payment.product_type);
+      console.log("Tipo de produto sem ação especial:", productType);
   }
 }

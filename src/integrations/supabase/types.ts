@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      influencers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          pix_key: string
+          pix_key_type: string
+          split_percentage: number
+          tax_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          pix_key: string
+          pix_key_type: string
+          split_percentage?: number
+          tax_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          pix_key?: string
+          pix_key_type?: string
+          split_percentage?: number
+          tax_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pix_payments: {
         Row: {
           charge_id: string | null
@@ -24,12 +60,16 @@ export type Database = {
           customer_taxid: string | null
           expires_at: string | null
           id: string
+          influencer_id: string | null
+          openpix_split_id: string | null
           paid_at: string | null
           pix_brcode: string | null
           pix_qrcode: string | null
           pix_qrcode_image: string | null
           product_id: string | null
           product_type: string
+          split_influencer_value: number | null
+          split_platform_value: number | null
           status: string
           updated_at: string
           user_id: string | null
@@ -44,12 +84,16 @@ export type Database = {
           customer_taxid?: string | null
           expires_at?: string | null
           id?: string
+          influencer_id?: string | null
+          openpix_split_id?: string | null
           paid_at?: string | null
           pix_brcode?: string | null
           pix_qrcode?: string | null
           pix_qrcode_image?: string | null
           product_id?: string | null
           product_type: string
+          split_influencer_value?: number | null
+          split_platform_value?: number | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -64,18 +108,30 @@ export type Database = {
           customer_taxid?: string | null
           expires_at?: string | null
           id?: string
+          influencer_id?: string | null
+          openpix_split_id?: string | null
           paid_at?: string | null
           pix_brcode?: string | null
           pix_qrcode?: string | null
           pix_qrcode_image?: string | null
           product_id?: string | null
           product_type?: string
+          split_influencer_value?: number | null
+          split_platform_value?: number | null
           status?: string
           updated_at?: string
           user_id?: string | null
           value?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pix_payments_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
