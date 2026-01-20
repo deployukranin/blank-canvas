@@ -23,17 +23,15 @@ interface CreateChargeRequest {
 interface Influencer {
   id: string;
   name: string;
-  tax_id: string;
-  pix_key_type: string;
-  pix_key: string;
+  openpix_receiver_id?: string;
   split_percentage: number;
   is_active: boolean;
 }
 
-const PLATFORM_SPLIT_PERCENTAGE = 20; // 20% para a plataforma
+// Split fixo: 20% plataforma, 80% influencer (configurável por influencer)
+const DEFAULT_PLATFORM_PERCENTAGE = 20;
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -43,7 +41,7 @@ Deno.serve(async (req) => {
     if (!OPENPIX_APP_ID) {
       console.error("OPENPIX_APP_ID não configurado");
       return new Response(
-        JSON.stringify({ error: "Configuração de pagamento não encontrada" }),
+        JSON.stringify({ success: false, error: "Configuração de pagamento não encontrada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -67,18 +65,20 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body: CreateChargeRequest = await req.json();
-    console.log("Criando cobrança Pix com split:", { ...body, userId });
+    console.log("=== Criando Cobrança PIX ===");
+    console.log("Request:", { ...body, userId });
 
+    // Validações
     if (!body.value || body.value < 1) {
       return new Response(
-        JSON.stringify({ error: "Valor inválido. Mínimo: 1 centavo" }),
+        JSON.stringify({ success: false, error: "Valor inválido. Mínimo: 1 centavo" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!body.productType) {
       return new Response(
-        JSON.stringify({ error: "Tipo de produto é obrigatório" }),
+        JSON.stringify({ success: false, error: "Tipo de produto é obrigatório" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     if (body.influencerId) {
       const { data: influencerData, error: influencerError } = await supabase
         .from("influencers")
-        .select("*")
+        .select("id, name, openpix_receiver_id, split_percentage, is_active")
         .eq("id", body.influencerId)
         .eq("is_active", true)
         .single();
@@ -99,24 +99,22 @@ Deno.serve(async (req) => {
       if (influencerError || !influencerData) {
         console.error("Influencer não encontrado:", influencerError);
         return new Response(
-          JSON.stringify({ error: "Influencer não encontrado ou inativo" }),
+          JSON.stringify({ success: false, error: "Influencer não encontrado ou inativo" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       influencer = influencerData as Influencer;
 
-      // Calcular valores do split (definido no backend, não no frontend)
-      const influencerPercentage = influencer.split_percentage;
-      const platformPercentage = 100 - influencerPercentage;
-
+      // Calcular split (definido no backend)
+      const influencerPercentage = influencer.split_percentage || 80;
       splitInfluencerValue = Math.floor((body.value * influencerPercentage) / 100);
-      splitPlatformValue = body.value - splitInfluencerValue; // Resto para plataforma
+      splitPlatformValue = body.value - splitInfluencerValue;
 
       console.log("Split calculado:", {
         total: body.value,
         influencerPercentage,
-        platformPercentage,
+        platformPercentage: 100 - influencerPercentage,
         splitInfluencerValue,
         splitPlatformValue,
       });
@@ -124,10 +122,10 @@ Deno.serve(async (req) => {
 
     // Gerar correlationID único
     const correlationID = crypto.randomUUID();
-    const expiresIn = body.expiresIn || 3600; // 1 hora default
+    const expiresIn = body.expiresIn || 3600;
     const expiresAt = new Date(Date.now() + expiresIn * 1000);
 
-    // Criar payload para OpenPix
+    // Payload para OpenPix
     const openPixPayload: Record<string, unknown> = {
       correlationID,
       value: body.value,
@@ -141,37 +139,20 @@ Deno.serve(async (req) => {
       } : undefined,
     };
 
-    // Adicionar split se houver influencer
-    if (influencer && splitInfluencerValue && splitInfluencerValue > 0) {
-      // OpenPix Split API: https://developers.openpix.com.br/docs/split-payment
+    // Adicionar split se houver influencer com receiver_id configurado na OpenPix
+    if (influencer?.openpix_receiver_id && splitInfluencerValue && splitInfluencerValue > 0) {
       openPixPayload.splits = [
         {
-          pixKey: influencer.pix_key,
-          pixKeyType: influencer.pix_key_type.toUpperCase(),
+          receiver: influencer.openpix_receiver_id,
           value: splitInfluencerValue,
-          splitDetail: {
-            name: influencer.name,
-            taxID: influencer.tax_id,
-          },
         },
       ];
+      console.log("Split adicionado ao payload:", openPixPayload.splits);
     }
 
     console.log("Enviando para OpenPix:", JSON.stringify(openPixPayload, null, 2));
-    console.log("AppID completo:", OPENPIX_APP_ID);
-    console.log("AppID length:", OPENPIX_APP_ID?.length);
 
-    // Testar primeiro o endpoint de status da API para validar a chave
-    const testResponse = await fetch("https://api.openpix.com.br/api/v1/account", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: OPENPIX_APP_ID,
-      },
-    });
-    const testData = await testResponse.json();
-    console.log("Teste de autenticação:", JSON.stringify(testData, null, 2));
-
+    // Criar cobrança na OpenPix
     const openPixResponse = await fetch("https://api.openpix.com.br/api/v1/charge", {
       method: "POST",
       headers: {
@@ -184,29 +165,20 @@ Deno.serve(async (req) => {
 
     const openPixData = await openPixResponse.json();
     console.log("Resposta OpenPix:", JSON.stringify(openPixData, null, 2));
+
     if (!openPixResponse.ok) {
       console.error("Erro OpenPix:", openPixData);
-      
-      // Verificar se é erro de chave PIX inválida
-      const errorMessage = openPixData?.error?.message || openPixData?.message || "";
-      if (errorMessage.toLowerCase().includes("pix") || errorMessage.toLowerCase().includes("key")) {
-        return new Response(
-          JSON.stringify({ 
-            error: "Chave PIX do influencer inválida", 
-            details: openPixData,
-            code: "INVALID_PIX_KEY"
-          }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
       return new Response(
-        JSON.stringify({ error: "Erro ao criar cobrança Pix", details: openPixData }),
+        JSON.stringify({ 
+          success: false, 
+          error: openPixData?.error?.message || "Erro ao criar cobrança Pix", 
+          details: openPixData 
+        }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Salvar no banco com dados de split
+    // Salvar no banco
     const { data: payment, error: dbError } = await supabase
       .from("pix_payments")
       .insert({
@@ -235,17 +207,14 @@ Deno.serve(async (req) => {
     if (dbError) {
       console.error("Erro ao salvar pagamento:", dbError);
       return new Response(
-        JSON.stringify({ error: "Erro ao salvar pagamento", details: dbError }),
+        JSON.stringify({ success: false, error: "Erro ao salvar pagamento", details: dbError }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Pagamento criado com split:", {
-      paymentId: payment.id,
-      influencerId: influencer?.id,
-      splitPlatformValue,
-      splitInfluencerValue,
-    });
+    console.log("=== Pagamento Criado ===");
+    console.log("Payment ID:", payment.id);
+    console.log("Charge ID:", openPixData.charge?.identifier);
 
     return new Response(
       JSON.stringify({
@@ -253,6 +222,7 @@ Deno.serve(async (req) => {
         payment: {
           id: payment.id,
           correlationId: correlationID,
+          chargeId: openPixData.charge?.identifier,
           value: body.value,
           status: "PENDING",
           qrCode: openPixData.charge?.qrCodeImage,
@@ -272,7 +242,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Erro inesperado:", error);
     return new Response(
-      JSON.stringify({ error: "Erro interno", details: String(error) }),
+      JSON.stringify({ success: false, error: "Erro interno", details: String(error) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

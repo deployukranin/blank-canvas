@@ -20,6 +20,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          openpix_receiver_id: string | null
           pix_key: string
           pix_key_type: string
           split_percentage: number
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          openpix_receiver_id?: string | null
           pix_key: string
           pix_key_type: string
           split_percentage?: number
@@ -42,6 +44,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          openpix_receiver_id?: string | null
           pix_key?: string
           pix_key_type?: string
           split_percentage?: number
