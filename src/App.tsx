@@ -21,6 +21,7 @@ import TermosDeUso from "./pages/TermosDeUso";
 import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -55,6 +56,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/ideias" element={<Ideias />} />
               <Route path="/loja" element={<Loja />} />
               <Route path="/assinaturas" element={<Assinaturas />} />

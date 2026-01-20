@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { getLocalProfile } from "@/lib/local-profile";
 
 export interface User {
@@ -15,14 +16,14 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signOut: () => Promise<void>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  loginAsAdmin: (
-    email: string,
-    password: string,
-    role: "admin" | "ceo"
-  ) => Promise<{ success: boolean; error?: string }>;
+  loginAsAdmin: (email: string, password: string, role: "admin" | "ceo") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
@@ -30,117 +31,143 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const applyLocalProfileToUser = (base: User): User => {
-  const local = getLocalProfile(base.id);
-  if (!local) return base;
-
-  return {
-    ...base,
-    username: local.displayName || base.username,
-    avatar: local.avatarDataUrl || base.avatar,
+const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+  const baseUser: User = {
+    id: supabaseUser.id,
+    email: supabaseUser.email || "",
+    username: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] || "Usuário",
+    avatar: supabaseUser.user_metadata?.avatar_url,
+    isVIP: false,
+    isAdmin: false,
+    isCEO: false,
+    createdAt: supabaseUser.created_at,
   };
+
+  // Apply local profile overrides
+  const local = getLocalProfile(baseUser.id);
+  if (local) {
+    return {
+      ...baseUser,
+      username: local.displayName || baseUser.username,
+      avatar: local.avatarDataUrl || baseUser.avatar,
+    };
+  }
+
+  return baseUser;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem("asmr_user");
-    const parsed = saved ? (JSON.parse(saved) as User) : null;
-    return parsed ? applyLocalProfileToUser(parsed) : null;
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
 
-  const persistUser = (next: User | null) => {
-    if (!next) {
-      localStorage.removeItem("asmr_user");
-      return;
-    }
-    localStorage.setItem("asmr_user", JSON.stringify(next));
-  };
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ? mapSupabaseUserToUser(newSession.user) : null);
+        setIsLoading(false);
 
-  const applyLocalProfile = useCallback(
-    (patch: { displayName?: string; avatarDataUrl?: string }) => {
-      setUser((prev) => {
-        if (!prev) return prev;
-        const next: User = {
-          ...prev,
-          username: patch.displayName?.trim() || prev.username,
-          avatar: patch.avatarDataUrl || prev.avatar,
-        };
-        persistUser(next);
-        return next;
-      });
-    },
-    []
-  );
+        // Execute pending callback if user just logged in
+        if (event === "SIGNED_IN" && pendingCallback) {
+          setTimeout(() => {
+            pendingCallback();
+            setPendingCallback(null);
+          }, 0);
+        }
+      }
+    );
 
-  const loginWithGoogle = useCallback(async () => {
-    setIsLoading(true);
-
-    // Simulate Google OAuth flow (mock)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Mock user from Google - regular user
-    const mockUser: User = applyLocalProfileToUser({
-      id: `google-${Date.now()}`,
-      email: "user@example.com",
-      username: "Usuário",
-      avatar: undefined,
-      isVIP: false,
-      isAdmin: false,
-      isCEO: false,
-      createdAt: new Date().toISOString(),
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      setUser(existingSession?.user ? mapSupabaseUserToUser(existingSession.user) : null);
+      setIsLoading(false);
     });
 
-    setUser(mockUser);
-    persistUser(mockUser);
-    setIsLoading(false);
-
-    // Execute pending callback if any
-    if (pendingCallback) {
-      pendingCallback();
-      setPendingCallback(null);
-    }
-
-    return { success: true };
+    return () => subscription.unsubscribe();
   }, [pendingCallback]);
 
-  const loginAsAdmin = useCallback(
-    async (email: string, password: string, role: "admin" | "ceo") => {
-      setIsLoading(true);
-
-      // Simulate API authentication
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const adminUser: User = applyLocalProfileToUser({
-        id: `admin-${Date.now()}`,
+  const signUp = useCallback(async (email: string, password: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
         email,
-        username: role === "ceo" ? "CEO" : "Administrador",
-        avatar: undefined,
-        isVIP: true,
-        isAdmin: true,
-        isCEO: role === "ceo",
-        createdAt: new Date().toISOString(),
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      void password;
-
-      setUser(adminUser);
-      persistUser(adminUser);
-      setIsLoading(false);
+      if (error) {
+        if (error.message.includes("already registered")) {
+          return { success: false, error: "Este email já está cadastrado" };
+        }
+        return { success: false, error: error.message };
+      }
 
       return { success: true };
-    },
-    []
-  );
+    } catch (err) {
+      return { success: false, error: "Erro ao criar conta" };
+    }
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          return { success: false, error: "Email ou senha incorretos" };
+        }
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Erro ao fazer login" };
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+  }, []);
+
+  const loginWithGoogle = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Erro ao fazer login com Google" };
+    }
+  }, []);
+
+  const loginAsAdmin = useCallback(async (email: string, password: string, _role: "admin" | "ceo") => {
+    // Use regular sign in for admin - role checking should be done server-side
+    return signIn(email, password);
+  }, [signIn]);
 
   const logout = useCallback(() => {
-    setUser(null);
-    persistUser(null);
-  }, []);
+    signOut();
+  }, [signOut]);
 
   const requireAuth = useCallback(
     (callback: () => void) => {
@@ -148,18 +175,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         callback();
       } else {
         setPendingCallback(() => callback);
-        setShowAuthModal(true);
+        // Navigate to auth page
+        window.location.href = "/auth";
       }
     },
     [user]
+  );
+
+  const applyLocalProfile = useCallback(
+    (patch: { displayName?: string; avatarDataUrl?: string }) => {
+      setUser((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          username: patch.displayName?.trim() || prev.username,
+          avatar: patch.avatarDataUrl || prev.avatar,
+        };
+      });
+    },
+    []
   );
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        session,
         isAuthenticated: !!user,
         isLoading,
+        signUp,
+        signIn,
+        signOut,
         loginWithGoogle,
         loginAsAdmin,
         logout,
@@ -168,10 +214,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }}
     >
       {children}
-      {/* Auth Modal will be rendered separately */}
-      {/* showAuthModal is intentionally kept for future wiring */}
-      {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-      {showAuthModal && null}
     </AuthContext.Provider>
   );
 };
@@ -179,17 +221,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // Resilience: during HMR or edge render paths, avoid blank screens.
     console.error("useAuth used outside AuthProvider");
 
     const noop = () => {};
+    const asyncNoop = async () => ({ success: false, error: "AuthProvider não inicializado" });
 
     return {
       user: null,
+      session: null,
       isAuthenticated: false,
       isLoading: false,
-      loginWithGoogle: async () => ({ success: false, error: "AuthProvider não inicializado" }),
-      loginAsAdmin: async () => ({ success: false, error: "AuthProvider não inicializado" }),
+      signUp: asyncNoop,
+      signIn: asyncNoop,
+      signOut: async () => {},
+      loginWithGoogle: asyncNoop,
+      loginAsAdmin: asyncNoop,
       logout: noop,
       requireAuth: noop,
       applyLocalProfile: noop,
@@ -197,4 +243,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
