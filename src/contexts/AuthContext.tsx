@@ -160,10 +160,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const loginAsAdmin = useCallback(async (email: string, password: string, _role: "admin" | "ceo") => {
-    // Use regular sign in for admin - role checking should be done server-side
-    return signIn(email, password);
-  }, [signIn]);
+  const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
+    // For mock admin login - set user state directly without Supabase
+    const mockUser: User = {
+      id: `mock-${role}-${Date.now()}`,
+      email,
+      username: role === 'ceo' ? 'CEO' : 'Admin',
+      isVIP: true,
+      isAdmin: true,
+      isCEO: role === 'ceo',
+      createdAt: new Date().toISOString(),
+    };
+    setUser(mockUser);
+    return { success: true };
+  }, []);
 
   const logout = useCallback(() => {
     signOut();
