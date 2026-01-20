@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { UserHandle } from '@/components/profile/UserHandle';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -227,7 +228,7 @@ const NotificacoesPage = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="text-sm">
-                              <span className="font-semibold">@{notification.fromUsername}</span>
+                              <span className="font-semibold">@{notification.fromUsername}</span> {/* TODO: Add userId to notifications */}
                               {' '}{notification.message}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">

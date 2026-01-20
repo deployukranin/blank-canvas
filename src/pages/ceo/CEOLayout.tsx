@@ -65,8 +65,8 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-amber-950/40 to-background border-r border-amber-600/20 fixed h-full">
-        <div className="p-6">
+      <aside className="w-64 bg-gradient-to-b from-amber-950/40 to-background border-r border-amber-600/20 fixed h-full flex flex-col">
+        <div className="p-6 flex-1 overflow-y-auto pb-32">
           <Link to="/" className="flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Voltar ao App</span>
@@ -93,8 +93,8 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30' 
+                    isActive
+                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30'
                       : 'text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10'
                   }`}
                 >
@@ -103,7 +103,7 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
                 </Link>
               );
             })}
-            
+
             {/* Admin Panel Link */}
             <Link
               to="/admin"
@@ -115,8 +115,8 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
           </nav>
         </div>
 
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-amber-600/20 space-y-3">
+        {/* User info at bottom (no overlay) */}
+        <div className="p-6 border-t border-amber-600/20 space-y-3 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
               <span className="text-sm font-bold text-amber-950">

@@ -3,14 +3,19 @@ import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/use-profile';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
 
 const Index = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { config } = useWhiteLabel();
+
+  const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
   // Get quick actions from config, filter only enabled ones
   const quickActions = config.quickActions.filter(action => action.enabled);
@@ -24,19 +29,36 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="relative rounded-2xl overflow-hidden"
         >
-          <img
-            src={heroImage}
-            alt="ASMR Luna"
-            className="w-full h-48 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+          <Carousel opts={{ loop: true }} className="w-full">
+            <CarouselContent>
+              {(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage]))
+                .filter(Boolean)
+                .map((src, idx) => (
+                  <CarouselItem key={`${src}-${idx}`}>
+                    <img
+                      src={src}
+                      alt={`Banner principal ${idx + 1}`}
+                      className="w-full h-48 object-cover"
+                      loading={idx === 0 ? 'eager' : 'lazy'}
+                    />
+                  </CarouselItem>
+                ))}
+            </CarouselContent>
+
+            {(config.bannerImages?.length ?? 0) > 1 && (
+              <>
+                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
+                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
+              </>
+            )}
+          </Carousel>
+
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
             <h2 className="font-display text-xl font-bold mb-1">
-              {user ? `Olá, ${user.username}! 💜` : 'Bem-vindo! 💜'}
+              {user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Relaxe com ASMR de qualidade
-            </p>
+            <p className="text-sm text-muted-foreground">Relaxe com ASMR de qualidade</p>
           </div>
         </motion.div>
 

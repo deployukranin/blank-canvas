@@ -45,6 +45,7 @@ const CEODashboard = () => {
     { icon: Palette, label: 'Mudar Cores', path: '/ceo/cores', description: 'Alterar tema do app' },
     { icon: Sparkles, label: 'Customizar Ícones', path: '/ceo/icones', description: 'Alterar emojis do app' },
     { icon: Link2, label: 'Conectar APIs', path: '/ceo/integracoes', description: 'Configurar integrações' },
+    { icon: Crown, label: 'Configurar Loja', path: '/ceo/loja', description: 'Textos e logos dos produtos' },
   ];
 
   return (

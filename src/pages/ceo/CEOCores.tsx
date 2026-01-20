@@ -254,6 +254,21 @@ const CEOCores = () => {
                 { name: 'Rosa Suave', primary: '330 70% 60%', accent: '340 60% 70%', bg: '320 30% 6%' },
                 { name: 'Azul Calmo', primary: '210 70% 50%', accent: '220 60% 65%', bg: '220 30% 6%' },
                 { name: 'Verde Zen', primary: '160 60% 45%', accent: '170 50% 55%', bg: '170 30% 6%' },
+
+                { name: 'Dourado VIP', primary: '45 80% 55%', accent: '35 90% 60%', bg: '42 30% 6%' },
+                { name: 'Vermelho Neon', primary: '0 80% 55%', accent: '350 75% 60%', bg: '350 30% 6%' },
+                { name: 'Laranja Energia', primary: '22 90% 55%', accent: '35 90% 60%', bg: '25 30% 6%' },
+                { name: 'Amarelo Solar', primary: '52 90% 55%', accent: '45 90% 60%', bg: '50 30% 6%' },
+
+                { name: 'Turquesa Praia', primary: '185 75% 45%', accent: '195 70% 60%', bg: '195 30% 6%' },
+                { name: 'Ciano Tech', primary: '200 85% 55%', accent: '210 80% 60%', bg: '215 30% 6%' },
+                { name: 'Indigo Night', primary: '235 75% 62%', accent: '260 70% 68%', bg: '240 30% 6%' },
+                { name: 'Lavanda Dream', primary: '285 65% 65%', accent: '300 55% 72%', bg: '285 30% 6%' },
+
+                { name: 'Mint Clean', primary: '145 55% 45%', accent: '155 50% 60%', bg: '160 30% 6%' },
+                { name: 'Forest Dark', primary: '120 45% 35%', accent: '145 45% 50%', bg: '130 30% 5%' },
+                { name: 'Berry Pop', primary: '310 75% 55%', accent: '290 70% 68%', bg: '305 30% 6%' },
+                { name: 'Chocolate', primary: '25 45% 45%', accent: '15 55% 55%', bg: '20 25% 6%' },
               ].map((preset) => (
                 <button
                   key={preset.name}

@@ -8,8 +8,38 @@ import { Badge } from '@/components/ui/badge';
 import { mockSubscriptions } from '@/lib/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+
+interface StoreTexts {
+  productIncludedTitle: string;
+  productDeliveryTitle: string;
+  productDeliveryDescription: string;
+  productDeliveryTip: string;
+  productDurationLabel: string;
+  productTypeLabel: string;
+  productBuyButton: string;
+}
+
+interface ProductCustomization {
+  id: string;
+  name: string;
+  description: string;
+  logoUrl?: string;
+  features: string[];
+  duration: string;
+  type: string;
+}
+
+const defaultStoreTexts: StoreTexts = {
+  productIncludedTitle: 'O que está incluso',
+  productDeliveryTitle: 'Entrega Automática',
+  productDeliveryDescription: 'Após a confirmação do pagamento, você receberá os dados de acesso diretamente no seu email cadastrado em até 24 horas.',
+  productDeliveryTip: '💡 Verifique sua caixa de spam caso não receba o email.',
+  productDurationLabel: 'Duração',
+  productTypeLabel: 'Tipo',
+  productBuyButton: 'Comprar Agora',
+};
 
 const ProdutoAssinatura = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +47,29 @@ const ProdutoAssinatura = () => {
   const { user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const product = mockSubscriptions.find((p) => p.id === id);
+  const [storeTexts, setStoreTexts] = useState<StoreTexts>(() => {
+    const saved = localStorage.getItem('ceo_store_texts');
+    return saved ? JSON.parse(saved) : defaultStoreTexts;
+  });
+
+  const [products, setProducts] = useState<ProductCustomization[]>(() => {
+    const saved = localStorage.getItem('ceo_store_products');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const mockProduct = mockSubscriptions.find((p) => p.id === id);
+  const customization = products.find(p => p.id === id);
+
+  // Merge mock data with CEO customizations
+  const product = mockProduct ? {
+    ...mockProduct,
+    name: customization?.name || mockProduct.name,
+    description: customization?.description || mockProduct.description,
+    logoUrl: customization?.logoUrl,
+    features: customization?.features || mockProduct.features,
+    duration: customization?.duration || '30 dias',
+    type: customization?.type || 'Conta compartilhada',
+  } : null;
 
   if (!product) {
     return (
@@ -61,11 +113,17 @@ const ProdutoAssinatura = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border border-primary/20 mx-auto mb-4">
-            <span className="text-4xl font-bold text-primary">
-              {product.name.charAt(0)}
-            </span>
-          </div>
+          {product.logoUrl ? (
+            <div className="w-24 h-24 rounded-2xl overflow-hidden border border-primary/20 mx-auto mb-4">
+              <img src={product.logoUrl} alt={product.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border border-primary/20 mx-auto mb-4">
+              <span className="text-4xl font-bold text-primary">
+                {product.name.charAt(0)}
+              </span>
+            </div>
+          )}
           
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1 className="font-display text-2xl font-bold">{product.name}</h1>
@@ -113,7 +171,7 @@ const ProdutoAssinatura = () => {
           <GlassCard className="p-4">
             <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
               <Zap className="w-5 h-5 text-primary" />
-              O que está incluso
+              {storeTexts.productIncludedTitle}
             </h2>
             <ul className="space-y-3">
               {product.features.map((feature, index) => (
@@ -137,14 +195,14 @@ const ProdutoAssinatura = () => {
           <GlassCard className="p-4">
             <h2 className="font-display font-semibold mb-3 flex items-center gap-2">
               <Package className="w-5 h-5 text-primary" />
-              Entrega Automática
+              {storeTexts.productDeliveryTitle}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Após a confirmação do pagamento, você receberá os dados de acesso diretamente no seu email cadastrado em até <strong className="text-foreground">24 horas</strong>.
+              {storeTexts.productDeliveryDescription}
             </p>
             <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
               <p className="text-xs text-muted-foreground">
-                💡 Verifique sua caixa de spam caso não receba o email.
+                {storeTexts.productDeliveryTip}
               </p>
             </div>
           </GlassCard>
@@ -158,12 +216,12 @@ const ProdutoAssinatura = () => {
         >
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Duração</span>
-              <span className="font-semibold">30 dias</span>
+              <span className="text-sm text-muted-foreground">{storeTexts.productDurationLabel}</span>
+              <span className="font-semibold">{product.duration}</span>
             </div>
             <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-muted-foreground">Tipo</span>
-              <span className="font-semibold">Conta compartilhada</span>
+              <span className="text-sm text-muted-foreground">{storeTexts.productTypeLabel}</span>
+              <span className="font-semibold">{product.type}</span>
             </div>
           </GlassCard>
         </motion.div>
@@ -177,7 +235,7 @@ const ProdutoAssinatura = () => {
           onClick={handleBuy}
         >
           <ShoppingCart className="w-5 h-5" />
-          Comprar Agora
+          {storeTexts.productBuyButton}
         </Button>
       </div>
 

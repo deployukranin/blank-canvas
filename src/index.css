@@ -38,21 +38,26 @@
 
     --radius: 1rem;
 
-    /* Custom ASMR Theme Variables */
-    --glass-bg: 260 30% 12% / 0.6;
-    --glass-border: 270 30% 40% / 0.2;
-    --glass-highlight: 270 50% 80% / 0.1;
+    /* Custom ASMR Theme Variables (theme-aware) */
+    --glass-bg: hsl(var(--card) / 0.6);
+    --glass-border: hsl(var(--primary) / 0.18);
+    --glass-highlight: hsl(var(--foreground) / 0.08);
     
-    --gradient-primary: linear-gradient(135deg, hsl(270 70% 60%), hsl(250 70% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(280 60% 70%), hsl(260 70% 60%));
-    --gradient-glass: linear-gradient(135deg, hsl(260 30% 15% / 0.8), hsl(260 30% 10% / 0.6));
-    --gradient-mesh: radial-gradient(ellipse at 20% 20%, hsl(280 60% 30% / 0.3) 0%, transparent 50%),
-                     radial-gradient(ellipse at 80% 80%, hsl(250 70% 30% / 0.3) 0%, transparent 50%),
-                     radial-gradient(ellipse at 50% 50%, hsl(270 50% 20% / 0.2) 0%, transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+    --gradient-glass: linear-gradient(
+      135deg,
+      hsl(var(--background) / 0.82),
+      hsl(var(--background) / 0.55)
+    );
+    --gradient-mesh:
+      radial-gradient(ellipse at 18% 18%, hsl(var(--accent) / 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse at 82% 78%, hsl(var(--primary) / 0.20) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 55%, hsl(var(--primary) / 0.10) 0%, transparent 70%);
     
-    --shadow-glass: 0 8px 32px hsl(260 50% 5% / 0.4), inset 0 1px 0 hsl(270 50% 80% / 0.1);
-    --shadow-glow: 0 0 40px hsl(270 70% 50% / 0.3);
-    --shadow-card: 0 4px 24px hsl(260 50% 5% / 0.5);
+    --shadow-glass: 0 8px 32px hsl(var(--background) / 0.45), inset 0 1px 0 hsl(var(--primary) / 0.10);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.28);
+    --shadow-card: 0 4px 24px hsl(var(--background) / 0.55);
 
     --sidebar-background: 260 30% 8%;
     --sidebar-foreground: 270 20% 90%;
@@ -181,7 +186,7 @@
   }
 
   @keyframes glow {
-    from { box-shadow: 0 0 20px hsl(270 70% 50% / 0.2); }
-    to { box-shadow: 0 0 40px hsl(270 70% 50% / 0.4); }
+    from { box-shadow: 0 0 20px hsl(var(--primary) / 0.20); }
+    to { box-shadow: 0 0 40px hsl(var(--primary) / 0.40); }
   }
 }

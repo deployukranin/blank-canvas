@@ -524,40 +524,47 @@ const defaultIcons: IconConfig = {
 };
 
 export const defaultQuickActions: QuickActionItem[] = [
-  { 
-    icon: { type: 'lucide', value: 'Lightbulb' }, 
-    label: 'Ideias', 
-    path: '/ideias', 
+  {
+    icon: { type: 'lucide', value: 'GalleryVertical' },
+    label: 'Vídeos',
+    path: '/galeria-videos',
+    color: 'from-sky-500 to-blue-500',
+    enabled: true,
+  },
+  {
+    icon: { type: 'lucide', value: 'Lightbulb' },
+    label: 'Ideias',
+    path: '/ideias',
     color: 'from-violet-500 to-purple-500',
-    enabled: true 
+    enabled: true,
   },
-  { 
-    icon: { type: 'lucide', value: 'Crown' }, 
-    label: 'VIP', 
-    path: '/vip', 
+  {
+    icon: { type: 'lucide', value: 'Crown' },
+    label: 'VIP',
+    path: '/vip',
     color: 'from-amber-500 to-orange-500',
-    enabled: true 
+    enabled: true,
   },
-  { 
-    icon: { type: 'lucide', value: 'Video' }, 
-    label: "Custom's", 
-    path: '/customs', 
+  {
+    icon: { type: 'lucide', value: 'Video' },
+    label: "Custom's",
+    path: '/customs',
     color: 'from-pink-500 to-rose-500',
-    enabled: true 
+    enabled: true,
   },
-  { 
-    icon: { type: 'lucide', value: 'ShoppingBag' }, 
-    label: 'Loja', 
-    path: '/loja', 
+  {
+    icon: { type: 'lucide', value: 'ShoppingBag' },
+    label: 'Loja',
+    path: '/loja',
     color: 'from-green-500 to-emerald-500',
-    enabled: true 
+    enabled: true,
   },
-  { 
-    icon: { type: 'lucide', value: 'Users' }, 
-    label: 'Comunidade', 
-    path: '/comunidade', 
+  {
+    icon: { type: 'lucide', value: 'Users' },
+    label: 'Comunidade',
+    path: '/comunidade',
     color: 'from-indigo-500 to-purple-500',
-    enabled: true 
+    enabled: true,
   },
 ];
 
@@ -592,29 +599,67 @@ export interface WhiteLabelConfig {
   siteName: string;
   siteDescription: string;
   bannerImage: string;
+  bannerImages: string[];
   logoImage: string;
-  
+
+  // YouTube / Videos
+  youtube: {
+    enabled: boolean;
+    channelId: string;
+
+    // Exibe/oculta busca por título na galeria
+    searchEnabled?: boolean;
+
+    // Limite inicial de vídeos por categoria (null = sem limite)
+    categoryPreviewLimit?: number | null;
+
+    // “Continuar assistindo” (histórico por usuário)
+    continueWatchingEnabled?: boolean;
+    continueWatchingLimit?: number;
+
+    // Badge “Novo” (últimos X dias)
+    newBadgeDays?: number;
+
+    // Categoria “Em alta” (automático por views)
+    trendingEnabled?: boolean;
+    trendingDays?: number;
+    trendingLimit?: number;
+
+    // Categorias manuais para a galeria de vídeos do YouTube
+    categories?: Array<{
+      id: string;
+      name: string;
+      icon?: string;
+      order?: number;
+    }>;
+
+    // Mapa video_id -> category_id
+    videoCategoryMap?: Record<string, string | undefined>;
+  };
+
   // Icons
   icons: IconConfig;
-  
+
   // Quick Actions (Explorar section)
   quickActions: QuickActionItem[];
-  
+
   // Community Config
   community: {
     title: string;
     description: string;
+    videosTabEnabled: boolean;
+    videosTabLabel: string;
     avisosTabLabel: string;
     ideiasTabLabel: string;
   };
-  
+
   // Colors (HSL format: "H S% L%")
   colors: {
     primary: string;
     accent: string;
     background: string;
   };
-  
+
   // Integration Tokens
   tokens: {
     supabase: {
@@ -648,6 +693,8 @@ export interface WhiteLabelConfig {
 const defaultCommunityConfig = {
   title: 'Fórum da comunidade',
   description: 'Participe das discussões e compartilhe suas ideias',
+  videosTabEnabled: true,
+  videosTabLabel: 'Vídeos',
   avisosTabLabel: 'Avisos',
   ideiasTabLabel: 'Ideias',
 };
@@ -656,7 +703,30 @@ const defaultConfig: WhiteLabelConfig = {
   siteName: 'WhisperScape',
   siteDescription: 'Sua experiência ASMR personalizada',
   bannerImage: '/placeholder.svg',
+  bannerImages: ['/placeholder.svg'],
   logoImage: '',
+  youtube: {
+    enabled: true,
+    channelId: '',
+    searchEnabled: true,
+    categoryPreviewLimit: 8,
+
+    continueWatchingEnabled: true,
+    continueWatchingLimit: 12,
+
+    newBadgeDays: 7,
+
+    trendingEnabled: true,
+    trendingDays: 7,
+    trendingLimit: 8,
+
+    categories: [
+      { id: 'roleplay', name: 'Roleplay', icon: '🎭', order: 1 },
+      { id: 'mouth-sounds', name: 'Sons de boca', icon: '💋', order: 2 },
+      { id: 'tapping', name: 'Tappings', icon: '👆', order: 3 },
+    ],
+    videoCategoryMap: {},
+  },
   icons: defaultIcons,
   quickActions: defaultQuickActions,
   community: defaultCommunityConfig,
@@ -696,11 +766,12 @@ const defaultConfig: WhiteLabelConfig = {
 
 interface WhiteLabelContextType {
   config: WhiteLabelConfig;
-  updateBranding: (branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'logoImage'>>) => void;
+  updateBranding: (branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'bannerImages' | 'logoImage'>>) => void;
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
   updateQuickActions: (quickActions: QuickActionItem[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
+  updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
   updateToken: <K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,
     tokenValue: Partial<WhiteLabelConfig['tokens'][K]>
@@ -721,9 +792,29 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { 
-        ...defaultConfig, 
+      const parsedBannerImages: string[] | undefined = Array.isArray(parsed.bannerImages)
+        ? parsed.bannerImages
+        : parsed.bannerImage
+          ? [parsed.bannerImage]
+          : undefined;
+
+      return {
+        ...defaultConfig,
         ...parsed,
+        bannerImages: (parsedBannerImages ?? defaultConfig.bannerImages).filter(Boolean),
+        bannerImage: (parsedBannerImages?.[0] ?? parsed.bannerImage ?? defaultConfig.bannerImage) || '',
+        youtube: {
+          ...defaultConfig.youtube,
+          ...parsed.youtube,
+          categories:
+            Array.isArray(parsed?.youtube?.categories) && parsed.youtube.categories.length
+              ? parsed.youtube.categories
+              : defaultConfig.youtube.categories,
+          videoCategoryMap:
+            parsed?.youtube?.videoCategoryMap && typeof parsed.youtube.videoCategoryMap === 'object'
+              ? parsed.youtube.videoCategoryMap
+              : defaultConfig.youtube.videoCategoryMap,
+        },
         icons: { ...defaultIcons, ...parsed.icons },
         quickActions: parsed.quickActions || defaultQuickActions,
         community: { ...defaultCommunityConfig, ...parsed.community },
@@ -749,8 +840,23 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   }, [config]);
 
-  const updateBranding = useCallback((branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'logoImage'>>) => {
-    setConfig(prev => ({ ...prev, ...branding }));
+  const updateBranding = useCallback((branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'bannerImages' | 'logoImage'>>) => {
+    setConfig(prev => {
+      const next = { ...prev, ...branding };
+
+      const nextBannerImages = Array.isArray(branding.bannerImages)
+        ? branding.bannerImages
+        : branding.bannerImage !== undefined
+          ? (branding.bannerImage ? [branding.bannerImage] : [])
+          : Array.isArray(prev.bannerImages)
+            ? prev.bannerImages
+            : (prev.bannerImage ? [prev.bannerImage] : []);
+
+      next.bannerImages = nextBannerImages.filter(Boolean);
+      next.bannerImage = next.bannerImages[0] ?? '';
+
+      return next;
+    });
   }, []);
 
   const updateColors = useCallback((colors: Partial<WhiteLabelConfig['colors']>) => {
@@ -778,6 +884,18 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({
       ...prev,
       community: { ...prev.community, ...community },
+    }));
+  }, []);
+
+  const updateYouTube = useCallback((youtube: Partial<WhiteLabelConfig['youtube']>) => {
+    setConfig(prev => ({
+      ...prev,
+      youtube: {
+        ...prev.youtube,
+        ...youtube,
+        categories: youtube.categories ?? prev.youtube.categories,
+        videoCategoryMap: youtube.videoCategoryMap ?? prev.youtube.videoCategoryMap,
+      },
     }));
   }, []);
 
@@ -863,6 +981,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateIcons,
         updateQuickActions,
         updateCommunity,
+        updateYouTube,
         updateToken,
         resetToDefaults,
         resetIconsToDefaults,
@@ -878,8 +997,30 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
 export const useWhiteLabel = () => {
   const context = useContext(WhiteLabelContext);
+
+  // Fallback to avoid a blank screen if a component renders outside the provider
+  // (e.g. during HMR or error recovery). We still log so we can diagnose.
   if (context === undefined) {
-    throw new Error('useWhiteLabel must be used within a WhiteLabelProvider');
+    console.error('useWhiteLabel used outside WhiteLabelProvider');
+
+    const noop = () => {};
+
+    return {
+      config: defaultConfig,
+      updateBranding: noop,
+      updateColors: noop,
+      updateIcons: noop,
+      updateQuickActions: noop,
+      updateCommunity: noop,
+      updateYouTube: noop,
+      updateToken: noop as any,
+      resetToDefaults: noop,
+      resetIconsToDefaults: noop,
+      resetQuickActionsToDefaults: noop,
+      resetCommunityToDefaults: noop,
+      testConnection: async () => ({ success: false, message: 'White Label indisponível' }),
+    };
   }
+
   return context;
 };

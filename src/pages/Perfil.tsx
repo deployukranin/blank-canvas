@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
+import { HandleSelector } from '@/components/profile/HandleSelector';
+import { useProfile } from '@/hooks/use-profile';
 
 const quickAccessItems = [
   { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -18,10 +20,10 @@ const quickAccessItems = [
 ];
 
 const menuItems = [
-  { icon: Settings, label: 'Configurações', description: 'Preferências do app', path: '#' },
-  { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '#' },
-  { icon: FileText, label: 'Termos de Uso', description: 'Leia nossos termos', path: '#' },
-  { icon: Shield, label: 'Privacidade', description: 'Política de privacidade', path: '#' },
+  { icon: Settings, label: 'Configurações', description: 'Preferências do app', path: '/perfil/configuracoes' },
+  { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '/ajuda' },
+  { icon: FileText, label: 'Termos de Uso', description: 'Leia nossos termos', path: '/termos' },
+  { icon: Shield, label: 'Privacidade', description: 'Política de privacidade', path: '/privacidade' },
 ];
 
 const PerfilPage = () => {
@@ -29,6 +31,7 @@ const PerfilPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
+  const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
 
   if (!isAuthenticated) {
     return (
@@ -89,16 +92,18 @@ const PerfilPage = () => {
           <GlassCard className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               {user?.avatar ? (
-                <img src={user.avatar} alt={user.username} className="w-full h-full rounded-full object-cover" />
+                <img src={user.avatar} alt={profile?.handle || user.username} className="w-full h-full rounded-full object-cover" />
               ) : (
                 <span className="text-2xl font-bold text-white">
-                  {user?.username?.charAt(0).toUpperCase()}
+                  {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="font-display font-bold text-lg">{user?.username}</h2>
+                <h2 className="font-display font-bold text-lg">
+                  {profile?.handle ? `@${profile.handle}` : user?.username}
+                </h2>
                 {user?.isVIP && (
                   <span className="px-2 py-0.5 rounded-full bg-vip/20 text-vip text-xs font-medium">
                     VIP 👑
@@ -108,6 +113,18 @@ const PerfilPage = () => {
               <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
           </GlassCard>
+        </motion.div>
+
+        {/* Handle Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <HandleSelector 
+            currentHandle={profile?.handle} 
+            onHandleSet={() => refetchProfile()}
+          />
         </motion.div>
 
         {/* CEO/Admin Panel Links */}
@@ -199,18 +216,20 @@ const PerfilPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 + 0.15 }}
             >
-              <GlassCard className="p-4" hover>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                    <item.icon className="w-5 h-5 text-muted-foreground" />
+              <Link to={item.path}>
+                <GlassCard className="p-4" hover>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{item.label}</p>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </GlassCard>
+                </GlassCard>
+              </Link>
             </motion.div>
           ))}
         </div>

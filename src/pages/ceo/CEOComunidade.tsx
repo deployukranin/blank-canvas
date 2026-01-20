@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Save, RotateCcw, Bell, Lightbulb, Eye } from 'lucide-react';
+import { Users, Save, RotateCcw, Bell, Lightbulb, Eye, Video } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +19,8 @@ const CEOComunidade = () => {
   const [formData, setFormData] = useState({
     title: config.community.title,
     description: config.community.description,
+    videosTabEnabled: config.community.videosTabEnabled,
+    videosTabLabel: config.community.videosTabLabel,
     avisosTabLabel: config.community.avisosTabLabel,
     ideiasTabLabel: config.community.ideiasTabLabel,
   });
@@ -35,6 +38,8 @@ const CEOComunidade = () => {
     setFormData({
       title: 'Fórum da comunidade',
       description: 'Participe das discussões e compartilhe suas ideias',
+      videosTabEnabled: true,
+      videosTabLabel: 'Vídeos',
       avisosTabLabel: 'Avisos',
       ideiasTabLabel: 'Ideias',
     });
@@ -82,24 +87,49 @@ const CEOComunidade = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-amber-100">Label da Aba Avisos</Label>
-                  <Input
-                    value={formData.avisosTabLabel}
-                    onChange={(e) => setFormData({ ...formData, avisosTabLabel: e.target.value })}
-                    placeholder="Ex: Avisos"
-                    className="mt-1.5 bg-amber-950/30 border-amber-600/30"
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-amber-100">Aba de Vídeos</Label>
+                    <p className="text-xs text-amber-400/70">Mostra/oculta a galeria de vídeos dentro da comunidade</p>
+                  </div>
+                  <Switch
+                    checked={formData.videosTabEnabled}
+                    onCheckedChange={(checked) => setFormData({ ...formData, videosTabEnabled: checked })}
                   />
                 </div>
-                <div>
-                  <Label className="text-amber-100">Label da Aba Ideias</Label>
-                  <Input
-                    value={formData.ideiasTabLabel}
-                    onChange={(e) => setFormData({ ...formData, ideiasTabLabel: e.target.value })}
-                    placeholder="Ex: Ideias"
-                    className="mt-1.5 bg-amber-950/30 border-amber-600/30"
-                  />
+
+                {formData.videosTabEnabled && (
+                  <div>
+                    <Label className="text-amber-100">Label da Aba Vídeos</Label>
+                    <Input
+                      value={formData.videosTabLabel}
+                      onChange={(e) => setFormData({ ...formData, videosTabLabel: e.target.value })}
+                      placeholder="Ex: Vídeos"
+                      className="mt-1.5 bg-amber-950/30 border-amber-600/30"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-amber-100">Label da Aba Avisos</Label>
+                    <Input
+                      value={formData.avisosTabLabel}
+                      onChange={(e) => setFormData({ ...formData, avisosTabLabel: e.target.value })}
+                      placeholder="Ex: Avisos"
+                      className="mt-1.5 bg-amber-950/30 border-amber-600/30"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-amber-100">Label da Aba Ideias</Label>
+                    <Input
+                      value={formData.ideiasTabLabel}
+                      onChange={(e) => setFormData({ ...formData, ideiasTabLabel: e.target.value })}
+                      placeholder="Ex: Ideias"
+                      className="mt-1.5 bg-amber-950/30 border-amber-600/30"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -141,8 +171,14 @@ const CEOComunidade = () => {
 
               {/* Preview Tabs */}
               <div className="p-4">
-                <Tabs defaultValue="avisos" className="w-full">
+                <Tabs defaultValue={formData.videosTabEnabled ? 'videos' : 'avisos'} className="w-full">
                   <TabsList className="w-full bg-card/50">
+                    {formData.videosTabEnabled && (
+                      <TabsTrigger value="videos" className="flex-1 gap-2">
+                        <Video className="w-4 h-4" />
+                        {formData.videosTabLabel || 'Vídeos'}
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger value="avisos" className="flex-1 gap-2">
                       <Bell className="w-4 h-4" />
                       {formData.avisosTabLabel || 'Avisos'}

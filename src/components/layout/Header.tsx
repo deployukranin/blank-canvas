@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, User, LogOut, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/use-profile';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,7 +25,10 @@ const navItems = [
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { profile } = useProfile();
   const location = useLocation();
+
+  const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -69,7 +73,7 @@ export const Header = () => {
                         <User className="w-4 h-4 text-white" />
                       </div>
                       <span className="hidden sm:block text-sm font-medium">
-                        {user?.username}
+                        {displayName}
                       </span>
                       {user?.isVIP && <span>👑</span>}
                     </Button>

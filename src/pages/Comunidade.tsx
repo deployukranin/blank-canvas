@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Bell, Star, Lock, Pin, Lightbulb, MessageCircle, ThumbsUp, Users, Plus, 
   Send, ChevronDown, ChevronUp, Trophy, TrendingUp, Filter, BellRing, Check, 
-  Flag, MoreHorizontal, AlertTriangle
+  Flag, MoreHorizontal, AlertTriangle, Video
 } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -30,6 +31,8 @@ import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { UserLevelBadge } from '@/components/reputation/UserLevelBadge';
 import { LeaderboardCard } from '@/components/reputation/LeaderboardCard';
 import { PushNotificationToggle } from '@/components/notifications/PushNotificationToggle';
+import { UserHandle } from '@/components/profile/UserHandle';
+import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
 const getPostTypeConfig = (type: FeedPost['type']) => {
   switch (type) {
     case 'announcement':
@@ -206,7 +209,11 @@ const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="font-semibold text-sm">@{post.authorUsername}</span>
+              <UserHandle 
+                userId={post.authorId} 
+                username={post.authorUsername} 
+                className="font-semibold text-sm" 
+              />
               <span className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</span>
               <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs ${typeConfig.color}`}>
                 {typeConfig.icon}
@@ -275,7 +282,11 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-sm">@{idea.authorUsername}</span>
+                <UserHandle 
+                  userId={idea.authorId} 
+                  username={idea.authorUsername} 
+                  className="font-semibold text-sm" 
+                />
                 <UserLevelBadge username={authorUsername} size="sm" />
                 <span className="text-xs text-muted-foreground">{formatDate(idea.createdAt)}</span>
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs bg-accent/20 text-accent">
@@ -348,7 +359,11 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-xs">@{comment.authorUsername}</span>
+                                <UserHandle 
+                                  userId={comment.authorId} 
+                                  username={comment.authorUsername} 
+                                  className="font-medium text-xs" 
+                                />
                                 <span className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</span>
                               </div>
                               {user && user.username !== comment.authorUsername && (
@@ -411,7 +426,7 @@ const NotificationItem = ({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs">
-          <span className="font-semibold">@{notification.fromUsername}</span>
+          <span className="font-semibold">@{notification.fromUsername}</span> {/* TODO: Add userId to notifications */}
           {' '}{notification.message}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">"{notification.ideaTitle}"</p>
@@ -425,7 +440,20 @@ const NotificationItem = ({
 );
 
 const ComunidadePage = () => {
-  const [activeTab, setActiveTab] = useState('avisos');
+  const { config } = useWhiteLabel();
+  const videosTabEnabled = config.community.videosTabEnabled;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  const initialTab = (() => {
+    if (!videosTabEnabled) {
+      return tabParam === 'ideias' ? 'ideias' : 'avisos';
+    }
+    return tabParam || 'videos';
+  })();
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [ideas, setIdeas] = useState<ForumIdea[]>(mockForumIdeas);
   const [votedIdeas, setVotedIdeas] = useState<string[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -433,8 +461,20 @@ const ComunidadePage = () => {
   const [sortBy, setSortBy] = useState<'votes' | 'recent'>('votes');
   const [myIdeasOnly, setMyIdeasOnly] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
-  
-  // Report state
+
+  useEffect(() => {
+    if (!videosTabEnabled && activeTab === 'videos') {
+      setActiveTab('avisos');
+    }
+  }, [videosTabEnabled, activeTab]);
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', activeTab);
+      return next;
+    }, { replace: true });
+  }, [activeTab, setSearchParams]);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState<{
     type: 'idea' | 'comment';
@@ -443,7 +483,6 @@ const ComunidadePage = () => {
     author: string;
   } | null>(null);
 
-  const { config } = useWhiteLabel();
   const { user, requireAuth } = useAuth();
   const { toast } = useToast();
   const { notifications, unreadCount, addNotification, markAsRead, markAllAsRead } = useCommunityNotifications();
@@ -801,6 +840,12 @@ const ComunidadePage = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-4 bg-card/50 backdrop-blur-sm">
+            {videosTabEnabled && (
+              <TabsTrigger value="videos" className="flex-1 gap-2">
+                <Video className="w-4 h-4" />
+                {config.community.videosTabLabel}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="avisos" className="flex-1 gap-2">
               <Bell className="w-4 h-4" />
               {config.community.avisosTabLabel}
@@ -811,12 +856,17 @@ const ComunidadePage = () => {
             </TabsTrigger>
           </TabsList>
 
+          {videosTabEnabled && (
+            <TabsContent value="videos" className="mt-0">
+              <VideoGalleryPanel className="space-y-4" />
+            </TabsContent>
+          )}
+
           <TabsContent value="avisos" className="space-y-4 mt-0">
             {mockFeedPosts.map((post, index) => (
               <AvisoCard key={post.id} post={post} index={index} />
             ))}
           </TabsContent>
-
           <TabsContent value="ideias" className="space-y-4 mt-0">
             {/* Create Idea Button */}
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

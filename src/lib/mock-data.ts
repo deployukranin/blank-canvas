@@ -48,6 +48,7 @@ export interface FeedPost {
   isPinned?: boolean;
   authorUsername: string;
   authorAvatar?: string;
+  authorId?: string; // For real users with handles
 }
 
 export interface ForumComment {
@@ -56,6 +57,7 @@ export interface ForumComment {
   content: string;
   authorUsername: string;
   authorAvatar?: string;
+  authorId?: string; // For real users with handles
   createdAt: string;
 }
 
@@ -66,6 +68,7 @@ export interface ForumIdea {
   votes: number;
   authorUsername: string;
   authorAvatar?: string;
+  authorId?: string; // For real users with handles
   createdAt: string;
   commentsCount: number;
   comments?: ForumComment[];

@@ -8,7 +8,6 @@ import {
   Users, 
   FileText,
   Settings,
-  ShieldAlert,
   LogOut,
   Menu,
   X,
@@ -32,7 +31,6 @@ const menuItems = [
   { path: '/admin/videos-config', icon: FileText, label: 'Config. Vídeos' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
-  { path: '/admin/moderacao', icon: ShieldAlert, label: 'Moderação' },
   { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
 ];
 

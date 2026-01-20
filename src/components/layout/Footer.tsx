@@ -80,19 +80,19 @@ export const Footer = () => {
             <h4 className="font-display font-semibold mb-4">Suporte</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/ajuda" className="text-muted-foreground hover:text-foreground transition-colors">
                   Ajuda & FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/termos" className="text-muted-foreground hover:text-foreground transition-colors">
                   Termos de Uso
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
                   Política de Privacidade
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">

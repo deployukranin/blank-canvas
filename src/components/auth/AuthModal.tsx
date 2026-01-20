@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -86,7 +87,14 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
               </Button>
 
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade
+                Ao continuar, você concorda com nossos{' '}
+                <Link to="/termos" className="underline underline-offset-2 hover:text-foreground">
+                  Termos de Uso
+                </Link>{' '}
+                e{' '}
+                <Link to="/privacidade" className="underline underline-offset-2 hover:text-foreground">
+                  Política de Privacidade
+                </Link>
               </p>
             </div>
           </motion.div>

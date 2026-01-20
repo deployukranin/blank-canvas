@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import Index from "./pages/Index";
@@ -13,7 +13,12 @@ import ProdutoAssinatura from "./pages/ProdutoAssinatura";
 import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
+import GaleriaVideos from "./pages/GaleriaVideos";
 import Perfil from "./pages/Perfil";
+import PerfilConfiguracoes from "./pages/PerfilConfiguracoes";
+import Ajuda from "./pages/Ajuda";
+import TermosDeUso from "./pages/TermosDeUso";
+import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
 
@@ -26,7 +31,6 @@ import AdminVideosConfig from "./pages/admin/AdminVideosConfig";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
-import AdminModeracao from "./pages/admin/AdminModeracao";
 import Notificacoes from "./pages/Notificacoes";
 
 // CEO Pages
@@ -37,6 +41,7 @@ import CEOIcones from "./pages/ceo/CEOIcones";
 import CEOExplorar from "./pages/ceo/CEOExplorar";
 import CEOComunidade from "./pages/ceo/CEOComunidade";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
+import CEOLoja from "./pages/ceo/CEOLoja";
 
 const queryClient = new QueryClient();
 
@@ -57,10 +62,14 @@ const App = () => (
               <Route path="/vip" element={<VIP />} />
               <Route path="/customs" element={<Customs />} />
               <Route path="/comunidade" element={<Comunidade />} />
+              <Route path="/galeria-videos" element={<Navigate to="/comunidade" replace />} />
               <Route path="/perfil" element={<Perfil />} />
+              <Route path="/perfil/configuracoes" element={<PerfilConfiguracoes />} />
+              <Route path="/ajuda" element={<Ajuda />} />
+              <Route path="/termos" element={<TermosDeUso />} />
+              <Route path="/privacidade" element={<Privacidade />} />
               <Route path="/meus-pedidos" element={<MeusPedidos />} />
               <Route path="/notificacoes" element={<Notificacoes />} />
-              
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminDashboard />} />
@@ -70,8 +79,7 @@ const App = () => (
               <Route path="/admin/usuarios" element={<AdminUsuarios />} />
               <Route path="/admin/conteudo" element={<AdminConteudo />} />
               <Route path="/admin/configuracoes" element={<AdminConfiguracoes />} />
-              <Route path="/admin/moderacao" element={<AdminModeracao />} />
-              
+
               {/* CEO Routes */}
               <Route path="/ceo" element={<CEODashboard />} />
               <Route path="/ceo/branding" element={<CEOBranding />} />
@@ -80,6 +88,7 @@ const App = () => (
               <Route path="/ceo/explorar" element={<CEOExplorar />} />
               <Route path="/ceo/comunidade" element={<CEOComunidade />} />
               <Route path="/ceo/integracoes" element={<CEOIntegracoes />} />
+              <Route path="/ceo/loja" element={<CEOLoja />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
