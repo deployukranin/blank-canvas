@@ -82,7 +82,7 @@ export const SupportChat = ({ defaultCategory = 'general' }: SupportChatProps) =
     <>
       {/* Floating Button */}
       <motion.div
-        className="fixed bottom-20 right-4 z-40"
+        className="fixed bottom-24 right-4 z-[60]"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.5, type: 'spring' }}
@@ -105,7 +105,7 @@ export const SupportChat = ({ defaultCategory = 'general' }: SupportChatProps) =
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
@@ -114,7 +114,7 @@ export const SupportChat = ({ defaultCategory = 'general' }: SupportChatProps) =
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe"
+              className="fixed bottom-0 left-0 right-0 z-[70] px-4 pb-[calc(env(safe-area-inset-bottom)+5rem)]"
             >
               <GlassCard className="rounded-t-3xl rounded-b-none p-0 w-full max-w-lg mx-auto">
                 <div className="flex items-center justify-between p-4 border-b border-white/10">
