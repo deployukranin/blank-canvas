@@ -14,127 +14,13 @@ export type Database = {
   }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          display_name: string | null
-          handle: string | null
-          handle_set_at: string | null
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          handle?: string | null
-          handle_set_at?: string | null
-          id: string
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          handle?: string | null
-          handle_set_at?: string | null
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      video_chat_messages: {
-        Row: {
-          created_at: string
-          id: string
-          message: string
-          user_id: string
-          video_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          user_id: string
-          video_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          user_id?: string
-          video_id?: string
-        }
-        Relationships: []
-      }
-      video_progress: {
-        Row: {
-          created_at: string
-          duration_seconds: number | null
-          id: string
-          last_watched_at: string
-          position_seconds: number
-          updated_at: string
-          user_id: string
-          video_id: string
-        }
-        Insert: {
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          last_watched_at?: string
-          position_seconds?: number
-          updated_at?: string
-          user_id: string
-          video_id: string
-        }
-        Update: {
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          last_watched_at?: string
-          position_seconds?: number
-          updated_at?: string
-          user_id?: string
-          video_id?: string
-        }
-        Relationships: []
-      }
-      video_views: {
-        Row: {
-          created_at: string
-          id: string
-          user_id: string
-          video_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          user_id: string
-          video_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          user_id?: string
-          video_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_trending_videos: {
-        Args: { p_days?: number; p_limit?: number }
-        Returns: {
-          video_id: string
-          views: number
-        }[]
-      }
-      set_user_handle: { Args: { new_handle: string }; Returns: Json }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
