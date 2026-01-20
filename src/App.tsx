@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
 import Loja from "./pages/Loja";
@@ -65,13 +66,13 @@ const App = () => (
               <Route path="/customs" element={<Customs />} />
               <Route path="/comunidade" element={<Comunidade />} />
               <Route path="/galeria-videos" element={<Navigate to="/comunidade" replace />} />
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/perfil/configuracoes" element={<PerfilConfiguracoes />} />
+              <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+              <Route path="/perfil/configuracoes" element={<ProtectedRoute><PerfilConfiguracoes /></ProtectedRoute>} />
               <Route path="/ajuda" element={<Ajuda />} />
               <Route path="/termos" element={<TermosDeUso />} />
               <Route path="/privacidade" element={<Privacidade />} />
-              <Route path="/meus-pedidos" element={<MeusPedidos />} />
-              <Route path="/notificacoes" element={<Notificacoes />} />
+              <Route path="/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
+              <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminDashboard />} />
