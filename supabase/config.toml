@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.sandbox-pix-test]
 verify_jwt = false
+
+[functions.send-report]
+verify_jwt = false

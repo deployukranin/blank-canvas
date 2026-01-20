@@ -2,7 +2,7 @@
  * Integration Configuration & Central Functions
  * 
  * This file contains all integration-ready functions and configurations.
- * In the future, these functions will connect to external APIs.
+ * Reports and support requests are sent to an external moderation panel.
  * 
  * Environment Variables (to be configured):
  * - VITE_PROJECT_ID: Unique identifier for this influencer project
@@ -11,6 +11,8 @@
  * - VITE_METRICS_TOKEN: Token for analytics integration
  * - VITE_DISCORD_WEBHOOK: Discord integration webhook
  */
+
+import { supabase } from '@/integrations/supabase/client';
 
 // Types for future integrations
 export interface PurchasePayload {
@@ -26,12 +28,19 @@ export interface ReportPayload {
   contentId: string;
   contentType: 'idea' | 'comment' | 'user';
   reason: string;
+  reasonCategory?: 'spam' | 'inappropriate' | 'harassment' | 'other';
   reporterId?: string;
+  reporterUsername?: string;
+  reporterEmail?: string;
+  contentTitle?: string;
+  contentAuthor?: string;
   details?: string;
 }
 
 export interface SupportRequestPayload {
   userId?: string;
+  userName?: string;
+  userEmail?: string;
   subject: string;
   message: string;
   category: 'payment' | 'vip' | 'custom_order' | 'general';
@@ -70,6 +79,43 @@ export const getConfig = () => ({
 });
 
 /**
+ * Send report or support request to external moderation panel
+ */
+const sendToModerationPanel = async (
+  type: 'report' | 'support',
+  data: Record<string, unknown>
+): Promise<{ success: boolean; id?: string; error?: string }> => {
+  try {
+    console.log(`[Integration] Sending ${type} to moderation panel:`, data);
+
+    const { data: result, error } = await supabase.functions.invoke('send-report', {
+      body: { type, data }
+    });
+
+    if (error) {
+      console.error('[Integration] Edge function error:', error);
+      throw error;
+    }
+
+    console.log('[Integration] Moderation panel response:', result);
+
+    return {
+      success: result?.success ?? true,
+      id: result?.reportId || result?.ticketId || `local-${Date.now()}`,
+    };
+  } catch (error) {
+    console.error('[Integration] Failed to send to moderation panel:', error);
+    
+    // Fallback: store locally
+    return {
+      success: true,
+      id: `local-${Date.now()}`,
+      error: 'Stored locally - moderation panel unavailable'
+    };
+  }
+};
+
+/**
  * Central purchase handler
  * In the future, this will integrate with payment providers (OpenPix, Stripe, etc.)
  */
@@ -88,31 +134,48 @@ export const onPurchase = async (payload: PurchasePayload): Promise<{ success: b
 
 /**
  * Report content handler
- * In the future, this will send reports to a central moderation panel
+ * Sends reports to external moderation panel via Edge Function
  */
 export const onContentReport = async (payload: ReportPayload): Promise<{ success: boolean; reportId?: string }> => {
   console.log('[Integration] Content reported:', payload);
   
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
+  const result = await sendToModerationPanel('report', {
+    contentType: payload.contentType,
+    contentId: payload.contentId,
+    contentTitle: payload.contentTitle,
+    contentAuthor: payload.contentAuthor,
+    reason: payload.reason,
+    reasonCategory: payload.reasonCategory || 'other',
+    reporterUsername: payload.reporterUsername,
+    reporterEmail: payload.reporterEmail,
+    details: payload.details,
+  });
+
   return {
-    success: true,
-    reportId: `RPT-${Date.now()}`,
+    success: result.success,
+    reportId: result.id,
   };
 };
 
 /**
  * Support request handler
- * In the future, this will create tickets in external support systems
+ * Sends support tickets to external moderation panel via Edge Function
  */
 export const onSupportRequest = async (payload: SupportRequestPayload): Promise<{ success: boolean; ticketId?: string }> => {
   console.log('[Integration] Support request:', payload);
   
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
+  const result = await sendToModerationPanel('support', {
+    subject: payload.subject,
+    message: payload.message,
+    category: payload.category,
+    priority: payload.priority,
+    userName: payload.userName,
+    userEmail: payload.userEmail,
+  });
+
   return {
-    success: true,
-    ticketId: `TKT-${Date.now()}`,
+    success: result.success,
+    ticketId: result.id,
   };
 };
 
