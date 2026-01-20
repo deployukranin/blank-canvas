@@ -30,6 +30,7 @@ import { useUserReputation } from '@/hooks/use-user-reputation';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { UserLevelBadge } from '@/components/reputation/UserLevelBadge';
 import { LeaderboardCard } from '@/components/reputation/LeaderboardCard';
+import { ReputationCard } from '@/components/reputation/ReputationCard';
 import { PushNotificationToggle } from '@/components/notifications/PushNotificationToggle';
 import { UserHandle } from '@/components/profile/UserHandle';
 import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
@@ -1016,6 +1017,45 @@ const ComunidadePage = () => {
           onReport={handleSubmitReport}
         />
       )}
+
+      {/* Ranking Dialog */}
+      <Dialog open={showRanking} onOpenChange={setShowRanking}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              Ranking da Comunidade
+            </DialogTitle>
+            <DialogDescription>
+              Veja sua posição e as maiores contribuições da comunidade
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* User's reputation card if logged in */}
+            {user && reputation && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground">Sua Reputação</h3>
+                <ReputationCard 
+                  reputation={reputation} 
+                  showBadges={true} 
+                  showStats={true} 
+                />
+              </div>
+            )}
+            
+            {/* Full leaderboard */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Top 15 da Comunidade</h3>
+              <LeaderboardCard 
+                leaderboard={leaderboard} 
+                currentUsername={user?.username}
+                limit={15}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MobileLayout>
   );
 };
