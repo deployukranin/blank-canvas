@@ -158,7 +158,19 @@ Deno.serve(async (req) => {
     }
 
     console.log("Enviando para OpenPix:", JSON.stringify(openPixPayload, null, 2));
-    console.log("AppID (primeiros 20 chars):", OPENPIX_APP_ID?.substring(0, 20) + "...");
+    console.log("AppID completo:", OPENPIX_APP_ID);
+    console.log("AppID length:", OPENPIX_APP_ID?.length);
+
+    // Testar primeiro o endpoint de status da API para validar a chave
+    const testResponse = await fetch("https://api.openpix.com.br/api/v1/account", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: OPENPIX_APP_ID,
+      },
+    });
+    const testData = await testResponse.json();
+    console.log("Teste de autenticação:", JSON.stringify(testData, null, 2));
 
     const openPixResponse = await fetch("https://api.openpix.com.br/api/v1/charge", {
       method: "POST",
@@ -172,7 +184,6 @@ Deno.serve(async (req) => {
 
     const openPixData = await openPixResponse.json();
     console.log("Resposta OpenPix:", JSON.stringify(openPixData, null, 2));
-
     if (!openPixResponse.ok) {
       console.error("Erro OpenPix:", openPixData);
       
