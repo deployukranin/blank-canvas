@@ -13,7 +13,6 @@ import {
   X,
   ArrowLeft,
   Shield,
-  Crown,
   CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -81,21 +80,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-card/95 backdrop-blur-xl border-r border-border z-40 transform transition-transform duration-300 lg:translate-x-0",
+        "fixed inset-y-0 left-0 w-64 bg-card/95 backdrop-blur-xl border-r border-border z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-bold gradient-text">Admin Panel</h2>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              {user?.isCEO ? (
-                <Crown className="w-4 h-4 text-yellow-500" />
-              ) : (
-                <Shield className="w-4 h-4 text-primary" />
-              )}
+              <Shield className="w-4 h-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-medium">{user?.username}</p>
@@ -104,7 +99,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           </div>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-2 overflow-y-auto flex-1">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -124,21 +119,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
               </Link>
             );
           })}
-          
-          {/* CEO Panel Link */}
-          {user?.isCEO && (
-            <Link
-              to="/ceo"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-500 hover:from-yellow-500/30 hover:to-amber-500/30"
-            >
-              <Crown className="w-5 h-5" />
-              <span className="font-medium">Painel CEO</span>
-            </Link>
-          )}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border space-y-2">
+        <div className="p-4 border-t border-border space-y-2 shrink-0">
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
