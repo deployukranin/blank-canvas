@@ -244,6 +244,42 @@ export type Database = {
         }
         Relationships: []
       }
+      video_watch_history: {
+        Row: {
+          completed: boolean
+          created_at: string
+          duration_seconds: number | null
+          guest_id: string | null
+          id: string
+          last_position_seconds: number
+          updated_at: string
+          user_id: string | null
+          video_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          duration_seconds?: number | null
+          guest_id?: string | null
+          id?: string
+          last_position_seconds?: number
+          updated_at?: string
+          user_id?: string | null
+          video_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          duration_seconds?: number | null
+          guest_id?: string | null
+          id?: string
+          last_position_seconds?: number
+          updated_at?: string
+          user_id?: string | null
+          video_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
