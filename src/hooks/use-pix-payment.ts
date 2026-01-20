@@ -5,6 +5,7 @@ interface CreateChargeParams {
   value: number; // valor em centavos
   productType: string;
   productId?: string;
+  influencerId?: string; // ID do influencer para split automático
   customer?: {
     name?: string;
     email?: string;
@@ -13,6 +14,13 @@ interface CreateChargeParams {
   };
   comment?: string;
   expiresIn?: number;
+}
+
+interface SplitInfo {
+  influencerId: string;
+  influencerName: string;
+  influencerValue: number;
+  platformValue: number;
 }
 
 interface PixPayment {
@@ -24,12 +32,14 @@ interface PixPayment {
   brCode: string;
   paymentLinkUrl?: string;
   expiresAt: string;
+  split?: SplitInfo | null;
 }
 
 interface UsePixPaymentReturn {
   createCharge: (params: CreateChargeParams) => Promise<PixPayment | null>;
   isLoading: boolean;
   error: string | null;
+  errorCode: string | null;
   payment: PixPayment | null;
   reset: () => void;
 }
@@ -37,11 +47,13 @@ interface UsePixPaymentReturn {
 export function usePixPayment(): UsePixPaymentReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [payment, setPayment] = useState<PixPayment | null>(null);
 
   const createCharge = useCallback(async (params: CreateChargeParams): Promise<PixPayment | null> => {
     setIsLoading(true);
     setError(null);
+    setErrorCode(null);
     setPayment(null);
 
     try {
@@ -57,6 +69,7 @@ export function usePixPayment(): UsePixPaymentReturn {
 
       if (!data?.success) {
         setError(data?.error || 'Erro desconhecido');
+        setErrorCode(data?.code || null);
         return null;
       }
 
@@ -69,6 +82,7 @@ export function usePixPayment(): UsePixPaymentReturn {
         brCode: data.payment.brCode,
         paymentLinkUrl: data.payment.paymentLinkUrl,
         expiresAt: data.payment.expiresAt,
+        split: data.payment.split,
       };
 
       setPayment(paymentData);
@@ -85,6 +99,7 @@ export function usePixPayment(): UsePixPaymentReturn {
   const reset = useCallback(() => {
     setPayment(null);
     setError(null);
+    setErrorCode(null);
     setIsLoading(false);
   }, []);
 
@@ -92,6 +107,7 @@ export function usePixPayment(): UsePixPaymentReturn {
     createCharge,
     isLoading,
     error,
+    errorCode,
     payment,
     reset,
   };
