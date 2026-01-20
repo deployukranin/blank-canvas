@@ -1,30 +1,127 @@
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { MobileLayout } from '@/components/layout/MobileLayout';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { DynamicIcon } from '@/components/ui/DynamicIcon';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { mockFeedPosts } from '@/lib/mock-data';
+import heroImage from '@/assets/hero-asmr.jpg';
+
 const Index = () => {
+  const { user } = useAuth();
+  const { config } = useWhiteLabel();
+
+  // Get quick actions from config, filter only enabled ones
+  const quickActions = config.quickActions.filter(action => action.enabled);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
-      <div className="text-center max-w-md">
-        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
-          <svg 
-            className="h-8 w-8 text-accent-foreground" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
-            />
-          </svg>
+    <MobileLayout>
+      <div className="px-4 py-6 space-y-6">
+        {/* Hero Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative rounded-2xl overflow-hidden"
+        >
+          <img
+            src={heroImage}
+            alt="ASMR Luna"
+            className="w-full h-48 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <h2 className="font-display text-xl font-bold mb-1">
+              {user ? `Olá, ${user.username}! 💜` : 'Bem-vindo! 💜'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Relaxe com ASMR de qualidade
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <div>
+          <h3 className="font-display font-semibold mb-3">Explorar</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {quickActions.map((action, index) => (
+              <motion.div
+                key={action.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Link to={action.path}>
+                  <div className="glass glass-hover rounded-xl p-4 text-center">
+                    <div className={`w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center`}>
+                      <DynamicIcon icon={action.icon} size={20} className="text-white" />
+                    </div>
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight text-foreground">
-          Projeto em Branco
-        </h1>
-        <p className="text-muted-foreground leading-relaxed">
-          Tudo pronto para começar. Descreva o que você quer construir.
-        </p>
+
+        {/* Feed Preview */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display font-semibold">Novidades</h3>
+            <Link to="/comunidade" className="text-primary text-sm font-medium">
+              Ver tudo
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {mockFeedPosts.slice(0, 2).map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+              >
+                <GlassCard className="p-4" hover={false}>
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm">🌙</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm mb-1 truncate">{post.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{post.content}</p>
+                    </div>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* VIP CTA (only if not VIP) */}
+        {(!user || !user.isVIP) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Link to="/vip">
+              <GlassCard glow className="p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-vip/30 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="flex items-center gap-4 relative">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vip to-amber-400 flex items-center justify-center">
+                    <DynamicIcon icon={config.icons.featureVIP} size={24} className="text-vip-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-display font-semibold text-vip">Seja VIP</p>
+                    <p className="text-xs text-muted-foreground">Acesso exclusivo ao Discord e muito mais</p>
+                  </div>
+                </div>
+              </GlassCard>
+            </Link>
+          </motion.div>
+        )}
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 

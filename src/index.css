@@ -1,88 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* ASMR Influencer Design System - Glassmorphism Dark Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 220 15% 15%;
+    --background: 260 30% 6%;
+    --foreground: 270 20% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card: 260 25% 12%;
+    --card-foreground: 270 20% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover: 260 25% 10%;
+    --popover-foreground: 270 20% 95%;
 
-    --primary: 220 70% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 270 70% 60%;
+    --primary-foreground: 270 20% 98%;
 
-    --secondary: 220 15% 96%;
-    --secondary-foreground: 220 15% 25%;
+    --secondary: 250 40% 20%;
+    --secondary-foreground: 270 20% 95%;
 
-    --muted: 220 15% 96%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 260 20% 18%;
+    --muted-foreground: 260 15% 60%;
 
-    --accent: 220 70% 96%;
-    --accent-foreground: 220 70% 40%;
+    --accent: 280 60% 70%;
+    --accent-foreground: 270 20% 98%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 92%;
-    --input: 220 15% 92%;
-    --ring: 220 70% 50%;
+    --border: 260 20% 20%;
+    --input: 260 20% 15%;
+    --ring: 270 70% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+    /* Custom ASMR Theme Variables */
+    --glass-bg: 260 30% 12% / 0.6;
+    --glass-border: 270 30% 40% / 0.2;
+    --glass-highlight: 270 50% 80% / 0.1;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(270 70% 60%), hsl(250 70% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(280 60% 70%), hsl(260 70% 60%));
+    --gradient-glass: linear-gradient(135deg, hsl(260 30% 15% / 0.8), hsl(260 30% 10% / 0.6));
+    --gradient-mesh: radial-gradient(ellipse at 20% 20%, hsl(280 60% 30% / 0.3) 0%, transparent 50%),
+                     radial-gradient(ellipse at 80% 80%, hsl(250 70% 30% / 0.3) 0%, transparent 50%),
+                     radial-gradient(ellipse at 50% 50%, hsl(270 50% 20% / 0.2) 0%, transparent 70%);
+    
+    --shadow-glass: 0 8px 32px hsl(260 50% 5% / 0.4), inset 0 1px 0 hsl(270 50% 80% / 0.1);
+    --shadow-glow: 0 0 40px hsl(270 70% 50% / 0.3);
+    --shadow-card: 0 4px 24px hsl(260 50% 5% / 0.5);
 
-  .dark {
-    --background: 220 20% 8%;
-    --foreground: 220 15% 95%;
+    --sidebar-background: 260 30% 8%;
+    --sidebar-foreground: 270 20% 90%;
+    --sidebar-primary: 270 70% 60%;
+    --sidebar-primary-foreground: 270 20% 98%;
+    --sidebar-accent: 260 25% 15%;
+    --sidebar-accent-foreground: 270 20% 95%;
+    --sidebar-border: 260 20% 18%;
+    --sidebar-ring: 270 70% 60%;
 
-    --card: 220 20% 10%;
-    --card-foreground: 220 15% 95%;
+    /* Status Colors */
+    --success: 160 60% 45%;
+    --success-foreground: 160 20% 98%;
+    --warning: 45 90% 50%;
+    --warning-foreground: 45 20% 10%;
+    --info: 210 70% 55%;
+    --info-foreground: 210 20% 98%;
 
-    --popover: 220 20% 10%;
-    --popover-foreground: 220 15% 95%;
-
-    --primary: 220 70% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 20% 15%;
-    --secondary-foreground: 220 15% 90%;
-
-    --muted: 220 20% 15%;
-    --muted-foreground: 220 10% 55%;
-
-    --accent: 220 30% 18%;
-    --accent-foreground: 220 70% 70%;
-
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 220 70% 55%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* VIP Gold */
+    --vip: 45 80% 55%;
+    --vip-foreground: 45 20% 10%;
   }
 }
 
@@ -91,11 +82,106 @@
     @apply border-border;
   }
 
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+/* Safe area utilities for PWA */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@layer components {
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-lg;
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-hover {
+    @apply transition-all duration-300;
+  }
+
+  .glass-hover:hover {
+    @apply bg-card/70 border-white/20;
+    box-shadow: var(--shadow-glass), var(--shadow-glow);
+    transform: translateY(-2px);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-accent);
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .mesh-gradient {
+    background-image: var(--gradient-mesh);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 20px hsl(270 70% 50% / 0.2); }
+    to { box-shadow: 0 0 40px hsl(270 70% 50% / 0.4); }
   }
 }
