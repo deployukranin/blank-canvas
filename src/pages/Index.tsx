@@ -51,7 +51,7 @@ const Index = () => {
   );
 
   return (
-    <MobileLayout>
+    <MobileLayout hideHeader>
       <div className="px-4 py-6 space-y-6">
         {/* Hero Card */}
         <motion.div
