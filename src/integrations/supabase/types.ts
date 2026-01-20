@@ -214,6 +214,36 @@ export type Database = {
         }
         Relationships: []
       }
+      video_reactions: {
+        Row: {
+          created_at: string
+          guest_id: string | null
+          id: string
+          reaction_type: Database["public"]["Enums"]["video_reaction_type"]
+          updated_at: string
+          user_id: string | null
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          reaction_type: Database["public"]["Enums"]["video_reaction_type"]
+          updated_at?: string
+          user_id?: string | null
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          reaction_type?: Database["public"]["Enums"]["video_reaction_type"]
+          updated_at?: string
+          user_id?: string | null
+          video_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -230,6 +260,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "ceo"
+      video_reaction_type: "relaxante" | "dormi" | "arrepios" | "favorito"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -358,6 +389,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "ceo"],
+      video_reaction_type: ["relaxante", "dormi", "arrepios", "favorito"],
     },
   },
 } as const

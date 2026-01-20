@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 import { VideoChat } from "@/components/video/VideoChat";
+import { VideoReactions } from "@/components/video/VideoReactions";
 import type { YouTubeVideoItem } from "@/hooks/use-youtube-videos";
 
 interface VideoWatchModalProps {
@@ -84,6 +85,12 @@ export const VideoWatchModal = ({
                     Sem descrição.
                   </p>
                 )}
+              </div>
+
+              {/* Reaction buttons */}
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Como você se sentiu?</p>
+                <VideoReactions videoId={selectedVideo.video_id} />
               </div>
 
               <div>
