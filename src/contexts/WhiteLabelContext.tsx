@@ -688,6 +688,18 @@ export interface WhiteLabelConfig {
     videosTabLabel: string;
     avisosTabLabel: string;
     ideiasTabLabel: string;
+    // VIP Tab
+    vipTabEnabled: boolean;
+    vipTabLabel: string;
+    vipTitle: string;
+    vipDescription: string;
+    vipButtonLabel: string;
+    vipBenefits: Array<{
+      id: string;
+      title: string;
+      description: string;
+      icon: 'star' | 'bell' | 'message' | 'gift' | 'zap' | 'heart';
+    }>;
   };
 
   // Colors (HSL format: "H S% L%")
@@ -735,6 +747,16 @@ const defaultCommunityConfig = {
   videosTabLabel: 'Vídeos',
   avisosTabLabel: 'Avisos',
   ideiasTabLabel: 'Ideias',
+  vipTabEnabled: true,
+  vipTabLabel: 'Área VIP',
+  vipTitle: 'Área VIP',
+  vipDescription: 'Conteúdo exclusivo para membros VIP. Acesse benefícios especiais, conteúdos antecipados e muito mais.',
+  vipButtonLabel: 'Tornar-se VIP',
+  vipBenefits: [
+    { id: '1', title: 'Conteúdos Exclusivos', description: 'Acesso a vídeos e áudios especiais', icon: 'star' as const },
+    { id: '2', title: 'Acesso Antecipado', description: 'Seja o primeiro a ver novos conteúdos', icon: 'bell' as const },
+    { id: '3', title: 'Chat Exclusivo', description: 'Converse diretamente com a comunidade VIP', icon: 'message' as const },
+  ],
 };
 
 const defaultConfig: WhiteLabelConfig = {
