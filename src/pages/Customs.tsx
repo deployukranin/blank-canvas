@@ -110,7 +110,7 @@ const CustomsPage = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
     setIsProcessing(true);
-    const finalPrice = calculatePrice(selectedDuration, selectedCategory);
+    const finalPrice = calculatePrice(selectedDuration);
 
     const result = await onPurchase({
       productId: `custom-video-${selectedCategory.id}-${selectedDuration.id}`,
@@ -158,7 +158,7 @@ const CustomsPage = () => {
       categoryName: selectedCategory.name,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
+      price: calculatePrice(selectedDuration),
       ...personalizationData,
       status: 'pending',
     });
@@ -173,7 +173,7 @@ const CustomsPage = () => {
       categoryIcon: selectedCategory.icon,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
+      price: calculatePrice(selectedDuration),
       status: 'pending',
       estimatedDelivery: deliveryDate.toISOString().split('T')[0],
       personalization: {
@@ -248,8 +248,8 @@ const CustomsPage = () => {
     setAudioOrderComplete(false);
   };
 
-  const finalPrice = selectedCategory && selectedDuration 
-    ? calculatePrice(selectedDuration, selectedCategory) 
+  const finalPrice = selectedDuration 
+    ? calculatePrice(selectedDuration) 
     : 0;
 
   if (!config) {
@@ -386,11 +386,6 @@ const CustomsPage = () => {
                       <div className="text-3xl mb-2">{category.icon}</div>
                       <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
                       <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
-                      {category.priceModifier > 1 && (
-                        <div className="mt-2 text-xs text-primary">
-                          +{Math.round((category.priceModifier - 1) * 100)}%
-                        </div>
-                      )}
                     </GlassCard>
                   </motion.div>
                 ))}
@@ -410,9 +405,7 @@ const CustomsPage = () => {
               </div>
               <div className="space-y-2">
                 {config.durations.map((duration, index) => {
-                  const price = selectedCategory 
-                    ? calculatePrice(duration, selectedCategory)
-                    : duration.price;
+                  const price = calculatePrice(duration);
                   return (
                     <motion.div
                       key={duration.id}

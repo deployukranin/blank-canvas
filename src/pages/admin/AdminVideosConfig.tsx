@@ -96,7 +96,6 @@ const AdminVideosConfig = () => {
       name: 'Nova Categoria',
       description: 'Descrição da categoria',
       icon: '🎬',
-      priceModifier: 1.0,
     };
     setConfig({ ...config, categories: [...config.categories, newCategory] });
   };
@@ -317,15 +316,6 @@ const AdminVideosConfig = () => {
                         placeholder="Nome da categoria"
                         value={category.name}
                         onChange={e => updateCategory(index, 'name', e.target.value)}
-                      />
-                      <Input
-                        type="number"
-                        className="w-20"
-                        step="0.05"
-                        min={0.5}
-                        max={3}
-                        value={category.priceModifier}
-                        onChange={e => updateCategory(index, 'priceModifier', parseFloat(e.target.value) || 1)}
                       />
                       <Button
                         size="icon"
