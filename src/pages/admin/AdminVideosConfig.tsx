@@ -318,19 +318,15 @@ const AdminVideosConfig = () => {
                         value={category.name}
                         onChange={e => updateCategory(index, 'name', e.target.value)}
                       />
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Mod:</span>
-                        <Input
-                          type="number"
-                          className="w-20"
-                          step="0.05"
-                          min={0.5}
-                          max={3}
-                          value={category.priceModifier}
-                          onChange={e => updateCategory(index, 'priceModifier', parseFloat(e.target.value) || 1)}
-                        />
-                        <span className="text-xs text-muted-foreground">x</span>
-                      </div>
+                      <Input
+                        type="number"
+                        className="w-20"
+                        step="0.05"
+                        min={0.5}
+                        max={3}
+                        value={category.priceModifier}
+                        onChange={e => updateCategory(index, 'priceModifier', parseFloat(e.target.value) || 1)}
+                      />
                       <Button
                         size="icon"
                         variant="ghost"
