@@ -35,7 +35,7 @@ const PerfilPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <MobileLayout title="Perfil">
+      <MobileLayout title="Perfil" hideHeader>
         <div className="px-4 py-6 flex flex-col items-center justify-center min-h-[60vh]">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -82,7 +82,7 @@ const PerfilPage = () => {
   }
 
   return (
-    <MobileLayout title="Perfil">
+    <MobileLayout title="Perfil" hideHeader>
       <div className="px-4 py-6 space-y-6">
         {/* User Info */}
         <motion.div

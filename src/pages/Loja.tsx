@@ -51,7 +51,7 @@ const LojaPage = () => {
   };
 
   return (
-    <MobileLayout title={storeTexts.pageTitle}>
+    <MobileLayout title={storeTexts.pageTitle} hideHeader>
       <div className="px-4 py-6 space-y-6">
         <motion.p
           initial={{ opacity: 0 }}

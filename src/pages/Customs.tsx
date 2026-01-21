@@ -254,7 +254,7 @@ const CustomsPage = () => {
 
   if (!config) {
     return (
-      <MobileLayout title="Custom's">
+      <MobileLayout title="Custom's" hideHeader>
         <div className="flex items-center justify-center h-64">
           <div className="animate-pulse text-muted-foreground">Carregando...</div>
         </div>
@@ -263,7 +263,7 @@ const CustomsPage = () => {
   }
 
   return (
-    <MobileLayout title="Custom's">
+    <MobileLayout title="Custom's" hideHeader>
       <div className="px-4 py-6 space-y-6">
         {/* Tabs for Video and Audio */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
