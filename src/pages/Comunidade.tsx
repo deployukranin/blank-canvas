@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   Bell, Star, Lock, Pin, Lightbulb, MessageCircle, ThumbsUp, Users, Plus, 
   Send, ChevronDown, ChevronUp, Trophy, TrendingUp, Filter, BellRing, Check, 
-  Flag, MoreHorizontal, AlertTriangle, Video
+  Flag, MoreHorizontal, AlertTriangle, Video, Crown
 } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -847,6 +847,10 @@ const ComunidadePage = () => {
               <Lightbulb className="w-4 h-4" />
               {config.community.ideiasTabLabel}
             </TabsTrigger>
+            <TabsTrigger value="vip" className="flex-1 gap-2">
+              <Crown className="w-4 h-4" />
+              Área VIP
+            </TabsTrigger>
           </TabsList>
 
           {videosTabEnabled && (
@@ -990,6 +994,61 @@ const ComunidadePage = () => {
                 </p>
               </GlassCard>
             )}
+          </TabsContent>
+
+          <TabsContent value="vip" className="space-y-4 mt-0">
+            <GlassCard className="p-6 text-center bg-gradient-to-br from-vip/10 to-primary/5 border-vip/20">
+              <Crown className="w-12 h-12 mx-auto mb-4 text-vip" />
+              <h3 className="font-display font-semibold text-lg mb-2">Área VIP</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Conteúdo exclusivo para membros VIP. Acesse benefícios especiais, conteúdos antecipados e muito mais.
+              </p>
+              <Button className="gap-2 bg-vip hover:bg-vip/90">
+                <Lock className="w-4 h-4" />
+                Tornar-se VIP
+              </Button>
+            </GlassCard>
+
+            <div className="grid gap-3">
+              <GlassCard className="p-4 opacity-75">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-vip/20 flex items-center justify-center">
+                    <Star className="w-5 h-5 text-vip" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm">Conteúdos Exclusivos</h4>
+                    <p className="text-xs text-muted-foreground">Acesso a vídeos e áudios especiais</p>
+                  </div>
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </GlassCard>
+
+              <GlassCard className="p-4 opacity-75">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-vip/20 flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-vip" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm">Acesso Antecipado</h4>
+                    <p className="text-xs text-muted-foreground">Seja o primeiro a ver novos conteúdos</p>
+                  </div>
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </GlassCard>
+
+              <GlassCard className="p-4 opacity-75">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-vip/20 flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-vip" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm">Chat Exclusivo</h4>
+                    <p className="text-xs text-muted-foreground">Converse diretamente com a comunidade VIP</p>
+                  </div>
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </GlassCard>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
