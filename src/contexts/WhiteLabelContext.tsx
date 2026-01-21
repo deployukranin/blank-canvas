@@ -569,18 +569,55 @@ export const defaultQuickActions: QuickActionItem[] = [
 ];
 
 export const availableGradientColors = [
+  // Roxos e Violetas
   { id: 'from-violet-500 to-purple-500', label: 'Violeta → Roxo' },
-  { id: 'from-amber-500 to-orange-500', label: 'Âmbar → Laranja' },
-  { id: 'from-pink-500 to-rose-500', label: 'Rosa → Rose' },
-  { id: 'from-green-500 to-emerald-500', label: 'Verde → Esmeralda' },
   { id: 'from-indigo-500 to-purple-500', label: 'Índigo → Roxo' },
-  { id: 'from-blue-500 to-cyan-500', label: 'Azul → Ciano' },
-  { id: 'from-red-500 to-pink-500', label: 'Vermelho → Rosa' },
-  { id: 'from-teal-500 to-green-500', label: 'Teal → Verde' },
-  { id: 'from-yellow-500 to-amber-500', label: 'Amarelo → Âmbar' },
+  { id: 'from-purple-500 to-violet-600', label: 'Roxo → Violeta' },
+  { id: 'from-violet-600 to-indigo-600', label: 'Violeta Escuro' },
+  
+  // Rosas e Fúcsias
+  { id: 'from-pink-500 to-rose-500', label: 'Rosa → Rose' },
   { id: 'from-fuchsia-500 to-pink-500', label: 'Fúcsia → Rosa' },
-  { id: 'from-sky-500 to-blue-500', label: 'Céu → Azul' },
+  { id: 'from-rose-500 to-red-500', label: 'Rose → Vermelho' },
+  { id: 'from-pink-400 to-fuchsia-600', label: 'Rosa Vibrante' },
+  
+  // Vermelhos e Laranjas
+  { id: 'from-red-500 to-pink-500', label: 'Vermelho → Rosa' },
+  { id: 'from-red-500 to-orange-500', label: 'Vermelho → Laranja' },
+  { id: 'from-orange-500 to-red-500', label: 'Laranja → Vermelho' },
+  { id: 'from-amber-500 to-orange-500', label: 'Âmbar → Laranja' },
+  
+  // Amarelos e Dourados
+  { id: 'from-yellow-500 to-amber-500', label: 'Amarelo → Âmbar' },
+  { id: 'from-yellow-400 to-orange-500', label: 'Amarelo → Laranja' },
+  { id: 'from-amber-400 to-yellow-500', label: 'Dourado' },
+  
+  // Verdes
+  { id: 'from-green-500 to-emerald-500', label: 'Verde → Esmeralda' },
+  { id: 'from-teal-500 to-green-500', label: 'Teal → Verde' },
   { id: 'from-lime-500 to-green-500', label: 'Lima → Verde' },
+  { id: 'from-emerald-500 to-teal-500', label: 'Esmeralda → Teal' },
+  { id: 'from-green-400 to-cyan-500', label: 'Verde Água' },
+  
+  // Azuis e Cianos
+  { id: 'from-blue-500 to-cyan-500', label: 'Azul → Ciano' },
+  { id: 'from-sky-500 to-blue-500', label: 'Céu → Azul' },
+  { id: 'from-cyan-500 to-blue-500', label: 'Ciano → Azul' },
+  { id: 'from-blue-600 to-indigo-600', label: 'Azul Profundo' },
+  { id: 'from-sky-400 to-cyan-500', label: 'Céu Claro' },
+  
+  // Neutros e Especiais
+  { id: 'from-slate-500 to-gray-600', label: 'Cinza Elegante' },
+  { id: 'from-zinc-500 to-slate-600', label: 'Grafite' },
+  { id: 'from-stone-500 to-neutral-600', label: 'Pedra' },
+  
+  // Gradientes Especiais
+  { id: 'from-rose-400 via-fuchsia-500 to-indigo-500', label: 'Arco-íris Rosa' },
+  { id: 'from-amber-400 via-orange-500 to-red-500', label: 'Pôr do Sol' },
+  { id: 'from-green-400 via-cyan-500 to-blue-500', label: 'Oceano' },
+  { id: 'from-purple-400 via-pink-500 to-red-500', label: 'Aurora' },
+  { id: 'from-blue-400 via-purple-500 to-pink-500', label: 'Galáxia' },
+  { id: 'from-yellow-400 via-lime-500 to-green-500', label: 'Natureza' },
 ];
 
 export const availableRoutes = [
