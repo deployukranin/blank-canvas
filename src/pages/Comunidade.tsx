@@ -732,15 +732,7 @@ const ComunidadePage = () => {
     <MobileLayout title="Comunidade" hideHeader>
       <div className="px-4 py-6">
         {/* Header do fórum */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            <div>
-              <span className="text-sm text-muted-foreground">
-                {config.community.title}
-              </span>
-            </div>
-          </div>
+        <div className="flex items-center justify-end mb-4">
 
           <div className="flex items-center gap-2">
             {/* Push Notification Toggle */}
