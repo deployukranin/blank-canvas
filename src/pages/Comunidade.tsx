@@ -729,7 +729,7 @@ const ComunidadePage = () => {
   };
 
   return (
-    <MobileLayout title="Comunidade">
+    <MobileLayout title="Comunidade" hideHeader>
       <div className="px-4 py-6">
         {/* Header do fórum */}
         <div className="flex items-center justify-between mb-4">
