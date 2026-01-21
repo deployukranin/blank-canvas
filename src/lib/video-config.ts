@@ -14,7 +14,6 @@ export interface VideoCategory {
   name: string;
   description: string;
   icon: string;
-  priceModifier: number; // Multiplier for base price
 }
 
 export interface VideoRules {
@@ -50,43 +49,37 @@ export const defaultVideoConfig: VideoConfig = {
       id: 'roleplay', 
       name: 'Roleplay', 
       description: 'Situações imersivas e personagens', 
-      icon: '🎭',
-      priceModifier: 1.2
+      icon: '🎭'
     },
     { 
       id: 'tapping', 
       name: 'Tapping', 
       description: 'Sons de batidas em diferentes superfícies', 
-      icon: '👆',
-      priceModifier: 1.0
+      icon: '👆'
     },
     { 
       id: 'mouth-sounds', 
       name: 'Sons de Boca', 
       description: 'Kisses, tongue clicks, inaudible whispers', 
-      icon: '💋',
-      priceModifier: 1.0
+      icon: '💋'
     },
     { 
       id: 'whispers', 
       name: 'Sussurros', 
       description: 'Sussurros suaves e relaxantes', 
-      icon: '🤫',
-      priceModifier: 1.0
+      icon: '🤫'
     },
     { 
       id: 'personal-attention', 
       name: 'Atenção Pessoal', 
       description: 'Cuidando de você com carinho', 
-      icon: '💆',
-      priceModifier: 1.1
+      icon: '💆'
     },
     { 
       id: 'custom-name', 
       name: 'Com Seu Nome', 
       description: 'Vídeo sussurrando seu nome', 
-      icon: '💫',
-      priceModifier: 1.15
+      icon: '💫'
     },
   ],
   rules: {
@@ -129,10 +122,7 @@ export const saveVideoConfig = (config: VideoConfig): void => {
   localStorage.setItem('videoConfig', JSON.stringify(config));
 };
 
-// Calculate final price based on duration and category
-export const calculatePrice = (
-  duration: VideoDuration,
-  category: VideoCategory
-): number => {
-  return Math.round(duration.price * category.priceModifier * 100) / 100;
+// Calculate final price based on duration
+export const calculatePrice = (duration: VideoDuration): number => {
+  return duration.price;
 };
