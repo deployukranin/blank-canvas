@@ -721,6 +721,12 @@ export interface WhiteLabelConfig {
       webhookSecret: string;
       environment: 'sandbox' | 'production';
       enabled: boolean;
+      // PIX Platform Configuration
+      platformPixKey: string;
+      platformPixKeyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
+      platformName: string;
+      defaultSplitPercentage: number; // % para plataforma (padrão 20)
+      platformPaysOpenPixFee: boolean; // Se true, taxa descontada da plataforma
     };
     support: {
       token: string;
@@ -806,6 +812,11 @@ const defaultConfig: WhiteLabelConfig = {
       webhookSecret: '',
       environment: 'sandbox',
       enabled: false,
+      platformPixKey: '',
+      platformPixKeyType: 'RANDOM' as const,
+      platformName: '',
+      defaultSplitPercentage: 20,
+      platformPaysOpenPixFee: true,
     },
     support: {
       token: '',
