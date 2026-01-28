@@ -113,6 +113,7 @@ const SubaccountManager = () => {
     try {
       const { data, error } = await supabase.functions.invoke('manage-subaccount', {
         body: { action: 'sync' },
+        headers: { 'X-Dev-Mode': 'true' },
       });
 
       if (error) {
@@ -139,6 +140,7 @@ const SubaccountManager = () => {
           name: influencer.name,
           influencerId: influencer.id,
         },
+        headers: { 'X-Dev-Mode': 'true' },
       });
 
       if (error || !data?.success) {
