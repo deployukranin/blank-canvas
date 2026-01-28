@@ -18,12 +18,19 @@ interface CreateChargeRequest {
   };
   comment?: string;
   expiresIn?: number; // segundos até expirar (default: 3600 = 1 hora)
+  // Configurações de split dinâmicas
+  splitConfig?: {
+    platformSplitPercentage?: number; // % para plataforma (default: 20)
+    platformPaysOpenPixFee?: boolean; // Se true, taxa descontada da plataforma
+  };
 }
 
 interface Influencer {
   id: string;
   name: string;
   openpix_receiver_id?: string;
+  woovi_subaccount_id?: string;
+  pix_key: string;
   split_percentage: number;
   is_active: boolean;
 }
@@ -88,10 +95,13 @@ Deno.serve(async (req) => {
     let splitPlatformValue: number | null = null;
     let splitInfluencerValue: number | null = null;
 
+    // Usar configurações de split passadas ou valores padrão
+    const platformSplitPercentage = body.splitConfig?.platformSplitPercentage ?? 20;
+
     if (body.influencerId) {
       const { data: influencerData, error: influencerError } = await supabase
         .from("influencers")
-        .select("id, name, openpix_receiver_id, split_percentage, is_active")
+        .select("id, name, openpix_receiver_id, woovi_subaccount_id, pix_key, split_percentage, is_active")
         .eq("id", body.influencerId)
         .eq("is_active", true)
         .single();
@@ -106,8 +116,9 @@ Deno.serve(async (req) => {
 
       influencer = influencerData as Influencer;
 
-      // Calcular split (definido no backend)
-      const influencerPercentage = influencer.split_percentage || 80;
+      // Calcular split - usar o percentual do influencer ou calcular baseado na plataforma
+      // O influencer.split_percentage é o que ele recebe, então usamos esse valor
+      const influencerPercentage = influencer.split_percentage || (100 - platformSplitPercentage);
       splitInfluencerValue = Math.floor((body.value * influencerPercentage) / 100);
       splitPlatformValue = body.value - splitInfluencerValue;
 
@@ -117,6 +128,7 @@ Deno.serve(async (req) => {
         platformPercentage: 100 - influencerPercentage,
         splitInfluencerValue,
         splitPlatformValue,
+        usedSubaccountId: influencer.woovi_subaccount_id || influencer.openpix_receiver_id || influencer.pix_key,
       });
     }
 
@@ -139,15 +151,19 @@ Deno.serve(async (req) => {
       } : undefined,
     };
 
-    // Adicionar split se houver influencer com receiver_id configurado na OpenPix
-    if (influencer?.openpix_receiver_id && splitInfluencerValue && splitInfluencerValue > 0) {
+    // Adicionar split se houver influencer com subconta ou receiver_id configurado
+    // Prioridade: woovi_subaccount_id > openpix_receiver_id > pix_key
+    const receiverId = influencer?.woovi_subaccount_id || influencer?.openpix_receiver_id;
+    if (receiverId && splitInfluencerValue && splitInfluencerValue > 0) {
       openPixPayload.splits = [
         {
-          receiver: influencer.openpix_receiver_id,
+          receiver: receiverId,
           value: splitInfluencerValue,
         },
       ];
       console.log("Split adicionado ao payload:", openPixPayload.splits);
+    } else if (influencer && !receiverId) {
+      console.warn("Influencer sem subconta ou receiver_id configurado. Split não será aplicado automaticamente.");
     }
 
     console.log("Enviando para OpenPix:", JSON.stringify(openPixPayload, null, 2));

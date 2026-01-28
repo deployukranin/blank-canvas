@@ -26,6 +26,7 @@ export type Database = {
           split_percentage: number
           tax_id: string
           updated_at: string
+          woovi_subaccount_id: string | null
         }
         Insert: {
           created_at?: string
@@ -38,6 +39,7 @@ export type Database = {
           split_percentage?: number
           tax_id: string
           updated_at?: string
+          woovi_subaccount_id?: string | null
         }
         Update: {
           created_at?: string
@@ -50,6 +52,7 @@ export type Database = {
           split_percentage?: number
           tax_id?: string
           updated_at?: string
+          woovi_subaccount_id?: string | null
         }
         Relationships: []
       }

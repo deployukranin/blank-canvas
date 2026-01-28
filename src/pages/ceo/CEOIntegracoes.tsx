@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Link2,
@@ -18,6 +18,12 @@ import {
   Shield,
   Download,
   Upload,
+  Users,
+  RefreshCw,
+  Plus,
+  Trash2,
+  Info,
+  Wallet,
 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -26,11 +32,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
 import { exportConfig, importConfig } from '@/lib/config-export';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TokenInputProps {
   label: string;
@@ -65,6 +73,198 @@ const TokenInput = ({ label, value, onChange, placeholder, isSecret = true }: To
         )}
       </div>
     </div>
+  );
+};
+
+interface Influencer {
+  id: string;
+  name: string;
+  pix_key: string;
+  pix_key_type: string;
+  split_percentage: number;
+  is_active: boolean;
+  woovi_subaccount_id: string | null;
+}
+
+const SubaccountManager = () => {
+  const [influencers, setInfluencers] = useState<Influencer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const fetchInfluencers = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('influencers')
+      .select('id, name, pix_key, pix_key_type, split_percentage, is_active, woovi_subaccount_id')
+      .order('name');
+
+    if (!error && data) {
+      setInfluencers(data as Influencer[]);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchInfluencers();
+  }, []);
+
+  const handleSyncSubaccounts = async () => {
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-subaccount', {
+        body: { action: 'sync' },
+      });
+
+      if (error) {
+        toast.error('Erro ao sincronizar subcontas');
+        console.error(error);
+      } else {
+        toast.success(`Sincronizado! ${data.synced} criadas, ${data.failed} falhas`);
+        await fetchInfluencers();
+      }
+    } catch (err) {
+      toast.error('Erro ao sincronizar subcontas');
+      console.error(err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleCreateSubaccount = async (influencer: Influencer) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-subaccount', {
+        body: {
+          action: 'create',
+          pixKey: influencer.pix_key,
+          name: influencer.name,
+          influencerId: influencer.id,
+        },
+      });
+
+      if (error || !data?.success) {
+        toast.error(data?.error || 'Erro ao criar subconta');
+      } else {
+        toast.success('Subconta criada com sucesso!');
+        await fetchInfluencers();
+      }
+    } catch (err) {
+      toast.error('Erro ao criar subconta');
+      console.error(err);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+    >
+      <GlassCard>
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Users className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-lg">Subcontas PIX (Influencers)</h3>
+              <p className="text-sm text-muted-foreground">Gerencie as subcontas para split automático</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncSubaccounts}
+            disabled={isSyncing}
+            className="gap-2"
+          >
+            {isSyncing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            Sincronizar com Woovi
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+            <p className="text-sm text-muted-foreground">
+              As subcontas permitem que os pagamentos sejam divididos automaticamente antes de cair nas contas.
+              Cada influencer precisa ter uma subconta na Woovi para receber sua parte do split.
+            </p>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : influencers.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>Nenhum influencer cadastrado</p>
+              <p className="text-sm">Cadastre influencers no painel admin para gerenciar subcontas</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Nome</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Chave PIX</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Split</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {influencers.map((influencer) => (
+                    <tr key={influencer.id} className="border-b border-border/50 hover:bg-muted/20">
+                      <td className="py-3 px-2">
+                        <div className="font-medium">{influencer.name}</div>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {influencer.pix_key_type}: {influencer.pix_key.slice(0, 15)}...
+                        </div>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className="text-sm font-bold text-accent">{influencer.split_percentage}%</span>
+                      </td>
+                      <td className="py-3 px-2">
+                        {influencer.woovi_subaccount_id ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Sincronizado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400">
+                            <XCircle className="w-3 h-3" />
+                            Pendente
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        {!influencer.woovi_subaccount_id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCreateSubaccount(influencer)}
+                            className="gap-1"
+                          >
+                            <Plus className="w-3 h-3" />
+                            Criar
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 };
 
@@ -510,10 +710,126 @@ const CEOIntegracoes = () => {
                       <span className="text-sm">Production (Real)</span>
                     </label>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    O split de 20% plataforma / 80% influencer é calculado automaticamente no backend.
-                    Recebedores são configurados diretamente na OpenPix.
+                </div>
+
+                {/* Platform PIX Configuration */}
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 space-y-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Wallet className="w-5 h-5 text-primary" />
+                    <span className="font-medium">Conta Principal da Plataforma</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Configure sua chave PIX principal. Esta conta receberá a porcentagem da plataforma e terá as taxas da OpenPix descontadas.
                   </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm">Tipo da Chave PIX</Label>
+                      <Select
+                        value={config.tokens.openpix.platformPixKeyType || 'RANDOM'}
+                        onValueChange={(value) => updateToken('openpix', { platformPixKeyType: value as 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM' })}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CPF">CPF</SelectItem>
+                          <SelectItem value="CNPJ">CNPJ</SelectItem>
+                          <SelectItem value="EMAIL">E-mail</SelectItem>
+                          <SelectItem value="PHONE">Telefone</SelectItem>
+                          <SelectItem value="RANDOM">Chave Aleatória</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-sm">Chave PIX</Label>
+                      <Input
+                        value={config.tokens.openpix.platformPixKey || ''}
+                        onChange={(e) => updateToken('openpix', { platformPixKey: e.target.value })}
+                        placeholder="Sua chave PIX"
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm">Nome do Titular</Label>
+                    <Input
+                      value={config.tokens.openpix.platformName || ''}
+                      onChange={(e) => updateToken('openpix', { platformName: e.target.value })}
+                      placeholder="Nome completo ou razão social"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Split Configuration */}
+                <div className="p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Percent className="w-5 h-5 text-accent" />
+                    <span className="font-medium">Configuração de Split</span>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">Porcentagem da Plataforma</Label>
+                        <span className="text-sm font-mono font-bold text-primary">
+                          {config.tokens.openpix.defaultSplitPercentage || 20}%
+                        </span>
+                      </div>
+                      <Slider
+                        value={[config.tokens.openpix.defaultSplitPercentage || 20]}
+                        onValueChange={(value) => updateToken('openpix', { defaultSplitPercentage: value[0] })}
+                        min={5}
+                        max={50}
+                        step={1}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>5%</span>
+                        <span>50%</span>
+                      </div>
+                    </div>
+
+                    {/* Split Preview */}
+                    <div className="p-3 rounded-lg bg-background/50 border border-border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Info className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-medium">Exemplo de Split (R$ 100,00)</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="p-2 rounded bg-primary/10">
+                          <p className="text-xs text-muted-foreground">Plataforma</p>
+                          <p className="font-bold text-primary">
+                            R$ {((100 * (config.tokens.openpix.defaultSplitPercentage || 20)) / 100).toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="p-2 rounded bg-accent/10">
+                          <p className="text-xs text-muted-foreground">Influencer</p>
+                          <p className="font-bold text-accent">
+                            R$ {((100 * (100 - (config.tokens.openpix.defaultSplitPercentage || 20))) / 100).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        * Taxa OpenPix (~1.29%) descontada da conta da plataforma
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
+                      <div>
+                        <Label className="text-sm">Taxa OpenPix descontada da plataforma</Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Quando ativo, a taxa é descontada da sua conta principal
+                        </p>
+                      </div>
+                      <Switch
+                        checked={config.tokens.openpix.platformPaysOpenPixFee ?? true}
+                        onCheckedChange={(checked) => updateToken('openpix', { platformPaysOpenPixFee: checked })}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -542,6 +858,11 @@ const CEOIntegracoes = () => {
             )}
           </GlassCard>
         </motion.div>
+
+        {/* Subcontas / Influencers PIX */}
+        {config.tokens.openpix.enabled && (
+          <SubaccountManager />
+        )}
 
         {/* Support */}
         <motion.div
