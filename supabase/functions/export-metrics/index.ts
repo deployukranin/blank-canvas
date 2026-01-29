@@ -50,6 +50,31 @@ interface MetricsPayload {
       active: number;
       syncedWithWoovi: number;
     };
+    // NEW: Advanced business metrics
+    business: {
+      // Conversion rate: % of users who made a purchase
+      conversionRate: number;
+      // LTV: Average revenue per paying user (in cents)
+      ltv: number;
+      // ARPU: Average revenue per user (all users, in cents)
+      arpu: number;
+      // Total unique paying customers
+      payingCustomers: number;
+      // Average ticket: Average payment value (in cents)
+      averageTicket: number;
+      // Repeat purchase rate: % of customers with more than 1 purchase
+      repeatPurchaseRate: number;
+      // Engagement rate: % of users with at least one reaction or message
+      engagementRate: number;
+      // Video engagement: reactions per view
+      videoEngagementRate: number;
+      // Revenue growth: % change from previous period
+      revenueGrowthRate: number;
+      // User growth: % change from previous period
+      userGrowthRate: number;
+      // Influencer contribution: % of revenue from influencer splits
+      influencerContributionRate: number;
+    };
   };
 }
 
@@ -306,6 +331,122 @@ Deno.serve(async (req) => {
       .select("*", { count: "exact", head: true })
       .not("woovi_subaccount_id", "is", null);
 
+    // ========== BUSINESS METRICS CALCULATION ==========
+    console.log("[export-metrics] Calculating business metrics...");
+
+    // Get unique paying customers
+    const { data: uniquePayersData } = await supabase
+      .from("pix_payments")
+      .select("user_id")
+      .eq("status", "COMPLETED")
+      .not("user_id", "is", null);
+
+    const uniquePayerIds = new Set<string>();
+    if (uniquePayersData) {
+      for (const p of uniquePayersData) {
+        if (p.user_id) uniquePayerIds.add(p.user_id);
+      }
+    }
+    const payingCustomers = uniquePayerIds.size;
+
+    // Calculate LTV (Lifetime Value) - Total revenue / Paying customers
+    const ltv = payingCustomers > 0 ? Math.round(revenueTotal / payingCustomers) : 0;
+
+    // Calculate ARPU (Average Revenue Per User) - Total revenue / All users
+    const arpu = (totalProfiles || 0) > 0 ? Math.round(revenueTotal / (totalProfiles || 1)) : 0;
+
+    // Conversion rate: Paying customers / Total users
+    const conversionRate = (totalProfiles || 0) > 0 
+      ? Math.round((payingCustomers / (totalProfiles || 1)) * 10000) / 100 
+      : 0;
+
+    // Average ticket: Revenue / Number of completed payments
+    const completedPaymentsCount = completedPayments?.length || 0;
+    const averageTicket = completedPaymentsCount > 0 
+      ? Math.round(revenueTotal / completedPaymentsCount) 
+      : 0;
+
+    // Repeat purchase rate: Customers with >1 purchase
+    const purchaseCountByUser: Record<string, number> = {};
+    if (uniquePayersData) {
+      for (const p of uniquePayersData) {
+        if (p.user_id) {
+          purchaseCountByUser[p.user_id] = (purchaseCountByUser[p.user_id] || 0) + 1;
+        }
+      }
+    }
+    const repeatCustomers = Object.values(purchaseCountByUser).filter(count => count > 1).length;
+    const repeatPurchaseRate = payingCustomers > 0 
+      ? Math.round((repeatCustomers / payingCustomers) * 10000) / 100 
+      : 0;
+
+    // Engagement rate: Users with reactions or messages / Total users
+    const { data: engagedReactionUsers } = await supabase
+      .from("video_reactions")
+      .select("user_id")
+      .not("user_id", "is", null);
+
+    const { data: engagedChatUsers } = await supabase
+      .from("video_chat_messages")
+      .select("user_id");
+
+    const engagedUserIds = new Set<string>();
+    if (engagedReactionUsers) {
+      for (const r of engagedReactionUsers) {
+        if (r.user_id) engagedUserIds.add(r.user_id);
+      }
+    }
+    if (engagedChatUsers) {
+      for (const c of engagedChatUsers) {
+        if (c.user_id) engagedUserIds.add(c.user_id);
+      }
+    }
+    const engagementRate = (totalProfiles || 0) > 0 
+      ? Math.round((engagedUserIds.size / (totalProfiles || 1)) * 10000) / 100 
+      : 0;
+
+    // Video engagement rate: Reactions per view
+    const videoEngagementRate = (totalViews || 0) > 0 
+      ? Math.round(((totalReactions || 0) / (totalViews || 1)) * 10000) / 100 
+      : 0;
+
+    // Revenue growth rate (compare current period vs previous period of same length)
+    const periodDuration = now.getTime() - periodStart.getTime();
+    const previousPeriodStart = new Date(periodStart.getTime() - periodDuration);
+    
+    const { data: previousPeriodPayments } = await supabase
+      .from("pix_payments")
+      .select("value")
+      .eq("status", "COMPLETED")
+      .gte("created_at", previousPeriodStart.toISOString())
+      .lt("created_at", periodStartISO);
+
+    let previousRevenue = 0;
+    if (previousPeriodPayments) {
+      for (const p of previousPeriodPayments) {
+        previousRevenue += p.value || 0;
+      }
+    }
+    const revenueGrowthRate = previousRevenue > 0 
+      ? Math.round(((revenueInPeriod - previousRevenue) / previousRevenue) * 10000) / 100 
+      : revenueInPeriod > 0 ? 100 : 0;
+
+    // User growth rate
+    const { count: previousPeriodUsers } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", previousPeriodStart.toISOString())
+      .lt("created_at", periodStartISO);
+
+    const userGrowthRate = (previousPeriodUsers || 0) > 0 
+      ? Math.round(((newUsers || 0) - (previousPeriodUsers || 0)) / (previousPeriodUsers || 1) * 10000) / 100 
+      : (newUsers || 0) > 0 ? 100 : 0;
+
+    // Influencer contribution rate
+    const influencerContributionRate = revenueTotal > 0 
+      ? Math.round((splitInfluencer / revenueTotal) * 10000) / 100 
+      : 0;
+
     // ========== BUILD PAYLOAD ==========
     const metricsPayload: MetricsPayload = {
       projectId: Deno.env.get("SUPABASE_URL")?.split("//")[1]?.split(".")[0] || "unknown",
@@ -350,6 +491,19 @@ Deno.serve(async (req) => {
           total: totalInfluencers || 0,
           active: activeInfluencers || 0,
           syncedWithWoovi: syncedInfluencers || 0,
+        },
+        business: {
+          conversionRate,
+          ltv,
+          arpu,
+          payingCustomers,
+          averageTicket,
+          repeatPurchaseRate,
+          engagementRate,
+          videoEngagementRate,
+          revenueGrowthRate,
+          userGrowthRate,
+          influencerContributionRate,
         },
       },
     };
