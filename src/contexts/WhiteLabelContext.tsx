@@ -743,6 +743,15 @@ export interface WhiteLabelConfig {
       apiKey: string;
       enabled: boolean;
     };
+    metricsExport: {
+      enabled: boolean;
+      apiUrl: string;
+      apiKey: string;
+      period: string;
+      autoSendEnabled: boolean;
+      autoSendInterval: number;
+      lastSentAt?: string;
+    };
   };
 
   // Admin Credentials (for local/demo authentication)
@@ -845,6 +854,15 @@ const defaultConfig: WhiteLabelConfig = {
       apiKey: '',
       enabled: false,
     },
+    metricsExport: {
+      enabled: false,
+      apiUrl: '',
+      apiKey: '',
+      period: '30days',
+      autoSendEnabled: false,
+      autoSendInterval: 60,
+      lastSentAt: undefined,
+    },
   },
   adminCredentials: {
     admin: {
@@ -919,6 +937,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           support: { ...defaultConfig.tokens.support, ...parsed.tokens?.support },
           accountStock: { ...defaultConfig.tokens.accountStock, ...parsed.tokens?.accountStock },
           moderation: { ...defaultConfig.tokens.moderation, ...parsed.tokens?.moderation },
+          metricsExport: { ...defaultConfig.tokens.metricsExport, ...parsed.tokens?.metricsExport },
         },
         adminCredentials: {
           admin: { ...defaultConfig.adminCredentials.admin, ...parsed.adminCredentials?.admin },

@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.manage-subaccount]
 verify_jwt = false
+
+[functions.export-metrics]
+verify_jwt = false

@@ -40,6 +40,7 @@ import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManage
 import { exportConfig, importConfig } from '@/lib/config-export';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
+import { MetricsExportManager } from '@/components/ceo/MetricsExportManager';
 
 interface TokenInputProps {
   label: string;
@@ -1073,6 +1074,9 @@ const CEOIntegracoes = () => {
 
         {/* Admin Credentials */}
         <AdminCredentialsManager />
+
+        {/* Metrics Export */}
+        <MetricsExportManager />
 
         {/* Save Button */}
         <motion.div
