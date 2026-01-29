@@ -39,6 +39,7 @@ import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
 import { exportConfig, importConfig } from '@/lib/config-export';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
 
 interface TokenInputProps {
   label: string;
@@ -1069,6 +1070,9 @@ const CEOIntegracoes = () => {
             )}
           </GlassCard>
         </motion.div>
+
+        {/* Admin Credentials */}
+        <AdminCredentialsManager />
 
         {/* Save Button */}
         <motion.div

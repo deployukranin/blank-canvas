@@ -744,6 +744,18 @@ export interface WhiteLabelConfig {
       enabled: boolean;
     };
   };
+
+  // Admin Credentials (for local/demo authentication)
+  adminCredentials: {
+    admin: {
+      email: string;
+      password: string;
+    };
+    ceo: {
+      email: string;
+      password: string;
+    };
+  };
 }
 
 const defaultCommunityConfig = {
@@ -834,6 +846,16 @@ const defaultConfig: WhiteLabelConfig = {
       enabled: false,
     },
   },
+  adminCredentials: {
+    admin: {
+      email: 'admin@whisperscape.com',
+      password: 'admin123',
+    },
+    ceo: {
+      email: 'ceo@whisperscape.com',
+      password: 'ceo123',
+    },
+  },
 };
 
 interface WhiteLabelContextType {
@@ -897,6 +919,10 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           support: { ...defaultConfig.tokens.support, ...parsed.tokens?.support },
           accountStock: { ...defaultConfig.tokens.accountStock, ...parsed.tokens?.accountStock },
           moderation: { ...defaultConfig.tokens.moderation, ...parsed.tokens?.moderation },
+        },
+        adminCredentials: {
+          admin: { ...defaultConfig.adminCredentials.admin, ...parsed.adminCredentials?.admin },
+          ceo: { ...defaultConfig.adminCredentials.ceo, ...parsed.adminCredentials?.ceo },
         },
       };
     }
