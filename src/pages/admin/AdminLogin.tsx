@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Mail, Lock, Eye, EyeOff, Crown, AlertCircle } from 'lucide-react';
@@ -7,14 +7,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock admin credentials for testing
-const MOCK_ADMINS = [
-  { email: 'admin@whisperscape.com', password: 'admin123', role: 'admin' as const },
-  { email: 'ceo@whisperscape.com', password: 'ceo123', role: 'ceo' as const },
-];
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 
 export default function AdminLogin() {
+  const { config } = useWhiteLabel();
+  
+  // Dynamic credentials from WhiteLabel config with fallback
+  const adminCredentials = useMemo(() => [
+    { 
+      email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
+      password: config.adminCredentials?.admin?.password || 'admin123',
+      role: 'admin' as const 
+    },
+    { 
+      email: config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com',
+      password: config.adminCredentials?.ceo?.password || 'ceo123',
+      role: 'ceo' as const 
+    },
+  ], [config.adminCredentials]);
   const navigate = useNavigate();
   const { loginAsAdmin } = useAuth();
   const { toast } = useToast();
@@ -33,7 +43,7 @@ export default function AdminLogin() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const admin = MOCK_ADMINS.find(
+    const admin = adminCredentials.find(
       a => a.email.toLowerCase() === email.toLowerCase() && a.password === password
     );
 
@@ -149,14 +159,14 @@ export default function AdminLogin() {
               <div className="p-3 rounded-xl bg-muted/50 text-center">
                 <Shield className="w-5 h-5 mx-auto mb-1 text-primary" />
                 <p className="text-xs font-medium">Admin</p>
-                <p className="text-[10px] text-muted-foreground">admin@whisperscape.com</p>
-                <p className="text-[10px] text-muted-foreground">admin123</p>
+                <p className="text-[10px] text-muted-foreground truncate">{adminCredentials[0].email}</p>
+                <p className="text-[10px] text-muted-foreground">••••••••</p>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-amber-500/20 text-center">
-                <Crown className="w-5 h-5 mx-auto mb-1 text-yellow-500" />
+              <div className="p-3 rounded-xl bg-accent/20 text-center">
+                <Crown className="w-5 h-5 mx-auto mb-1 text-accent" />
                 <p className="text-xs font-medium">CEO</p>
-                <p className="text-[10px] text-muted-foreground">ceo@whisperscape.com</p>
-                <p className="text-[10px] text-muted-foreground">ceo123</p>
+                <p className="text-[10px] text-muted-foreground truncate">{adminCredentials[1].email}</p>
+                <p className="text-[10px] text-muted-foreground">••••••••</p>
               </div>
             </div>
           </div>
