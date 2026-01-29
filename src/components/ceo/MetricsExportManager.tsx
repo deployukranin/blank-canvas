@@ -15,6 +15,14 @@ import {
   MessageSquare,
   UserCheck,
   RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  DollarSign,
+  Percent,
+  Heart,
+  Repeat,
+  Activity,
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -32,6 +40,19 @@ interface MetricsPreview {
   videos: { totalViews: number; totalReactions: number; completionRate: number };
   community: { totalChatMessages: number; messagesInPeriod: number };
   influencers: { total: number; active: number; syncedWithWoovi: number };
+  business?: {
+    conversionRate: number;
+    ltv: number;
+    arpu: number;
+    payingCustomers: number;
+    averageTicket: number;
+    repeatPurchaseRate: number;
+    engagementRate: number;
+    videoEngagementRate: number;
+    revenueGrowthRate: number;
+    userGrowthRate: number;
+    influencerContributionRate: number;
+  };
 }
 
 export const MetricsExportManager = () => {
@@ -383,6 +404,142 @@ export const MetricsExportManager = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Business Metrics Section */}
+                {metricsPreview.business && (
+                  <>
+                    <div className="flex items-center gap-2 text-sm font-medium mt-4 pt-4 border-t border-border">
+                      <TrendingUp className="w-4 h-4" />
+                      Métricas de Negócio
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {/* Conversion Rate */}
+                      <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs mb-1">
+                          <Target className="w-3 h-3" />
+                          Taxa de Conversão
+                        </div>
+                        <div className="text-lg font-bold">{metricsPreview.business.conversionRate}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          usuários → clientes
+                        </div>
+                      </div>
+
+                      {/* LTV */}
+                      <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                        <div className="flex items-center gap-2 text-amber-400 text-xs mb-1">
+                          <DollarSign className="w-3 h-3" />
+                          LTV
+                        </div>
+                        <div className="text-lg font-bold">{formatCurrency(metricsPreview.business.ltv)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          valor por cliente
+                        </div>
+                      </div>
+
+                      {/* ARPU */}
+                      <div className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                        <div className="flex items-center gap-2 text-violet-400 text-xs mb-1">
+                          <Users className="w-3 h-3" />
+                          ARPU
+                        </div>
+                        <div className="text-lg font-bold">{formatCurrency(metricsPreview.business.arpu)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          receita por usuário
+                        </div>
+                      </div>
+
+                      {/* Average Ticket */}
+                      <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                        <div className="flex items-center gap-2 text-cyan-400 text-xs mb-1">
+                          <CreditCard className="w-3 h-3" />
+                          Ticket Médio
+                        </div>
+                        <div className="text-lg font-bold">{formatCurrency(metricsPreview.business.averageTicket)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {metricsPreview.business.payingCustomers} clientes
+                        </div>
+                      </div>
+
+                      {/* Repeat Purchase Rate */}
+                      <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
+                        <div className="flex items-center gap-2 text-rose-400 text-xs mb-1">
+                          <Repeat className="w-3 h-3" />
+                          Recorrência
+                        </div>
+                        <div className="text-lg font-bold">{metricsPreview.business.repeatPurchaseRate}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          compras repetidas
+                        </div>
+                      </div>
+
+                      {/* Engagement Rate */}
+                      <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                        <div className="flex items-center gap-2 text-indigo-400 text-xs mb-1">
+                          <Heart className="w-3 h-3" />
+                          Engajamento
+                        </div>
+                        <div className="text-lg font-bold">{metricsPreview.business.engagementRate}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          usuários ativos
+                        </div>
+                      </div>
+
+                      {/* Video Engagement Rate */}
+                      <div className="p-3 rounded-lg bg-sky-500/10 border border-sky-500/20">
+                        <div className="flex items-center gap-2 text-sky-400 text-xs mb-1">
+                          <Activity className="w-3 h-3" />
+                          Engajamento Vídeos
+                        </div>
+                        <div className="text-lg font-bold">{metricsPreview.business.videoEngagementRate}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          reações por view
+                        </div>
+                      </div>
+
+                      {/* Revenue Growth */}
+                      <div className={`p-3 rounded-lg ${metricsPreview.business.revenueGrowthRate >= 0 ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'} border`}>
+                        <div className={`flex items-center gap-2 ${metricsPreview.business.revenueGrowthRate >= 0 ? 'text-green-400' : 'text-red-400'} text-xs mb-1`}>
+                          {metricsPreview.business.revenueGrowthRate >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                          Crescimento Receita
+                        </div>
+                        <div className="text-lg font-bold">
+                          {metricsPreview.business.revenueGrowthRate >= 0 ? '+' : ''}{metricsPreview.business.revenueGrowthRate}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          vs período anterior
+                        </div>
+                      </div>
+
+                      {/* User Growth */}
+                      <div className={`p-3 rounded-lg ${metricsPreview.business.userGrowthRate >= 0 ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'} border`}>
+                        <div className={`flex items-center gap-2 ${metricsPreview.business.userGrowthRate >= 0 ? 'text-green-400' : 'text-red-400'} text-xs mb-1`}>
+                          {metricsPreview.business.userGrowthRate >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                          Crescimento Usuários
+                        </div>
+                        <div className="text-lg font-bold">
+                          {metricsPreview.business.userGrowthRate >= 0 ? '+' : ''}{metricsPreview.business.userGrowthRate}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          vs período anterior
+                        </div>
+                      </div>
+
+                      {/* Influencer Contribution */}
+                      <div className="p-3 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20">
+                        <div className="flex items-center gap-2 text-fuchsia-400 text-xs mb-1">
+                          <Percent className="w-3 h-3" />
+                          Split Influencers
+                        </div>
+                        <div className="text-lg font-bold">{metricsPreview.business.influencerContributionRate}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          da receita
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
