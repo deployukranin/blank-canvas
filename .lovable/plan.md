@@ -1,204 +1,203 @@
 
 
-## Plano: Configuração Completa de Pagamentos PIX com Split no Painel CEO
+## Plano: Configuração de Credenciais Admin e CEO no Painel CEO
 
-### Entendimento do Requisito
+### Situação Atual
 
-O objetivo é criar uma interface no Painel CEO para:
-1. **Configurar a chave PIX da plataforma** (sua chave - a conta principal que recebe as taxas)
-2. **Gerenciar subcontas/influencers** com suas chaves PIX para receber o split
-3. **Configurar percentuais de split** (quanto fica para plataforma vs influencer)
-4. **Taxa OpenPix descontada automaticamente da sua conta** (conta principal)
+O sistema atual usa credenciais fixas ("hardcoded") no arquivo `AdminLogin.tsx`:
 
-### Arquitetura do Sistema de Split na Woovi/OpenPix
+```typescript
+const MOCK_ADMINS = [
+  { email: 'admin@whisperscape.com', password: 'admin123', role: 'admin' },
+  { email: 'ceo@whisperscape.com', password: 'ceo123', role: 'ceo' },
+];
+```
+
+Essas credenciais não podem ser alteradas sem modificar o código-fonte.
+
+### O Que Será Implementado
+
+Uma nova seção no Painel CEO para configurar dinamicamente as credenciais de acesso administrativo:
+
+1. **Seção "Contas Administrativas"** em `/ceo/integracoes` ou nova página `/ceo/configuracoes`
+2. **Configuração da Conta Admin**: Email e senha
+3. **Configuração da Conta CEO**: Email e senha
+4. **Persistência via WhiteLabelContext** (localStorage)
+
+### Arquitetura da Solução
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FLUXO DO PAGAMENTO PIX                       │
+│                    FLUXO DE AUTENTICAÇÃO                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Cliente paga R$100,00                                          │
+│  Painel CEO configura credenciais                               │
 │         │                                                       │
 │         ▼                                                       │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │                   OpenPix/Woovi                          │   │
-│  │  ┌───────────────────────────────────────────────────┐  │   │
-│  │  │ Taxa OpenPix (1.29% ou configurada)               │  │   │
-│  │  │ R$1,29 descontado da CONTA PRINCIPAL              │  │   │
-│  │  └───────────────────────────────────────────────────┘  │   │
+│  │      WhiteLabelContext (localStorage)                    │   │
 │  │                                                          │   │
-│  │  Split automático ANTES de cair nas contas:              │   │
-│  │  ┌────────────────────┐  ┌─────────────────────────┐    │   │
-│  │  │ 20% Plataforma     │  │ 80% Influencer          │    │   │
-│  │  │ R$18,71            │  │ R$80,00                 │    │   │
-│  │  │ (Sua chave PIX)    │  │ (Subconta do influencer)│    │   │
-│  │  └────────────────────┘  └─────────────────────────┘    │   │
+│  │   config.adminCredentials = {                            │   │
+│  │     admin: { email, passwordHash }                       │   │
+│  │     ceo: { email, passwordHash }                         │   │
+│  │   }                                                      │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                        │                                        │
+│                        ▼                                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              AdminLogin.tsx                              │   │
+│  │                                                          │   │
+│  │   1. Lê credenciais do WhiteLabel                        │   │
+│  │   2. Se não configurado, usa fallback (mock)             │   │
+│  │   3. Valida login contra credenciais salvas              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### O Que Será Implementado
+### Detalhes da Implementação
 
-#### 1. Nova Seção "Pagamentos" no Painel CEO (/ceo/integracoes)
+#### 1. Atualizar WhiteLabelContext
 
-Expandir a seção OpenPix existente com:
-
-- **Chave PIX da Plataforma** (sua chave principal)
-  - Campo para informar a chave PIX (CPF, CNPJ, Email, Telefone ou Aleatória)
-  - Tipo da chave PIX
-  - Nome do titular
-  
-- **Configuração de Split Padrão**
-  - Slider para ajustar % Plataforma vs % Influencer (padrão 20/80)
-  - Opção "Taxa OpenPix descontada da plataforma" (checkbox)
-
-- **Gestão de Subcontas (Influencers)**
-  - Lista de subcontas cadastradas
-  - Botão para adicionar nova subconta
-  - Para cada subconta: Nome, Chave PIX, Tipo, Percentual customizado (opcional)
-  - Status de ativação
-
-#### 2. Atualização do WhiteLabelContext
-
-Adicionar novos campos na configuração `tokens.openpix`:
+Adicionar nova seção `adminCredentials` na configuração:
 
 ```typescript
-openpix: {
-  appId: string;
-  webhookSecret: string;
-  environment: 'sandbox' | 'production';
-  enabled: boolean;
-  // NOVOS CAMPOS:
-  platformPixKey: string;
-  platformPixKeyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
-  platformName: string;
-  defaultSplitPercentage: number; // % que vai para plataforma (padrão 20)
-  platformPaysOpenPixFee: boolean; // Se true, taxa descontada da plataforma
+interface WhiteLabelConfig {
+  // ... campos existentes ...
+  
+  adminCredentials: {
+    admin: {
+      email: string;
+      password: string; // Nota: em produção, usar hash
+    };
+    ceo: {
+      email: string;
+      password: string;
+    };
+  };
 }
 ```
 
-#### 3. Atualização da Tabela `influencers`
-
-Adicionar campos para gerenciar subcontas diretamente via Woovi:
-
-```sql
-ALTER TABLE influencers ADD COLUMN IF NOT EXISTS 
-  woovi_subaccount_id text; -- ID da subconta na Woovi
+Valores padrão (fallback para credenciais atuais):
+```typescript
+adminCredentials: {
+  admin: {
+    email: 'admin@whisperscape.com',
+    password: 'admin123',
+  },
+  ceo: {
+    email: 'ceo@whisperscape.com',
+    password: 'ceo123',
+  },
+}
 ```
 
-#### 4. Nova Edge Function: `manage-subaccount`
+#### 2. Criar Interface no Painel CEO
 
-Criar edge function para gerenciar subcontas na Woovi:
-- Criar subconta via API `/api/v1/subaccount`
-- Atualizar dados da subconta
-- Buscar saldo da subconta
+Nova seção em `CEOIntegracoes.tsx` ou criar página dedicada `CEOConfiguracoes.tsx`:
 
-#### 5. Atualizar Edge Function `create-pix-charge`
+**Seção "Contas Administrativas"** com:
+- Card para Conta Admin
+  - Input: Email
+  - Input: Senha (com toggle de visibilidade)
+  - Botão: Salvar
+  
+- Card para Conta CEO
+  - Input: Email
+  - Input: Senha (com toggle de visibilidade)
+  - Botão: Salvar
+
+- Aviso de segurança: "As credenciais são armazenadas localmente. Para produção, recomenda-se implementar autenticação via Supabase Auth."
+
+#### 3. Atualizar AdminLogin.tsx
 
 Modificar para:
-- Usar as configurações do WhiteLabel (passadas pelo frontend ou lidas do banco)
-- Aplicar split correto baseado nas configurações
-- Registrar se a taxa OpenPix é descontada da plataforma
-
-### Arquivos a Serem Modificados/Criados
-
-| Arquivo | Ação |
-|---------|------|
-| `src/contexts/WhiteLabelContext.tsx` | Adicionar campos de configuração de pagamento |
-| `src/pages/ceo/CEOIntegracoes.tsx` | Adicionar seção de configuração de PIX e subcontas |
-| `src/hooks/use-influencers.ts` | Expandir para gerenciar subcontas |
-| `supabase/functions/manage-subaccount/index.ts` | **NOVO** - Criar/gerenciar subcontas na Woovi |
-| `supabase/functions/create-pix-charge/index.ts` | Atualizar para usar configurações dinâmicas |
-| Migração SQL | Adicionar coluna `woovi_subaccount_id` na tabela influencers |
-| `supabase/config.toml` | Adicionar nova função |
-
-### Seção Técnica - Detalhes de Implementação
-
-#### API da Woovi para Subcontas
-
-Baseado na documentação que você enviou:
-
-**Criar Subconta:**
-```
-POST /api/v1/subaccount
-{
-  "pixKey": "chave-pix-do-influencer@email.com",
-  "name": "Nome do Influencer"
-}
-```
-
-**Listar Subcontas:**
-```
-GET /api/v1/subaccount
-```
-
-**Buscar Subconta:**
-```
-GET /api/v1/subaccount/{pixKey}
-```
-
-**Sacar de Subconta (se necessário):**
-```
-POST /api/v1/subaccount/{pixKey}/withdraw
-{ "value": 1000 }
-```
-
-#### Split na Cobrança
-
-O split já está implementado no `create-pix-charge`, mas será melhorado:
+1. Importar `useWhiteLabel` context
+2. Ler credenciais do `config.adminCredentials`
+3. Usar fallback se não configurado
+4. Atualizar exibição de credenciais de teste dinamicamente
 
 ```typescript
-// Usar receiver da subconta Woovi em vez de openpix_receiver_id manual
-openPixPayload.splits = [
-  {
-    receiver: influencer.woovi_subaccount_id || influencer.pix_key,
-    value: splitInfluencerValue,
+const { config } = useWhiteLabel();
+
+const ADMIN_CREDENTIALS = [
+  { 
+    email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
+    password: config.adminCredentials?.admin?.password || 'admin123',
+    role: 'admin' 
+  },
+  { 
+    email: config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com',
+    password: config.adminCredentials?.ceo?.password || 'ceo123',
+    role: 'ceo' 
   },
 ];
 ```
 
-#### Interface no Painel CEO
+### Arquivos a Modificar/Criar
 
-Nova seção colapsável "Configurações de Pagamento PIX" com:
+| Arquivo | Ação | Descrição |
+|---------|------|-----------|
+| `src/contexts/WhiteLabelContext.tsx` | Modificar | Adicionar `adminCredentials` ao tipo e defaults |
+| `src/pages/ceo/CEOIntegracoes.tsx` | Modificar | Adicionar seção de configuração de credenciais |
+| `src/pages/admin/AdminLogin.tsx` | Modificar | Usar credenciais dinâmicas do WhiteLabel |
+| `src/pages/ceo/CEOLayout.tsx` | Modificar | Adicionar item "Configurações" ao menu (opcional) |
 
-1. **Conta Principal da Plataforma**
-   - Input: Chave PIX
-   - Select: Tipo (CPF, CNPJ, Email, Telefone, Aleatória)
-   - Input: Nome do Titular
-   
-2. **Configuração de Split**
-   - Slider: 0-50% para plataforma (deixar mínimo de 50% para influencer)
-   - Toggle: "Taxa OpenPix descontada da minha conta"
-   - Info: Exibir exemplo de cálculo em tempo real
+### Interface Visual Proposta
 
-3. **Gerenciar Subcontas (Influencers)**
-   - Tabela com influencers cadastrados
-   - Botão "Sincronizar com Woovi" - cria subcontas automaticamente
-   - Status de cada subconta
+Na página de Integrações (`/ceo/integracoes`), após as seções existentes:
 
-### Fluxo de Configuração
-
-1. CEO acessa `/ceo/integracoes`
-2. Habilita OpenPix e insere App ID
-3. Configura sua chave PIX principal
-4. Define percentual de split padrão
-5. Cadastra influencers com suas chaves PIX
-6. Sistema sincroniza subcontas com Woovi
-7. Pagamentos são automaticamente divididos
+```text
+┌────────────────────────────────────────────────────────────────┐
+│  🔐 Contas Administrativas                                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  ┌────────────────────────────┐  ┌────────────────────────────┐│
+│  │  🛡️ Conta Admin            │  │  👑 Conta CEO              ││
+│  │                            │  │                            ││
+│  │  Email:                    │  │  Email:                    ││
+│  │  [admin@exemplo.com    ]   │  │  [ceo@exemplo.com      ]   ││
+│  │                            │  │                            ││
+│  │  Senha:                    │  │  Senha:                    ││
+│  │  [••••••••        ] 👁️     │  │  [••••••••        ] 👁️     ││
+│  │                            │  │                            ││
+│  │  [     Salvar      ]       │  │  [     Salvar      ]       ││
+│  └────────────────────────────┘  └────────────────────────────┘│
+│                                                                │
+│  ⚠️ As credenciais são armazenadas no navegador local.         │
+│     Para ambientes de produção, considere usar autenticação    │
+│     via banco de dados com hash de senhas.                     │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
 
 ### Considerações de Segurança
 
-- **Chaves PIX e App ID** são armazenados no localStorage (WhiteLabel) e passados para Edge Functions
-- Para produção, recomenda-se migrar App ID para Supabase Secrets (já existe `OPENPIX_APP_ID`)
-- RLS nas tabelas protege dados de influencers
+**Importante**: Esta solução armazena credenciais no localStorage do navegador, o que é adequado para:
+- Ambientes de desenvolvimento
+- Demonstrações
+- Protótipos
 
-### Próximos Passos Após Aprovação
+Para produção real, recomenda-se:
+1. Migrar para autenticação via Supabase Auth
+2. Criar usuários reais no banco de dados
+3. Usar hash de senhas (bcrypt)
+4. Implementar tabela `user_roles` para controle de acesso
 
-1. Criar migração SQL para adicionar coluna
-2. Atualizar WhiteLabelContext com novos campos
-3. Implementar UI no CEOIntegracoes
-4. Criar edge function manage-subaccount
-5. Atualizar create-pix-charge
-6. Testar fluxo completo
+### Fluxo de Uso
+
+1. CEO acessa `/ceo/integracoes`
+2. Localiza seção "Contas Administrativas"
+3. Configura email e senha para Admin
+4. Configura email e senha para CEO
+5. Clica "Salvar" em cada card
+6. Credenciais são persistidas no WhiteLabel (localStorage)
+7. Próximo login usa as novas credenciais
+
+### Validações
+
+- Email: formato válido
+- Senha: mínimo 6 caracteres
+- Não permitir emails duplicados entre Admin e CEO
+- Feedback visual ao salvar (toast de sucesso)
 
