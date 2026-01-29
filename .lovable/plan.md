@@ -1,203 +1,289 @@
 
+## Plano: Sistema de Exportacao de Metricas para Painel Externo
 
-## Plano: Configuração de Credenciais Admin e CEO no Painel CEO
+### Objetivo
 
-### Situação Atual
+Criar um sistema completo para enviar metricas da plataforma para outro painel externo, coletando o maximo de dados possiveis do Supabase e enviando periodicamente ou sob demanda.
 
-O sistema atual usa credenciais fixas ("hardcoded") no arquivo `AdminLogin.tsx`:
+### Metricas Disponiveis
 
-```typescript
-const MOCK_ADMINS = [
-  { email: 'admin@whisperscape.com', password: 'admin123', role: 'admin' },
-  { email: 'ceo@whisperscape.com', password: 'ceo123', role: 'ceo' },
-];
-```
+Com base na analise do banco de dados, as seguintes metricas podem ser exportadas:
 
-Essas credenciais não podem ser alteradas sem modificar o código-fonte.
+| Categoria | Metrica | Fonte |
+|-----------|---------|-------|
+| **Usuarios** | Total de perfis | `profiles` |
+| **Usuarios** | Novos usuarios (periodo) | `profiles.created_at` |
+| **Usuarios** | Usuarios ativos (periodo) | `profiles.updated_at` |
+| **Usuarios** | Total de admins/CEOs | `user_roles` |
+| **Pagamentos** | Total de pagamentos | `pix_payments` |
+| **Pagamentos** | Pagamentos por status | `pix_payments.status` |
+| **Pagamentos** | Receita total (centavos) | `pix_payments.value WHERE status='COMPLETED'` |
+| **Pagamentos** | Receita por tipo de produto | `pix_payments.product_type` |
+| **Pagamentos** | Split para influencers | `pix_payments.split_influencer_value` |
+| **Pagamentos** | Split para plataforma | `pix_payments.split_platform_value` |
+| **Videos** | Total de reacoes | `video_reactions` |
+| **Videos** | Reacoes por tipo | `video_reactions.reaction_type` |
+| **Videos** | Videos mais curtidos | Agregacao por `video_id` |
+| **Videos** | Total de visualizacoes | `video_watch_history` |
+| **Videos** | Videos mais assistidos | Agregacao por `video_id` |
+| **Videos** | Taxa de conclusao | `video_watch_history.completed` |
+| **Comunidade** | Mensagens no chat | `video_chat_messages` |
+| **Influencers** | Total de influencers ativos | `influencers.is_active` |
+| **Influencers** | Subcontas Woovi sincronizadas | `influencers.woovi_subaccount_id` |
 
-### O Que Será Implementado
-
-Uma nova seção no Painel CEO para configurar dinamicamente as credenciais de acesso administrativo:
-
-1. **Seção "Contas Administrativas"** em `/ceo/integracoes` ou nova página `/ceo/configuracoes`
-2. **Configuração da Conta Admin**: Email e senha
-3. **Configuração da Conta CEO**: Email e senha
-4. **Persistência via WhiteLabelContext** (localStorage)
-
-### Arquitetura da Solução
+### Arquitetura do Sistema
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FLUXO DE AUTENTICAÇÃO                        │
+│                    FLUXO DE METRICAS                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Painel CEO configura credenciais                               │
+│  Painel CEO (CEOIntegracoes.tsx)                                │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ Secao: Exportacao de Metricas                             │ │
+│  │ - URL do painel externo                                   │ │
+│  │ - API Key do painel                                       │ │
+│  │ - Botao "Enviar Agora"                                    │ │
+│  │ - Toggle "Envio automatico" (intervalo)                   │ │
+│  │ - Preview das metricas                                    │ │
+│  └───────────────────────────────────────────────────────────┘ │
 │         │                                                       │
 │         ▼                                                       │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │      WhiteLabelContext (localStorage)                    │   │
-│  │                                                          │   │
-│  │   config.adminCredentials = {                            │   │
-│  │     admin: { email, passwordHash }                       │   │
-│  │     ceo: { email, passwordHash }                         │   │
-│  │   }                                                      │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                        │                                        │
-│                        ▼                                        │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │              AdminLogin.tsx                              │   │
-│  │                                                          │   │
-│  │   1. Lê credenciais do WhiteLabel                        │   │
-│  │   2. Se não configurado, usa fallback (mock)             │   │
-│  │   3. Valida login contra credenciais salvas              │   │
-│  └─────────────────────────────────────────────────────────┘   │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │        Edge Function: export-metrics                      │ │
+│  │                                                           │ │
+│  │  1. Coleta metricas do Supabase                           │ │
+│  │  2. Agrega dados por periodo                              │ │
+│  │  3. Envia para URL configurada                            │ │
+│  │  4. Retorna confirmacao                                   │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│         │                                                       │
+│         ▼                                                       │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │            Painel Externo (seu outro sistema)             │ │
+│  │  POST /api/receive-metrics                                │ │
+│  │  { projectId, timestamp, metrics: {...} }                 │ │
+│  └───────────────────────────────────────────────────────────┘ │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Detalhes da Implementação
+### Implementacao
 
 #### 1. Atualizar WhiteLabelContext
 
-Adicionar nova seção `adminCredentials` na configuração:
+Adicionar nova secao de configuracao para exportacao de metricas:
 
 ```typescript
-interface WhiteLabelConfig {
-  // ... campos existentes ...
-  
-  adminCredentials: {
-    admin: {
-      email: string;
-      password: string; // Nota: em produção, usar hash
+tokens: {
+  // ... existentes ...
+  metricsExport: {
+    enabled: boolean;
+    apiUrl: string;      // URL do painel externo
+    apiKey: string;      // Chave de autenticacao
+    autoSendEnabled: boolean;
+    autoSendInterval: number; // minutos (ex: 60 = a cada hora)
+    lastSentAt?: string;
+  };
+}
+```
+
+#### 2. Criar Edge Function `export-metrics`
+
+Nova edge function que:
+- Aceita parametros de periodo (hoje, 7 dias, 30 dias, customizado)
+- Coleta todas as metricas do Supabase usando service_role
+- Agrega os dados
+- Envia para a URL configurada
+- Suporta modo "preview" que retorna os dados sem enviar
+
+Payload de metricas:
+
+```typescript
+interface MetricsPayload {
+  projectId: string;
+  timestamp: string;
+  period: {
+    start: string;
+    end: string;
+    label: string;
+  };
+  metrics: {
+    users: {
+      total: number;
+      newInPeriod: number;
+      activeInPeriod: number;
+      byRole: { admin: number; ceo: number; moderator: number; user: number };
     };
-    ceo: {
-      email: string;
-      password: string;
+    payments: {
+      total: number;
+      byStatus: { pending: number; completed: number; expired: number; refunded: number; cancelled: number };
+      revenueTotal: number;
+      revenueByProduct: Record<string, number>;
+      splitInfluencer: number;
+      splitPlatform: number;
+    };
+    videos: {
+      totalReactions: number;
+      reactionsByType: { relaxante: number; dormi: number; arrepios: number; favorito: number };
+      topReactedVideos: Array<{ videoId: string; count: number }>;
+      totalViews: number;
+      completionRate: number;
+      topWatchedVideos: Array<{ videoId: string; views: number }>;
+    };
+    community: {
+      totalChatMessages: number;
+      messagesInPeriod: number;
+    };
+    influencers: {
+      total: number;
+      active: number;
+      syncedWithWoovi: number;
     };
   };
 }
 ```
 
-Valores padrão (fallback para credenciais atuais):
-```typescript
-adminCredentials: {
-  admin: {
-    email: 'admin@whisperscape.com',
-    password: 'admin123',
-  },
-  ceo: {
-    email: 'ceo@whisperscape.com',
-    password: 'ceo123',
-  },
-}
-```
+#### 3. Interface no Painel CEO
 
-#### 2. Criar Interface no Painel CEO
+Nova secao em CEOIntegracoes.tsx:
 
-Nova seção em `CEOIntegracoes.tsx` ou criar página dedicada `CEOConfiguracoes.tsx`:
+**Secao "Exportacao de Metricas"** com:
 
-**Seção "Contas Administrativas"** com:
-- Card para Conta Admin
-  - Input: Email
-  - Input: Senha (com toggle de visibilidade)
-  - Botão: Salvar
-  
-- Card para Conta CEO
-  - Input: Email
-  - Input: Senha (com toggle de visibilidade)
-  - Botão: Salvar
+- Toggle: Habilitar exportacao
+- Input: URL do painel externo (ex: `https://meu-painel.com/api/v1`)
+- Input: API Key (com toggle de visibilidade)
+- Select: Periodo padrao (Hoje, 7 dias, 30 dias, Tudo)
+- Toggle: Envio automatico
+- Select: Intervalo (15 min, 30 min, 1 hora, 6 horas, 24 horas)
+- Botao: "Enviar Agora"
+- Botao: "Visualizar Metricas" (preview sem enviar)
+- Info: Ultimo envio bem-sucedido
 
-- Aviso de segurança: "As credenciais são armazenadas localmente. Para produção, recomenda-se implementar autenticação via Supabase Auth."
+### Arquivos a Criar/Modificar
 
-#### 3. Atualizar AdminLogin.tsx
-
-Modificar para:
-1. Importar `useWhiteLabel` context
-2. Ler credenciais do `config.adminCredentials`
-3. Usar fallback se não configurado
-4. Atualizar exibição de credenciais de teste dinamicamente
-
-```typescript
-const { config } = useWhiteLabel();
-
-const ADMIN_CREDENTIALS = [
-  { 
-    email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
-    password: config.adminCredentials?.admin?.password || 'admin123',
-    role: 'admin' 
-  },
-  { 
-    email: config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com',
-    password: config.adminCredentials?.ceo?.password || 'ceo123',
-    role: 'ceo' 
-  },
-];
-```
-
-### Arquivos a Modificar/Criar
-
-| Arquivo | Ação | Descrição |
+| Arquivo | Acao | Descricao |
 |---------|------|-----------|
-| `src/contexts/WhiteLabelContext.tsx` | Modificar | Adicionar `adminCredentials` ao tipo e defaults |
-| `src/pages/ceo/CEOIntegracoes.tsx` | Modificar | Adicionar seção de configuração de credenciais |
-| `src/pages/admin/AdminLogin.tsx` | Modificar | Usar credenciais dinâmicas do WhiteLabel |
-| `src/pages/ceo/CEOLayout.tsx` | Modificar | Adicionar item "Configurações" ao menu (opcional) |
+| `src/contexts/WhiteLabelContext.tsx` | Modificar | Adicionar `metricsExport` em tokens |
+| `supabase/functions/export-metrics/index.ts` | **NOVO** | Edge function para coletar e enviar metricas |
+| `supabase/config.toml` | Modificar | Registrar nova funcao |
+| `src/pages/ceo/CEOIntegracoes.tsx` | Modificar | Adicionar secao de exportacao |
+| `src/hooks/use-metrics-export.ts` | **NOVO** (opcional) | Hook para gerenciar estado da exportacao |
+
+### Secao Tecnica - Consultas SQL
+
+A Edge Function executara as seguintes queries:
+
+```sql
+-- Usuarios
+SELECT COUNT(*) as total FROM profiles;
+SELECT COUNT(*) FROM profiles WHERE created_at >= :period_start;
+SELECT COUNT(*) FROM profiles WHERE updated_at >= :period_start;
+
+-- Roles
+SELECT role, COUNT(*) as count FROM user_roles GROUP BY role;
+
+-- Pagamentos
+SELECT 
+  COUNT(*) as total,
+  SUM(CASE WHEN status = 'COMPLETED' THEN value ELSE 0 END) as revenue,
+  SUM(CASE WHEN status = 'COMPLETED' THEN split_influencer_value ELSE 0 END) as split_inf,
+  SUM(CASE WHEN status = 'COMPLETED' THEN split_platform_value ELSE 0 END) as split_plat
+FROM pix_payments WHERE created_at >= :period_start;
+
+SELECT status, COUNT(*) FROM pix_payments GROUP BY status;
+SELECT product_type, SUM(value) FROM pix_payments WHERE status = 'COMPLETED' GROUP BY product_type;
+
+-- Videos - Reacoes
+SELECT reaction_type, COUNT(*) FROM video_reactions GROUP BY reaction_type;
+SELECT video_id, COUNT(*) as cnt FROM video_reactions GROUP BY video_id ORDER BY cnt DESC LIMIT 10;
+
+-- Videos - Visualizacoes
+SELECT COUNT(*) FROM video_watch_history;
+SELECT COUNT(*) FILTER (WHERE completed = true) * 100.0 / NULLIF(COUNT(*), 0) FROM video_watch_history;
+SELECT video_id, COUNT(*) as views FROM video_watch_history GROUP BY video_id ORDER BY views DESC LIMIT 10;
+
+-- Comunidade
+SELECT COUNT(*) FROM video_chat_messages;
+SELECT COUNT(*) FROM video_chat_messages WHERE created_at >= :period_start;
+
+-- Influencers
+SELECT 
+  COUNT(*) as total,
+  COUNT(*) FILTER (WHERE is_active = true) as active,
+  COUNT(*) FILTER (WHERE woovi_subaccount_id IS NOT NULL) as synced
+FROM influencers;
+```
 
 ### Interface Visual Proposta
 
-Na página de Integrações (`/ceo/integracoes`), após as seções existentes:
-
 ```text
 ┌────────────────────────────────────────────────────────────────┐
-│  🔐 Contas Administrativas                                     │
+│  📊 Exportacao de Metricas                     [Toggle ON/OFF] │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  ┌────────────────────────────┐  ┌────────────────────────────┐│
-│  │  🛡️ Conta Admin            │  │  👑 Conta CEO              ││
-│  │                            │  │                            ││
-│  │  Email:                    │  │  Email:                    ││
-│  │  [admin@exemplo.com    ]   │  │  [ceo@exemplo.com      ]   ││
-│  │                            │  │                            ││
-│  │  Senha:                    │  │  Senha:                    ││
-│  │  [••••••••        ] 👁️     │  │  [••••••••        ] 👁️     ││
-│  │                            │  │                            ││
-│  │  [     Salvar      ]       │  │  [     Salvar      ]       ││
-│  └────────────────────────────┘  └────────────────────────────┘│
+│  URL do Painel Externo:                                        │
+│  [https://meu-painel.com/api/v1/metrics                    ]   │
 │                                                                │
-│  ⚠️ As credenciais são armazenadas no navegador local.         │
-│     Para ambientes de produção, considere usar autenticação    │
-│     via banco de dados com hash de senhas.                     │
+│  API Key:                                                      │
+│  [••••••••••••••••••••••••••••••                ] 👁️           │
+│                                                                │
+│  ┌──────────────────────┐  ┌─────────────────────────────────┐│
+│  │ Periodo: [30 dias ▼] │  │ ⏰ Envio Automatico: [  OFF  ] ││
+│  └──────────────────────┘  │    Intervalo: [1 hora ▼]       ││
+│                            └─────────────────────────────────┘│
+│                                                                │
+│  ┌──────────────────┐  ┌────────────────────┐                 │
+│  │ 📤 Enviar Agora  │  │ 👁️ Visualizar      │                 │
+│  └──────────────────┘  └────────────────────┘                 │
+│                                                                │
+│  ✅ Ultimo envio: 29/01/2026 07:30 - Sucesso                  │
+│                                                                │
+│  ┌─────────────────────────────────────────────────────────┐  │
+│  │  Preview das Metricas (ultimos 30 dias)                 │  │
+│  │                                                         │  │
+│  │  👥 Usuarios: 1,247 (12 novos)                          │  │
+│  │  💳 Pagamentos: R$ 8.456,80 (342 transacoes)            │  │
+│  │  📺 Videos: 2,891 visualizacoes | 156 reacoes           │  │
+│  │  💬 Chat: 89 mensagens                                  │  │
+│  │  🎭 Influencers: 2 ativos | 1 sincronizado              │  │
+│  └─────────────────────────────────────────────────────────┘  │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### Considerações de Segurança
+### Endpoint Esperado no Painel Externo
 
-**Importante**: Esta solução armazena credenciais no localStorage do navegador, o que é adequado para:
-- Ambientes de desenvolvimento
-- Demonstrações
-- Protótipos
+O painel que recebera as metricas deve implementar:
 
-Para produção real, recomenda-se:
-1. Migrar para autenticação via Supabase Auth
-2. Criar usuários reais no banco de dados
-3. Usar hash de senhas (bcrypt)
-4. Implementar tabela `user_roles` para controle de acesso
+```
+POST /api/receive-metrics (ou caminho customizado)
+Headers:
+  Content-Type: application/json
+  X-API-Key: {sua-api-key}
 
-### Fluxo de Uso
+Body: MetricsPayload (descrito acima)
 
-1. CEO acessa `/ceo/integracoes`
-2. Localiza seção "Contas Administrativas"
-3. Configura email e senha para Admin
-4. Configura email e senha para CEO
-5. Clica "Salvar" em cada card
-6. Credenciais são persistidas no WhiteLabel (localStorage)
-7. Próximo login usa as novas credenciais
+Response esperado:
+{
+  "success": true,
+  "message": "Metrics received successfully",
+  "id": "metric-123456"
+}
+```
 
-### Validações
+### Consideracoes de Seguranca
 
-- Email: formato válido
-- Senha: mínimo 6 caracteres
-- Não permitir emails duplicados entre Admin e CEO
-- Feedback visual ao salvar (toast de sucesso)
+- API Key nunca e exposta no frontend (enviada apenas para edge function)
+- Edge function usa `service_role` para acessar dados agregados
+- Dados sensiveis (emails, nomes) NAO sao exportados - apenas contagens/agregacoes
+- Logs de envio armazenados localmente para auditoria
 
+### Proximos Passos Apos Aprovacao
+
+1. Atualizar WhiteLabelContext com configuracao `metricsExport`
+2. Criar edge function `export-metrics`
+3. Atualizar `supabase/config.toml`
+4. Implementar UI no CEOIntegracoes
+5. Testar com preview local
+6. Documentar formato esperado pelo painel receptor
