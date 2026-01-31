@@ -261,12 +261,15 @@ const AdminVideosConfig = () => {
                       <span className="text-sm text-muted-foreground">R$</span>
                       <Input
                         type="number"
-                        className="w-24"
+                        className={`w-24 ${duration.price < 10 ? 'border-destructive' : ''}`}
                         step="0.01"
-                        min={0}
+                        min={10}
                         value={duration.price}
-                        onChange={e => updateDuration(index, 'price', parseFloat(e.target.value) || 0)}
+                        onChange={e => updateDuration(index, 'price', parseFloat(e.target.value) || 10)}
                       />
+                      {duration.price < 10 && (
+                        <span className="text-xs text-destructive whitespace-nowrap">Mín. R$10</span>
+                      )}
                     </div>
                     <Button
                       size="icon"
