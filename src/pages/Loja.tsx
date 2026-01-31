@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { mockSubscriptions } from '@/lib/mock-data';
 import { useState } from 'react';
 import { SupportChat } from '@/components/support/SupportChat';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import LojaShopify from './LojaShopify';
+
 interface StoreTexts {
   pageTitle: string;
   pageSubtitle: string;
@@ -29,6 +32,18 @@ const defaultStoreTexts: StoreTexts = {
 };
 
 const LojaPage = () => {
+  const { config } = useWhiteLabel();
+  
+  // If Shopify is enabled, render the Shopify embed page
+  if (config.shopify?.enabled && config.shopify?.storeUrl) {
+    return <LojaShopify />;
+  }
+
+  // Otherwise, render the default digital store
+  return <LojaDigital />;
+};
+
+const LojaDigital = () => {
   const [storeTexts, setStoreTexts] = useState<StoreTexts>(() => {
     const saved = localStorage.getItem('ceo_store_texts');
     return saved ? JSON.parse(saved) : defaultStoreTexts;

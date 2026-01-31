@@ -699,6 +699,12 @@ export interface WhiteLabelConfig {
     background: string;
   };
 
+  // Shopify Integration
+  shopify: {
+    enabled: boolean;
+    storeUrl: string;
+  };
+
   // Integration Tokens
   tokens: {
     supabase: {
@@ -780,6 +786,10 @@ const defaultConfig: WhiteLabelConfig = {
     primary: '270 70% 60%',
     accent: '280 60% 70%',
     background: '260 30% 6%',
+  },
+  shopify: {
+    enabled: false,
+    storeUrl: '',
   },
   tokens: {
     supabase: {
@@ -864,6 +874,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         icons: { ...defaultIcons, ...parsed.icons },
         quickActions: parsed.quickActions || defaultQuickActions,
         community: { ...defaultCommunityConfig, ...parsed.community },
+        shopify: { ...defaultConfig.shopify, ...parsed.shopify },
         tokens: {
           supabase: { ...defaultConfig.tokens.supabase, ...parsed.tokens?.supabase },
           metricsExport: { ...defaultConfig.tokens.metricsExport, ...parsed.tokens?.metricsExport },
