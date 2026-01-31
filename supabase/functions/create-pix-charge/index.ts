@@ -84,9 +84,6 @@ Deno.serve(async (req) => {
         value: amountCents,
         comment: `${body.productType === 'video' ? 'Vídeo' : 'Áudio'} Personalizado - ${body.categoryName || body.category}`,
         expiresIn: 900, // 15 minutes in seconds
-        customer: {
-          name: body.customerName,
-        },
       }),
     });
 
