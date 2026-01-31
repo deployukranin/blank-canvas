@@ -34,6 +34,7 @@ Deno.serve(async (req) => {
   try {
     const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
     const CREATOR_PIX_KEY = Deno.env.get('CREATOR_PIX_KEY');
+    const CREATOR_TAX_ID = Deno.env.get('CREATOR_TAX_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -49,6 +50,14 @@ Deno.serve(async (req) => {
       console.error('CREATOR_PIX_KEY not configured');
       return new Response(
         JSON.stringify({ error: 'Creator PIX key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!CREATOR_TAX_ID) {
+      console.error('CREATOR_TAX_ID not configured');
+      return new Response(
+        JSON.stringify({ error: 'Creator Tax ID not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -149,6 +158,7 @@ Deno.serve(async (req) => {
     console.log('Creating Pix Out:', {
       value: creatorShareCents,
       destination: CREATOR_PIX_KEY,
+      taxId: CREATOR_TAX_ID,
       correlationID: payoutCorrelationID,
     });
 
@@ -162,6 +172,7 @@ Deno.serve(async (req) => {
         correlationID: payoutCorrelationID,
         value: creatorShareCents,
         destinationAlias: CREATOR_PIX_KEY,
+        taxId: CREATOR_TAX_ID,
         comment: `Pagamento Custom ${order.product_type} - ${order.category_name || order.category}`,
       }),
     });
