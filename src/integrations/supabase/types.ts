@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_orders: {
+        Row: {
+          amount_cents: number
+          br_code: string | null
+          category: string
+          category_name: string | null
+          correlation_id: string
+          created_at: string
+          customer_name: string
+          delivered_at: string | null
+          duration_label: string | null
+          duration_minutes: number | null
+          expires_at: string | null
+          id: string
+          observations: string | null
+          openpix_charge_id: string | null
+          paid_at: string | null
+          payout_amount_cents: number | null
+          payout_correlation_id: string | null
+          payout_status: string | null
+          preferences: string | null
+          product_id: string | null
+          product_type: string
+          qr_code_image: string | null
+          script: string | null
+          status: string
+          triggers: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          br_code?: string | null
+          category: string
+          category_name?: string | null
+          correlation_id: string
+          created_at?: string
+          customer_name: string
+          delivered_at?: string | null
+          duration_label?: string | null
+          duration_minutes?: number | null
+          expires_at?: string | null
+          id?: string
+          observations?: string | null
+          openpix_charge_id?: string | null
+          paid_at?: string | null
+          payout_amount_cents?: number | null
+          payout_correlation_id?: string | null
+          payout_status?: string | null
+          preferences?: string | null
+          product_id?: string | null
+          product_type: string
+          qr_code_image?: string | null
+          script?: string | null
+          status?: string
+          triggers?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          br_code?: string | null
+          category?: string
+          category_name?: string | null
+          correlation_id?: string
+          created_at?: string
+          customer_name?: string
+          delivered_at?: string | null
+          duration_label?: string | null
+          duration_minutes?: number | null
+          expires_at?: string | null
+          id?: string
+          observations?: string | null
+          openpix_charge_id?: string | null
+          paid_at?: string | null
+          payout_amount_cents?: number | null
+          payout_correlation_id?: string | null
+          payout_status?: string | null
+          preferences?: string | null
+          product_id?: string | null
+          product_type?: string
+          qr_code_image?: string | null
+          script?: string | null
+          status?: string
+          triggers?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
