@@ -1,11 +1,5 @@
 project_id = "lkwvlzcapuptcxvwukcm"
 
-[functions.create-openpix-charge]
-verify_jwt = false
-
-[functions.openpix-webhook]
-verify_jwt = false
-
 [functions.youtube-videos]
 verify_jwt = false
 
