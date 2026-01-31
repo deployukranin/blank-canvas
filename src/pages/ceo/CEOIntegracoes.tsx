@@ -2,23 +2,16 @@ import { useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Database,
-  CreditCard,
-  HeadphonesIcon,
-  Package,
   Save,
   TestTube,
   CheckCircle2,
   XCircle,
   Loader2,
-  Percent,
   Eye,
   EyeOff,
   Youtube,
-  Shield,
   Download,
   Upload,
-  Info,
-  Wallet,
 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -26,8 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
@@ -72,8 +63,6 @@ const TokenInput = ({ label, value, onChange, placeholder, isSecret = true }: To
   );
 };
 
-// SubaccountManager removed - influencers table no longer exists
-
 const CEOIntegracoes = () => {
   const { config, updateToken, testConnection, updateYouTube, setConfig } = useWhiteLabel();
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
@@ -108,7 +97,7 @@ const CEOIntegracoes = () => {
 
   const videos = useMemo(() => ytData?.videos ?? [], [ytData]);
 
-  const handleTest = async (tokenKey: "supabase" | "openpix" | "support" | "accountStock" | "moderation") => {
+  const handleTest = async (tokenKey: "supabase") => {
     setTestingConnection(tokenKey);
     const result = await testConnection(tokenKey);
     setConnectionResults((prev) => ({ ...prev, [tokenKey]: result }));
@@ -183,6 +172,7 @@ const CEOIntegracoes = () => {
             className="hidden"
           />
         </motion.div>
+
         {/* YouTube */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <GlassCard>
@@ -251,7 +241,7 @@ const CEOIntegracoes = () => {
                       }}
                       placeholder="8 (vazio = sem limite)"
                     />
-                    <p className="text-xs text-muted-foreground">Exibe “Ver mais” quando houver mais vídeos.</p>
+                    <p className="text-xs text-muted-foreground">Exibe "Ver mais" quando houver mais vídeos.</p>
                   </div>
 
                   <div className="space-y-2">
@@ -284,7 +274,7 @@ const CEOIntegracoes = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <div className="space-y-0.5">
-                        <Label className="text-sm">Categoria “Em alta”</Label>
+                        <Label className="text-sm">Categoria "Em alta"</Label>
                         <p className="text-xs text-muted-foreground">Ordena por visualizações no app.</p>
                       </div>
                       <Switch
@@ -320,7 +310,7 @@ const CEOIntegracoes = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm">Badge “Novo” (dias)</Label>
+                    <Label className="text-sm">Badge "Novo" (dias)</Label>
                     <Input
                       inputMode="numeric"
                       value={String(youtubeDraft.newBadgeDays ?? 7)}
@@ -332,7 +322,7 @@ const CEOIntegracoes = () => {
                       }}
                       placeholder="7"
                     />
-                    <p className="text-xs text-muted-foreground">Mostra “Novo” em vídeos publicados recentemente.</p>
+                    <p className="text-xs text-muted-foreground">Mostra "Novo" em vídeos publicados recentemente.</p>
                   </div>
                 </div>
 
@@ -440,429 +430,6 @@ const CEOIntegracoes = () => {
                         <XCircle className="w-4 h-4" />
                       )}
                       {connectionResults.supabase.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
-        {/* OpenPix/Woovi */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <GlassCard>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-lg">OpenPix / Woovi</h3>
-                  <p className="text-sm text-muted-foreground">Gateway de pagamentos PIX</p>
-                </div>
-              </div>
-              <Switch
-                checked={config.tokens.openpix.enabled}
-                onCheckedChange={(checked) => updateToken('openpix', { enabled: checked })}
-              />
-            </div>
-
-            {config.tokens.openpix.enabled && (
-              <div className="space-y-6 pt-4 border-t border-border">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <TokenInput
-                    label="App ID (API Key)"
-                    value={config.tokens.openpix.appId}
-                    onChange={(value) => updateToken('openpix', { appId: value })}
-                    placeholder="Seu App ID da OpenPix"
-                  />
-                  <TokenInput
-                    label="Webhook Secret"
-                    value={config.tokens.openpix.webhookSecret}
-                    onChange={(value) => updateToken('openpix', { webhookSecret: value })}
-                    placeholder="Secret para validar webhooks"
-                  />
-                </div>
-
-                {/* Environment Selection */}
-                <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Percent className="w-5 h-5 text-blue-400" />
-                    <span className="font-medium">Ambiente</span>
-                  </div>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="openpix-environment"
-                        checked={config.tokens.openpix.environment === 'sandbox'}
-                        onChange={() => updateToken('openpix', { environment: 'sandbox' })}
-                        className="accent-blue-500"
-                      />
-                      <span className="text-sm">Sandbox (Testes)</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="openpix-environment"
-                        checked={config.tokens.openpix.environment === 'production'}
-                        onChange={() => updateToken('openpix', { environment: 'production' })}
-                        className="accent-blue-500"
-                      />
-                      <span className="text-sm">Production (Real)</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Platform PIX Configuration */}
-                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Wallet className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Conta Principal da Plataforma</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Configure sua chave PIX principal. Esta conta receberá a porcentagem da plataforma e terá as taxas da OpenPix descontadas.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm">Tipo da Chave PIX</Label>
-                      <Select
-                        value={config.tokens.openpix.platformPixKeyType || 'RANDOM'}
-                        onValueChange={(value) => updateToken('openpix', { platformPixKeyType: value as 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM' })}
-                      >
-                        <SelectTrigger className="mt-2">
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="CPF">CPF</SelectItem>
-                          <SelectItem value="CNPJ">CNPJ</SelectItem>
-                          <SelectItem value="EMAIL">E-mail</SelectItem>
-                          <SelectItem value="PHONE">Telefone</SelectItem>
-                          <SelectItem value="RANDOM">Chave Aleatória</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-sm">Chave PIX</Label>
-                      <Input
-                        value={config.tokens.openpix.platformPixKey || ''}
-                        onChange={(e) => updateToken('openpix', { platformPixKey: e.target.value })}
-                        placeholder="Sua chave PIX"
-                        className="mt-2"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm">Nome do Titular</Label>
-                    <Input
-                      value={config.tokens.openpix.platformName || ''}
-                      onChange={(e) => updateToken('openpix', { platformName: e.target.value })}
-                      placeholder="Nome completo ou razão social"
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-
-                {/* Split Configuration */}
-                <div className="p-4 rounded-xl bg-accent/10 border border-accent/20 space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Percent className="w-5 h-5 text-accent" />
-                    <span className="font-medium">Configuração de Split</span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm">Porcentagem da Plataforma</Label>
-                        <span className="text-sm font-mono font-bold text-primary">
-                          {config.tokens.openpix.defaultSplitPercentage || 20}%
-                        </span>
-                      </div>
-                      <Slider
-                        value={[config.tokens.openpix.defaultSplitPercentage || 20]}
-                        onValueChange={(value) => updateToken('openpix', { defaultSplitPercentage: value[0] })}
-                        min={5}
-                        max={50}
-                        step={1}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>5%</span>
-                        <span>50%</span>
-                      </div>
-                    </div>
-
-                    {/* Split Preview */}
-                    <div className="p-3 rounded-lg bg-background/50 border border-border">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Info className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-xs font-medium">Exemplo de Split (R$ 100,00)</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="p-2 rounded bg-primary/10">
-                          <p className="text-xs text-muted-foreground">Plataforma</p>
-                          <p className="font-bold text-primary">
-                            R$ {((100 * (config.tokens.openpix.defaultSplitPercentage || 20)) / 100).toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="p-2 rounded bg-accent/10">
-                          <p className="text-xs text-muted-foreground">Influencer</p>
-                          <p className="font-bold text-accent">
-                            R$ {((100 * (100 - (config.tokens.openpix.defaultSplitPercentage || 20))) / 100).toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        * Taxa OpenPix (~1.29%) descontada da conta da plataforma
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
-                      <div>
-                        <Label className="text-sm">Taxa OpenPix descontada da plataforma</Label>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Quando ativo, a taxa é descontada da sua conta principal
-                        </p>
-                      </div>
-                      <Switch
-                        checked={config.tokens.openpix.platformPaysOpenPixFee ?? true}
-                        onCheckedChange={(checked) => updateToken('openpix', { platformPaysOpenPixFee: checked })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleTest('openpix')}
-                    disabled={testingConnection === 'openpix'}
-                    className="gap-2"
-                  >
-                    {testingConnection === 'openpix' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <TestTube className="w-4 h-4" />
-                    )}
-                    Testar Conexão
-                  </Button>
-                  {connectionResults.openpix && (
-                    <span className={`flex items-center gap-1 text-sm ${connectionResults.openpix.success ? 'text-green-400' : 'text-red-400'}`}>
-                      {connectionResults.openpix.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                      {connectionResults.openpix.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
-        {/* Subcontas / Influencers PIX - Removido */}
-
-        {/* Support */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <GlassCard>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                  <HeadphonesIcon className="w-6 h-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-lg">Suporte Externo</h3>
-                  <p className="text-sm text-muted-foreground">Sistema de tickets e atendimento</p>
-                </div>
-              </div>
-              <Switch
-                checked={config.tokens.support.enabled}
-                onCheckedChange={(checked) => updateToken('support', { enabled: checked })}
-              />
-            </div>
-
-            {config.tokens.support.enabled && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <TokenInput
-                  label="Token de Acesso"
-                  value={config.tokens.support.token}
-                  onChange={(value) => updateToken('support', { token: value })}
-                  placeholder="Seu token de API"
-                />
-                <TokenInput
-                  label="Webhook URL"
-                  value={config.tokens.support.webhookUrl}
-                  onChange={(value) => updateToken('support', { webhookUrl: value })}
-                  placeholder="https://..."
-                  isSecret={false}
-                />
-                <div className="flex items-center gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleTest('support')}
-                    disabled={testingConnection === 'support'}
-                    className="gap-2"
-                  >
-                    {testingConnection === 'support' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <TestTube className="w-4 h-4" />
-                    )}
-                    Testar Conexão
-                  </Button>
-                  {connectionResults.support && (
-                    <span className={`flex items-center gap-1 text-sm ${connectionResults.support.success ? 'text-green-400' : 'text-red-400'}`}>
-                      {connectionResults.support.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                      {connectionResults.support.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
-        {/* Account Stock */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <GlassCard>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                  <Package className="w-6 h-6 text-orange-400" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-lg">Estoque de Contas</h3>
-                  <p className="text-sm text-muted-foreground">Gerenciamento de contas da loja</p>
-                </div>
-              </div>
-              <Switch
-                checked={config.tokens.accountStock.enabled}
-                onCheckedChange={(checked) => updateToken('accountStock', { enabled: checked })}
-              />
-            </div>
-
-            {config.tokens.accountStock.enabled && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <TokenInput
-                  label="URL da API"
-                  value={config.tokens.accountStock.apiUrl}
-                  onChange={(value) => updateToken('accountStock', { apiUrl: value })}
-                  placeholder="https://api.seuservidor.com/v1"
-                  isSecret={false}
-                />
-                <TokenInput
-                  label="API Key"
-                  value={config.tokens.accountStock.apiKey}
-                  onChange={(value) => updateToken('accountStock', { apiKey: value })}
-                  placeholder="Sua API Key"
-                />
-                <div className="flex items-center gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleTest('accountStock')}
-                    disabled={testingConnection === 'accountStock'}
-                    className="gap-2"
-                  >
-                    {testingConnection === 'accountStock' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <TestTube className="w-4 h-4" />
-                    )}
-                    Testar Conexão
-                  </Button>
-                  {connectionResults.accountStock && (
-                    <span className={`flex items-center gap-1 text-sm ${connectionResults.accountStock.success ? 'text-green-400' : 'text-red-400'}`}>
-                      {connectionResults.accountStock.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                      {connectionResults.accountStock.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
-        {/* Moderation Panel */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          <GlassCard>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-red-400" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-lg">Painel de Moderação</h3>
-                  <p className="text-sm text-muted-foreground">Enviar denúncias e suporte para projeto externo</p>
-                </div>
-              </div>
-              <Switch
-                checked={config.tokens.moderation.enabled}
-                onCheckedChange={(checked) => updateToken('moderation', { enabled: checked })}
-              />
-            </div>
-
-            {config.tokens.moderation.enabled && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Configure a URL e API Key do projeto de moderação para enviar denúncias e tickets de suporte automaticamente.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    No projeto de moderação, crie um registro em <code className="font-mono bg-background/50 px-1 rounded">connected_projects</code> com a API Key gerada.
-                  </p>
-                </div>
-                
-                <TokenInput
-                  label="URL da API de Moderação"
-                  value={config.tokens.moderation.apiUrl}
-                  onChange={(value) => updateToken('moderation', { apiUrl: value })}
-                  placeholder="https://seu-projeto-moderacao.supabase.co"
-                  isSecret={false}
-                />
-                <TokenInput
-                  label="API Key"
-                  value={config.tokens.moderation.apiKey}
-                  onChange={(value) => updateToken('moderation', { apiKey: value })}
-                  placeholder="Chave gerada no projeto de moderação"
-                />
-                <div className="flex items-center gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleTest('moderation')}
-                    disabled={testingConnection === 'moderation'}
-                    className="gap-2"
-                  >
-                    {testingConnection === 'moderation' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <TestTube className="w-4 h-4" />
-                    )}
-                    Testar Conexão
-                  </Button>
-                  {connectionResults.moderation && (
-                    <span className={`flex items-center gap-1 text-sm ${connectionResults.moderation.success ? 'text-green-400' : 'text-red-400'}`}>
-                      {connectionResults.moderation.success ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                      {connectionResults.moderation.message}
                     </span>
                   )}
                 </div>

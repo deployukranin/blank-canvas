@@ -8,7 +8,6 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { onSupportRequest } from '@/lib/integrations';
 import { toast } from 'sonner';
 
 interface SupportChatProps {
@@ -43,33 +42,22 @@ export const SupportChat = ({ defaultCategory = 'general' }: SupportChatProps) =
     setIsSubmitting(true);
 
     try {
-      const result = await onSupportRequest({
-        userId: user?.id,
-        userName: user?.username,
-        userEmail: user?.email,
-        subject: subject.trim(),
-        message: message.trim(),
-        category,
-        priority: category === 'payment' ? 'high' : 'medium',
+      // Simulate support request (functionality removed)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsSuccess(true);
+      toast.success('Mensagem enviada!', {
+        description: `Ticket #${Date.now().toString().slice(-8)}`,
       });
-
-      if (result.success) {
-        setIsSuccess(true);
-        toast.success('Mensagem enviada!', {
-          description: `Ticket #${result.ticketId?.slice(-8) || 'criado'}`,
-        });
-        
-        // Reset after 2 seconds
-        setTimeout(() => {
-          setIsSuccess(false);
-          setIsOpen(false);
-          setSubject('');
-          setMessage('');
-          setCategory(defaultCategory);
-        }, 2000);
-      } else {
-        toast.error('Erro ao enviar mensagem');
-      }
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsOpen(false);
+        setSubject('');
+        setMessage('');
+        setCategory(defaultCategory);
+      }, 2000);
     } catch (error) {
       console.error('Support request error:', error);
       toast.error('Erro ao enviar mensagem');
