@@ -204,29 +204,52 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Approve the Pix Out
-    console.log('Approving Pix Out...');
-    const approveResponse = await fetch(
-      `https://api.openpix.com.br/api/v1/payment/${payoutCorrelationID}/approve`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': OPENPIX_APP_ID,
-          'Content-Type': 'application/json',
-        },
+    // Update order with payout info (Pix Out was created successfully)
+    // Note: Some OpenPix accounts have auto-approve enabled, so we don't need to call /approve
+    let payoutFinalStatus = 'created';
+    
+    // Try to approve the Pix Out (may not be needed if auto-approve is enabled)
+    try {
+      console.log('Attempting to approve Pix Out...');
+      const approveResponse = await fetch(
+        `https://api.openpix.com.br/api/v1/payment/${payoutCorrelationID}/approve`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': OPENPIX_APP_ID,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (approveResponse.ok) {
+        const approveData = await approveResponse.json();
+        console.log('Approve response:', JSON.stringify(approveData));
+        payoutFinalStatus = 'approved';
+      } else {
+        // Check if it's a 404 (auto-approve might be enabled, or endpoint not available)
+        const responseText = await approveResponse.text();
+        console.log(`Approve endpoint returned ${approveResponse.status}: ${responseText}`);
+        
+        if (approveResponse.status === 404) {
+          // This is normal for accounts with auto-approve enabled
+          payoutFinalStatus = 'auto_approved';
+        } else {
+          payoutFinalStatus = 'pending_approval';
+        }
       }
-    );
+    } catch (approveError) {
+      console.error('Error during approval attempt:', approveError);
+      payoutFinalStatus = 'pending_approval';
+    }
 
-    const approveData = await approveResponse.json();
-    console.log('Approve response:', JSON.stringify(approveData));
-
-    // Update order with payout success
+    // Update order with final payout status
     const { error: finalUpdateError } = await supabase
       .from('custom_orders')
       .update({
         status: 'payout_done',
         payout_correlation_id: payoutCorrelationID,
-        payout_status: approveResponse.ok ? 'completed' : 'pending_approval',
+        payout_status: payoutFinalStatus,
       })
       .eq('id', order.id);
 
@@ -242,7 +265,7 @@ Deno.serve(async (req) => {
         processed: true,
         order_id: order.id,
         payment_status: 'paid',
-        payout_status: approveResponse.ok ? 'completed' : 'pending_approval',
+        payout_status: payoutFinalStatus,
         split: {
           total: totalCents,
           creator: creatorShareCents,
