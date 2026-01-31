@@ -14,48 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      influencers: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          openpix_receiver_id: string | null
-          pix_key: string
-          pix_key_type: string
-          split_percentage: number
-          tax_id: string
-          updated_at: string
-          woovi_subaccount_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          openpix_receiver_id?: string | null
-          pix_key: string
-          pix_key_type: string
-          split_percentage?: number
-          tax_id: string
-          updated_at?: string
-          woovi_subaccount_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          openpix_receiver_id?: string | null
-          pix_key?: string
-          pix_key_type?: string
-          split_percentage?: number
-          tax_id?: string
-          updated_at?: string
-          woovi_subaccount_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
