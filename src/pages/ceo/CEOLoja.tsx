@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Upload, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, ShoppingBag, ExternalLink, Globe, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 
@@ -85,8 +86,13 @@ const defaultProducts: ProductCustomization[] = [
   },
 ];
 
+interface ShopifyConfig {
+  enabled: boolean;
+  storeUrl: string;
+}
+
 const CEOLoja = () => {
-  const { config, updateBranding } = useWhiteLabel();
+  const { config, setConfig } = useWhiteLabel();
   
   const [storeTexts, setStoreTexts] = useState<StoreTexts>(() => {
     const saved = localStorage.getItem('ceo_store_texts');
@@ -99,6 +105,14 @@ const CEOLoja = () => {
   });
 
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  
+  // Shopify config state
+  const [shopifyConfig, setShopifyConfig] = useState<ShopifyConfig>({
+    enabled: config.shopify?.enabled || false,
+    storeUrl: config.shopify?.storeUrl || '',
+  });
+  const [testingUrl, setTestingUrl] = useState(false);
+  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
 
   useEffect(() => {
     localStorage.setItem('ceo_store_texts', JSON.stringify(storeTexts));
@@ -110,6 +124,51 @@ const CEOLoja = () => {
 
   const handleSaveTexts = () => {
     toast.success('Textos da loja salvos!');
+  };
+
+  const handleSaveShopify = () => {
+    setConfig({
+      ...config,
+      shopify: {
+        enabled: shopifyConfig.enabled,
+        storeUrl: shopifyConfig.storeUrl,
+      },
+    });
+    toast.success('Configuração Shopify salva!');
+  };
+
+  const normalizeUrl = (url: string): string => {
+    if (!url) return '';
+    let normalized = url.trim();
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+      normalized = 'https://' + normalized;
+    }
+    return normalized.replace('http://', 'https://');
+  };
+
+  const handleTestUrl = async () => {
+    const url = normalizeUrl(shopifyConfig.storeUrl);
+    if (!url) {
+      toast.error('Insira uma URL válida');
+      return;
+    }
+
+    setTestingUrl(true);
+    setTestResult(null);
+
+    try {
+      // We can't truly test X-Frame-Options from JS, but we can check if URL is valid
+      const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      // Note: no-cors will always "succeed" but won't give us headers
+      // We'll show a warning that user should test manually
+      setTestResult('success');
+      toast.info('URL parece válida. Teste clicando em "Ver Preview" para confirmar se carrega no iframe.');
+    } catch (error) {
+      setTestResult('error');
+      toast.error('Não foi possível acessar a URL. Verifique se está correta.');
+    } finally {
+      setTestingUrl(false);
+    }
   };
 
   const handleProductUpdate = (id: string, field: keyof ProductCustomization, value: any) => {
@@ -156,21 +215,134 @@ const CEOLoja = () => {
   return (
     <CEOLayout title="Configurar Loja">
       <div className="space-y-8">
-        {/* Store Page Texts */}
+        {/* Shopify Integration */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <GlassCard>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-amber-400" />
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-display font-semibold text-lg">Textos da Página /loja</h2>
-                <p className="text-sm text-muted-foreground">Personalize os textos exibidos na página principal da loja</p>
+                <h2 className="font-display font-semibold text-lg">Loja Shopify Externa</h2>
+                <p className="text-sm text-muted-foreground">Integre sua loja Shopify diretamente no app</p>
               </div>
             </div>
+
+            <div className="space-y-6">
+              {/* Enable Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-muted/30">
+                <div className="space-y-1">
+                  <Label className="text-base">Usar Loja Shopify</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Quando ativado, a aba Loja exibirá sua loja Shopify
+                  </p>
+                </div>
+                <Switch
+                  checked={shopifyConfig.enabled}
+                  onCheckedChange={(checked) => setShopifyConfig(prev => ({ ...prev, enabled: checked }))}
+                />
+              </div>
+
+              {/* URL Input */}
+              <div className="space-y-2">
+                <Label>URL da Loja Shopify</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={shopifyConfig.storeUrl}
+                    onChange={(e) => {
+                      setShopifyConfig(prev => ({ ...prev, storeUrl: e.target.value }));
+                      setTestResult(null);
+                    }}
+                    placeholder="https://sualojaexemplo.myshopify.com"
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleTestUrl}
+                    disabled={testingUrl || !shopifyConfig.storeUrl}
+                    className="gap-2"
+                  >
+                    {testingUrl ? (
+                      <span className="animate-spin">⏳</span>
+                    ) : testResult === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    ) : testResult === 'error' ? (
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4" />
+                    )}
+                    Testar
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Ex: https://sualojaexemplo.myshopify.com ou sualojaexemplo.myshopify.com
+                </p>
+              </div>
+
+              {/* Warning */}
+              <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/10">
+                <div className="flex gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-amber-200">Aviso de Compatibilidade</p>
+                    <p className="text-xs text-muted-foreground">
+                      Algumas lojas Shopify bloqueiam o carregamento via iframe por segurança. 
+                      Se a loja não carregar, os usuários verão um botão para abrir em nova aba.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview Button */}
+              {shopifyConfig.storeUrl && (
+                <div className="flex gap-3">
+                  <Button onClick={handleSaveShopify} className="gap-2">
+                    <Save className="w-4 h-4" />
+                    Salvar Configuração
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(normalizeUrl(shopifyConfig.storeUrl), '_blank')}
+                    className="gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver Loja
+                  </Button>
+                </div>
+              )}
+
+              {!shopifyConfig.storeUrl && (
+                <Button onClick={handleSaveShopify} className="gap-2">
+                  <Save className="w-4 h-4" />
+                  Salvar Configuração
+                </Button>
+              )}
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        <Separator className="my-6" />
+
+        {/* Store Page Texts - Only show if Shopify disabled */}
+        {!shopifyConfig.enabled && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <GlassCard>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <ShoppingBag className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <h2 className="font-display font-semibold text-lg">Textos da Página /loja</h2>
+                    <p className="text-sm text-muted-foreground">Personalize os textos exibidos na página principal da loja</p>
+                  </div>
+                </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -426,6 +598,8 @@ const CEOLoja = () => {
             </div>
           </GlassCard>
         </motion.div>
+          </>
+        )}
       </div>
     </CEOLayout>
   );
