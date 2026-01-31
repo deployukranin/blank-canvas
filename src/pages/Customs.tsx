@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { onCustomOrder, onPurchase, trackEvent } from '@/lib/integrations';
+import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { mockAudioCategories, type CustomCategory } from '@/lib/mock-data';
@@ -47,10 +47,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePixPayment } from '@/hooks/use-pix-payment';
+import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
@@ -58,6 +61,7 @@ const CustomsPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
   const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -73,6 +77,8 @@ const CustomsPage = () => {
   const [audioFormData, setAudioFormData] = useState({ name: '', preferences: '', observations: '' });
   const [audioOrderComplete, setAudioOrderComplete] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showAudioPixModal, setShowAudioPixModal] = useState(false);
+  const [audioChargeData, setAudioChargeData] = useState<typeof chargeData>(null);
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
@@ -112,30 +118,43 @@ const CustomsPage = () => {
     setIsProcessing(true);
     const finalPrice = calculatePrice(selectedDuration);
 
-    const result = await onPurchase({
-      productId: `custom-video-${selectedCategory.id}-${selectedDuration.id}`,
-      productType: 'custom_video',
+    // Create PIX charge
+    const result = await createCharge({
       amount: finalPrice,
-      currency: 'BRL',
+      productType: 'video',
+      category: selectedCategory.id,
+      categoryName: selectedCategory.name,
+      durationMinutes: selectedDuration.minutes,
+      durationLabel: selectedDuration.label,
+      customerName: personalizationData.name || 'Cliente',
     });
+
+    setIsProcessing(false);
 
     if (result.success) {
       setShowPaymentDialog(false);
-      setShowPersonalizationDialog(true);
-      trackEvent('video_payment_completed', { 
+      setShowPixModal(true);
+      trackEvent('video_pix_charge_created', { 
         category: selectedCategory.id,
         duration: selectedDuration.id,
         price: finalPrice
       });
     } else {
       toast({
-        title: 'Erro no pagamento',
-        description: 'Tente novamente ou use outro método de pagamento.',
+        title: 'Erro ao gerar cobrança',
+        description: result.error || 'Tente novamente.',
         variant: 'destructive',
       });
     }
+  };
 
-    setIsProcessing(false);
+  const handlePixPaymentConfirmed = () => {
+    setShowPixModal(false);
+    setShowPersonalizationDialog(true);
+    trackEvent('video_payment_completed', { 
+      category: selectedCategory?.id,
+      duration: selectedDuration?.id,
+    });
   };
 
   const handleSubmitPersonalization = async () => {
@@ -198,7 +217,9 @@ const CustomsPage = () => {
     setSelectedCategory(null);
     setSelectedDuration(null);
     setShowSuccessDialog(false);
+    setShowPixModal(false);
     setPersonalizationData({ name: '', triggers: '', script: '', observations: '' });
+    resetCharge();
   };
 
   // Audio handlers
@@ -218,34 +239,56 @@ const CustomsPage = () => {
 
     setIsProcessing(true);
 
-    const result = await onPurchase({
-      productId: `custom-audio-${selectedAudioCategory.id}`,
-      productType: 'custom_audio',
+    // Create PIX charge for audio
+    const result = await createCharge({
       amount: selectedAudioCategory.basePrice,
-      currency: 'BRL',
+      productType: 'audio',
+      category: selectedAudioCategory.id,
+      categoryName: selectedAudioCategory.name,
+      customerName: audioFormData.name,
+      preferences: audioFormData.preferences,
+      observations: audioFormData.observations,
     });
 
-    if (result.success) {
-      await onCustomOrder({
-        type: 'audio',
-        category: selectedAudioCategory.id,
-        name: audioFormData.name,
-        preferences: audioFormData.preferences,
-        observations: audioFormData.observations,
-        status: 'pending',
-      });
-
-      trackEvent('custom_audio_order', { category: selectedAudioCategory.id });
-      setAudioOrderComplete(true);
-    }
-
     setIsProcessing(false);
+
+    if (result.success) {
+      setAudioChargeData(result);
+      setShowAudioPixModal(true);
+      trackEvent('audio_pix_charge_created', { category: selectedAudioCategory.id });
+    } else {
+      toast({
+        title: 'Erro ao gerar cobrança',
+        description: result.error || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleAudioPixPaymentConfirmed = async () => {
+    if (!selectedAudioCategory) return;
+
+    setShowAudioPixModal(false);
+    
+    await onCustomOrder({
+      type: 'audio',
+      category: selectedAudioCategory.id,
+      name: audioFormData.name,
+      preferences: audioFormData.preferences,
+      observations: audioFormData.observations,
+      status: 'pending',
+    });
+
+    trackEvent('custom_audio_order', { category: selectedAudioCategory.id });
+    setAudioOrderComplete(true);
   };
 
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
     setAudioOrderComplete(false);
+    setShowAudioPixModal(false);
+    setAudioChargeData(null);
   };
 
   const finalPrice = selectedDuration 
@@ -559,7 +602,7 @@ const CustomsPage = () => {
       />
 
       {/* Video Payment Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && setShowPaymentDialog(false)}>
+      <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowPaymentDialog(false)}>
         <DialogContent className="glass mx-4">
           <DialogHeader>
             <DialogTitle>Confirmar Compra</DialogTitle>
@@ -595,21 +638,38 @@ const CustomsPage = () => {
                 variant="ghost" 
                 className="flex-1" 
                 onClick={() => setShowPaymentDialog(false)}
-                disabled={isProcessing}
+                disabled={isProcessing || isPixLoading}
               >
                 Cancelar
               </Button>
               <Button 
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || isPixLoading}
               >
-                {isProcessing ? 'Processando...' : 'Confirmar Pagamento'}
+                {isProcessing || isPixLoading ? 'Gerando PIX...' : 'Confirmar Pagamento'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* PIX Payment Modal for Videos */}
+      {chargeData?.success && (
+        <PixPaymentModal
+          isOpen={showPixModal}
+          onClose={() => {
+            setShowPixModal(false);
+            resetCharge();
+          }}
+          onPaymentConfirmed={handlePixPaymentConfirmed}
+          qrCodeImage={chargeData.qrCodeImage!}
+          brCode={chargeData.brCode!}
+          correlationId={chargeData.correlationId!}
+          expiresAt={chargeData.expiresAt!}
+          amount={finalPrice}
+        />
+      )}
 
       {/* Video Personalization Dialog */}
       <Dialog open={showPersonalizationDialog} onOpenChange={() => !isProcessing && setShowPersonalizationDialog(false)}>
@@ -698,7 +758,7 @@ const CustomsPage = () => {
       </Dialog>
 
       {/* Audio Order Dialog */}
-      <Dialog open={!!selectedAudioCategory && !audioOrderComplete} onOpenChange={() => !isProcessing && resetAudioOrder()}>
+      <Dialog open={!!selectedAudioCategory && !audioOrderComplete && !showAudioPixModal} onOpenChange={() => !isProcessing && !isPixLoading && resetAudioOrder()}>
         <DialogContent className="glass mx-4">
           <DialogHeader>
             <DialogTitle>Pedir Áudio</DialogTitle>
@@ -726,21 +786,38 @@ const CustomsPage = () => {
               className="glass border-white/10"
             />
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={resetAudioOrder} disabled={isProcessing}>
+              <Button variant="ghost" className="flex-1" onClick={resetAudioOrder} disabled={isProcessing || isPixLoading}>
                 Cancelar
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handleAudioOrder}
-                disabled={isProcessing}
+                disabled={isProcessing || isPixLoading}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Enviando...' : 'Enviar'}
+                {isProcessing || isPixLoading ? 'Gerando PIX...' : 'Pagar com PIX'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* PIX Payment Modal for Audio */}
+      {audioChargeData?.success && selectedAudioCategory && (
+        <PixPaymentModal
+          isOpen={showAudioPixModal}
+          onClose={() => {
+            setShowAudioPixModal(false);
+            setAudioChargeData(null);
+          }}
+          onPaymentConfirmed={handleAudioPixPaymentConfirmed}
+          qrCodeImage={audioChargeData.qrCodeImage!}
+          brCode={audioChargeData.brCode!}
+          correlationId={audioChargeData.correlationId!}
+          expiresAt={audioChargeData.expiresAt!}
+          amount={selectedAudioCategory.basePrice}
+        />
+      )}
 
       {/* Audio Success Dialog */}
       <Dialog open={audioOrderComplete} onOpenChange={resetAudioOrder}>
