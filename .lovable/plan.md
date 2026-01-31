@@ -1,45 +1,128 @@
-# Plano: Sistema OpenPix com Split de Pagamento - IMPLEMENTADO ✅
 
-## Status: CONCLUÍDO
+# Plano: Integrar Loja Shopify via Iframe
 
-### O que foi implementado:
+## Visao Geral
 
-1. **Tabela `custom_orders`** - Criada no banco de dados para armazenar pedidos
-2. **Edge Function `create-pix-charge`** - Gera cobrança PIX via OpenPix API
-3. **Edge Function `openpix-webhook`** - Recebe confirmação de pagamento e executa Pix Out
-4. **Hook `usePixPayment`** - Gerencia estado de pagamento no frontend
-5. **Componente `PixPaymentModal`** - Modal com QR Code e polling de status
-6. **Integração em `Customs.tsx`** - Fluxo completo de vídeos e áudios personalizados
+Vamos transformar a aba "Loja" para exibir sua loja Shopify diretamente dentro do app via iframe fullscreen. A loja atual de assinaturas digitais sera substituida completamente.
 
----
+## Importante: Limitacao de Seguranca
 
-## Configuração Pendente (Manual)
+Muitas lojas Shopify bloqueiam carregamento via iframe (header `X-Frame-Options`). Se isso acontecer:
+- O iframe ficara em branco
+- Implementaremos um botao de fallback "Abrir Loja" que abre em nova aba
 
-### Configurar Webhook na OpenPix:
-
-1. Acesse: **API/Plugins → Webhooks** no painel OpenPix
-2. URL: `https://lkwvlzcapuptcxvwukcm.supabase.co/functions/v1/openpix-webhook`
-3. Eventos: `OPENPIX:CHARGE_COMPLETED`
+**Recomendacao:** Teste sua URL da Shopify para verificar se permite iframe. Se nao funcionar, podemos usar a abordagem de abrir em nova aba ou um WebView nativo (se for app mobile).
 
 ---
 
-## Split de Pagamento
+## Etapas de Implementacao
 
-| Item | Percentual |
-|------|------------|
-| Criador (Pix Out) | 79% |
-| Plataforma | 21% |
-| Taxa OpenPix | 0.80% (deduzida da plataforma) |
+### 1. Adicionar URL da Shopify nas Configuracoes
 
-### Exemplo para R$ 49,90:
-- Criador recebe: R$ 39,42 (via Pix Out automático)
-- Plataforma fica: R$ 10,08 (após taxa)
+**Arquivo:** `src/contexts/WhiteLabelContext.tsx`
+
+Adicionar nova propriedade no `WhiteLabelConfig`:
+
+```text
+shopify: {
+  enabled: boolean;
+  storeUrl: string; // Ex: "https://sualojaexemplo.myshopify.com"
+}
+```
+
+Isso permitira configurar a URL da loja pelo painel CEO.
 
 ---
 
-## Secrets Configurados
+### 2. Criar Pagina de Loja Shopify Embed
 
-| Secret | Status |
-|--------|--------|
-| `OPENPIX_APP_ID` | ✅ Configurado |
-| `CREATOR_PIX_KEY` | ✅ Configurado |
+**Arquivo:** `src/pages/LojaShopify.tsx` (novo)
+
+Componente que:
+- Exibe um iframe fullscreen com a loja Shopify
+- Mostra loading spinner enquanto carrega
+- Detecta erro de carregamento e oferece botao "Abrir em Nova Aba"
+- Mantem a navegacao inferior (BottomNav) visivel
+
+```text
+Estrutura:
++------------------------------------------+
+|              Navbar Inferior             |
++------------------------------------------+
+|                                          |
+|     [iframe fullscreen: Shopify]         |
+|                                          |
+|     (ou botao fallback se bloqueado)     |
+|                                          |
++------------------------------------------+
+|   Home | Custom's | Loja | Comunidade    |
++------------------------------------------+
+```
+
+---
+
+### 3. Atualizar Roteamento
+
+**Arquivo:** `src/App.tsx`
+
+- Manter rota `/loja` mas renderizar `LojaShopify` quando Shopify estiver habilitado
+- Fallback para loja atual se Shopify desabilitado
+
+---
+
+### 4. Adicionar Configuracao no Painel CEO
+
+**Arquivo:** `src/pages/ceo/CEOLoja.tsx`
+
+Adicionar secao no topo:
+- Toggle "Usar Loja Shopify Externa"
+- Campo para URL da loja Shopify
+- Botao para testar se URL funciona em iframe
+
+---
+
+## Arquivos que Serao Modificados
+
+| Arquivo | Alteracao |
+|---------|-----------|
+| `src/contexts/WhiteLabelContext.tsx` | Adicionar config `shopify` |
+| `src/pages/LojaShopify.tsx` | **Novo** - Componente iframe |
+| `src/pages/Loja.tsx` | Condicional para Shopify ou loja atual |
+| `src/pages/ceo/CEOLoja.tsx` | Campos de config Shopify |
+| `src/App.tsx` | Importar novo componente (se necessario) |
+
+---
+
+## Secao Tecnica
+
+### Deteccao de Erro de Iframe
+
+Como iframes nao disparam erro quando bloqueados por `X-Frame-Options`, usaremos:
+1. Timeout de 5 segundos
+2. Verificacao via `onLoad` do iframe
+3. Se nao carregar, mostrar botao de fallback
+
+### Tratamento de URLs
+
+- Aceitar URLs com ou sem protocolo
+- Normalizar para HTTPS
+- Validar formato de URL antes de salvar
+
+### Persistencia
+
+A configuracao sera salva no `localStorage` junto com as outras configs do WhiteLabel, permitindo que o CEO configure pelo painel.
+
+---
+
+## Resultado Esperado
+
+Apos implementacao:
+1. CEO acessa `/ceo/loja`
+2. Ativa "Usar Loja Shopify"
+3. Insere URL: `https://sualojaexemplo.myshopify.com`
+4. Salva
+5. Usuarios ao clicar em "Loja" veem a Shopify integrada
+
+Se o iframe for bloqueado, usuarios verao:
+- Mensagem explicativa
+- Botao "Abrir Loja" que abre em nova aba
