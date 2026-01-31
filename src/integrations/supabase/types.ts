@@ -56,6 +56,137 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount_cents: number
+          correlation_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          expires_at: string | null
+          id: string
+          influencer_id: string
+          openpix_charge_id: string | null
+          order_type: string
+          paid_at: string | null
+          pix_brcode: string | null
+          pix_qrcode_image: string | null
+          product_id: string | null
+          product_type: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          correlation_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          influencer_id: string
+          openpix_charge_id?: string | null
+          order_type: string
+          paid_at?: string | null
+          pix_brcode?: string | null
+          pix_qrcode_image?: string | null
+          product_id?: string | null
+          product_type?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          correlation_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          influencer_id?: string
+          openpix_charge_id?: string | null
+          order_type?: string
+          paid_at?: string | null
+          pix_brcode?: string | null
+          pix_qrcode_image?: string | null
+          product_id?: string | null
+          product_type?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          amount_cents: number
+          approved_at: string | null
+          created_at: string
+          error_message: string | null
+          fee_cents: number
+          id: string
+          influencer_id: string
+          openpix_payment_id: string | null
+          order_id: string
+          payment_correlation_id: string | null
+          platform_cents: number
+          status: string
+          who_pays_fee: string
+        }
+        Insert: {
+          amount_cents: number
+          approved_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          fee_cents: number
+          id?: string
+          influencer_id: string
+          openpix_payment_id?: string | null
+          order_id: string
+          payment_correlation_id?: string | null
+          platform_cents: number
+          status?: string
+          who_pays_fee: string
+        }
+        Update: {
+          amount_cents?: number
+          approved_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          fee_cents?: number
+          id?: string
+          influencer_id?: string
+          openpix_payment_id?: string | null
+          order_id?: string
+          payment_correlation_id?: string | null
+          platform_cents?: number
+          status?: string
+          who_pays_fee?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pix_payments: {
         Row: {
           charge_id: string | null

@@ -1,6 +1,6 @@
 project_id = "lkwvlzcapuptcxvwukcm"
 
-[functions.create-pix-charge]
+[functions.create-openpix-charge]
 verify_jwt = false
 
 [functions.openpix-webhook]
@@ -9,17 +9,11 @@ verify_jwt = false
 [functions.youtube-videos]
 verify_jwt = false
 
-[functions.mock-pix-webhook]
-verify_jwt = false
-
-[functions.sandbox-pix-test]
+[functions.export-metrics]
 verify_jwt = false
 
 [functions.send-report]
 verify_jwt = false
 
 [functions.manage-subaccount]
-verify_jwt = false
-
-[functions.export-metrics]
 verify_jwt = false
