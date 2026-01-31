@@ -110,9 +110,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Idempotency: if already paid, return success
-    if (order.status !== 'pending') {
-      console.log('Order already processed:', order.id, order.status);
+    // Idempotency / resume:
+    // - pending: first time processing
+    // - paid: payment confirmed but payout may not have been executed (e.g. function crashed) -> resume payout
+    // - payout_done/delivered: fully processed
+    if (['payout_done', 'delivered'].includes(order.status)) {
+      console.log('Order already fully processed:', order.id, order.status);
       return new Response(
         JSON.stringify({ received: true, processed: false, reason: 'Already processed', status: order.status }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -134,22 +137,26 @@ Deno.serve(async (req) => {
       platformNet: platformNetCents,
     });
 
-    // Update order status to paid
-    const { error: updateError } = await supabase
-      .from('custom_orders')
-      .update({
-        status: 'paid',
-        paid_at: new Date().toISOString(),
-        payout_amount_cents: creatorShareCents,
-      })
-      .eq('id', order.id);
+    // Update order status to paid (only if still pending)
+    if (order.status === 'pending') {
+      const { error: updateError } = await supabase
+        .from('custom_orders')
+        .update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+          payout_amount_cents: creatorShareCents,
+        })
+        .eq('id', order.id);
 
-    if (updateError) {
-      console.error('Failed to update order status:', updateError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to update order', details: updateError }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (updateError) {
+        console.error('Failed to update order status:', updateError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to update order', details: updateError }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      console.log('Order already marked paid, resuming payout:', order.id);
     }
 
     // Create Pix Out for creator (79%)
@@ -208,35 +215,29 @@ Deno.serve(async (req) => {
     // Note: Some OpenPix accounts have auto-approve enabled, so we don't need to call /approve
     let payoutFinalStatus = 'created';
     
-    // Try to approve the Pix Out (may not be needed if auto-approve is enabled)
+    // Try to approve the Pix Out (required in many accounts)
     try {
       console.log('Attempting to approve Pix Out...');
-      const approveResponse = await fetch(
-        `https://api.openpix.com.br/api/v1/payment/${payoutCorrelationID}/approve`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': OPENPIX_APP_ID,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // Woovi/OpenPix docs: approve endpoint is /api/v1/payment/approve and expects correlationID in body
+      const approveResponse = await fetch('https://api.openpix.com.br/api/v1/payment/approve', {
+        method: 'POST',
+        headers: {
+          'Authorization': OPENPIX_APP_ID,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correlationID: payoutCorrelationID }),
+      });
 
       if (approveResponse.ok) {
         const approveData = await approveResponse.json();
         console.log('Approve response:', JSON.stringify(approveData));
         payoutFinalStatus = 'approved';
       } else {
-        // Check if it's a 404 (auto-approve might be enabled, or endpoint not available)
+        // Check if it's a 404 (account may not support API approval or endpoint not available)
         const responseText = await approveResponse.text();
         console.log(`Approve endpoint returned ${approveResponse.status}: ${responseText}`);
         
-        if (approveResponse.status === 404) {
-          // This is normal for accounts with auto-approve enabled
-          payoutFinalStatus = 'auto_approved';
-        } else {
-          payoutFinalStatus = 'pending_approval';
-        }
+        payoutFinalStatus = approveResponse.status === 404 ? 'pending_approval' : 'pending_approval';
       }
     } catch (approveError) {
       console.error('Error during approval attempt:', approveError);
