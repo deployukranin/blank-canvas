@@ -304,99 +304,104 @@ export const availableLucideIcons = [
   { id: 'ArrowLeft', label: 'Seta Esquerda', category: 'Setas' },
   { id: 'ArrowRight', label: 'Seta Direita', category: 'Setas' },
   { id: 'ArrowUpRight', label: 'Seta Diagonal', category: 'Setas' },
+  { id: 'ArrowDownRight', label: 'Seta Diagonal 2', category: 'Setas' },
+  { id: 'ArrowUpLeft', label: 'Seta Diagonal 3', category: 'Setas' },
+  { id: 'ArrowDownLeft', label: 'Seta Diagonal 4', category: 'Setas' },
   { id: 'ChevronUp', label: 'Chevron Cima', category: 'Setas' },
   { id: 'ChevronDown', label: 'Chevron Baixo', category: 'Setas' },
   { id: 'ChevronLeft', label: 'Chevron Esquerda', category: 'Setas' },
   { id: 'ChevronRight', label: 'Chevron Direita', category: 'Setas' },
-  { id: 'ChevronsUp', label: 'Duplo Cima', category: 'Setas' },
-  { id: 'ChevronsDown', label: 'Duplo Baixo', category: 'Setas' },
+  { id: 'ChevronsUp', label: 'Duplo Chevron Cima', category: 'Setas' },
+  { id: 'ChevronsDown', label: 'Duplo Chevron Baixo', category: 'Setas' },
+  { id: 'ChevronsLeft', label: 'Duplo Chevron Esquerda', category: 'Setas' },
+  { id: 'ChevronsRight', label: 'Duplo Chevron Direita', category: 'Setas' },
   { id: 'MoveUp', label: 'Mover Cima', category: 'Setas' },
   { id: 'MoveDown', label: 'Mover Baixo', category: 'Setas' },
-  { id: 'TrendingUp', label: 'Tendência Alta', category: 'Setas' },
-  { id: 'TrendingDown', label: 'Tendência Baixa', category: 'Setas' },
+  { id: 'MoveLeft', label: 'Mover Esquerda', category: 'Setas' },
+  { id: 'MoveRight', label: 'Mover Direita', category: 'Setas' },
+  { id: 'ArrowBigUp', label: 'Seta Grande Cima', category: 'Setas' },
+  { id: 'ArrowBigDown', label: 'Seta Grande Baixo', category: 'Setas' },
+  { id: 'ArrowBigLeft', label: 'Seta Grande Esquerda', category: 'Setas' },
+  { id: 'ArrowBigRight', label: 'Seta Grande Direita', category: 'Setas' },
   
-  // Actions
-  { id: 'Plus', label: 'Mais', category: 'Ações' },
-  { id: 'PlusCircle', label: 'Mais Círculo', category: 'Ações' },
-  { id: 'Minus', label: 'Menos', category: 'Ações' },
-  { id: 'MinusCircle', label: 'Menos Círculo', category: 'Ações' },
+  // Files & Documents
+  { id: 'File', label: 'Arquivo', category: 'Arquivos' },
+  { id: 'FileText', label: 'Documento', category: 'Arquivos' },
+  { id: 'FileImage', label: 'Arquivo Imagem', category: 'Arquivos' },
+  { id: 'FileVideo', label: 'Arquivo Vídeo', category: 'Arquivos' },
+  { id: 'FileAudio', label: 'Arquivo Áudio', category: 'Arquivos' },
+  { id: 'FileCode', label: 'Código', category: 'Arquivos' },
+  { id: 'FileJson', label: 'JSON', category: 'Arquivos' },
+  { id: 'FileSpreadsheet', label: 'Planilha', category: 'Arquivos' },
+  { id: 'FileArchive', label: 'Arquivo ZIP', category: 'Arquivos' },
+  { id: 'FilePlus', label: 'Adicionar Arquivo', category: 'Arquivos' },
+  { id: 'FileMinus', label: 'Remover Arquivo', category: 'Arquivos' },
+  { id: 'FileX', label: 'Fechar Arquivo', category: 'Arquivos' },
+  { id: 'FileCheck', label: 'Arquivo OK', category: 'Arquivos' },
+  { id: 'FileWarning', label: 'Arquivo Aviso', category: 'Arquivos' },
+  { id: 'Files', label: 'Arquivos', category: 'Arquivos' },
+  { id: 'Folder', label: 'Pasta', category: 'Arquivos' },
+  { id: 'FolderOpen', label: 'Pasta Aberta', category: 'Arquivos' },
+  { id: 'FolderPlus', label: 'Adicionar Pasta', category: 'Arquivos' },
+  { id: 'FolderMinus', label: 'Remover Pasta', category: 'Arquivos' },
+  { id: 'FolderX', label: 'Fechar Pasta', category: 'Arquivos' },
+  { id: 'FolderCheck', label: 'Pasta OK', category: 'Arquivos' },
+  { id: 'Download', label: 'Download', category: 'Arquivos' },
+  { id: 'Upload', label: 'Upload', category: 'Arquivos' },
+  { id: 'DownloadCloud', label: 'Download Nuvem', category: 'Arquivos' },
+  { id: 'UploadCloud', label: 'Upload Nuvem', category: 'Arquivos' },
+  { id: 'Save', label: 'Salvar', category: 'Arquivos' },
+  { id: 'SaveAll', label: 'Salvar Tudo', category: 'Arquivos' },
+  { id: 'Trash', label: 'Lixeira', category: 'Arquivos' },
+  { id: 'Trash2', label: 'Lixeira 2', category: 'Arquivos' },
+  { id: 'Copy', label: 'Copiar', category: 'Arquivos' },
+  { id: 'Clipboard', label: 'Área de Transferência', category: 'Arquivos' },
+  { id: 'ClipboardCopy', label: 'Copiar para Área', category: 'Arquivos' },
+  { id: 'ClipboardCheck', label: 'Área OK', category: 'Arquivos' },
+  
+  // Editing & Actions
   { id: 'Edit', label: 'Editar', category: 'Ações' },
   { id: 'Edit2', label: 'Editar 2', category: 'Ações' },
   { id: 'Edit3', label: 'Editar 3', category: 'Ações' },
-  { id: 'Trash', label: 'Lixeira', category: 'Ações' },
-  { id: 'Trash2', label: 'Lixeira 2', category: 'Ações' },
-  { id: 'Copy', label: 'Copiar', category: 'Ações' },
-  { id: 'Clipboard', label: 'Área de Transferência', category: 'Ações' },
-  { id: 'ClipboardCheck', label: 'Copiado', category: 'Ações' },
-  { id: 'Download', label: 'Download', category: 'Ações' },
-  { id: 'Upload', label: 'Upload', category: 'Ações' },
-  { id: 'Save', label: 'Salvar', category: 'Ações' },
-  { id: 'FolderOpen', label: 'Pasta Aberta', category: 'Ações' },
-  { id: 'Folder', label: 'Pasta', category: 'Ações' },
-  { id: 'File', label: 'Arquivo', category: 'Ações' },
-  { id: 'FileText', label: 'Documento', category: 'Ações' },
-  { id: 'FilePlus', label: 'Novo Arquivo', category: 'Ações' },
-  { id: 'Filter', label: 'Filtro', category: 'Ações' },
-  { id: 'SlidersHorizontal', label: 'Ajustes', category: 'Ações' },
-  { id: 'Settings', label: 'Configurações', category: 'Ações' },
+  { id: 'Undo', label: 'Desfazer', category: 'Ações' },
+  { id: 'Undo2', label: 'Desfazer 2', category: 'Ações' },
+  { id: 'Redo', label: 'Refazer', category: 'Ações' },
+  { id: 'Redo2', label: 'Refazer 2', category: 'Ações' },
+  { id: 'Plus', label: 'Mais', category: 'Ações' },
+  { id: 'PlusCircle', label: 'Mais Círculo', category: 'Ações' },
+  { id: 'PlusSquare', label: 'Mais Quadrado', category: 'Ações' },
+  { id: 'Minus', label: 'Menos', category: 'Ações' },
+  { id: 'MinusCircle', label: 'Menos Círculo', category: 'Ações' },
+  { id: 'MinusSquare', label: 'Menos Quadrado', category: 'Ações' },
   { id: 'Maximize', label: 'Maximizar', category: 'Ações' },
+  { id: 'Maximize2', label: 'Maximizar 2', category: 'Ações' },
   { id: 'Minimize', label: 'Minimizar', category: 'Ações' },
+  { id: 'Minimize2', label: 'Minimizar 2', category: 'Ações' },
+  { id: 'Expand', label: 'Expandir', category: 'Ações' },
+  { id: 'Shrink', label: 'Encolher', category: 'Ações' },
   { id: 'ZoomIn', label: 'Zoom In', category: 'Ações' },
   { id: 'ZoomOut', label: 'Zoom Out', category: 'Ações' },
-  { id: 'Eye', label: 'Visualizar', category: 'Ações' },
-  { id: 'EyeOff', label: 'Ocultar', category: 'Ações' },
-  { id: 'Power', label: 'Energia', category: 'Ações' },
+  { id: 'Move', label: 'Mover', category: 'Ações' },
+  { id: 'GripVertical', label: 'Arrastar V', category: 'Ações' },
+  { id: 'GripHorizontal', label: 'Arrastar H', category: 'Ações' },
+  { id: 'MoreHorizontal', label: 'Mais Opções H', category: 'Ações' },
+  { id: 'MoreVertical', label: 'Mais Opções V', category: 'Ações' },
+  { id: 'Power', label: 'Ligar/Desligar', category: 'Ações' },
   { id: 'PowerOff', label: 'Desligar', category: 'Ações' },
   { id: 'LogIn', label: 'Entrar', category: 'Ações' },
   { id: 'LogOut', label: 'Sair', category: 'Ações' },
   
-  // Documents & Data
-  { id: 'FileText', label: 'Documento', category: 'Documentos' },
-  { id: 'FileImage', label: 'Arquivo Imagem', category: 'Documentos' },
-  { id: 'FileVideo', label: 'Arquivo Vídeo', category: 'Documentos' },
-  { id: 'FileAudio', label: 'Arquivo Áudio', category: 'Documentos' },
-  { id: 'FileCode', label: 'Código', category: 'Documentos' },
-  { id: 'FileJson', label: 'JSON', category: 'Documentos' },
-  { id: 'FileSpreadsheet', label: 'Planilha', category: 'Documentos' },
-  { id: 'FileArchive', label: 'Arquivo Zip', category: 'Documentos' },
-  { id: 'Book', label: 'Livro', category: 'Documentos' },
-  { id: 'BookOpen', label: 'Livro Aberto', category: 'Documentos' },
-  { id: 'BookMarked', label: 'Livro Marcado', category: 'Documentos' },
-  { id: 'Notebook', label: 'Caderno', category: 'Documentos' },
-  { id: 'Library', label: 'Biblioteca', category: 'Documentos' },
-  { id: 'Newspaper', label: 'Jornal', category: 'Documentos' },
-  { id: 'ScrollText', label: 'Pergaminho', category: 'Documentos' },
-  { id: 'ListTodo', label: 'Lista de Tarefas', category: 'Documentos' },
-  { id: 'ClipboardList', label: 'Lista', category: 'Documentos' },
-  { id: 'Calendar', label: 'Calendário', category: 'Documentos' },
-  { id: 'CalendarDays', label: 'Calendário Dias', category: 'Documentos' },
-  { id: 'CalendarCheck', label: 'Data Marcada', category: 'Documentos' },
-  { id: 'Clock', label: 'Relógio', category: 'Documentos' },
-  { id: 'Clock2', label: 'Relógio 2', category: 'Documentos' },
-  { id: 'History', label: 'Histórico', category: 'Documentos' },
-  { id: 'BarChart', label: 'Gráfico Barras', category: 'Documentos' },
-  { id: 'BarChart2', label: 'Gráfico Barras 2', category: 'Documentos' },
-  { id: 'BarChart3', label: 'Gráfico Barras 3', category: 'Documentos' },
-  { id: 'PieChart', label: 'Gráfico Pizza', category: 'Documentos' },
-  { id: 'LineChart', label: 'Gráfico Linhas', category: 'Documentos' },
-  { id: 'TrendingUp', label: 'Tendência', category: 'Documentos' },
-  { id: 'Table', label: 'Tabela', category: 'Documentos' },
-  { id: 'Table2', label: 'Tabela 2', category: 'Documentos' },
-  { id: 'Grid', label: 'Grade', category: 'Documentos' },
-  { id: 'Rows', label: 'Linhas', category: 'Documentos' },
-  { id: 'Columns', label: 'Colunas', category: 'Documentos' },
-  
   // Tech & Devices
+  { id: 'Smartphone', label: 'Celular', category: 'Tecnologia' },
+  { id: 'Tablet', label: 'Tablet', category: 'Tecnologia' },
   { id: 'Laptop', label: 'Notebook', category: 'Tecnologia' },
   { id: 'Laptop2', label: 'Notebook 2', category: 'Tecnologia' },
   { id: 'Monitor', label: 'Monitor', category: 'Tecnologia' },
-  { id: 'Tablet', label: 'Tablet', category: 'Tecnologia' },
-  { id: 'Smartphone', label: 'Celular', category: 'Tecnologia' },
-  { id: 'Watch', label: 'Smartwatch', category: 'Tecnologia' },
+  { id: 'Tv', label: 'TV', category: 'Tecnologia' },
   { id: 'Keyboard', label: 'Teclado', category: 'Tecnologia' },
   { id: 'Mouse', label: 'Mouse', category: 'Tecnologia' },
   { id: 'Printer', label: 'Impressora', category: 'Tecnologia' },
-  { id: 'Cpu', label: 'CPU', category: 'Tecnologia' },
+  { id: 'ScanLine', label: 'Scanner', category: 'Tecnologia' },
   { id: 'HardDrive', label: 'HD', category: 'Tecnologia' },
   { id: 'Server', label: 'Servidor', category: 'Tecnologia' },
   { id: 'Database', label: 'Banco de Dados', category: 'Tecnologia' },
@@ -643,34 +648,20 @@ export interface WhiteLabelConfig {
   youtube: {
     enabled: boolean;
     channelId: string;
-
-    // Exibe/oculta busca por título na galeria
     searchEnabled?: boolean;
-
-    // Limite inicial de vídeos por categoria (null = sem limite)
     categoryPreviewLimit?: number | null;
-
-    // “Continuar assistindo” (histórico por usuário)
     continueWatchingEnabled?: boolean;
     continueWatchingLimit?: number;
-
-    // Badge “Novo” (últimos X dias)
     newBadgeDays?: number;
-
-    // Categoria “Em alta” (automático por views)
     trendingEnabled?: boolean;
     trendingDays?: number;
     trendingLimit?: number;
-
-    // Categorias manuais para a galeria de vídeos do YouTube
     categories?: Array<{
       id: string;
       name: string;
       icon?: string;
       order?: number;
     }>;
-
-    // Mapa video_id -> category_id
     videoCategoryMap?: Record<string, string | undefined>;
   };
 
@@ -688,7 +679,6 @@ export interface WhiteLabelConfig {
     videosTabLabel: string;
     avisosTabLabel: string;
     ideiasTabLabel: string;
-    // VIP Tab
     vipTabEnabled: boolean;
     vipTabLabel: string;
     vipTitle: string;
@@ -714,33 +704,6 @@ export interface WhiteLabelConfig {
     supabase: {
       url: string;
       anonKey: string;
-      enabled: boolean;
-    };
-    openpix: {
-      appId: string;
-      webhookSecret: string;
-      environment: 'sandbox' | 'production';
-      enabled: boolean;
-      // PIX Platform Configuration
-      platformPixKey: string;
-      platformPixKeyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM';
-      platformName: string;
-      defaultSplitPercentage: number; // % para plataforma (padrão 20)
-      platformPaysOpenPixFee: boolean; // Se true, taxa descontada da plataforma
-    };
-    support: {
-      token: string;
-      webhookUrl: string;
-      enabled: boolean;
-    };
-    accountStock: {
-      apiUrl: string;
-      apiKey: string;
-      enabled: boolean;
-    };
-    moderation: {
-      apiUrl: string;
-      apiKey: string;
       enabled: boolean;
     };
     metricsExport: {
@@ -797,16 +760,12 @@ const defaultConfig: WhiteLabelConfig = {
     channelId: '',
     searchEnabled: true,
     categoryPreviewLimit: 8,
-
     continueWatchingEnabled: true,
     continueWatchingLimit: 12,
-
     newBadgeDays: 7,
-
     trendingEnabled: true,
     trendingDays: 7,
     trendingLimit: 8,
-
     categories: [
       { id: 'roleplay', name: 'Roleplay', icon: '🎭', order: 1 },
       { id: 'mouth-sounds', name: 'Sons de boca', icon: '💋', order: 2 },
@@ -826,32 +785,6 @@ const defaultConfig: WhiteLabelConfig = {
     supabase: {
       url: '',
       anonKey: '',
-      enabled: false,
-    },
-    openpix: {
-      appId: '',
-      webhookSecret: '',
-      environment: 'sandbox',
-      enabled: false,
-      platformPixKey: '',
-      platformPixKeyType: 'RANDOM' as const,
-      platformName: '',
-      defaultSplitPercentage: 20,
-      platformPaysOpenPixFee: true,
-    },
-    support: {
-      token: '',
-      webhookUrl: '',
-      enabled: false,
-    },
-    accountStock: {
-      apiUrl: '',
-      apiKey: '',
-      enabled: false,
-    },
-    moderation: {
-      apiUrl: '',
-      apiKey: '',
       enabled: false,
     },
     metricsExport: {
@@ -933,10 +866,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         community: { ...defaultCommunityConfig, ...parsed.community },
         tokens: {
           supabase: { ...defaultConfig.tokens.supabase, ...parsed.tokens?.supabase },
-          openpix: { ...defaultConfig.tokens.openpix, ...parsed.tokens?.openpix },
-          support: { ...defaultConfig.tokens.support, ...parsed.tokens?.support },
-          accountStock: { ...defaultConfig.tokens.accountStock, ...parsed.tokens?.accountStock },
-          moderation: { ...defaultConfig.tokens.moderation, ...parsed.tokens?.moderation },
           metricsExport: { ...defaultConfig.tokens.metricsExport, ...parsed.tokens?.metricsExport },
         },
         adminCredentials: {
@@ -1074,30 +1003,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
         return { success: true, message: 'Conexão Supabase estabelecida!' };
         
-      case 'openpix':
-        if (!token.enabled || !config.tokens.openpix.appId) {
-          return { success: false, message: 'Configure App ID primeiro' };
-        }
-        return { success: true, message: 'OpenPix/Woovi conectado!' };
-        
-      case 'support':
-        if (!token.enabled || !config.tokens.support.token) {
-          return { success: false, message: 'Configure o token de suporte primeiro' };
-        }
-        return { success: true, message: 'Sistema de suporte conectado!' };
-        
-      case 'accountStock':
-        if (!token.enabled || !config.tokens.accountStock.apiUrl || !config.tokens.accountStock.apiKey) {
-          return { success: false, message: 'Configure URL e API Key primeiro' };
-        }
-        return { success: true, message: 'Estoque de contas conectado! 47 contas disponíveis.' };
-        
-      case 'moderation':
-        if (!token.enabled || !config.tokens.moderation.apiUrl || !config.tokens.moderation.apiKey) {
-          return { success: false, message: 'Configure URL e API Key primeiro' };
-        }
-        return { success: true, message: 'Painel de Moderação conectado!' };
-        
       default:
         return { success: false, message: 'Integração desconhecida' };
     }
@@ -1131,7 +1036,6 @@ export const useWhiteLabel = () => {
   const context = useContext(WhiteLabelContext);
 
   // Fallback to avoid a blank screen if a component renders outside the provider
-  // (e.g. during HMR or error recovery). We still log so we can diagnose.
   if (context === undefined) {
     console.error('useWhiteLabel used outside WhiteLabelProvider');
 

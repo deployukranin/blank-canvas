@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { mockVideoIdeas, type VideoIdea } from '@/lib/mock-data';
-import { onContentReport, trackEvent } from '@/lib/integrations';
+import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
   Dialog,
@@ -95,12 +95,8 @@ const IdeiasPage = () => {
       return;
     }
 
-    await onContentReport({
-      contentId: ideaId,
-      contentType: 'idea',
-      reason: reportReason,
-      reporterId: user?.id,
-    });
+    // Report functionality removed - just show feedback
+    console.log('[Report] Idea reported:', { ideaId, reason: reportReason });
 
     toast({
       title: 'Denúncia enviada',

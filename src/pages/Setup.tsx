@@ -169,106 +169,7 @@ const SupabaseStep = ({ onNext, onBack }: StepProps) => {
   );
 };
 
-// Step 3: OpenPix (Optional)
-const OpenPixStep = ({ onNext, onBack }: StepProps) => {
-  const { config, updateToken } = useWhiteLabel();
-  const [enabled, setEnabled] = useState(config.tokens.openpix.enabled);
-  const [appId, setAppId] = useState(config.tokens.openpix.appId);
-  const [webhookSecret, setWebhookSecret] = useState(config.tokens.openpix.webhookSecret);
-  const [environment, setEnvironment] = useState<'sandbox' | 'production'>(config.tokens.openpix.environment);
-
-  const handleNext = () => {
-    updateToken('openpix', { appId, webhookSecret, environment, enabled });
-    onNext();
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -50 }}
-      className="space-y-6"
-    >
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4">
-          <CreditCard className="w-8 h-8 text-blue-400" />
-        </div>
-        <h2 className="text-2xl font-display font-bold">Configurar OpenPix</h2>
-        <p className="text-muted-foreground mt-2">
-          Configure pagamentos PIX (opcional - pode configurar depois)
-        </p>
-      </div>
-
-      <GlassCard className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>Ativar Pagamentos PIX</Label>
-            <p className="text-xs text-muted-foreground">
-              Habilita cobranças via OpenPix/Woovi
-            </p>
-          </div>
-          <Switch checked={enabled} onCheckedChange={setEnabled} />
-        </div>
-
-        {enabled && (
-          <>
-            <div>
-              <Label>App ID (API Key)</Label>
-              <Input
-                type="password"
-                value={appId}
-                onChange={(e) => setAppId(e.target.value)}
-                placeholder="Seu App ID da OpenPix"
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <Label>Webhook Secret</Label>
-              <Input
-                type="password"
-                value={webhookSecret}
-                onChange={(e) => setWebhookSecret(e.target.value)}
-                placeholder="Secret para validar webhooks"
-                className="mt-2"
-              />
-            </div>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  checked={environment === 'sandbox'}
-                  onChange={() => setEnvironment('sandbox')}
-                  className="accent-primary"
-                />
-                <span className="text-sm">Sandbox (Testes)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  checked={environment === 'production'}
-                  onChange={() => setEnvironment('production')}
-                  className="accent-primary"
-                />
-                <span className="text-sm">Production (Real)</span>
-              </label>
-            </div>
-          </>
-        )}
-      </GlassCard>
-
-      <div className="flex justify-between pt-4">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </Button>
-        <Button onClick={handleNext} className="gap-2">
-          {enabled ? 'Próximo' : 'Pular'}
-          <ArrowRight className="w-4 h-4" />
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
+// OpenPix step removed - functionality cleaned up
 
 // Step 4: YouTube (Optional)
 const YouTubeStep = ({ onNext, onBack }: StepProps) => {
@@ -464,7 +365,6 @@ const Setup = () => {
   const steps = [
     { component: WelcomeStep, title: 'Bem-vindo' },
     { component: SupabaseStep, title: 'Supabase' },
-    { component: OpenPixStep, title: 'OpenPix' },
     { component: YouTubeStep, title: 'YouTube' },
     { component: BrandingStep, title: 'Branding' },
     { component: CompleteStep, title: 'Concluído' },

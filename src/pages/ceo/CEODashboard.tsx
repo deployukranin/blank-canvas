@@ -23,21 +23,6 @@ const CEODashboard = () => {
       enabled: config.tokens.supabase.enabled,
       configured: !!(config.tokens.supabase.url && config.tokens.supabase.anonKey),
     },
-    {
-      name: 'OpenPix/Woovi',
-      enabled: config.tokens.openpix.enabled,
-      configured: !!config.tokens.openpix.appId,
-    },
-    {
-      name: 'Suporte Externo',
-      enabled: config.tokens.support.enabled,
-      configured: !!(config.tokens.support.token),
-    },
-    {
-      name: 'Estoque de Contas',
-      enabled: config.tokens.accountStock.enabled,
-      configured: !!(config.tokens.accountStock.apiUrl && config.tokens.accountStock.apiKey),
-    },
   ];
 
   const quickLinks = [
@@ -75,7 +60,7 @@ const CEODashboard = () => {
         </motion.div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Site Name */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -103,23 +88,6 @@ const CEODashboard = () => {
               </p>
             </GlassCard>
           </motion.div>
-
-          {/* Environment */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <GlassCard className="text-center">
-              <div className="w-8 h-8 mx-auto mb-3 rounded-full bg-amber-400/20 flex items-center justify-center">
-                <span className="text-amber-400 font-bold text-sm">🔧</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Ambiente OpenPix</p>
-              <p className="font-display font-bold text-lg capitalize">
-                {config.tokens.openpix.environment || 'sandbox'}
-              </p>
-            </GlassCard>
-          </motion.div>
         </div>
 
         {/* Integration Status */}
@@ -133,7 +101,7 @@ const CEODashboard = () => {
           </h3>
           <GlassCard>
             <div className="divide-y divide-border">
-              {integrationStatus.map((integration, index) => (
+              {integrationStatus.map((integration) => (
                 <div key={integration.name} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
                   <span className="font-medium">{integration.name}</span>
                   <div className="flex items-center gap-2">
@@ -169,23 +137,29 @@ const CEODashboard = () => {
           <h3 className="font-display font-semibold text-lg mb-4 text-amber-100">
             Ações Rápidas
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {quickLinks.map((link) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {quickLinks.map((link, index) => (
               <Link key={link.path} to={link.path}>
-                <GlassCard hover className="h-full">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                      <link.icon className="w-6 h-6 text-amber-400" />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 + index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <GlassCard className="group cursor-pointer hover:border-amber-500/30 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors">
+                        <link.icon className="w-6 h-6 text-amber-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold">{link.label}</p>
+                        <p className="text-sm text-muted-foreground">{link.description}</p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-amber-400 transition-colors" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium mb-1 flex items-center gap-2">
-                        {link.label}
-                        <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      </p>
-                      <p className="text-sm text-muted-foreground">{link.description}</p>
-                    </div>
-                  </div>
-                </GlassCard>
+                  </GlassCard>
+                </motion.div>
               </Link>
             ))}
           </div>

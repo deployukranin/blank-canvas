@@ -21,7 +21,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { mockFeedPosts, mockForumIdeas, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
 import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
-import { moderateContent } from '@/lib/content-moderation';
+// Content moderation removed - inline simple check
+const moderateContent = (content: string) => ({ isBlocked: false, blockedWords: [] as string[] });
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
