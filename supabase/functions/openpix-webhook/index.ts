@@ -56,6 +56,16 @@ Deno.serve(async (req) => {
     const payload: OpenPixWebhookPayload = await req.json();
     console.log('Webhook received:', JSON.stringify(payload));
 
+    // Handle test webhooks from OpenPix dashboard
+    const isTestWebhook = (payload as any).evento === 'teste_webhook';
+    if (isTestWebhook) {
+      console.log('Test webhook received - responding with success');
+      return new Response(
+        JSON.stringify({ received: true, processed: false, reason: 'Test webhook acknowledged' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Only process charge completed events
     if (payload.event !== 'OPENPIX:CHARGE_COMPLETED') {
       console.log('Ignoring event:', payload.event);
