@@ -22,7 +22,6 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   loginAsAdmin: (email: string, password: string, role: "admin" | "ceo") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
@@ -141,29 +140,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   }, []);
 
-  const loginWithGoogle = useCallback(async () => {
-    try {
-      const { lovable } = await import("@/integrations/lovable/index");
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      
-      if (result.error) {
-        return { success: false, error: result.error.message };
-      }
-      
-      // If redirected, the page will reload and onAuthStateChange will handle the session
-      if (result.redirected) {
-        return { success: true };
-      }
-      
-      return { success: true };
-    } catch (err) {
-      console.error("Google login error:", err);
-      return { success: false, error: "Erro ao fazer login com Google" };
-    }
-  }, []);
-
   const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
     // For mock admin login - set user state directly without Supabase
     const mockUser: User = {
@@ -220,7 +196,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
-        loginWithGoogle,
         loginAsAdmin,
         logout,
         requireAuth,
@@ -248,7 +223,6 @@ export const useAuth = (): AuthContextType => {
       signUp: asyncNoop,
       signIn: asyncNoop,
       signOut: async () => {},
-      loginWithGoogle: asyncNoop,
       loginAsAdmin: asyncNoop,
       logout: noop,
       requireAuth: noop,
