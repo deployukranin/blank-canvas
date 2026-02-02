@@ -35,6 +35,7 @@ import { ReputationCard } from '@/components/reputation/ReputationCard';
 import { PushNotificationToggle } from '@/components/notifications/PushNotificationToggle';
 import { UserHandle } from '@/components/profile/UserHandle';
 import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
+import { VIPAreaContent } from '@/components/vip/VIPAreaContent';
 const getPostTypeConfig = (type: FeedPost['type']) => {
   switch (type) {
     case 'announcement':
@@ -1001,41 +1002,7 @@ const ComunidadePage = () => {
 
           {config.community.vipTabEnabled && (
             <TabsContent value="vip" className="space-y-4 mt-0">
-              <GlassCard className="p-6 text-center bg-gradient-to-br from-vip/10 to-primary/5 border-vip/20">
-                <Crown className="w-12 h-12 mx-auto mb-4 text-vip" />
-                <h3 className="font-display font-semibold text-lg mb-2">
-                  {config.community.vipTitle || 'Área VIP'}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {config.community.vipDescription || 'Conteúdo exclusivo para membros VIP.'}
-                </p>
-                <Button className="gap-2 bg-vip hover:bg-vip/90">
-                  <Lock className="w-4 h-4" />
-                  {config.community.vipButtonLabel || 'Tornar-se VIP'}
-                </Button>
-              </GlassCard>
-
-              <div className="grid gap-3">
-                {(config.community.vipBenefits || []).map((benefit) => (
-                  <GlassCard key={benefit.id} className="p-4 opacity-75">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-vip/20 flex items-center justify-center">
-                        {benefit.icon === 'star' && <Star className="w-5 h-5 text-vip" />}
-                        {benefit.icon === 'bell' && <Bell className="w-5 h-5 text-vip" />}
-                        {benefit.icon === 'message' && <MessageCircle className="w-5 h-5 text-vip" />}
-                        {benefit.icon === 'gift' && <Gift className="w-5 h-5 text-vip" />}
-                        {benefit.icon === 'zap' && <Zap className="w-5 h-5 text-vip" />}
-                        {benefit.icon === 'heart' && <Heart className="w-5 h-5 text-vip" />}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{benefit.title}</h4>
-                        <p className="text-xs text-muted-foreground">{benefit.description}</p>
-                      </div>
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
+              <VIPAreaContent />
             </TabsContent>
           )}
         </Tabs>
