@@ -895,13 +895,36 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Apply CSS variables whenever colors change
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--primary', config.colors.primary);
-    root.style.setProperty('--accent', config.colors.accent);
-    root.style.setProperty('--background', config.colors.background);
+    
+    // Validate HSL format before applying (should be "H S% L%" format)
+    const isValidHSL = (value: string) => {
+      const parts = value.trim().split(/\s+/);
+      if (parts.length !== 3) return false;
+      const h = parseFloat(parts[0]);
+      const s = parts[1];
+      const l = parts[2];
+      return !isNaN(h) && h >= 0 && h <= 360 && 
+             s.endsWith('%') && l.endsWith('%');
+    };
+    
+    // Only apply valid HSL colors, otherwise use defaults
+    const defaultColors = {
+      primary: '270 70% 60%',
+      accent: '280 60% 70%',
+      background: '260 30% 6%',
+    };
+    
+    const primary = isValidHSL(config.colors.primary) ? config.colors.primary : defaultColors.primary;
+    const accent = isValidHSL(config.colors.accent) ? config.colors.accent : defaultColors.accent;
+    const background = isValidHSL(config.colors.background) ? config.colors.background : defaultColors.background;
+    
+    root.style.setProperty('--primary', primary);
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--background', background);
     
     // Update gradient variables that use primary/accent
-    root.style.setProperty('--ring', config.colors.primary);
-    root.style.setProperty('--sidebar-primary', config.colors.primary);
+    root.style.setProperty('--ring', primary);
+    root.style.setProperty('--sidebar-primary', primary);
   }, [config.colors]);
 
   // Save to localStorage whenever config changes
