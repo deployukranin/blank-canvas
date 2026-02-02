@@ -245,6 +245,78 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_content: {
+        Row: {
+          content: string
+          content_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          media_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          media_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          media_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vip_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          plan_type: string
+          price_cents: number
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          plan_type?: string
+          price_cents: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          plan_type?: string
+          price_cents?: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -257,6 +329,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_vip: { Args: { check_user_id: string }; Returns: boolean }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
     }
     Enums: {
