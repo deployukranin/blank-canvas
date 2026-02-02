@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Upload, Plus, Trash2, ShoppingBag, ExternalLink, Globe, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, ShoppingBag, ExternalLink, Globe, AlertTriangle, CheckCircle2, Tag } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -89,6 +89,8 @@ const defaultProducts: ProductCustomization[] = [
 interface ShopifyConfig {
   enabled: boolean;
   storeUrl: string;
+  couponCode: string;
+  couponLabel: string;
 }
 
 const CEOLoja = () => {
@@ -110,6 +112,8 @@ const CEOLoja = () => {
   const [shopifyConfig, setShopifyConfig] = useState<ShopifyConfig>({
     enabled: config.shopify?.enabled || false,
     storeUrl: config.shopify?.storeUrl || '',
+    couponCode: config.shopify?.couponCode || '',
+    couponLabel: config.shopify?.couponLabel || 'Use o cupom',
   });
   const [testingUrl, setTestingUrl] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
@@ -132,6 +136,8 @@ const CEOLoja = () => {
       shopify: {
         enabled: shopifyConfig.enabled,
         storeUrl: shopifyConfig.storeUrl,
+        couponCode: shopifyConfig.couponCode,
+        couponLabel: shopifyConfig.couponLabel,
       },
     });
     toast.success('Configuração Shopify salva!');
@@ -282,15 +288,45 @@ const CEOLoja = () => {
                 </p>
               </div>
 
+              {/* Coupon Configuration */}
+              <div className="space-y-4 p-4 rounded-lg border border-border/50 bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  <Label className="text-base font-medium">Configuração de Cupom</Label>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Código do Cupom</Label>
+                    <Input
+                      value={shopifyConfig.couponCode}
+                      onChange={(e) => setShopifyConfig(prev => ({ ...prev, couponCode: e.target.value }))}
+                      placeholder="Ex: DESCONTO10"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Deixe em branco para não exibir cupom
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Texto do Aviso</Label>
+                    <Input
+                      value={shopifyConfig.couponLabel}
+                      onChange={(e) => setShopifyConfig(prev => ({ ...prev, couponLabel: e.target.value }))}
+                      placeholder="Ex: Use o cupom"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Warning */}
               <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/10">
                 <div className="flex gap-3">
                   <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-amber-200">Aviso de Compatibilidade</p>
+                    <p className="text-sm font-medium text-amber-200">Informação</p>
                     <p className="text-xs text-muted-foreground">
-                      Algumas lojas Shopify bloqueiam o carregamento via iframe por segurança. 
-                      Se a loja não carregar, os usuários verão um botão para abrir em nova aba.
+                      O usuário será redirecionado para sua loja Shopify ao clicar no botão. 
+                      O cupom será exibido para que ele possa copiar antes de ir para a loja.
                     </p>
                   </div>
                 </div>

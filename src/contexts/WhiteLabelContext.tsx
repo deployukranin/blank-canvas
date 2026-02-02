@@ -703,6 +703,8 @@ export interface WhiteLabelConfig {
   shopify: {
     enabled: boolean;
     storeUrl: string;
+    couponCode?: string;
+    couponLabel?: string;
   };
 
   // Integration Tokens
@@ -790,6 +792,8 @@ const defaultConfig: WhiteLabelConfig = {
   shopify: {
     enabled: false,
     storeUrl: '',
+    couponCode: '',
+    couponLabel: 'Use o cupom',
   },
   tokens: {
     supabase: {
