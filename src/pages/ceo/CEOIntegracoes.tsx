@@ -1,18 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Database,
-  Save,
-  TestTube,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  Eye,
-  EyeOff,
-  Youtube,
-  Download,
-  Upload,
-} from 'lucide-react';
+import { Save, Youtube } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -23,51 +11,10 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
-import { exportConfig, importConfig } from '@/lib/config-export';
 import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
-import { MetricsExportManager } from '@/components/ceo/MetricsExportManager';
-
-interface TokenInputProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  isSecret?: boolean;
-}
-
-const TokenInput = ({ label, value, onChange, placeholder, isSecret = true }: TokenInputProps) => {
-  const [showValue, setShowValue] = useState(false);
-
-  return (
-    <div>
-      <Label className="text-sm">{label}</Label>
-      <div className="relative mt-2">
-        <Input
-          type={isSecret && !showValue ? 'password' : 'text'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="pr-10"
-        />
-        {isSecret && (
-          <button
-            type="button"
-            onClick={() => setShowValue(!showValue)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showValue ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const CEOIntegracoes = () => {
-  const { config, updateToken, testConnection, updateYouTube, setConfig } = useWhiteLabel();
-  const [testingConnection, setTestingConnection] = useState<string | null>(null);
-  const [connectionResults, setConnectionResults] = useState<Record<string, { success: boolean; message: string }>>({}); 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { config, updateYouTube } = useWhiteLabel();
 
   const [youtubeDraft, setYoutubeDraft] = useState({
     enabled: config.youtube?.enabled ?? true,
@@ -97,81 +44,14 @@ const CEOIntegracoes = () => {
 
   const videos = useMemo(() => ytData?.videos ?? [], [ytData]);
 
-  const handleTest = async (tokenKey: "supabase") => {
-    setTestingConnection(tokenKey);
-    const result = await testConnection(tokenKey);
-    setConnectionResults((prev) => ({ ...prev, [tokenKey]: result }));
-    setTestingConnection(null);
-
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-  };
-
   const handleSave = () => {
     updateYouTube(youtubeDraft);
     toast.success("Configurações de integrações salvas!");
   };
 
-  const handleExport = () => {
-    exportConfig(config);
-    toast.success("Configurações exportadas com sucesso!");
-  };
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const importedConfig = await importConfig(file);
-      setConfig(importedConfig);
-      toast.success("Configurações importadas com sucesso! Recarregando...");
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      // Reload to apply all changes
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao importar configurações");
-    }
-  };
-
   return (
     <CEOLayout title="Integrações Externas">
       <div className="space-y-8 max-w-4xl">
-        {/* Export/Import Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap gap-3"
-        >
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Exportar Configurações
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            className="gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Importar Configurações
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            className="hidden"
-          />
-        </motion.div>
 
         {/* YouTube */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -364,85 +244,8 @@ const CEOIntegracoes = () => {
           </GlassCard>
         </motion.div>
 
-        {/* Supabase */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <GlassCard>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                  <Database className="w-6 h-6 text-green-400" />
-                </div>
-                <div>
-                  <h3 className="font-display font-semibold text-lg">Supabase</h3>
-                  <p className="text-sm text-muted-foreground">Banco de dados e autenticação</p>
-                </div>
-              </div>
-              <Switch
-                checked={config.tokens.supabase.enabled}
-                onCheckedChange={(checked) => updateToken('supabase', { enabled: checked })}
-              />
-            </div>
-
-            {config.tokens.supabase.enabled && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <TokenInput
-                  label="URL do Projeto"
-                  value={config.tokens.supabase.url}
-                  onChange={(value) => updateToken('supabase', { url: value })}
-                  placeholder="https://xxx.supabase.co"
-                  isSecret={false}
-                />
-                <TokenInput
-                  label="Anon Key"
-                  value={config.tokens.supabase.anonKey}
-                  onChange={(value) => updateToken('supabase', { anonKey: value })}
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR..."
-                />
-                <div className="flex items-center gap-3 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleTest('supabase')}
-                    disabled={testingConnection === 'supabase'}
-                    className="gap-2"
-                  >
-                    {testingConnection === 'supabase' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <TestTube className="w-4 h-4" />
-                    )}
-                    Testar Conexão
-                  </Button>
-                  {connectionResults.supabase && (
-                    <span
-                      className={`flex items-center gap-1 text-sm ${
-                        connectionResults.supabase.success
-                          ? 'text-green-400'
-                          : 'text-red-400'
-                      }`}
-                    >
-                      {connectionResults.supabase.success ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <XCircle className="w-4 h-4" />
-                      )}
-                      {connectionResults.supabase.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
         {/* Admin Credentials */}
         <AdminCredentialsManager />
-
-        {/* Metrics Export */}
-        <MetricsExportManager />
 
         {/* Save Button */}
         <motion.div
