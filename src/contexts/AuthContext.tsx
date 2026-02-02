@@ -142,19 +142,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
-    // Mock login for testing - creates a fake user session
-    const mockUser: User = {
-      id: `mock-user-${Date.now()}`,
-      email: "usuario.teste@gmail.com",
-      username: "Usuário Teste",
-      avatar: "https://ui-avatars.com/api/?name=Usuario+Teste&background=8b5cf6&color=fff",
-      isVIP: false,
-      isAdmin: false,
-      isCEO: false,
-      createdAt: new Date().toISOString(),
-    };
-    setUser(mockUser);
-    return { success: true };
+    try {
+      const { lovable } = await import("@/integrations/lovable/index");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      
+      if (result.error) {
+        return { success: false, error: result.error.message };
+      }
+      
+      // If redirected, the page will reload and onAuthStateChange will handle the session
+      if (result.redirected) {
+        return { success: true };
+      }
+      
+      return { success: true };
+    } catch (err) {
+      console.error("Google login error:", err);
+      return { success: false, error: "Erro ao fazer login com Google" };
+    }
   }, []);
 
   const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
