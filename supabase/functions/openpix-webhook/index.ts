@@ -122,6 +122,51 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Handle VIP subscription payments (no split, just activate subscription)
+    if (order.product_type === 'vip_subscription' && order.product_id) {
+      console.log('Processing VIP subscription payment for:', order.product_id);
+      
+      // Activate the VIP subscription
+      const { error: vipUpdateError } = await supabase
+        .from('vip_subscriptions')
+        .update({
+          status: 'active',
+          started_at: new Date().toISOString(),
+        })
+        .eq('id', order.product_id);
+
+      if (vipUpdateError) {
+        console.error('Failed to activate VIP subscription:', vipUpdateError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to activate VIP subscription', details: vipUpdateError }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Mark order as paid
+      await supabase
+        .from('custom_orders')
+        .update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', order.id);
+
+      console.log('VIP subscription activated:', order.product_id);
+      
+      return new Response(
+        JSON.stringify({
+          received: true,
+          processed: true,
+          order_id: order.id,
+          subscription_id: order.product_id,
+          payment_status: 'paid',
+          type: 'vip_subscription',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Calculate split
     const totalCents = order.amount_cents;
     const creatorShareCents = Math.floor(totalCents * CREATOR_PERCENTAGE);

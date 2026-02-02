@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Lock, Star, Gift, Zap, Heart, Video, Music, Image, FileText, Check, Loader2 } from 'lucide-react';
+import { Crown, Lock, Star, Gift, Zap, Heart, Video, Music, Image, FileText, Check, Loader2, Copy, Clock, RefreshCw } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useVIPSubscription, VIPContent } from '@/hooks/use-vip-subscription';
+import { useVIPSubscription, VIPContent, VIPChargeResult } from '@/hooks/use-vip-subscription';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -54,23 +54,54 @@ const getBenefitIcon = (icon: string) => {
 
 export const VIPAreaContent = () => {
   const { config } = useWhiteLabel();
-  const { isAuthenticated } = useAuth();
+  const { session } = useAuth();
+  const isAuthenticated = !!session?.user;
   const { 
     isVIP, 
     isLoading, 
     vipContent, 
     subscription, 
-    subscribe, 
-    getDaysRemaining 
+    createCharge,
+    checkPaymentStatus,
+    copyBrCode,
+    getDaysRemaining,
+    refreshSubscription,
   } = useVIPSubscription();
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showSubscribeDialog, setShowSubscribeDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [chargeData, setChargeData] = useState<VIPChargeResult | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<string>('pending');
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   const VIP_MONTHLY_PRICE = 19.90;
   const VIP_YEARLY_PRICE = 199.00;
+
+  // Poll for payment status
+  useEffect(() => {
+    if (chargeData?.correlationId && showPaymentDialog) {
+      const poll = async () => {
+        const status = await checkPaymentStatus(chargeData.correlationId!);
+        if (status?.status === 'paid') {
+          setPaymentStatus('paid');
+          await refreshSubscription();
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+          }
+        }
+      };
+
+      pollingRef.current = setInterval(poll, 3000);
+      return () => {
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current);
+        }
+      };
+    }
+  }, [chargeData?.correlationId, showPaymentDialog, checkPaymentStatus, refreshSubscription]);
 
   const handleSubscribeClick = () => {
     if (!isAuthenticated) {
@@ -82,9 +113,29 @@ export const VIPAreaContent = () => {
 
   const handleConfirmSubscription = async () => {
     setIsProcessing(true);
-    await subscribe(selectedPlan);
+    const result = await createCharge(selectedPlan);
     setIsProcessing(false);
-    setShowSubscribeDialog(false);
+    
+    if (result.success) {
+      setChargeData(result);
+      setPaymentStatus('pending');
+      setShowSubscribeDialog(false);
+      setShowPaymentDialog(true);
+    }
+  };
+
+  const handleCopyCode = async () => {
+    if (chargeData?.brCode) {
+      await copyBrCode(chargeData.brCode);
+    }
+  };
+
+  const handleClosePayment = () => {
+    setShowPaymentDialog(false);
+    setChargeData(null);
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
   };
 
   if (isLoading) {
@@ -252,7 +303,7 @@ export const VIPAreaContent = () => {
         message="Faça login para assinar o VIP"
       />
 
-      {/* Subscribe Dialog */}
+      {/* Subscribe Dialog - Plan Selection */}
       <Dialog open={showSubscribeDialog} onOpenChange={setShowSubscribeDialog}>
         <DialogContent className="glass mx-4">
           <DialogHeader>
@@ -261,7 +312,7 @@ export const VIPAreaContent = () => {
               Assinar VIP
             </DialogTitle>
             <DialogDescription>
-              Escolha seu plano e aproveite benefícios exclusivos
+              Escolha seu plano e pague via PIX
             </DialogDescription>
           </DialogHeader>
 
@@ -332,14 +383,95 @@ export const VIPAreaContent = () => {
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processando...
+                    Gerando PIX...
                   </>
                 ) : (
-                  'Confirmar'
+                  'Gerar PIX'
                 )}
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog - QR Code */}
+      <Dialog open={showPaymentDialog} onOpenChange={handleClosePayment}>
+        <DialogContent className="glass mx-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-vip" />
+              Pagamento PIX
+            </DialogTitle>
+            <DialogDescription>
+              {paymentStatus === 'paid' 
+                ? 'Pagamento confirmado!' 
+                : 'Escaneie o QR Code ou copie o código'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {paymentStatus === 'paid' ? (
+            <div className="text-center py-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Check className="w-8 h-8 text-green-500" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Bem-vindo ao VIP! 👑</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Sua assinatura foi ativada com sucesso
+              </p>
+              <Button onClick={handleClosePayment} className="bg-vip text-vip-foreground">
+                Acessar Conteúdo VIP
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* QR Code */}
+              {chargeData?.qrCodeImage && (
+                <div className="flex justify-center">
+                  <div className="bg-white p-3 rounded-xl">
+                    <img 
+                      src={chargeData.qrCodeImage} 
+                      alt="QR Code PIX" 
+                      className="w-48 h-48"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Amount */}
+              <div className="text-center">
+                <span className="text-2xl font-bold text-vip">
+                  R$ {((chargeData?.amountCents || 0) / 100).toFixed(2).replace('.', ',')}
+                </span>
+                <span className="text-sm text-muted-foreground ml-2">
+                  ({chargeData?.planType === 'monthly' ? 'Mensal' : 'Anual'})
+                </span>
+              </div>
+
+              {/* Copy Code Button */}
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={handleCopyCode}
+              >
+                <Copy className="w-4 h-4" />
+                Copiar Código PIX
+              </Button>
+
+              {/* Status */}
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Aguardando pagamento...
+              </div>
+
+              {/* Expiration */}
+              {chargeData?.expiresAt && (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  Expira em 15 minutos
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
