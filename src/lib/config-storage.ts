@@ -6,7 +6,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
-import { getAdminToken } from '@/lib/admin-session';
+import { clearAdminSession, getAdminToken } from '@/lib/admin-session';
 
 export type ConfigKey = 
   | 'video_config' 
@@ -67,11 +67,19 @@ export const saveConfig = async <T>(
     });
 
     if (error) {
+      // If the admin token is invalid/expired, stop retry loops by clearing it.
+      const status = (error as unknown as { status?: number }).status;
+      if (status === 401) {
+        clearAdminSession();
+      }
       console.error(`Error saving config ${key}:`, error);
       return false;
     }
 
     if (!data?.success) {
+      if (data?.error === 'Não autorizado') {
+        clearAdminSession();
+      }
       console.error(`Failed to save config ${key}:`, data?.error);
       return false;
     }
