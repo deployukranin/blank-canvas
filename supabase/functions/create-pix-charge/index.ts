@@ -58,13 +58,25 @@ Deno.serve(async (req) => {
     // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get user ID from auth header if present
+    // Get user ID from auth header - REQUIRED (can be anonymous user)
     let userId: string | null = null;
     const authHeader = req.headers.get('Authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.replace('Bearer ', '');
       const { data } = await supabase.auth.getUser(token);
       userId = data.user?.id || null;
+    }
+
+    // User must be authenticated (regular or anonymous)
+    if (!userId) {
+      console.error('No authenticated user found - rejecting charge creation');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Autenticação necessária para criar cobrança. Tente novamente.' 
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Rate limiting: use user_id if logged in, otherwise use IP

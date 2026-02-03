@@ -18,12 +18,15 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
+  isAnonymous: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signInAnonymously: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
+  ensureAuthenticated: () => Promise<boolean>;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
 
@@ -156,6 +159,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const signInAnonymously = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+
+      if (error) {
+        console.error("Anonymous sign-in error:", error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("Anonymous sign-in unexpected error:", err);
+      return { success: false, error: "Erro ao criar sessão anônima" };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -179,6 +198,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [user]
   );
 
+  // Ensures user is authenticated (signs in anonymously if needed for guest checkout)
+  const ensureAuthenticated = useCallback(async (): Promise<boolean> => {
+    if (session) {
+      return true;
+    }
+
+    // Sign in anonymously for guest users
+    const result = await signInAnonymously();
+    return result.success;
+  }, [session, signInAnonymously]);
+
   const applyLocalProfile = useCallback(
     (patch: { displayName?: string; avatarDataUrl?: string }) => {
       setUser((prev) => {
@@ -193,18 +223,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     []
   );
 
+  // Check if user is anonymous (signed in but no email)
+  const isAnonymous = !!session?.user && session.user.is_anonymous === true;
+
   return (
     <AuthContext.Provider
       value={{
         user,
         session,
         isAuthenticated: !!user,
+        isAnonymous,
         isLoading,
         signUp,
         signIn,
+        signInAnonymously,
         signOut,
         logout,
         requireAuth,
+        ensureAuthenticated,
         applyLocalProfile,
       }}
     >
@@ -225,12 +261,15 @@ export const useAuth = (): AuthContextType => {
       user: null,
       session: null,
       isAuthenticated: false,
+      isAnonymous: false,
       isLoading: false,
       signUp: asyncNoop,
       signIn: asyncNoop,
+      signInAnonymously: asyncNoop,
       signOut: async () => {},
       logout: noop,
       requireAuth: noop,
+      ensureAuthenticated: async () => false,
       applyLocalProfile: noop,
     };
   }
