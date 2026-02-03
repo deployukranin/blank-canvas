@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ExternalLink, Tag, ShoppingBag } from 'lucide-react';
+import { ExternalLink, Tag, ShoppingBag, Sparkles, Copy } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Button } from '@/components/ui/button';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
@@ -32,17 +32,23 @@ const LojaShopify = () => {
     }
   };
 
+  const handleCopyCouponButton = () => {
+    if (couponCode) {
+      navigator.clipboard.writeText(couponCode);
+    }
+  };
+
   return (
     <MobileLayout hideHeader>
-      <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center px-6 py-12 gap-8">
+      <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center px-6 py-12 gap-6">
         {/* Store Icon */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20"
+          className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20"
         >
-          <ShoppingBag className="w-12 h-12 text-primary" />
+          <ShoppingBag className="w-10 h-10 text-primary" />
         </motion.div>
 
         {/* Title */}
@@ -50,47 +56,83 @@ const LojaShopify = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-center space-y-2"
+          className="text-center space-y-1"
         >
-          <h1 className="font-display font-semibold text-2xl">Loja</h1>
-          <p className="text-muted-foreground text-sm max-w-xs">
-            Acesse nossa loja para ver todos os produtos disponíveis
-          </p>
+          <h1 className="font-display font-semibold text-2xl">Nossa Loja Parceira</h1>
         </motion.div>
 
-        {/* Coupon Alert */}
-        {couponCode && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="w-full max-w-sm"
-          >
-            <Alert className="bg-primary/10 border-primary/30 cursor-pointer hover:bg-primary/15 transition-colors" onClick={handleCopyCoupon}>
-              <Tag className="w-4 h-4 text-primary" />
-              <AlertDescription className="flex items-center gap-2">
-                <span className="text-foreground">{couponLabel}</span>
-                <span className="font-bold text-primary">{couponCode}</span>
-                <span className="text-xs text-muted-foreground ml-auto">(toque para copiar)</span>
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
+        {/* Benefits Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="w-full max-w-sm"
+        >
+          <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 rounded-2xl p-5 space-y-4">
+            {/* Coupon benefit */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Tag className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-foreground font-medium text-sm">
+                  Compre usando meu cupom e ganhe
+                </p>
+                <p className="text-primary font-bold text-lg">30% OFF em todos os produtos</p>
+              </div>
+            </div>
 
-        {/* Open Store Button */}
+            {/* Subscription benefit */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-foreground font-medium text-sm">
+                  Assinaturas por até
+                </p>
+                <p className="text-primary font-bold text-lg">-80% do valor</p>
+              </div>
+            </div>
+
+            {/* Coupon display */}
+            {couponCode && (
+              <div className="pt-2 border-t border-primary/20">
+                <p className="text-muted-foreground text-xs mb-2">{couponLabel}</p>
+                <div className="flex items-center justify-between bg-background/50 rounded-lg px-4 py-2 border border-primary/20">
+                  <span className="font-mono font-bold text-primary text-lg tracking-wider">{couponCode}</span>
+                  <Copy className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Action Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="w-full max-w-sm"
+          className="w-full max-w-sm space-y-3"
         >
+          {couponCode && (
+            <Button 
+              onClick={handleCopyCouponButton} 
+              variant="outline"
+              className="w-full gap-2 h-12 text-base border-primary/30 hover:bg-primary/10"
+            >
+              <Copy className="w-5 h-5" />
+              Copiar Cupom
+            </Button>
+          )}
+          
           <Button 
             onClick={handleOpenStore} 
             className="w-full gap-2 h-12 text-base"
             disabled={!normalizedUrl}
           >
             <ExternalLink className="w-5 h-5" />
-            Ir para Loja
+            Abrir Loja Parceira
           </Button>
         </motion.div>
 
