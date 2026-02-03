@@ -16,6 +16,14 @@ export interface VideoCategory {
   icon: string;
 }
 
+export interface AudioCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  basePrice: number;
+}
+
 export interface VideoRules {
   allowed: string[];
   notAllowed: string[];
@@ -27,6 +35,7 @@ export interface VideoConfig {
   previewDescription: string;
   durations: VideoDuration[];
   categories: VideoCategory[];
+  audioCategories: AudioCategory[];
   rules: VideoRules;
   deliveryDays: number;
 }
@@ -80,6 +89,36 @@ export const defaultVideoConfig: VideoConfig = {
       name: 'Com Seu Nome', 
       description: 'Vídeo sussurrando seu nome', 
       icon: '💫'
+    },
+  ],
+  audioCategories: [
+    {
+      id: 'sussurros',
+      name: 'Sussurros',
+      description: 'Áudios com sussurros suaves',
+      icon: '🤫',
+      basePrice: 29.90,
+    },
+    {
+      id: 'afirmacoes',
+      name: 'Afirmações',
+      description: 'Afirmações positivas para relaxar',
+      icon: '💝',
+      basePrice: 34.90,
+    },
+    {
+      id: 'para-dormir',
+      name: 'Para Dormir',
+      description: 'Áudios relaxantes para ajudar a dormir',
+      icon: '🌙',
+      basePrice: 39.90,
+    },
+    {
+      id: 'sons-especificos',
+      name: 'Sons Específicos',
+      description: 'Tapping, scratching e outros sons',
+      icon: '🎵',
+      basePrice: 24.90,
     },
   ],
   rules: {
