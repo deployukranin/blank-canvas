@@ -14,3 +14,15 @@ verify_jwt = false
 
 [functions.create-vip-charge]
 verify_jwt = false
+
+[functions.validate-admin-login]
+verify_jwt = false
+
+[functions.get-admin-credentials]
+verify_jwt = false
+
+[functions.update-admin-credentials]
+verify_jwt = false
+
+[functions.save-app-config]
+verify_jwt = false

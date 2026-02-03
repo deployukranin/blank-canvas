@@ -1,9 +1,12 @@
 /**
  * Configuration Storage - Persists app configurations to Supabase
+ * 
+ * Uses edge function for saving (bypasses RLS for admin users)
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
+import { getAdminToken } from '@/lib/admin-session';
 
 export type ConfigKey = 
   | 'video_config' 
@@ -34,47 +37,46 @@ export const loadConfig = async <T>(key: ConfigKey): Promise<T | null> => {
 };
 
 /**
- * Save configuration to database
+ * Save configuration to database via edge function
+ * This bypasses RLS by using service role in the edge function
  */
 export const saveConfig = async <T>(
   key: ConfigKey, 
   value: T
 ): Promise<boolean> => {
   try {
-    // Check if exists first
-    const { data: existing } = await supabase
-      .from('app_configurations')
-      .select('id')
-      .eq('config_key', key)
-      .maybeSingle();
-
-    let error;
-    if (existing) {
-      // Update existing
-      const result = await supabase
-        .from('app_configurations')
-        .update({ 
-          config_value: value as Json,
-          updated_at: new Date().toISOString()
-        })
-        .eq('config_key', key);
-      error = result.error;
-    } else {
-      // Insert new
-      const result = await supabase
-        .from('app_configurations')
-        .insert({ 
-          config_key: key, 
-          config_value: value as Json
-        });
-      error = result.error;
+    // Get admin token if available
+    const adminToken = getAdminToken();
+    
+    // Build headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (adminToken) {
+      headers['x-admin-token'] = adminToken;
     }
+
+    // Call edge function to save config
+    const { data, error } = await supabase.functions.invoke('save-app-config', {
+      body: {
+        config_key: key,
+        config_value: value,
+      },
+      headers,
+    });
 
     if (error) {
       console.error(`Error saving config ${key}:`, error);
       return false;
     }
 
+    if (!data?.success) {
+      console.error(`Failed to save config ${key}:`, data?.error);
+      return false;
+    }
+
+    console.log(`Config ${key} saved successfully`);
     return true;
   } catch (err) {
     console.error(`Exception saving config ${key}:`, err);
