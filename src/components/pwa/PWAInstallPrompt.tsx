@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Smartphone } from 'lucide-react';
+import { X, Download, Smartphone, Share, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 export const PWAInstallPrompt = () => {
-  const { canInstall, promptInstall, dismissPrompt } = usePWAInstall();
+  const { canInstall, isIOS, promptInstall, dismissPrompt } = usePWAInstall();
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,10 @@ export const PWAInstallPrompt = () => {
 
   const handleInstall = async () => {
     await promptInstall();
-    setShowPrompt(false);
+    if (!isIOS) {
+      setShowPrompt(false);
+    }
+    // For iOS, keep showing instructions
   };
 
   const handleDismiss = () => {
@@ -75,7 +78,6 @@ export const PWAInstallPrompt = () => {
                     alt="ASMR Luna" 
                     className="h-16 w-16 rounded-xl"
                     onError={(e) => {
-                      // Fallback to icon if image fails
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.parentElement?.classList.add('fallback-icon');
                     }}
@@ -88,27 +90,76 @@ export const PWAInstallPrompt = () => {
                   Instale o ASMR Luna!
                 </h3>
 
-                {/* Description */}
-                <p className="mb-6 text-sm text-muted-foreground">
-                  Adicione nosso app na sua tela inicial para acesso rápido e melhor experiência.
-                </p>
+                {/* Description - Different for iOS */}
+                {isIOS ? (
+                  <div className="mb-5 space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Para instalar no seu iPhone/iPad, siga os passos:
+                    </p>
+                    
+                    {/* iOS Installation Steps */}
+                    <div className="space-y-2 rounded-xl bg-muted/50 p-4 text-left">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                          <Share className="h-4 w-4" />
+                        </div>
+                        <p className="text-sm text-foreground">
+                          <span className="font-medium">1.</span> Toque no botão <span className="font-semibold">Compartilhar</span> do Safari
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                          <Plus className="h-4 w-4" />
+                        </div>
+                        <p className="text-sm text-foreground">
+                          <span className="font-medium">2.</span> Selecione <span className="font-semibold">"Adicionar à Tela de Início"</span>
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                          <Download className="h-4 w-4" />
+                        </div>
+                        <p className="text-sm text-foreground">
+                          <span className="font-medium">3.</span> Toque em <span className="font-semibold">"Adicionar"</span> no canto superior
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mb-6 text-sm text-muted-foreground">
+                    Adicione nosso app na sua tela inicial para acesso rápido e melhor experiência.
+                  </p>
+                )}
 
                 {/* Buttons */}
                 <div className="flex w-full gap-3">
-                  <Button
-                    onClick={handleInstall}
-                    className="flex-1 gap-2 bg-gradient-to-r from-primary to-primary/80 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
-                  >
-                    <Download className="h-4 w-4" />
-                    Instalar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={handleDismiss}
-                    className="flex-1 text-muted-foreground hover:text-foreground"
-                  >
-                    Agora não
-                  </Button>
+                  {isIOS ? (
+                    <Button
+                      onClick={handleDismiss}
+                      className="flex-1 gap-2 bg-gradient-to-r from-primary to-primary/80 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                    >
+                      Entendi!
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={handleInstall}
+                        className="flex-1 gap-2 bg-gradient-to-r from-primary to-primary/80 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                      >
+                        <Download className="h-4 w-4" />
+                        Instalar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={handleDismiss}
+                        className="flex-1 text-muted-foreground hover:text-foreground"
+                      >
+                        Agora não
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
