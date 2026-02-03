@@ -22,7 +22,6 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
-  loginAsAdmin: (email: string, password: string, role: "admin" | "ceo") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
@@ -30,15 +29,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+const mapSupabaseUserToUser = async (supabaseUser: SupabaseUser): Promise<User> => {
+  // Fetch roles from user_roles table
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", supabaseUser.id);
+
+  const userRoles = roles?.map(r => r.role) || [];
+  const isAdmin = userRoles.includes('admin') || userRoles.includes('ceo');
+  const isCEO = userRoles.includes('ceo');
+
   const baseUser: User = {
     id: supabaseUser.id,
     email: supabaseUser.email || "",
     username: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] || "Usuário",
     avatar: supabaseUser.user_metadata?.avatar_url,
     isVIP: false,
-    isAdmin: false,
-    isCEO: false,
+    isAdmin,
+    isCEO,
     createdAt: supabaseUser.created_at,
   };
 
@@ -66,8 +75,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
-        setUser(newSession?.user ? mapSupabaseUserToUser(newSession.user) : null);
-        setIsLoading(false);
+        
+        if (newSession?.user) {
+          // Use setTimeout to avoid deadlock with Supabase client
+          setTimeout(async () => {
+            const mappedUser = await mapSupabaseUserToUser(newSession.user);
+            setUser(mappedUser);
+            setIsLoading(false);
+          }, 0);
+        } else {
+          setUser(null);
+          setIsLoading(false);
+        }
 
         // Execute pending callback if user just logged in
         if (event === "SIGNED_IN" && pendingCallback) {
@@ -80,9 +99,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
       setSession(existingSession);
-      setUser(existingSession?.user ? mapSupabaseUserToUser(existingSession.user) : null);
+      if (existingSession?.user) {
+        const mappedUser = await mapSupabaseUserToUser(existingSession.user);
+        setUser(mappedUser);
+      }
       setIsLoading(false);
     });
 
@@ -140,21 +162,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   }, []);
 
-  const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
-    // For mock admin login - set user state directly without Supabase
-    const mockUser: User = {
-      id: `mock-${role}-${Date.now()}`,
-      email,
-      username: role === 'ceo' ? 'CEO' : 'Admin',
-      isVIP: true,
-      isAdmin: true,
-      isCEO: role === 'ceo',
-      createdAt: new Date().toISOString(),
-    };
-    setUser(mockUser);
-    return { success: true };
-  }, []);
-
   const logout = useCallback(() => {
     signOut();
   }, [signOut]);
@@ -196,7 +203,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
-        loginAsAdmin,
         logout,
         requireAuth,
         applyLocalProfile,
@@ -223,7 +229,6 @@ export const useAuth = (): AuthContextType => {
       signUp: asyncNoop,
       signIn: asyncNoop,
       signOut: async () => {},
-      loginAsAdmin: asyncNoop,
       logout: noop,
       requireAuth: noop,
       applyLocalProfile: noop,
