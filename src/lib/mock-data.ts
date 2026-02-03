@@ -1,6 +1,6 @@
 /**
- * Type Definitions for Application Data
- * Data arrays have been removed for production - use database queries instead
+ * Mock Data for MVP
+ * This data will be replaced with real database queries in the future
  */
 
 export interface VideoIdea {
@@ -48,7 +48,7 @@ export interface FeedPost {
   isPinned?: boolean;
   authorUsername: string;
   authorAvatar?: string;
-  authorId?: string;
+  authorId?: string; // For real users with handles
 }
 
 export interface ForumComment {
@@ -57,7 +57,7 @@ export interface ForumComment {
   content: string;
   authorUsername: string;
   authorAvatar?: string;
-  authorId?: string;
+  authorId?: string; // For real users with handles
   createdAt: string;
 }
 
@@ -68,13 +68,121 @@ export interface ForumIdea {
   votes: number;
   authorUsername: string;
   authorAvatar?: string;
-  authorId?: string;
+  authorId?: string; // For real users with handles
   createdAt: string;
   commentsCount: number;
   comments?: ForumComment[];
 }
 
-// VIP Benefits - keeping this as it's static configuration
+// Mock Video Ideas
+export const mockVideoIdeas: VideoIdea[] = [
+  {
+    id: '1',
+    title: 'ASMR chuva na janela com digitação suave',
+    description: 'Um vídeo relaxante combinando sons de chuva batendo na janela com digitação suave no teclado. Perfeito para estudar ou dormir.',
+    votes: 47,
+    status: 'active',
+    authorName: 'Luna',
+    createdAt: '2024-01-15',
+  },
+  {
+    id: '2',
+    title: 'Roleplay: Bibliotecária organizando livros',
+    description: 'ASMR de roleplay com sons de páginas virando, sussurros e organização de livros antigos.',
+    votes: 32,
+    status: 'active',
+    authorName: 'Carlos M.',
+    createdAt: '2024-01-14',
+  },
+  {
+    id: '3',
+    title: 'Tapping em diferentes texturas de madeira',
+    description: 'Explorar diferentes tipos de madeira com tapping suave - carvalho, pinho, bambu, etc.',
+    votes: 28,
+    status: 'active',
+    authorName: 'Ana B.',
+    createdAt: '2024-01-13',
+  },
+  {
+    id: '4',
+    title: 'ASMR de desenho com lápis de cor',
+    description: 'Som relaxante de lápis de cor desenhando em papel texturizado, com sussurros explicando o desenho.',
+    votes: 41,
+    status: 'active',
+    authorName: 'Pedro',
+    createdAt: '2024-01-12',
+  },
+  {
+    id: '5',
+    title: 'Unboxing de produtos de skincare (sussurrado)',
+    description: 'ASMR de unboxing com muitos crinkles, tapping em embalagens e sussurros sobre cada produto.',
+    votes: 19,
+    status: 'active',
+    authorName: 'Mariana',
+    createdAt: '2024-01-11',
+  },
+];
+
+// Mock Digital Subscriptions
+export const mockSubscriptions: DigitalSubscription[] = [
+  {
+    id: 'netflix',
+    name: 'Netflix',
+    description: 'Acesso completo ao catálogo de filmes e séries',
+    price: 29.90,
+    originalPrice: 55.90,
+    image: '/placeholder.svg',
+    features: ['Catálogo completo', '4 telas simultâneas', 'Qualidade 4K', 'Downloads ilimitados'],
+    popular: true,
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify Premium',
+    description: 'Músicas e podcasts sem anúncios',
+    price: 14.90,
+    originalPrice: 21.90,
+    image: '/placeholder.svg',
+    features: ['Sem anúncios', 'Downloads offline', 'Qualidade máxima', 'Spotify Connect'],
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube Premium',
+    description: 'Vídeos sem anúncios + YouTube Music',
+    price: 19.90,
+    originalPrice: 29.99,
+    image: '/placeholder.svg',
+    features: ['Sem anúncios', 'YouTube Music', 'Downloads', 'Reprodução em segundo plano'],
+  },
+  {
+    id: 'disney',
+    name: 'Disney+',
+    description: 'Disney, Marvel, Star Wars e muito mais',
+    price: 24.90,
+    originalPrice: 43.90,
+    image: '/placeholder.svg',
+    features: ['Catálogo completo', 'Originais exclusivos', '4 telas', 'Downloads'],
+  },
+  {
+    id: 'hbo',
+    name: 'Max (HBO)',
+    description: 'Séries premiadas e filmes exclusivos',
+    price: 27.90,
+    originalPrice: 49.90,
+    image: '/placeholder.svg',
+    features: ['HBO Originals', 'Warner Bros', 'Discovery+', 'Qualidade 4K'],
+  },
+  {
+    id: 'prime',
+    name: 'Amazon Prime',
+    description: 'Prime Video + benefícios Amazon',
+    price: 12.90,
+    originalPrice: 19.90,
+    image: '/placeholder.svg',
+    features: ['Prime Video', 'Frete grátis', 'Prime Gaming', 'Prime Reading'],
+  },
+];
+
+// Mock VIP Benefits
 export const mockVIPBenefits: VIPBenefit[] = [
   {
     icon: '👑',
@@ -108,7 +216,7 @@ export const mockVIPBenefits: VIPBenefit[] = [
   },
 ];
 
-// Custom Video Categories - keeping as static configuration
+// Mock Custom Video Categories
 export const mockVideoCategories: CustomCategory[] = [
   {
     id: 'relaxation',
@@ -140,7 +248,7 @@ export const mockVideoCategories: CustomCategory[] = [
   },
 ];
 
-// Custom Audio Categories - keeping as static configuration
+// Mock Custom Audio Categories
 export const mockAudioCategories: CustomCategory[] = [
   {
     id: 'whispers',
@@ -169,5 +277,129 @@ export const mockAudioCategories: CustomCategory[] = [
     description: 'Tapping, scratching, crinkling, etc.',
     icon: '🎵',
     basePrice: 24.90,
+  },
+];
+
+// Mock Feed Posts (Avisos)
+export const mockFeedPosts: FeedPost[] = [
+  {
+    id: '1',
+    type: 'announcement',
+    title: '🎉 Novo horário de lives!',
+    content: 'A partir de agora, nossas lives serão toda sexta-feira às 21h! Marquem na agenda e venham relaxar comigo.',
+    createdAt: '2024-01-16T18:00:00',
+    isPinned: true,
+    authorUsername: 'luna_asmr',
+    authorAvatar: '🌙',
+  },
+  {
+    id: '2',
+    type: 'news',
+    title: 'Novo microfone chegou! 🎙️',
+    content: 'Finalmente chegou o microfone novo que vocês tanto pediram. Os próximos vídeos vão ter uma qualidade de áudio incrível. Mal posso esperar para vocês ouvirem!',
+    createdAt: '2024-01-15T14:30:00',
+    authorUsername: 'luna_asmr',
+    authorAvatar: '🌙',
+  },
+  {
+    id: '3',
+    type: 'exclusive',
+    title: '✨ Prévia do vídeo de amanhã',
+    content: 'Para os VIPs: o vídeo de amanhã vai ser um roleplay de loja de cristais! Vocês vão amar os sons das pedras.',
+    createdAt: '2024-01-14T20:00:00',
+    authorUsername: 'luna_asmr',
+    authorAvatar: '🌙',
+  },
+  {
+    id: '4',
+    type: 'news',
+    title: 'Obrigada por 100k! 💜',
+    content: 'Não tenho palavras para agradecer o carinho de vocês. 100 mil inscritos é um sonho realizado. Vem conteúdo especial por aí!',
+    createdAt: '2024-01-13T16:00:00',
+    authorUsername: 'luna_asmr',
+    authorAvatar: '🌙',
+  },
+];
+
+// Mock Forum Ideas (Ideias da comunidade)
+export const mockForumIdeas: ForumIdea[] = [
+  {
+    id: '1',
+    title: 'ASMR chuva na janela com digitação suave',
+    description: 'Um vídeo relaxante combinando sons de chuva batendo na janela com digitação suave no teclado. Perfeito para estudar ou dormir.',
+    votes: 47,
+    authorUsername: 'relaxed_user',
+    authorAvatar: '😴',
+    createdAt: '2024-01-15T10:00:00',
+    commentsCount: 2,
+    comments: [
+      {
+        id: 'c1',
+        ideaId: '1',
+        content: 'Adorei essa ideia! Chuva + digitação seria perfeito para estudar.',
+        authorUsername: 'study_lover',
+        authorAvatar: '📖',
+        createdAt: '2024-01-15T12:00:00',
+      },
+      {
+        id: 'c2',
+        ideaId: '1',
+        content: 'Apoio total! Combina muito bem esses dois sons.',
+        authorUsername: 'sleepy_head',
+        authorAvatar: '😪',
+        createdAt: '2024-01-15T14:30:00',
+      },
+    ],
+  },
+  {
+    id: '2',
+    title: 'Roleplay: Bibliotecária organizando livros',
+    description: 'ASMR de roleplay com sons de páginas virando, sussurros e organização de livros antigos.',
+    votes: 32,
+    authorUsername: 'book_lover',
+    authorAvatar: '📚',
+    createdAt: '2024-01-14T15:30:00',
+    commentsCount: 1,
+    comments: [
+      {
+        id: 'c3',
+        ideaId: '2',
+        content: 'Biblioteca é meu cenário favorito de ASMR!',
+        authorUsername: 'quiet_reader',
+        authorAvatar: '🤫',
+        createdAt: '2024-01-14T18:00:00',
+      },
+    ],
+  },
+  {
+    id: '3',
+    title: 'Tapping em diferentes texturas de madeira',
+    description: 'Explorar diferentes tipos de madeira com tapping suave - carvalho, pinho, bambu, etc.',
+    votes: 28,
+    authorUsername: 'tingle_fan',
+    authorAvatar: '✨',
+    createdAt: '2024-01-13T20:00:00',
+    commentsCount: 0,
+    comments: [],
+  },
+  {
+    id: '4',
+    title: 'ASMR de desenho com lápis de cor',
+    description: 'Som relaxante de lápis de cor desenhando em papel texturizado, com sussurros explicando o desenho.',
+    votes: 41,
+    authorUsername: 'art_whisper',
+    authorAvatar: '🎨',
+    createdAt: '2024-01-12T18:45:00',
+    commentsCount: 1,
+    comments: [
+      {
+        id: 'c4',
+        ideaId: '4',
+        content: 'Seria incrível ver o desenho sendo feito enquanto ouve os sons!',
+        authorUsername: 'creative_soul',
+        authorAvatar: '🎨',
+        createdAt: '2024-01-12T20:00:00',
+      },
+    ],
   },
 ];

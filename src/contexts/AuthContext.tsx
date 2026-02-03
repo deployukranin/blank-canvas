@@ -18,39 +18,27 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
-  isAnonymous: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signInAnonymously: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  loginAsAdmin: (email: string, password: string, role: "admin" | "ceo") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
-  ensureAuthenticated: () => Promise<boolean>;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapSupabaseUserToUser = async (supabaseUser: SupabaseUser): Promise<User> => {
-  // Fetch roles from user_roles table
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", supabaseUser.id);
-
-  const userRoles = roles?.map(r => r.role) || [];
-  const isAdmin = userRoles.includes('admin') || userRoles.includes('ceo');
-  const isCEO = userRoles.includes('ceo');
-
+const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
   const baseUser: User = {
     id: supabaseUser.id,
     email: supabaseUser.email || "",
     username: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] || "Usuário",
     avatar: supabaseUser.user_metadata?.avatar_url,
     isVIP: false,
-    isAdmin,
-    isCEO,
+    isAdmin: false,
+    isCEO: false,
     createdAt: supabaseUser.created_at,
   };
 
@@ -78,18 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
-        
-        if (newSession?.user) {
-          // Use setTimeout to avoid deadlock with Supabase client
-          setTimeout(async () => {
-            const mappedUser = await mapSupabaseUserToUser(newSession.user);
-            setUser(mappedUser);
-            setIsLoading(false);
-          }, 0);
-        } else {
-          setUser(null);
-          setIsLoading(false);
-        }
+        setUser(newSession?.user ? mapSupabaseUserToUser(newSession.user) : null);
+        setIsLoading(false);
 
         // Execute pending callback if user just logged in
         if (event === "SIGNED_IN" && pendingCallback) {
@@ -102,12 +80,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
       setSession(existingSession);
-      if (existingSession?.user) {
-        const mappedUser = await mapSupabaseUserToUser(existingSession.user);
-        setUser(mappedUser);
-      }
+      setUser(existingSession?.user ? mapSupabaseUserToUser(existingSession.user) : null);
       setIsLoading(false);
     });
 
@@ -159,26 +134,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signInAnonymously = useCallback(async () => {
-    try {
-      const { error } = await supabase.auth.signInAnonymously();
-
-      if (error) {
-        console.error("Anonymous sign-in error:", error);
-        return { success: false, error: error.message };
-      }
-
-      return { success: true };
-    } catch (err) {
-      console.error("Anonymous sign-in unexpected error:", err);
-      return { success: false, error: "Erro ao criar sessão anônima" };
-    }
-  }, []);
-
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+  }, []);
+
+  const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
+    // For mock admin login - set user state directly without Supabase
+    const mockUser: User = {
+      id: `mock-${role}-${Date.now()}`,
+      email,
+      username: role === 'ceo' ? 'CEO' : 'Admin',
+      isVIP: true,
+      isAdmin: true,
+      isCEO: role === 'ceo',
+      createdAt: new Date().toISOString(),
+    };
+    setUser(mockUser);
+    return { success: true };
   }, []);
 
   const logout = useCallback(() => {
@@ -198,17 +172,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [user]
   );
 
-  // Ensures user is authenticated (signs in anonymously if needed for guest checkout)
-  const ensureAuthenticated = useCallback(async (): Promise<boolean> => {
-    if (session) {
-      return true;
-    }
-
-    // Sign in anonymously for guest users
-    const result = await signInAnonymously();
-    return result.success;
-  }, [session, signInAnonymously]);
-
   const applyLocalProfile = useCallback(
     (patch: { displayName?: string; avatarDataUrl?: string }) => {
       setUser((prev) => {
@@ -223,24 +186,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     []
   );
 
-  // Check if user is anonymous (signed in but no email)
-  const isAnonymous = !!session?.user && session.user.is_anonymous === true;
-
   return (
     <AuthContext.Provider
       value={{
         user,
         session,
         isAuthenticated: !!user,
-        isAnonymous,
         isLoading,
         signUp,
         signIn,
-        signInAnonymously,
         signOut,
+        loginAsAdmin,
         logout,
         requireAuth,
-        ensureAuthenticated,
         applyLocalProfile,
       }}
     >
@@ -261,15 +219,13 @@ export const useAuth = (): AuthContextType => {
       user: null,
       session: null,
       isAuthenticated: false,
-      isAnonymous: false,
       isLoading: false,
       signUp: asyncNoop,
       signIn: asyncNoop,
-      signInAnonymously: asyncNoop,
       signOut: async () => {},
+      loginAsAdmin: asyncNoop,
       logout: noop,
       requireAuth: noop,
-      ensureAuthenticated: async () => false,
       applyLocalProfile: noop,
     };
   }

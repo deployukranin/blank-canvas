@@ -161,36 +161,6 @@ export type Database = {
         }
         Relationships: []
       }
-      rate_limits: {
-        Row: {
-          created_at: string
-          endpoint: string
-          id: string
-          identifier: string
-          request_count: number
-          updated_at: string
-          window_start: string
-        }
-        Insert: {
-          created_at?: string
-          endpoint: string
-          id?: string
-          identifier: string
-          request_count?: number
-          updated_at?: string
-          window_start?: string
-        }
-        Update: {
-          created_at?: string
-          endpoint?: string
-          id?: string
-          identifier?: string
-          request_count?: number
-          updated_at?: string
-          window_start?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -376,52 +346,9 @@ export type Database = {
       }
     }
     Views: {
-      admin_credentials_safe: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          id: string | null
-          role: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      check_rate_limit: {
-        Args: {
-          p_endpoint: string
-          p_identifier: string
-          p_max_requests?: number
-          p_window_minutes?: number
-        }
-        Returns: Json
-      }
-      cleanup_old_rate_limits: { Args: never; Returns: number }
-      get_admin_credentials_safe: {
-        Args: never
-        Returns: {
-          created_at: string
-          email: string
-          id: string
-          role: string
-          updated_at: string
-        }[]
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

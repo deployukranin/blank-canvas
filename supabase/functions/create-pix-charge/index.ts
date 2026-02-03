@@ -2,12 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dev-mode, x-forwarded-for',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dev-mode',
 };
-
-// Rate limit configuration
-const RATE_LIMIT_MAX_REQUESTS = 5; // Max 5 payment attempts
-const RATE_LIMIT_WINDOW_MINUTES = 60; // Per hour
 
 interface CreateChargeRequest {
   amount: number;
@@ -21,19 +17,6 @@ interface CreateChargeRequest {
   script?: string;
   preferences?: string;
   observations?: string;
-}
-
-// Extract client IP from request headers
-function getClientIP(req: Request): string {
-  const forwardedFor = req.headers.get('x-forwarded-for');
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
-  }
-  const realIP = req.headers.get('x-real-ip');
-  if (realIP) {
-    return realIP;
-  }
-  return 'unknown';
 }
 
 Deno.serve(async (req) => {
@@ -55,69 +38,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create Supabase client with service role
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Get user ID from auth header - REQUIRED (can be anonymous user)
-    let userId: string | null = null;
-    const authHeader = req.headers.get('Authorization');
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data } = await supabase.auth.getUser(token);
-      userId = data.user?.id || null;
-    }
-
-    // User must be authenticated (regular or anonymous)
-    if (!userId) {
-      console.error('No authenticated user found - rejecting charge creation');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Autenticação necessária para criar cobrança. Tente novamente.' 
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Rate limiting: use user_id if logged in, otherwise use IP
-    const clientIP = getClientIP(req);
-    const rateLimitIdentifier = userId || `ip:${clientIP}`;
-    
-    console.log('Rate limit check for:', rateLimitIdentifier);
-
-    // Check rate limit using database function
-    const { data: rateLimitResult, error: rateLimitError } = await supabase
-      .rpc('check_rate_limit', {
-        p_identifier: rateLimitIdentifier,
-        p_endpoint: 'create-pix-charge',
-        p_max_requests: RATE_LIMIT_MAX_REQUESTS,
-        p_window_minutes: RATE_LIMIT_WINDOW_MINUTES,
-      });
-
-    if (rateLimitError) {
-      console.error('Rate limit check failed:', rateLimitError);
-      // Continue without rate limiting if check fails (fail open for usability)
-    } else if (rateLimitResult && !rateLimitResult.allowed) {
-      console.warn('Rate limit exceeded for:', rateLimitIdentifier, rateLimitResult);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Muitas tentativas de pagamento. Tente novamente mais tarde.',
-          retry_after_seconds: rateLimitResult.retry_after_seconds,
-        }),
-        { 
-          status: 429, 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json',
-            'Retry-After': String(rateLimitResult.retry_after_seconds || 3600),
-          } 
-        }
-      );
-    }
-
-    console.log('Rate limit passed:', rateLimitResult);
-
     const body: CreateChargeRequest = await req.json();
     console.log('Creating charge for:', body);
 
@@ -129,27 +49,23 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate amount (minimum R$1.00, maximum R$10,000.00)
-    if (body.amount < 1 || body.amount > 10000) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Valor inválido. Mínimo R$1,00, máximo R$10.000,00' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Validate customer name (basic sanitization)
-    if (body.customerName.length < 2 || body.customerName.length > 100) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Nome do cliente inválido' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Convert amount to cents
     const amountCents = Math.round(body.amount * 100);
     
     // Generate unique correlationID
     const correlationID = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
+    // Create Supabase client with service role
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Get user ID from auth header if present
+    let userId: string | null = null;
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      userId = data.user?.id || null;
+    }
 
     // Calculate expiration (15 minutes)
     const expiresAt = new Date();

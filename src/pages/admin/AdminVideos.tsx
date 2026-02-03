@@ -55,12 +55,11 @@ const AdminVideos = () => {
       name: 'Nova Categoria',
       description: 'Descrição da categoria',
       icon: '🎬',
-      extraPrice: 0,
     };
     setConfig({ ...config, categories: [...config.categories, newCategory] });
   };
 
-  const updateCategory = (index: number, field: keyof VideoCategory, value: string | number) => {
+  const updateCategory = (index: number, field: keyof VideoCategory, value: string) => {
     if (!config) return;
     const newCategories = [...config.categories];
     newCategories[index] = { ...newCategories[index], [field]: value };
@@ -262,18 +261,6 @@ const AdminVideos = () => {
                         value={category.name}
                         onChange={e => updateCategory(index, 'name', e.target.value)}
                       />
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground whitespace-nowrap">+R$</span>
-                        <Input
-                          type="number"
-                          className="w-20"
-                          step="0.01"
-                          min={0}
-                          placeholder="0,00"
-                          value={category.extraPrice || 0}
-                          onChange={e => updateCategory(index, 'extraPrice', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
                       <Button
                         size="icon"
                         variant="ghost"

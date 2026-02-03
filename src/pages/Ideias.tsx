@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { type VideoIdea } from '@/lib/mock-data';
+import { mockVideoIdeas, type VideoIdea } from '@/lib/mock-data';
 import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
@@ -22,7 +22,7 @@ import {
 const IdeiasPage = () => {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
-  const [ideas, setIdeas] = useState<VideoIdea[]>([]);
+  const [ideas, setIdeas] = useState<VideoIdea[]>(mockVideoIdeas);
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportingId, setReportingId] = useState<string | null>(null);

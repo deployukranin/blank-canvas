@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Mail, Lock, Eye, EyeOff, Crown, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { loginAsAdmin } = useAuth();
   const { toast } = useToast();
   
   const [email, setEmail] = useState('');
@@ -18,69 +20,37 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check if already logged in as admin
-  useEffect(() => {
-    const checkExistingSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // Check if user has admin or ceo role
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id);
-        
-        if (roles?.some(r => r.role === 'ceo')) {
-          navigate('/ceo');
-        } else if (roles?.some(r => r.role === 'admin')) {
-          navigate('/admin');
-        }
-      }
-    };
-    checkExistingSession();
-  }, [navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Validate credentials via edge function which returns a real Supabase session
+      // Validate credentials against database via edge function
       const { data, error: funcError } = await supabase.functions.invoke('validate-admin-login', {
         body: { email, password }
       });
 
       if (funcError || !data?.success) {
-        setError(data?.error || 'Email ou senha inválidos.');
+        setError('Email ou senha inválidos.');
         setIsLoading(false);
         return;
       }
 
-      // Set the session from the edge function response
-      if (data.session) {
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
-
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          setError('Erro ao estabelecer sessão.');
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      toast({
-        title: data.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!',
-        description: 'Login realizado com sucesso.',
-      });
+      const result = await loginAsAdmin(email, password, data.role);
       
-      // Redirect based on role
-      if (data.role === 'ceo') {
-        navigate('/ceo');
-      } else {
-        navigate('/admin');
+      if (result.success) {
+        toast({
+          title: data.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!',
+          description: 'Login realizado com sucesso.',
+        });
+        
+        // Redirect based on role
+        if (data.role === 'ceo') {
+          navigate('/ceo');
+        } else {
+          navigate('/admin');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -177,6 +147,24 @@ export default function AdminLogin() {
             </Button>
           </form>
 
+          {/* Role indicators */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-xs text-muted-foreground text-center mb-3">
+              Tipos de acesso disponíveis:
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-muted/50 text-center">
+                <Shield className="w-5 h-5 mx-auto mb-1 text-primary" />
+                <p className="text-xs font-medium">Admin</p>
+                <p className="text-[10px] text-muted-foreground">Gerenciamento</p>
+              </div>
+              <div className="p-3 rounded-xl bg-accent/20 text-center">
+                <Crown className="w-5 h-5 mx-auto mb-1 text-accent" />
+                <p className="text-xs font-medium">CEO</p>
+                <p className="text-[10px] text-muted-foreground">Acesso total</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Back to home */}
