@@ -19,12 +19,33 @@ export const useYouTubeVideos = ({ channelId, enabled = true }: UseYouTubeVideos
     queryKey: ["youtube-videos", channelId],
     enabled: enabled && Boolean(channelId),
     staleTime: 5 * 60 * 1000,
+    retry: (failureCount, error) => {
+      // Don't retry quota errors
+      if (error?.message?.includes("quota") || error?.message?.includes("403")) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("youtube-videos", {
         body: { channelId },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[useYouTubeVideos] Error:", error);
+        throw error;
+      }
+
+      // Handle API errors returned in data
+      if (data?.error) {
+        const errorMessage = data.details?.error?.message || data.error;
+        const isQuotaError = errorMessage?.includes("quota") || data.details?.error?.code === 403;
+        
+        if (isQuotaError) {
+          throw new Error("Quota da API do YouTube excedida. Tente novamente amanhã.");
+        }
+        throw new Error(errorMessage);
+      }
 
       const videos = ((data?.videos ?? []) as YouTubeVideoItem[])
         .filter((v) => v?.video_id)
