@@ -169,30 +169,33 @@ export const defaultVideoConfig: VideoConfig = {
   },
 };
 
-// Mock function to get config (will be replaced with API call)
+// Sync function to get config (for backwards compatibility)
+// Loads from localStorage cache, which is populated by the async loader
 export const getVideoConfig = (): VideoConfig => {
-  // In the future, this will fetch from the database
-  const savedConfig = localStorage.getItem('videoConfig');
+  const savedConfig = localStorage.getItem('videoConfig_cache');
   if (savedConfig) {
-    const parsed = JSON.parse(savedConfig);
-    // Merge with defaults to ensure new fields are present
-    return {
-      ...defaultVideoConfig,
-      ...parsed,
-      previewType: parsed.previewType || defaultVideoConfig.previewType,
-      previewImageUrl: parsed.previewImageUrl || defaultVideoConfig.previewImageUrl,
-      audioPreviewUrl: parsed.audioPreviewUrl || defaultVideoConfig.audioPreviewUrl,
-      audioPreviewEnabled: parsed.audioPreviewEnabled ?? defaultVideoConfig.audioPreviewEnabled,
-      audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
-      audioDurations: parsed.audioDurations || defaultVideoConfig.audioDurations,
-    };
+    try {
+      const parsed = JSON.parse(savedConfig);
+      return {
+        ...defaultVideoConfig,
+        ...parsed,
+        previewType: parsed.previewType || defaultVideoConfig.previewType,
+        previewImageUrl: parsed.previewImageUrl || defaultVideoConfig.previewImageUrl,
+        audioPreviewUrl: parsed.audioPreviewUrl || defaultVideoConfig.audioPreviewUrl,
+        audioPreviewEnabled: parsed.audioPreviewEnabled ?? defaultVideoConfig.audioPreviewEnabled,
+        audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
+        audioDurations: parsed.audioDurations || defaultVideoConfig.audioDurations,
+      };
+    } catch {
+      return defaultVideoConfig;
+    }
   }
   return defaultVideoConfig;
 };
 
-// Mock function to save config (will be replaced with API call)
+// Sync save for backwards compatibility - updates local cache
 export const saveVideoConfig = (config: VideoConfig): void => {
-  localStorage.setItem('videoConfig', JSON.stringify(config));
+  localStorage.setItem('videoConfig_cache', JSON.stringify(config));
 };
 
 // Calculate final price for audio based on duration

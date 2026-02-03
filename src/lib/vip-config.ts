@@ -59,16 +59,20 @@ export const defaultVipConfig: VipConfig = {
   ],
 };
 
-// Get config from localStorage
+// Get config from localStorage cache (for sync access)
 export const getVipConfig = (): VipConfig => {
-  const savedConfig = localStorage.getItem('vipConfig');
+  const savedConfig = localStorage.getItem('vipConfig_cache');
   if (savedConfig) {
-    return JSON.parse(savedConfig);
+    try {
+      return JSON.parse(savedConfig);
+    } catch {
+      return defaultVipConfig;
+    }
   }
   return defaultVipConfig;
 };
 
-// Save config to localStorage
+// Save config to localStorage cache
 export const saveVipConfig = (config: VipConfig): void => {
-  localStorage.setItem('vipConfig', JSON.stringify(config));
+  localStorage.setItem('vipConfig_cache', JSON.stringify(config));
 };

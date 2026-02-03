@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { loadConfig, saveConfig } from '@/lib/config-storage';
 // Available Lucide icons for customization
 export const availableLucideIcons = [
   // Navigation & UI
@@ -866,46 +866,89 @@ const WhiteLabelContext = createContext<WhiteLabelContextType | undefined>(undef
 const STORAGE_KEY = 'whitelabel_config';
 
 export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState<WhiteLabelConfig>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const parsedBannerImages: string[] | undefined = Array.isArray(parsed.bannerImages)
-        ? parsed.bannerImages
-        : parsed.bannerImage
-          ? [parsed.bannerImage]
-          : undefined;
+  const [config, setConfig] = useState<WhiteLabelConfig>(defaultConfig);
+  const [isDbLoaded, setIsDbLoaded] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initialLoadRef = useRef(false);
 
-      return {
-        ...defaultConfig,
-        ...parsed,
-        bannerImages: (parsedBannerImages ?? defaultConfig.bannerImages).filter(Boolean),
-        bannerImage: (parsedBannerImages?.[0] ?? parsed.bannerImage ?? defaultConfig.bannerImage) || '',
-        youtube: {
-          ...defaultConfig.youtube,
-          ...parsed.youtube,
-          categories:
-            Array.isArray(parsed?.youtube?.categories) && parsed.youtube.categories.length
-              ? parsed.youtube.categories
-              : defaultConfig.youtube.categories,
-          videoCategoryMap:
-            parsed?.youtube?.videoCategoryMap && typeof parsed.youtube.videoCategoryMap === 'object'
-              ? parsed.youtube.videoCategoryMap
-              : defaultConfig.youtube.videoCategoryMap,
-        },
-        icons: { ...defaultIcons, ...parsed.icons },
-        quickActions: parsed.quickActions || defaultQuickActions,
-        navigationTabs: parsed.navigationTabs || defaultNavigationTabs,
-        community: { ...defaultCommunityConfig, ...parsed.community },
-        shopify: { ...defaultConfig.shopify, ...parsed.shopify },
-        tokens: {
-          supabase: { ...defaultConfig.tokens.supabase, ...parsed.tokens?.supabase },
-          metricsExport: { ...defaultConfig.tokens.metricsExport, ...parsed.tokens?.metricsExport },
-        },
-      };
-    }
-    return defaultConfig;
-  });
+  // Load from database on mount
+  useEffect(() => {
+    const loadFromDb = async () => {
+      try {
+        const dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
+        
+        if (dbConfig) {
+          // Deep merge with defaults
+          const merged = mergeConfig(defaultConfig, dbConfig);
+          setConfig(merged);
+          localStorage.removeItem(STORAGE_KEY); // Clear old localStorage
+        } else {
+          // No DB config, try localStorage migration
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const merged = mergeConfig(defaultConfig, parsed);
+            setConfig(merged);
+            
+            // Save to DB
+            await saveConfig('white_label_config', merged);
+            localStorage.removeItem(STORAGE_KEY);
+            console.log('Migrated whitelabel config to database');
+          }
+        }
+      } catch (err) {
+        console.error('Error loading config:', err);
+        // Fallback to localStorage
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setConfig(mergeConfig(defaultConfig, parsed));
+        }
+      } finally {
+        setIsDbLoaded(true);
+        initialLoadRef.current = true;
+      }
+    };
+
+    loadFromDb();
+  }, []);
+
+  // Helper function to merge config with defaults
+  const mergeConfig = (defaults: WhiteLabelConfig, parsed: Partial<WhiteLabelConfig>): WhiteLabelConfig => {
+    const parsedBannerImages: string[] | undefined = Array.isArray(parsed.bannerImages)
+      ? parsed.bannerImages
+      : parsed.bannerImage
+        ? [parsed.bannerImage]
+        : undefined;
+
+    return {
+      ...defaults,
+      ...parsed,
+      bannerImages: (parsedBannerImages ?? defaults.bannerImages).filter(Boolean),
+      bannerImage: (parsedBannerImages?.[0] ?? parsed.bannerImage ?? defaults.bannerImage) || '',
+      youtube: {
+        ...defaults.youtube,
+        ...parsed.youtube,
+        categories:
+          Array.isArray(parsed?.youtube?.categories) && parsed.youtube.categories.length
+            ? parsed.youtube.categories
+            : defaults.youtube.categories,
+        videoCategoryMap:
+          parsed?.youtube?.videoCategoryMap && typeof parsed.youtube.videoCategoryMap === 'object'
+            ? parsed.youtube.videoCategoryMap
+            : defaults.youtube.videoCategoryMap,
+      },
+      icons: { ...defaultIcons, ...parsed.icons },
+      quickActions: parsed.quickActions || defaultQuickActions,
+      navigationTabs: parsed.navigationTabs || defaultNavigationTabs,
+      community: { ...defaultCommunityConfig, ...parsed.community },
+      shopify: { ...defaults.shopify, ...parsed.shopify },
+      tokens: {
+        supabase: { ...defaults.tokens.supabase, ...parsed.tokens?.supabase },
+        metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
+      },
+    };
+  };
 
   // Apply CSS variables whenever colors change
   useEffect(() => {
@@ -942,9 +985,29 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     root.style.setProperty('--sidebar-primary', primary);
   }, [config.colors]);
 
-  // Save to localStorage whenever config changes
+  // Debounced save to database whenever config changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    if (!initialLoadRef.current) return;
+    
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Debounce save to avoid too many writes
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await saveConfig('white_label_config', config);
+      } catch (err) {
+        console.error('Error saving config to database:', err);
+      }
+    }, 2000);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [config]);
 
   const updateBranding = useCallback((branding: Partial<Pick<WhiteLabelConfig, 'siteName' | 'siteDescription' | 'bannerImage' | 'bannerImages' | 'logoImage'>>) => {
