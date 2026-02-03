@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, Link as LinkIcon, Check, Loader2, LayoutDashboard } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
-import { HandleSelector } from '@/components/profile/HandleSelector';
 import { useProfile } from '@/hooks/use-profile';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/use-user-role';
 
 const quickAccessItems = [
@@ -32,38 +28,12 @@ const menuItems = [
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
-  const { toast } = useToast();
+  const { profile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
-
-  const handleSaveAvatar = async () => {
-    if (!avatarUrl.trim() || !user) return;
-    
-    setIsSavingAvatar(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ avatar_url: avatarUrl.trim() })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      toast({ title: 'Foto atualizada!', description: 'Sua foto de perfil foi salva.' });
-      setAvatarUrl('');
-      refetchProfile();
-    } catch (err) {
-      console.error('Error saving avatar:', err);
-      toast({ title: 'Erro ao salvar', description: 'Tente novamente.', variant: 'destructive' });
-    } finally {
-      setIsSavingAvatar(false);
-    }
-  };
 
   if (!isAuthenticated) {
     return (
@@ -129,60 +99,6 @@ const PerfilPage = () => {
                 )}
               </div>
               <p className="text-muted-foreground text-sm">{user?.email}</p>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Handle Selector - only show if no handle set */}
-        {!profile?.handle && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
-            <HandleSelector 
-              currentHandle={profile?.handle} 
-              onHandleSet={() => refetchProfile()}
-            />
-          </motion.div>
-        )}
-
-        {/* Avatar URL Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-        >
-          <GlassCard className="p-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <LinkIcon className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Foto de perfil</p>
-                <p className="text-xs text-muted-foreground">Cole o link de uma imagem</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://exemplo.com/foto.jpg"
-                className="flex-1"
-                disabled={isSavingAvatar}
-              />
-              <Button 
-                onClick={handleSaveAvatar} 
-                disabled={!avatarUrl.trim() || isSavingAvatar}
-                size="sm"
-                className="shrink-0"
-              >
-                {isSavingAvatar ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Check className="w-4 h-4" />
-                )}
-              </Button>
             </div>
           </GlassCard>
         </motion.div>
