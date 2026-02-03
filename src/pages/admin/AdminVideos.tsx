@@ -55,11 +55,12 @@ const AdminVideos = () => {
       name: 'Nova Categoria',
       description: 'Descrição da categoria',
       icon: '🎬',
+      surcharge: 0,
     };
     setConfig({ ...config, categories: [...config.categories, newCategory] });
   };
 
-  const updateCategory = (index: number, field: keyof VideoCategory, value: string) => {
+  const updateCategory = (index: number, field: keyof VideoCategory, value: string | number) => {
     if (!config) return;
     const newCategories = [...config.categories];
     newCategories[index] = { ...newCategories[index], [field]: value };
@@ -275,6 +276,23 @@ const AdminVideos = () => {
                       value={category.description}
                       onChange={e => updateCategory(index, 'description', e.target.value)}
                     />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">Taxa fixa: +R$</span>
+                      <Input
+                        type="number"
+                        className="w-24"
+                        step="0.01"
+                        min={0}
+                        placeholder="0.00"
+                        value={category.surcharge || 0}
+                        onChange={e => updateCategory(index, 'surcharge', parseFloat(e.target.value) || 0)}
+                      />
+                      {(category.surcharge || 0) > 0 && (
+                        <span className="text-xs text-primary">
+                          +R$ {(category.surcharge || 0).toFixed(2)} por pedido
+                        </span>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
 

@@ -14,6 +14,7 @@ export interface VideoCategory {
   name: string;
   description: string;
   icon: string;
+  surcharge?: number; // Taxa fixa adicional (R$) para esta categoria
 }
 
 export interface AudioDuration {
@@ -183,7 +184,9 @@ export const calculateAudioPrice = (duration: AudioDuration): number => {
   return duration.price;
 };
 
-// Calculate final price based on duration
-export const calculatePrice = (duration: VideoDuration): number => {
-  return duration.price;
+// Calculate final price based on duration and category surcharge
+export const calculatePrice = (duration: VideoDuration, category?: VideoCategory): number => {
+  const basePrice = duration.price;
+  const surcharge = category?.surcharge || 0;
+  return basePrice + surcharge;
 };
