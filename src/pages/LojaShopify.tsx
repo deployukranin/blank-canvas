@@ -6,14 +6,14 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { GlassCard } from '@/components/ui/GlassCard';
 
-// Produtos exemplo para mostrar ao público
-const exampleProducts = [
-  { id: 1, name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
-  { id: 2, name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
-  { id: 3, name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
-  { id: 4, name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
-  { id: 5, name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
-  { id: 6, name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+// Produtos padrão caso não haja configuração
+const defaultProducts = [
+  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
+  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
+  { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
+  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
+  { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
+  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
 ];
 
 const LojaShopify = () => {
@@ -22,6 +22,10 @@ const LojaShopify = () => {
   const storeUrl = config.shopify?.storeUrl || '';
   const couponCode = config.shopify?.couponCode || '';
   const couponLabel = config.shopify?.couponLabel || 'Use o cupom';
+  const exampleProducts = config.shopify?.exampleProducts?.length 
+    ? config.shopify.exampleProducts 
+    : defaultProducts;
+
 
   // Normalize URL to ensure HTTPS
   const normalizedUrl = (() => {

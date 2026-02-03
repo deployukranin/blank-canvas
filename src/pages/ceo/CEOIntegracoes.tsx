@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Youtube, ShoppingBag, Tag, ExternalLink } from 'lucide-react';
+import { Save, Youtube, ShoppingBag, Tag, ExternalLink, Plus, Trash2, Package } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,22 @@ import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
 import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
+
+interface ExampleProduct {
+  id: string;
+  name: string;
+  originalPrice: number;
+  emoji: string;
+}
+
+const defaultProducts: ExampleProduct[] = [
+  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
+  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
+  { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
+  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
+  { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
+  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+];
 
 const CEOIntegracoes = () => {
   const { config, updateYouTube, updateShopify } = useWhiteLabel();
@@ -40,6 +56,7 @@ const CEOIntegracoes = () => {
     storeUrl: config.shopify?.storeUrl ?? '',
     couponCode: config.shopify?.couponCode ?? '',
     couponLabel: config.shopify?.couponLabel ?? 'Use o cupom',
+    exampleProducts: config.shopify?.exampleProducts ?? defaultProducts,
   });
 
   const channelId = youtubeDraft.channelId.trim();
@@ -124,6 +141,94 @@ const CEOIntegracoes = () => {
                       placeholder="Use o cupom"
                       className="mt-2"
                     />
+                  </div>
+                </div>
+
+                {/* Example Products Section */}
+                <div className="space-y-3 pt-4 border-t border-border/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-primary" />
+                      <Label className="text-sm font-medium">Produtos Exemplo</Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newProduct: ExampleProduct = {
+                          id: Date.now().toString(),
+                          name: 'Novo Produto',
+                          originalPrice: 29.90,
+                          emoji: '📦',
+                        };
+                        setShopifyDraft((prev) => ({
+                          ...prev,
+                          exampleProducts: [...prev.exampleProducts, newProduct],
+                        }));
+                      }}
+                      className="gap-1"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Produtos exibidos na página /loja com desconto de 80%. Servem para mostrar ao público exemplos do que podem comprar.
+                  </p>
+
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {shopifyDraft.exampleProducts.map((product, index) => (
+                      <div key={product.id} className="flex items-center gap-2 p-2 rounded-lg bg-background/50 border border-border/50">
+                        <Input
+                          value={product.emoji}
+                          onChange={(e) => {
+                            const updated = [...shopifyDraft.exampleProducts];
+                            updated[index] = { ...updated[index], emoji: e.target.value };
+                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                          }}
+                          className="w-14 text-center"
+                          placeholder="🎵"
+                        />
+                        <Input
+                          value={product.name}
+                          onChange={(e) => {
+                            const updated = [...shopifyDraft.exampleProducts];
+                            updated[index] = { ...updated[index], name: e.target.value };
+                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                          }}
+                          className="flex-1"
+                          placeholder="Nome do produto"
+                        />
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">R$</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={product.originalPrice}
+                            onChange={(e) => {
+                              const updated = [...shopifyDraft.exampleProducts];
+                              updated[index] = { ...updated[index], originalPrice: parseFloat(e.target.value) || 0 };
+                              setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                            }}
+                            className="w-20"
+                            placeholder="29.90"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const updated = shopifyDraft.exampleProducts.filter((_, i) => i !== index);
+                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

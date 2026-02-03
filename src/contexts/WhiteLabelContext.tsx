@@ -725,6 +725,12 @@ export interface WhiteLabelConfig {
     storeUrl: string;
     couponCode?: string;
     couponLabel?: string;
+    exampleProducts?: Array<{
+      id: string;
+      name: string;
+      originalPrice: number;
+      emoji: string;
+    }>;
   };
 
   // Integration Tokens
@@ -804,6 +810,14 @@ const defaultConfig: WhiteLabelConfig = {
     storeUrl: '',
     couponCode: '',
     couponLabel: 'Use o cupom',
+    exampleProducts: [
+      { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
+      { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
+      { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
+      { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
+      { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
+      { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+    ],
   },
   tokens: {
     supabase: {
