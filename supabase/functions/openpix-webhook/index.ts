@@ -25,6 +25,40 @@ interface OpenPixWebhookPayload {
   };
 }
 
+// Validate OpenPix webhook signature using HMAC SHA-256
+async function validateSignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    // Compare signatures (constant-time comparison to prevent timing attacks)
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < signature.length; i++) {
+      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+    }
+    
+    return result === 0;
+  } catch (error) {
+    console.error('Signature validation error:', error);
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -33,10 +67,20 @@ Deno.serve(async (req) => {
 
   try {
     const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
+    const OPENPIX_WEBHOOK_SECRET = Deno.env.get('OPENPIX_WEBHOOK_SECRET');
     const CREATOR_PIX_KEY = Deno.env.get('CREATOR_PIX_KEY');
     const CREATOR_TAX_ID = Deno.env.get('CREATOR_TAX_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // CRITICAL: Require webhook secret in production
+    if (!OPENPIX_WEBHOOK_SECRET) {
+      console.error('CRITICAL: OPENPIX_WEBHOOK_SECRET not configured - rejecting all webhooks for security');
+      return new Response(
+        JSON.stringify({ error: 'Webhook security not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!OPENPIX_APP_ID) {
       console.error('OPENPIX_APP_ID not configured');
@@ -62,7 +106,34 @@ Deno.serve(async (req) => {
       );
     }
 
-    const payload: OpenPixWebhookPayload = await req.json();
+    // Get raw body for signature validation
+    const rawBody = await req.text();
+    
+    // Validate webhook signature BEFORE processing
+    const signature = req.headers.get('x-webhook-signature') || req.headers.get('X-Webhook-Signature');
+    
+    if (!signature) {
+      console.error('SECURITY: Missing webhook signature header');
+      return new Response(
+        JSON.stringify({ error: 'Missing signature', message: 'Webhook signature is required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const isValidSignature = await validateSignature(rawBody, signature, OPENPIX_WEBHOOK_SECRET);
+    
+    if (!isValidSignature) {
+      console.error('SECURITY: Invalid webhook signature detected - potential fraud attempt');
+      return new Response(
+        JSON.stringify({ error: 'Invalid signature', message: 'Webhook signature validation failed' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Webhook signature validated successfully');
+
+    // Parse payload after signature validation
+    const payload: OpenPixWebhookPayload = JSON.parse(rawBody);
     console.log('Webhook received:', JSON.stringify(payload));
 
     // Handle test webhooks from OpenPix dashboard
