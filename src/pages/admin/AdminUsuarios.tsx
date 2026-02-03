@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Crown, Shield, User, Mail, Calendar, DollarSign } from 'lucide-react';
+import { Search, Crown, User, Mail, Calendar } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -12,15 +12,14 @@ import { mockAdminUsers, AdminUser } from '@/lib/admin-mock-data';
 const AdminUsuarios: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>(mockAdminUsers);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'vip' | 'admin' | 'regular'>('all');
+  const [filter, setFilter] = useState<'all' | 'vip' | 'regular'>('all');
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.username.toLowerCase().includes(search.toLowerCase()) ||
                          user.email.toLowerCase().includes(search.toLowerCase());
     let matchesFilter = true;
-    if (filter === 'vip') matchesFilter = user.isVIP && !user.isAdmin;
-    if (filter === 'admin') matchesFilter = user.isAdmin;
-    if (filter === 'regular') matchesFilter = !user.isVIP && !user.isAdmin;
+    if (filter === 'vip') matchesFilter = user.isVIP;
+    if (filter === 'regular') matchesFilter = !user.isVIP;
     return matchesSearch && matchesFilter;
   });
 
@@ -30,17 +29,11 @@ const AdminUsuarios: React.FC = () => {
     ));
   };
 
-  const toggleAdmin = (id: string) => {
-    setUsers(users.map(user => 
-      user.id === id ? { ...user, isAdmin: !user.isAdmin } : user
-    ));
-  };
-
   return (
     <AdminLayout title="Gerenciar Usuários">
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <GlassCard className="p-4 text-center">
             <User className="w-6 h-6 mx-auto text-blue-400 mb-2" />
             <p className="text-xl font-bold">{users.length}</p>
@@ -50,11 +43,6 @@ const AdminUsuarios: React.FC = () => {
             <Crown className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
             <p className="text-xl font-bold">{users.filter(u => u.isVIP).length}</p>
             <p className="text-xs text-muted-foreground">VIP</p>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <Shield className="w-6 h-6 mx-auto text-red-400 mb-2" />
-            <p className="text-xl font-bold">{users.filter(u => u.isAdmin).length}</p>
-            <p className="text-xs text-muted-foreground">Admins</p>
           </GlassCard>
         </div>
 
@@ -71,14 +59,14 @@ const AdminUsuarios: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'vip', 'admin', 'regular'] as const).map((f) => (
+              {(['all', 'vip', 'regular'] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setFilter(f)}
                 >
-                  {f === 'all' ? 'Todos' : f === 'vip' ? 'VIP' : f === 'admin' ? 'Admin' : 'Regular'}
+                  {f === 'all' ? 'Todos' : f === 'vip' ? 'VIP' : 'Regular'}
                 </Button>
               ))}
             </div>
@@ -146,15 +134,6 @@ const AdminUsuarios: React.FC = () => {
                       >
                         <Crown className="w-4 h-4 mr-1" />
                         {user.isVIP ? 'VIP' : 'Tornar VIP'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={user.isAdmin ? 'default' : 'outline'}
-                        className={user.isAdmin ? 'bg-red-500 hover:bg-red-600' : ''}
-                        onClick={() => toggleAdmin(user.id)}
-                      >
-                        <Shield className="w-4 h-4 mr-1" />
-                        {user.isAdmin ? 'Admin' : 'Tornar Admin'}
                       </Button>
                     </div>
                   </div>
