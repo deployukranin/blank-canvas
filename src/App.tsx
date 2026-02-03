@@ -16,7 +16,7 @@ import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
 import GaleriaVideos from "./pages/GaleriaVideos";
 import Perfil from "./pages/Perfil";
-import PerfilConfiguracoes from "./pages/PerfilConfiguracoes";
+
 import Ajuda from "./pages/Ajuda";
 import TermosDeUso from "./pages/TermosDeUso";
 import Privacidade from "./pages/Privacidade";
@@ -74,7 +74,7 @@ const App = () => (
               <Route path="/comunidade" element={<Comunidade />} />
               <Route path="/galeria-videos" element={<Navigate to="/comunidade" replace />} />
               <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-              <Route path="/perfil/configuracoes" element={<ProtectedRoute><PerfilConfiguracoes /></ProtectedRoute>} />
+              
               <Route path="/ajuda" element={<Ajuda />} />
               <Route path="/termos" element={<TermosDeUso />} />
               <Route path="/privacidade" element={<Privacidade />} />
