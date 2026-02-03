@@ -14,6 +14,7 @@ export interface VideoCategory {
   name: string;
   description: string;
   icon: string;
+  extraPrice?: number; // Acréscimo fixo em reais
 }
 
 export interface AudioDuration {
@@ -183,7 +184,8 @@ export const calculateAudioPrice = (duration: AudioDuration): number => {
   return duration.price;
 };
 
-// Calculate final price based on duration
-export const calculatePrice = (duration: VideoDuration): number => {
-  return duration.price;
+// Calculate final price based on duration and category extra
+export const calculatePrice = (duration: VideoDuration, category?: VideoCategory): number => {
+  const extraPrice = category?.extraPrice || 0;
+  return duration.price + extraPrice;
 };
