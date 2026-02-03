@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff, Shield } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -24,20 +25,18 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
 
   // Admin credentials from WhiteLabel config
   const adminCredentials = useMemo(() => [
     { 
-      email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
-      password: config.adminCredentials?.admin?.password || 'admin123',
-      role: 'admin' as const 
-    },
-    { 
       email: config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com',
       password: config.adminCredentials?.ceo?.password || 'ceo123',
       role: 'ceo' as const 
+    },
+    { 
+      email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
+      password: config.adminCredentials?.admin?.password || 'admin123',
+      role: 'admin' as const 
     },
   ], [config.adminCredentials]);
 
@@ -51,6 +50,23 @@ const Auth = () => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const checkUserRoles = async (userId: string): Promise<{ isAdmin: boolean; isCEO: boolean }> => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    if (error || !data) {
+      return { isAdmin: false, isCEO: false };
+    }
+
+    const roles = data.map((r) => r.role);
+    return {
+      isAdmin: roles.includes("admin"),
+      isCEO: roles.includes("ceo"),
+    };
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -67,11 +83,45 @@ const Auth = () => {
     }
 
     setIsSubmitting(true);
+
+    // First check if it's an admin/CEO mock credential
+    const adminMatch = adminCredentials.find(
+      a => a.email.toLowerCase() === loginEmail.toLowerCase() && a.password === loginPassword
+    );
+
+    if (adminMatch) {
+      const result = await loginAsAdmin(loginEmail, loginPassword, adminMatch.role);
+      if (result.success) {
+        toast.success(adminMatch.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
+        navigate(adminMatch.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Regular Supabase authentication
     const result = await signIn(loginEmail, loginPassword);
     
     if (result.success) {
-      toast.success("Login realizado com sucesso!");
-      navigate("/", { replace: true });
+      // Get current user and check roles
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { isAdmin, isCEO } = await checkUserRoles(user.id);
+        
+        if (isCEO) {
+          toast.success("👑 Bem-vindo, CEO!");
+          navigate("/ceo", { replace: true });
+        } else if (isAdmin) {
+          toast.success("🛡️ Bem-vindo, Admin!");
+          navigate("/admin", { replace: true });
+        } else {
+          toast.success("Login realizado com sucesso!");
+          navigate("/", { replace: true });
+        }
+      } else {
+        toast.success("Login realizado com sucesso!");
+        navigate("/", { replace: true });
+      }
     } else {
       toast.error(result.error || "Erro ao fazer login");
     }
@@ -105,34 +155,6 @@ const Auth = () => {
     } else {
       toast.error(result.error || "Erro ao criar conta");
     }
-    setIsSubmitting(false);
-  };
-
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateEmail(adminEmail)) {
-      toast.error("Digite um email válido");
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    const admin = adminCredentials.find(
-      a => a.email.toLowerCase() === adminEmail.toLowerCase() && a.password === adminPassword
-    );
-
-    if (admin) {
-      const result = await loginAsAdmin(adminEmail, adminPassword, admin.role);
-      
-      if (result.success) {
-        toast.success(admin.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
-        navigate(admin.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
-      }
-    } else {
-      toast.error("Credenciais administrativas inválidas");
-    }
-    
     setIsSubmitting(false);
   };
 
@@ -175,13 +197,9 @@ const Auth = () => {
           </div>
 
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar Conta</TabsTrigger>
-              <TabsTrigger value="admin" className="flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                Admin
-              </TabsTrigger>
             </TabsList>
 
             {/* Login Tab */}
@@ -310,68 +328,6 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            {/* Admin Tab */}
-            <TabsContent value="admin">
-              <form onSubmit={handleAdminLogin} className="space-y-4">
-                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mb-4">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Acesso restrito para administradores
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="admin-email">Email Admin</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="admin-email"
-                      type="email"
-                      placeholder="admin@email.com"
-                      value={adminEmail}
-                      onChange={(e) => setAdminEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="admin-password">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="admin-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={adminPassword}
-                      onChange={(e) => setAdminPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-primary to-accent"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Shield className="w-4 h-4 mr-2" />
-                  )}
-                  Acessar Painel
-                </Button>
-              </form>
-            </TabsContent>
           </Tabs>
 
           {/* Terms */}
