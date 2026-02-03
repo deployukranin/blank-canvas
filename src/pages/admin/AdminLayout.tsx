@@ -16,7 +16,8 @@ import {
   CreditCard,
   Crown,
   Video,
-  Headphones
+  Headphones,
+  Youtube
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const menuItems = [
   { path: '/admin/vip-precos', icon: Crown, label: 'Preços VIP' },
   { path: '/admin/videos', icon: Video, label: 'Vídeos' },
   { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
+  { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
   { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
