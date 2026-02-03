@@ -199,17 +199,24 @@ export const AdminCredentialsManager = () => {
   const fetchCredentials = async () => {
     setIsLoading(true);
     try {
-      // Use edge function to get credentials (returns only email, role - no password)
-      const { data, error } = await supabase.functions.invoke('get-admin-credentials');
+      // Use RPC function to get credentials (returns only email, role - no password)
+      // This function requires CEO role and never exposes password_hash
+      const { data, error } = await supabase.rpc('get_admin_credentials_safe');
       
       if (error) {
         console.error('Error fetching credentials:', error);
-        toast.error('Erro ao carregar credenciais');
+        // Fallback to edge function if RPC fails (e.g., user not CEO yet)
+        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('get-admin-credentials');
+        if (!edgeError && edgeData?.credentials) {
+          setCredentials(edgeData.credentials);
+        } else {
+          toast.error('Erro ao carregar credenciais');
+        }
         return;
       }
 
-      if (data?.credentials) {
-        setCredentials(data.credentials);
+      if (data) {
+        setCredentials(data as AdminCredential[]);
       }
     } catch (err) {
       console.error('Error:', err);
