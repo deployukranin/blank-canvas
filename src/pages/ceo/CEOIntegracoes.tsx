@@ -17,16 +17,23 @@ interface ExampleProduct {
   id: string;
   name: string;
   originalPrice: number;
+  salePrice: number;
   emoji: string;
 }
 
+// Emojis populares para produtos
+const productEmojis = [
+  '🎬', '🎵', '✨', '▶️', '🎭', '📦', '🎮', '📱', '💻', '🎧',
+  '📺', '🎪', '🎯', '🎨', '📚', '🎁', '💎', '👑', '⭐', '🌟',
+];
+
 const defaultProducts: ExampleProduct[] = [
-  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
-  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
-  { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
-  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
-  { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
-  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, salePrice: 11.18, emoji: '🎬' },
+  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, salePrice: 6.98, emoji: '🎵' },
+  { id: '3', name: 'Disney+', originalPrice: 43.90, salePrice: 8.78, emoji: '✨' },
+  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, salePrice: 9.18, emoji: '▶️' },
+  { id: '5', name: 'HBO Max', originalPrice: 49.90, salePrice: 9.98, emoji: '🎭' },
+  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, salePrice: 3.98, emoji: '📦' },
 ];
 
 const CEOIntegracoes = () => {
@@ -160,6 +167,7 @@ const CEOIntegracoes = () => {
                           id: Date.now().toString(),
                           name: 'Novo Produto',
                           originalPrice: 29.90,
+                          salePrice: 5.98,
                           emoji: '📦',
                         };
                         setShopifyDraft((prev) => ({
@@ -174,59 +182,109 @@ const CEOIntegracoes = () => {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Produtos exibidos na página /loja com desconto de 80%. Servem para mostrar ao público exemplos do que podem comprar.
+                    Produtos exibidos na página /loja. Configure preço original e preço de venda.
                   </p>
 
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                     {shopifyDraft.exampleProducts.map((product, index) => (
-                      <div key={product.id} className="flex items-center gap-2 p-2 rounded-lg bg-background/50 border border-border/50">
-                        <Input
-                          value={product.emoji}
-                          onChange={(e) => {
-                            const updated = [...shopifyDraft.exampleProducts];
-                            updated[index] = { ...updated[index], emoji: e.target.value };
-                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
-                          }}
-                          className="w-14 text-center"
-                          placeholder="🎵"
-                        />
-                        <Input
-                          value={product.name}
-                          onChange={(e) => {
-                            const updated = [...shopifyDraft.exampleProducts];
-                            updated[index] = { ...updated[index], name: e.target.value };
-                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
-                          }}
-                          className="flex-1"
-                          placeholder="Nome do produto"
-                        />
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">R$</span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={product.originalPrice}
-                            onChange={(e) => {
-                              const updated = [...shopifyDraft.exampleProducts];
-                              updated[index] = { ...updated[index], originalPrice: parseFloat(e.target.value) || 0 };
+                      <div key={product.id} className="p-3 rounded-lg bg-background/50 border border-border/50 space-y-3">
+                        {/* Row 1: Emoji picker and name */}
+                        <div className="flex items-center gap-2">
+                          {/* Emoji selector */}
+                          <div className="flex flex-col gap-1">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 text-2xl">
+                              {product.emoji}
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1 space-y-1">
+                            <Input
+                              value={product.name}
+                              onChange={(e) => {
+                                const updated = [...shopifyDraft.exampleProducts];
+                                updated[index] = { ...updated[index], name: e.target.value };
+                                setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                              }}
+                              placeholder="Nome do produto"
+                              className="font-medium"
+                            />
+                          </div>
+                          
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const updated = shopifyDraft.exampleProducts.filter((_, i) => i !== index);
                               setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
                             }}
-                            className="w-20"
-                            placeholder="29.90"
-                          />
+                            className="text-destructive hover:text-destructive shrink-0"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const updated = shopifyDraft.exampleProducts.filter((_, i) => i !== index);
-                            setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
-                          }}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+
+                        {/* Row 2: Emoji picker */}
+                        <div className="flex flex-wrap gap-1">
+                          {productEmojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => {
+                                const updated = [...shopifyDraft.exampleProducts];
+                                updated[index] = { ...updated[index], emoji };
+                                setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                              }}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg transition-all ${
+                                product.emoji === emoji 
+                                  ? 'bg-primary/30 ring-2 ring-primary' 
+                                  : 'bg-muted/30 hover:bg-muted/50'
+                              }`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Row 3: Prices */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Preço Original</Label>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground">R$</span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={product.originalPrice}
+                                onChange={(e) => {
+                                  const updated = [...shopifyDraft.exampleProducts];
+                                  updated[index] = { ...updated[index], originalPrice: parseFloat(e.target.value) || 0 };
+                                  setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                                }}
+                                className="text-muted-foreground"
+                                placeholder="55.90"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-primary font-medium">Preço de Venda</Label>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-primary">R$</span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={product.salePrice}
+                                onChange={(e) => {
+                                  const updated = [...shopifyDraft.exampleProducts];
+                                  updated[index] = { ...updated[index], salePrice: parseFloat(e.target.value) || 0 };
+                                  setShopifyDraft((prev) => ({ ...prev, exampleProducts: updated }));
+                                }}
+                                className="border-primary/50 focus:ring-primary"
+                                placeholder="11.18"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

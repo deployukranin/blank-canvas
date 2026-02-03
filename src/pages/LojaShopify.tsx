@@ -8,12 +8,12 @@ import { GlassCard } from '@/components/ui/GlassCard';
 
 // Produtos padrão caso não haja configuração
 const defaultProducts = [
-  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
-  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
-  { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
-  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
-  { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
-  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+  { id: '1', name: 'Netflix Premium', originalPrice: 55.90, salePrice: 11.18, emoji: '🎬' },
+  { id: '2', name: 'Spotify Premium', originalPrice: 34.90, salePrice: 6.98, emoji: '🎵' },
+  { id: '3', name: 'Disney+', originalPrice: 43.90, salePrice: 8.78, emoji: '✨' },
+  { id: '4', name: 'YouTube Premium', originalPrice: 45.90, salePrice: 9.18, emoji: '▶️' },
+  { id: '5', name: 'HBO Max', originalPrice: 49.90, salePrice: 9.98, emoji: '🎭' },
+  { id: '6', name: 'Amazon Prime', originalPrice: 19.90, salePrice: 3.98, emoji: '📦' },
 ];
 
 const LojaShopify = () => {
@@ -48,9 +48,10 @@ const LojaShopify = () => {
     }
   };
 
-  // Calcula preço com 80% de desconto
-  const calculateDiscountedPrice = (originalPrice: number) => {
-    return originalPrice * 0.2; // 80% off = pagar apenas 20%
+  // Calcula percentual de desconto
+  const calculateDiscountPercent = (originalPrice: number, salePrice: number) => {
+    if (originalPrice <= 0) return 0;
+    return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
   };
 
   return (
@@ -177,7 +178,8 @@ const LojaShopify = () => {
 
           <div className="grid grid-cols-2 gap-3">
             {exampleProducts.map((product, index) => {
-              const discountedPrice = calculateDiscountedPrice(product.originalPrice);
+              const salePrice = product.salePrice ?? product.originalPrice * 0.2;
+              const discountPercent = calculateDiscountPercent(product.originalPrice, salePrice);
               return (
                 <motion.div
                   key={product.id}
@@ -196,11 +198,13 @@ const LojaShopify = () => {
                           R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                         </p>
                         <p className="text-primary font-bold text-base">
-                          R$ {discountedPrice.toFixed(2).replace('.', ',')}
+                          R$ {salePrice.toFixed(2).replace('.', ',')}
                         </p>
-                        <span className="inline-block px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-semibold">
-                          -80% OFF
-                        </span>
+                        {discountPercent > 0 && (
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-semibold">
+                            -{discountPercent}% OFF
+                          </span>
+                        )}
                       </div>
                     </div>
                   </GlassCard>
