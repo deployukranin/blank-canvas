@@ -1,12 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Crown, Eye, EyeOff, Save, AlertTriangle } from 'lucide-react';
+import { Shield, Crown, Eye, EyeOff, Save, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+interface AdminCredential {
+  id: string;
+  role: string;
+  email: string;
+  password_hash: string;
+}
 
 interface CredentialCardProps {
   role: 'admin' | 'ceo';
@@ -14,8 +21,9 @@ interface CredentialCardProps {
   title: string;
   email: string;
   password: string;
-  onSave: (email: string, password: string) => void;
+  onSave: (email: string, password: string) => Promise<void>;
   otherEmail: string;
+  isSaving: boolean;
 }
 
 const CredentialCard = ({ 
@@ -25,14 +33,20 @@ const CredentialCard = ({
   email: initialEmail, 
   password: initialPassword,
   onSave,
-  otherEmail
+  otherEmail,
+  isSaving
 }: CredentialCardProps) => {
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(initialPassword);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const validateAndSave = () => {
+  useEffect(() => {
+    setEmail(initialEmail);
+    setPassword(initialPassword);
+  }, [initialEmail, initialPassword]);
+
+  const validateAndSave = async () => {
     const newErrors: { email?: string; password?: string } = {};
     
     // Validate email
@@ -55,8 +69,7 @@ const CredentialCard = ({
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length === 0) {
-      onSave(email.trim(), password);
-      toast.success(`Credenciais ${title} salvas com sucesso!`);
+      await onSave(email.trim(), password);
     }
   };
 
@@ -87,6 +100,7 @@ const CredentialCard = ({
             }}
             placeholder="email@exemplo.com"
             className="mt-1.5"
+            disabled={isSaving}
           />
           {errors.email && (
             <p className="text-xs text-destructive mt-1">{errors.email}</p>
@@ -105,6 +119,7 @@ const CredentialCard = ({
               }}
               placeholder="••••••••"
               className="pr-10"
+              disabled={isSaving}
             />
             <button
               type="button"
@@ -123,8 +138,13 @@ const CredentialCard = ({
           onClick={validateAndSave}
           className="w-full gap-2"
           variant={role === 'ceo' ? 'default' : 'secondary'}
+          disabled={isSaving}
         >
-          <Save className="w-4 h-4" />
+          {isSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
           Salvar
         </Button>
       </div>
@@ -133,27 +153,80 @@ const CredentialCard = ({
 };
 
 export const AdminCredentialsManager = () => {
-  const { config, setConfig } = useWhiteLabel();
+  const [credentials, setCredentials] = useState<AdminCredential[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSaveAdmin = (email: string, password: string) => {
-    setConfig({
-      ...config,
-      adminCredentials: {
-        ...config.adminCredentials,
-        admin: { email, password },
-      },
-    });
+  const fetchCredentials = async () => {
+    setIsLoading(true);
+    try {
+      // Use edge function to get credentials (bypasses RLS)
+      const { data, error } = await supabase.functions.invoke('get-admin-credentials');
+      
+      if (error) {
+        console.error('Error fetching credentials:', error);
+        toast.error('Erro ao carregar credenciais');
+        return;
+      }
+
+      if (data?.credentials) {
+        setCredentials(data.credentials);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Erro ao carregar credenciais');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSaveCEO = (email: string, password: string) => {
-    setConfig({
-      ...config,
-      adminCredentials: {
-        ...config.adminCredentials,
-        ceo: { email, password },
-      },
-    });
+  useEffect(() => {
+    fetchCredentials();
+  }, []);
+
+  const getCredentialByRole = (role: 'admin' | 'ceo') => {
+    return credentials.find(c => c.role === role);
   };
+
+  const handleSave = async (role: 'admin' | 'ceo', email: string, password: string) => {
+    setIsSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('update-admin-credentials', {
+        body: { role, email, password }
+      });
+
+      if (error) {
+        console.error('Error updating credentials:', error);
+        toast.error('Erro ao salvar credenciais');
+        return;
+      }
+
+      if (data?.success) {
+        toast.success(`Credenciais ${role === 'ceo' ? 'CEO' : 'Admin'} salvas com sucesso!`);
+        await fetchCredentials();
+      } else {
+        toast.error(data?.error || 'Erro ao salvar credenciais');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Erro ao salvar credenciais');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const adminCred = getCredentialByRole('admin');
+  const ceoCred = getCredentialByRole('ceo');
+
+  if (isLoading) {
+    return (
+      <GlassCard>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </GlassCard>
+    );
+  }
 
   return (
     <motion.div
@@ -162,16 +235,21 @@ export const AdminCredentialsManager = () => {
       transition={{ delay: 0.2 }}
     >
       <GlassCard>
-        <div className="flex items-start gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-primary" />
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-lg">Contas Administrativas</h3>
+              <p className="text-sm text-muted-foreground">
+                Configure as credenciais de acesso ao painel admin e CEO
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-display font-semibold text-lg">Contas Administrativas</h3>
-            <p className="text-sm text-muted-foreground">
-              Configure as credenciais de acesso ao painel admin e CEO
-            </p>
-          </div>
+          <Button variant="ghost" size="icon" onClick={fetchCredentials} disabled={isLoading}>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -179,30 +257,31 @@ export const AdminCredentialsManager = () => {
             role="admin"
             icon={<Shield className="w-5 h-5" />}
             title="Conta Admin"
-            email={config.adminCredentials?.admin?.email || 'admin@whisperscape.com'}
-            password={config.adminCredentials?.admin?.password || 'admin123'}
-            onSave={handleSaveAdmin}
-            otherEmail={config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com'}
+            email={adminCred?.email || 'admin@whisperscape.com'}
+            password={adminCred?.password_hash || 'admin123'}
+            onSave={(email, password) => handleSave('admin', email, password)}
+            otherEmail={ceoCred?.email || 'ceo@whisperscape.com'}
+            isSaving={isSaving}
           />
           
           <CredentialCard
             role="ceo"
             icon={<Crown className="w-5 h-5" />}
             title="Conta CEO"
-            email={config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com'}
-            password={config.adminCredentials?.ceo?.password || 'ceo123'}
-            onSave={handleSaveCEO}
-            otherEmail={config.adminCredentials?.admin?.email || 'admin@whisperscape.com'}
+            email={ceoCred?.email || 'ceo@whisperscape.com'}
+            password={ceoCred?.password_hash || 'ceo123'}
+            onSave={(email, password) => handleSave('ceo', email, password)}
+            otherEmail={adminCred?.email || 'admin@whisperscape.com'}
+            isSaving={isSaving}
           />
         </div>
 
-        <div className="flex items-start gap-2 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+          <Shield className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Aviso de Segurança</p>
+            <p className="font-medium text-foreground mb-1">Armazenamento Seguro</p>
             <p>
-              As credenciais são armazenadas no navegador local. Para ambientes de produção,
-              recomenda-se implementar autenticação via banco de dados com hash de senhas.
+              As credenciais são armazenadas de forma segura no banco de dados da plataforma.
             </p>
           </div>
         </div>
