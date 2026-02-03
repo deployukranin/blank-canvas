@@ -485,6 +485,15 @@ export interface QuickActionItem {
   enabled: boolean;
 }
 
+export interface NavTabConfig {
+  id: string;
+  label: string;
+  path: string;
+  icon: IconItem;
+  enabled: boolean;
+  order: number;
+}
+
 export interface IconConfig {
   // Navigation icons
   navHome: IconItem;
@@ -527,6 +536,14 @@ const defaultIcons: IconConfig = {
   logoIcon: { type: 'lucide', value: 'Sparkles' },
   successIcon: { type: 'lucide', value: 'CheckCircle2' },
 };
+
+export const defaultNavigationTabs: NavTabConfig[] = [
+  { id: 'home', label: 'Início', path: '/', icon: { type: 'lucide', value: 'Home' }, enabled: true, order: 0 },
+  { id: 'customs', label: "Custom's", path: '/customs', icon: { type: 'lucide', value: 'Video' }, enabled: true, order: 1 },
+  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: true, order: 2 },
+  { id: 'comunidade', label: 'Comunidade', path: '/comunidade', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
+  { id: 'perfil', label: 'Perfil', path: '/perfil', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
+];
 
 export const defaultQuickActions: QuickActionItem[] = [
   {
@@ -643,6 +660,9 @@ export interface WhiteLabelConfig {
   bannerImage: string;
   bannerImages: string[];
   logoImage: string;
+
+  // Navigation Tabs
+  navigationTabs: NavTabConfig[];
 
   // YouTube / Videos
   youtube: {
@@ -763,6 +783,7 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImage: '/placeholder.svg',
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
+  navigationTabs: defaultNavigationTabs,
   youtube: {
     enabled: true,
     channelId: '',
@@ -830,6 +851,7 @@ interface WhiteLabelContextType {
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
   updateQuickActions: (quickActions: QuickActionItem[]) => void;
+  updateNavigationTabs: (tabs: NavTabConfig[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
   updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
   updateToken: <K extends keyof WhiteLabelConfig['tokens']>(
@@ -840,6 +862,7 @@ interface WhiteLabelContextType {
   resetIconsToDefaults: () => void;
   resetQuickActionsToDefaults: () => void;
   resetCommunityToDefaults: () => void;
+  resetNavigationTabsToDefaults: () => void;
   testConnection: (tokenKey: keyof WhiteLabelConfig['tokens']) => Promise<{ success: boolean; message: string }>;
 }
 
@@ -877,6 +900,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         },
         icons: { ...defaultIcons, ...parsed.icons },
         quickActions: parsed.quickActions || defaultQuickActions,
+        navigationTabs: parsed.navigationTabs || defaultNavigationTabs,
         community: { ...defaultCommunityConfig, ...parsed.community },
         shopify: { ...defaultConfig.shopify, ...parsed.shopify },
         tokens: {
@@ -972,6 +996,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, []);
 
+  const updateNavigationTabs = useCallback((navigationTabs: NavTabConfig[]) => {
+    setConfig(prev => ({
+      ...prev,
+      navigationTabs,
+    }));
+  }, []);
+
   const updateCommunity = useCallback((community: Partial<WhiteLabelConfig['community']>) => {
     setConfig(prev => ({
       ...prev,
@@ -1029,6 +1060,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, []);
 
+  const resetNavigationTabsToDefaults = useCallback(() => {
+    setConfig(prev => ({
+      ...prev,
+      navigationTabs: defaultNavigationTabs,
+    }));
+  }, []);
+
   const testConnection = useCallback(async (tokenKey: keyof WhiteLabelConfig['tokens']): Promise<{ success: boolean; message: string }> => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
@@ -1055,6 +1093,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateColors,
         updateIcons,
         updateQuickActions,
+        updateNavigationTabs,
         updateCommunity,
         updateYouTube,
         updateToken,
@@ -1062,6 +1101,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         resetIconsToDefaults,
         resetQuickActionsToDefaults,
         resetCommunityToDefaults,
+        resetNavigationTabsToDefaults,
         testConnection,
       }}
     >
@@ -1086,6 +1126,7 @@ export const useWhiteLabel = () => {
       updateColors: noop,
       updateIcons: noop,
       updateQuickActions: noop,
+      updateNavigationTabs: noop,
       updateCommunity: noop,
       updateYouTube: noop,
       updateToken: noop as any,
@@ -1093,6 +1134,7 @@ export const useWhiteLabel = () => {
       resetIconsToDefaults: noop,
       resetQuickActionsToDefaults: noop,
       resetCommunityToDefaults: noop,
+      resetNavigationTabsToDefaults: noop,
       testConnection: async () => ({ success: false, message: 'White Label indisponível' }),
     };
   }

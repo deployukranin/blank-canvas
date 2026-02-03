@@ -7,13 +7,10 @@ export const BottomNav = () => {
   const location = useLocation();
   const { config } = useWhiteLabel();
 
-  const navItems = [
-    { path: '/', icon: config.icons.navHome, label: 'Início' },
-    { path: '/customs', icon: config.icons.navCustoms, label: "Custom's" },
-    { path: '/loja', icon: config.icons.navLoja, label: 'Loja' },
-    { path: '/comunidade', icon: config.icons.navComunidade, label: 'Comunidade' },
-    { path: '/perfil', icon: config.icons.navPerfil, label: 'Perfil' },
-  ];
+  // Use navigation tabs from config, filtered by enabled and sorted by order
+  const navItems = config.navigationTabs
+    .filter(tab => tab.enabled)
+    .sort((a, b) => a.order - b.order);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
@@ -24,7 +21,7 @@ export const BottomNav = () => {
 
             return (
               <Link
-                key={item.path}
+                key={item.id}
                 to={item.path}
                 className="relative flex flex-col items-center gap-1 py-2 px-4 min-w-[64px]"
               >
