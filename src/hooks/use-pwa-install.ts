@@ -9,6 +9,7 @@ interface UsePWAInstall {
   canInstall: boolean;
   isInstalled: boolean;
   isAndroid: boolean;
+  isIOS: boolean;
   promptInstall: () => Promise<void>;
   dismissPrompt: () => void;
 }
@@ -16,10 +17,17 @@ interface UsePWAInstall {
 const DISMISS_KEY = 'pwa-install-dismissed';
 const DISMISS_DAYS = 7;
 
-const isAndroid = (): boolean => {
+const isAndroidDevice = (): boolean => {
   if (typeof navigator === 'undefined') return false;
   const userAgent = navigator.userAgent.toLowerCase();
   return userAgent.includes('android');
+};
+
+const isIOSDevice = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const userAgent = navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad on iOS 13+
 };
 
 const isStandalone = (): boolean => {
@@ -42,13 +50,15 @@ export const usePWAInstall = (): UsePWAInstall => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [isIOS] = useState(isIOSDevice);
+  const [isAndroid] = useState(isAndroidDevice);
 
   useEffect(() => {
     // Check initial state
     setIsInstalled(isStandalone());
     setDismissed(wasDismissed());
 
-    // Listen for the beforeinstallprompt event
+    // Listen for the beforeinstallprompt event (Android/Chrome only)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -70,20 +80,22 @@ export const usePWAInstall = (): UsePWAInstall => {
   }, []);
 
   const promptInstall = useCallback(async () => {
-    if (!deferredPrompt) return;
-
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
+    // For Android with beforeinstallprompt
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          setIsInstalled(true);
+        }
+        
+        setDeferredPrompt(null);
+      } catch (error) {
+        console.error('Error prompting PWA install:', error);
       }
-      
-      setDeferredPrompt(null);
-    } catch (error) {
-      console.error('Error prompting PWA install:', error);
     }
+    // For iOS, we just dismiss the prompt (user follows manual instructions)
   }, [deferredPrompt]);
 
   const dismissPrompt = useCallback(() => {
@@ -91,14 +103,14 @@ export const usePWAInstall = (): UsePWAInstall => {
     setDismissed(true);
   }, []);
 
-  // TEMP: Force show for visual testing - remove after testing
-  const canInstall = !isInstalled && !dismissed;
-  // const canInstall = Boolean(deferredPrompt) && !isInstalled && !dismissed && isAndroid();
+  // Can install on Android with prompt OR on iOS (manual instructions)
+  const canInstall = !isInstalled && !dismissed && (Boolean(deferredPrompt) || isIOS);
 
   return {
     canInstall,
     isInstalled,
-    isAndroid: isAndroid(),
+    isAndroid,
+    isIOS,
     promptInstall,
     dismissPrompt,
   };
