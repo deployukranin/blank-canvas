@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, Image, ImageIcon } from 'lucide-react';
+import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, ImageIcon, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
-  getVideoConfig,
+  defaultVideoConfig,
   saveVideoConfig,
   type VideoConfig,
   type VideoCategory,
@@ -26,31 +27,34 @@ import {
 
 const AdminVideos = () => {
   const { toast } = useToast();
-  const [config, setConfig] = useState<VideoConfig | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const { 
+    config, 
+    setConfig, 
+    isLoading, 
+    isSaving, 
+    saveNow 
+  } = usePersistentConfig<VideoConfig>({
+    configKey: 'video_config',
+    defaultValue: defaultVideoConfig,
+    localStorageKey: 'videoConfig', // Migrate from old localStorage
+    debounceMs: 2000,
+  });
+  
   const [showPreview, setShowPreview] = useState(false);
 
+  // Also update the local cache for sync access
   useEffect(() => {
-    setConfig(getVideoConfig());
-  }, []);
-
-  const handleSave = () => {
-    if (!config) return;
-    setIsSaving(true);
-    
-    setTimeout(() => {
+    if (!isLoading) {
       saveVideoConfig(config);
-      toast({
-        title: 'Configurações salvas!',
-        description: 'As alterações foram aplicadas com sucesso.',
-      });
-      setIsSaving(false);
-    }, 500);
+    }
+  }, [config, isLoading]);
+
+  const handleSave = async () => {
+    await saveNow();
   };
 
   // Categories
   const addCategory = () => {
-    if (!config) return;
     const newCategory: VideoCategory = {
       id: `video-category-${Date.now()}`,
       name: 'Nova Categoria',
@@ -58,74 +62,81 @@ const AdminVideos = () => {
       icon: '🎬',
       surcharge: 0,
     };
-    setConfig({ ...config, categories: [...config.categories, newCategory] });
+    setConfig(prev => ({ ...prev, categories: [...prev.categories, newCategory] }));
   };
 
   const updateCategory = (index: number, field: keyof VideoCategory, value: string | number) => {
-    if (!config) return;
-    const newCategories = [...config.categories];
-    newCategories[index] = { ...newCategories[index], [field]: value };
-    setConfig({ ...config, categories: newCategories });
+    setConfig(prev => {
+      const newCategories = [...prev.categories];
+      newCategories[index] = { ...newCategories[index], [field]: value };
+      return { ...prev, categories: newCategories };
+    });
   };
 
   const removeCategory = (index: number) => {
-    if (!config) return;
-    const newCategories = config.categories.filter((_, i) => i !== index);
-    setConfig({ ...config, categories: newCategories });
+    setConfig(prev => {
+      const newCategories = prev.categories.filter((_, i) => i !== index);
+      return { ...prev, categories: newCategories };
+    });
   };
 
   // Durations
   const addDuration = () => {
-    if (!config) return;
     const newDuration: VideoDuration = {
       id: `duration-${Date.now()}`,
       label: 'Nova duração',
       minutes: 5,
       price: 49.90,
     };
-    setConfig({ ...config, durations: [...config.durations, newDuration] });
+    setConfig(prev => ({ ...prev, durations: [...prev.durations, newDuration] }));
   };
 
   const updateDuration = (index: number, field: keyof VideoDuration, value: string | number) => {
-    if (!config) return;
-    const newDurations = [...config.durations];
-    newDurations[index] = { ...newDurations[index], [field]: value };
-    setConfig({ ...config, durations: newDurations });
+    setConfig(prev => {
+      const newDurations = [...prev.durations];
+      newDurations[index] = { ...newDurations[index], [field]: value };
+      return { ...prev, durations: newDurations };
+    });
   };
 
   const removeDuration = (index: number) => {
-    if (!config) return;
-    const newDurations = config.durations.filter((_, i) => i !== index);
-    setConfig({ ...config, durations: newDurations });
+    setConfig(prev => {
+      const newDurations = prev.durations.filter((_, i) => i !== index);
+      return { ...prev, durations: newDurations };
+    });
   };
 
   // Rules
   const addRule = (type: 'allowed' | 'notAllowed') => {
-    if (!config) return;
-    const newRules = { ...config.rules };
-    newRules[type] = [...newRules[type], 'Nova regra'];
-    setConfig({ ...config, rules: newRules });
+    setConfig(prev => {
+      const newRules = { ...prev.rules };
+      newRules[type] = [...newRules[type], 'Nova regra'];
+      return { ...prev, rules: newRules };
+    });
   };
 
   const updateRule = (type: 'allowed' | 'notAllowed', index: number, value: string) => {
-    if (!config) return;
-    const newRules = { ...config.rules };
-    newRules[type][index] = value;
-    setConfig({ ...config, rules: newRules });
+    setConfig(prev => {
+      const newRules = { ...prev.rules };
+      newRules[type][index] = value;
+      return { ...prev, rules: newRules };
+    });
   };
 
   const removeRule = (type: 'allowed' | 'notAllowed', index: number) => {
-    if (!config) return;
-    const newRules = { ...config.rules };
-    newRules[type] = newRules[type].filter((_, i) => i !== index);
-    setConfig({ ...config, rules: newRules });
+    setConfig(prev => {
+      const newRules = { ...prev.rules };
+      newRules[type] = newRules[type].filter((_, i) => i !== index);
+      return { ...prev, rules: newRules };
+    });
   };
 
-  if (!config) {
+  if (isLoading) {
     return (
       <AdminLayout title="Vídeos">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-muted-foreground">Carregando...</div>
+          <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
+          <span className="text-muted-foreground">Carregando configurações...</span>
         </div>
       </AdminLayout>
     );
@@ -136,12 +147,20 @@ const AdminVideos = () => {
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Configure vídeos personalizados, categorias, preços e regras
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Configure vídeos personalizados, categorias, preços e regras
+            </p>
+            {isSaving && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Salvando...
+              </span>
+            )}
+          </div>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? 'Salvando...' : 'Salvar no servidor'}
           </Button>
         </div>
 

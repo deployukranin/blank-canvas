@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Crown, Sparkles } from 'lucide-react';
+import { Save, Plus, Trash2, Crown, Sparkles, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -14,39 +14,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
-  getVipConfig,
+  defaultVipConfig,
   saveVipConfig,
   type VipConfig,
   type VipPlan,
 } from '@/lib/vip-config';
 
 const AdminVipPrecos = () => {
-  const { toast } = useToast();
-  const [config, setConfig] = useState<VipConfig | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const { 
+    config, 
+    setConfig, 
+    isLoading, 
+    isSaving, 
+    saveNow 
+  } = usePersistentConfig<VipConfig>({
+    configKey: 'vip_config',
+    defaultValue: defaultVipConfig,
+    localStorageKey: 'vipConfig',
+    debounceMs: 2000,
+  });
 
+  // Keep local cache updated
   useEffect(() => {
-    setConfig(getVipConfig());
-  }, []);
-
-  const handleSave = () => {
-    if (!config) return;
-    setIsSaving(true);
-    
-    setTimeout(() => {
+    if (!isLoading) {
       saveVipConfig(config);
-      toast({
-        title: 'Preços VIP salvos!',
-        description: 'As alterações foram aplicadas com sucesso.',
-      });
-      setIsSaving(false);
-    }, 500);
+    }
+  }, [config, isLoading]);
+
+  const handleSave = async () => {
+    await saveNow();
   };
 
   const addPlan = () => {
-    if (!config) return;
     const newPlan: VipPlan = {
       id: `plan-${Date.now()}`,
       name: 'Novo Plano',
@@ -55,41 +56,46 @@ const AdminVipPrecos = () => {
       description: 'Descrição do plano',
       features: ['Recurso 1', 'Recurso 2'],
     };
-    setConfig({ ...config, plans: [...config.plans, newPlan] });
+    setConfig(prev => ({ ...prev, plans: [...prev.plans, newPlan] }));
   };
 
   const updatePlan = (index: number, field: keyof VipPlan, value: string | number | string[]) => {
-    if (!config) return;
-    const newPlans = [...config.plans];
-    newPlans[index] = { ...newPlans[index], [field]: value };
-    setConfig({ ...config, plans: newPlans });
+    setConfig(prev => {
+      const newPlans = [...prev.plans];
+      newPlans[index] = { ...newPlans[index], [field]: value };
+      return { ...prev, plans: newPlans };
+    });
   };
 
   const removePlan = (index: number) => {
-    if (!config) return;
-    const newPlans = config.plans.filter((_, i) => i !== index);
-    setConfig({ ...config, plans: newPlans });
+    setConfig(prev => {
+      const newPlans = prev.plans.filter((_, i) => i !== index);
+      return { ...prev, plans: newPlans };
+    });
   };
 
   const addFeature = (planIndex: number) => {
-    if (!config) return;
-    const newPlans = [...config.plans];
-    newPlans[planIndex].features = [...newPlans[planIndex].features, 'Novo recurso'];
-    setConfig({ ...config, plans: newPlans });
+    setConfig(prev => {
+      const newPlans = [...prev.plans];
+      newPlans[planIndex].features = [...newPlans[planIndex].features, 'Novo recurso'];
+      return { ...prev, plans: newPlans };
+    });
   };
 
   const updateFeature = (planIndex: number, featureIndex: number, value: string) => {
-    if (!config) return;
-    const newPlans = [...config.plans];
-    newPlans[planIndex].features[featureIndex] = value;
-    setConfig({ ...config, plans: newPlans });
+    setConfig(prev => {
+      const newPlans = [...prev.plans];
+      newPlans[planIndex].features[featureIndex] = value;
+      return { ...prev, plans: newPlans };
+    });
   };
 
   const removeFeature = (planIndex: number, featureIndex: number) => {
-    if (!config) return;
-    const newPlans = [...config.plans];
-    newPlans[planIndex].features = newPlans[planIndex].features.filter((_, i) => i !== featureIndex);
-    setConfig({ ...config, plans: newPlans });
+    setConfig(prev => {
+      const newPlans = [...prev.plans];
+      newPlans[planIndex].features = newPlans[planIndex].features.filter((_, i) => i !== featureIndex);
+      return { ...prev, plans: newPlans };
+    });
   };
 
   const formatCurrency = (value: number) => {
@@ -99,11 +105,12 @@ const AdminVipPrecos = () => {
     }).format(value);
   };
 
-  if (!config) {
+  if (isLoading) {
     return (
       <AdminLayout title="Preços VIP">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-muted-foreground">Carregando...</div>
+          <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
+          <span className="text-muted-foreground">Carregando configurações...</span>
         </div>
       </AdminLayout>
     );
@@ -114,9 +121,17 @@ const AdminVipPrecos = () => {
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Configure os planos e preços das assinaturas VIP
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Configure os planos e preços das assinaturas VIP
+            </p>
+            {isSaving && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Salvando...
+              </span>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={addPlan}>
               <Plus className="w-4 h-4 mr-2" />
@@ -124,7 +139,7 @@ const AdminVipPrecos = () => {
             </Button>
             <Button size="sm" onClick={handleSave} disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Salvando...' : 'Salvar'}
+              {isSaving ? 'Salvando...' : 'Salvar no servidor'}
             </Button>
           </div>
         </div>

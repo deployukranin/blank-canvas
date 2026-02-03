@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Headphones, Clock, Music, Eye, EyeOff } from 'lucide-react';
+import { Save, Plus, Trash2, Headphones, Clock, Music, Eye, EyeOff, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
-  getVideoConfig,
+  defaultVideoConfig,
   saveVideoConfig,
   type VideoConfig,
   type AudioCategory,
@@ -19,16 +20,27 @@ const MIN_PRICE = 10;
 
 const AdminAudios = () => {
   const { toast } = useToast();
-  const [config, setConfig] = useState<VideoConfig | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const { 
+    config, 
+    setConfig, 
+    isLoading, 
+    isSaving, 
+    saveNow 
+  } = usePersistentConfig<VideoConfig>({
+    configKey: 'video_config',
+    defaultValue: defaultVideoConfig,
+    localStorageKey: 'videoConfig',
+    debounceMs: 2000,
+  });
 
+  // Keep local cache updated
   useEffect(() => {
-    setConfig(getVideoConfig());
-  }, []);
+    if (!isLoading) {
+      saveVideoConfig(config);
+    }
+  }, [config, isLoading]);
 
-  const handleSave = () => {
-    if (!config) return;
-    
+  const handleSave = async () => {
     // Validate minimum prices
     const invalidDurations = config.audioDurations.filter(d => d.price < MIN_PRICE);
     if (invalidDurations.length > 0) {
@@ -40,73 +52,67 @@ const AdminAudios = () => {
       return;
     }
     
-    setIsSaving(true);
-    
-    setTimeout(() => {
-      saveVideoConfig(config);
-      toast({
-        title: 'Configurações salvas!',
-        description: 'As alterações foram aplicadas com sucesso.',
-      });
-      setIsSaving(false);
-    }, 500);
+    await saveNow();
   };
 
   // Category handlers
   const addCategory = () => {
-    if (!config) return;
     const newCategory: AudioCategory = {
       id: `audio-category-${Date.now()}`,
       name: 'Nova Categoria',
       description: 'Descrição da categoria',
       icon: '🎧',
     };
-    setConfig({ ...config, audioCategories: [...config.audioCategories, newCategory] });
+    setConfig(prev => ({ ...prev, audioCategories: [...prev.audioCategories, newCategory] }));
   };
 
   const updateCategory = (index: number, field: keyof AudioCategory, value: string) => {
-    if (!config) return;
-    const newCategories = [...config.audioCategories];
-    newCategories[index] = { ...newCategories[index], [field]: value };
-    setConfig({ ...config, audioCategories: newCategories });
+    setConfig(prev => {
+      const newCategories = [...prev.audioCategories];
+      newCategories[index] = { ...newCategories[index], [field]: value };
+      return { ...prev, audioCategories: newCategories };
+    });
   };
 
   const removeCategory = (index: number) => {
-    if (!config) return;
-    const newCategories = config.audioCategories.filter((_, i) => i !== index);
-    setConfig({ ...config, audioCategories: newCategories });
+    setConfig(prev => {
+      const newCategories = prev.audioCategories.filter((_, i) => i !== index);
+      return { ...prev, audioCategories: newCategories };
+    });
   };
 
   // Duration handlers
   const addDuration = () => {
-    if (!config) return;
     const newDuration: AudioDuration = {
       id: `audio-duration-${Date.now()}`,
       label: '5 minutos',
       minutes: 5,
       price: 19.90,
     };
-    setConfig({ ...config, audioDurations: [...config.audioDurations, newDuration] });
+    setConfig(prev => ({ ...prev, audioDurations: [...prev.audioDurations, newDuration] }));
   };
 
   const updateDuration = (index: number, field: keyof AudioDuration, value: string | number) => {
-    if (!config) return;
-    const newDurations = [...config.audioDurations];
-    newDurations[index] = { ...newDurations[index], [field]: value };
-    setConfig({ ...config, audioDurations: newDurations });
+    setConfig(prev => {
+      const newDurations = [...prev.audioDurations];
+      newDurations[index] = { ...newDurations[index], [field]: value };
+      return { ...prev, audioDurations: newDurations };
+    });
   };
 
   const removeDuration = (index: number) => {
-    if (!config) return;
-    const newDurations = config.audioDurations.filter((_, i) => i !== index);
-    setConfig({ ...config, audioDurations: newDurations });
+    setConfig(prev => {
+      const newDurations = prev.audioDurations.filter((_, i) => i !== index);
+      return { ...prev, audioDurations: newDurations };
+    });
   };
 
-  if (!config) {
+  if (isLoading) {
     return (
       <AdminLayout title="Áudios">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-muted-foreground">Carregando...</div>
+          <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
+          <span className="text-muted-foreground">Carregando configurações...</span>
         </div>
       </AdminLayout>
     );
@@ -117,12 +123,20 @@ const AdminAudios = () => {
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Configure as categorias e durações de áudios personalizados
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Configure as categorias e durações de áudios personalizados
+            </p>
+            {isSaving && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Salvando...
+              </span>
+            )}
+          </div>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? 'Salvando...' : 'Salvar no servidor'}
           </Button>
         </div>
 
