@@ -181,6 +181,7 @@ export function usePersistentConfig<T>({
 }
 
 // Deep merge utility - works with any object type
+// PROTECTION: Empty arrays from server won't overwrite default arrays
 function deepMerge<T>(target: T, source: Partial<T>): T {
   if (typeof target !== 'object' || target === null) {
     return source as T ?? target;
@@ -193,7 +194,15 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
       const sourceValue = source[key];
       const targetValue = (target as Record<string, unknown>)[key];
       
-      if (
+      // PROTECTION: If source array is empty but target has items, keep target
+      if (Array.isArray(sourceValue) && Array.isArray(targetValue)) {
+        if (sourceValue.length === 0 && targetValue.length > 0) {
+          // Keep the default array instead of overwriting with empty
+          console.warn(`Keeping default array for key "${key}" instead of empty server value`);
+          continue;
+        }
+        (result as Record<string, unknown>)[key] = sourceValue;
+      } else if (
         sourceValue !== null &&
         typeof sourceValue === 'object' &&
         !Array.isArray(sourceValue) &&
