@@ -101,10 +101,7 @@ const CustomsPage = () => {
   };
 
   const handleBuyClick = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
+    // Auth is handled automatically via anonymous sign-in in the payment hook
     if (!selectedCategory || !selectedDuration) {
       toast({ 
         title: 'Selecione categoria e duração', 
@@ -236,10 +233,7 @@ const CustomsPage = () => {
   };
 
   const handleAudioBuyClick = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
+    // Auth is handled automatically via anonymous sign-in in the payment hook
     if (!selectedAudioCategory || !selectedAudioDuration) {
       toast({ 
         title: 'Selecione categoria e duração', 

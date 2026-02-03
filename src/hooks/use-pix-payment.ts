@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface CreateChargeParams {
   amount: number;
@@ -35,11 +36,24 @@ export function usePixPayment() {
   const [isLoading, setIsLoading] = useState(false);
   const [chargeData, setChargeData] = useState<PixChargeResult | null>(null);
   const { toast } = useToast();
+  const { ensureAuthenticated } = useAuth();
 
   const createCharge = useCallback(async (params: CreateChargeParams): Promise<PixChargeResult> => {
     setIsLoading(true);
     
     try {
+      // Ensure user is authenticated (signs in anonymously if needed)
+      const isAuthed = await ensureAuthenticated();
+      if (!isAuthed) {
+        const result: PixChargeResult = {
+          success: false,
+          error: 'Não foi possível criar sessão de pagamento. Tente novamente.',
+        };
+        setChargeData(result);
+        setIsLoading(false);
+        return result;
+      }
+
       console.log('Creating PIX charge:', params);
       
       const { data, error } = await supabase.functions.invoke('create-pix-charge', {
