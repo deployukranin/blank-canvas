@@ -147,24 +147,6 @@ export default function AdminLogin() {
             </Button>
           </form>
 
-          {/* Role indicators */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Tipos de acesso disponíveis:
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-muted/50 text-center">
-                <Shield className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <p className="text-xs font-medium">Admin</p>
-                <p className="text-[10px] text-muted-foreground">Gerenciamento</p>
-              </div>
-              <div className="p-3 rounded-xl bg-accent/20 text-center">
-                <Crown className="w-5 h-5 mx-auto mb-1 text-accent" />
-                <p className="text-xs font-medium">CEO</p>
-                <p className="text-[10px] text-muted-foreground">Acesso total</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Back to home */}
