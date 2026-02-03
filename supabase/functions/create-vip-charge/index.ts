@@ -2,12 +2,29 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-forwarded-for',
 };
+
+// Rate limit configuration
+const RATE_LIMIT_MAX_REQUESTS = 3; // Max 3 VIP subscription attempts
+const RATE_LIMIT_WINDOW_MINUTES = 60; // Per hour
 
 interface CreateVIPChargeRequest {
   planType: 'monthly' | 'quarterly' | 'yearly';
   customerName?: string;
+}
+
+// Extract client IP from request headers
+function getClientIP(req: Request): string {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  const realIP = req.headers.get('x-real-ip');
+  if (realIP) {
+    return realIP;
+  }
+  return 'unknown';
 }
 
 Deno.serve(async (req) => {
@@ -56,6 +73,45 @@ Deno.serve(async (req) => {
     const userEmail = userData.user.email || 'Usuário';
     console.log('Creating VIP charge for user:', userId);
 
+    // Rate limiting: use user_id for authenticated requests
+    const clientIP = getClientIP(req);
+    const rateLimitIdentifier = userId; // VIP requires auth, so always use user_id
+    
+    console.log('Rate limit check for:', rateLimitIdentifier, 'IP:', clientIP);
+
+    // Check rate limit using database function
+    const { data: rateLimitResult, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        p_identifier: rateLimitIdentifier,
+        p_endpoint: 'create-vip-charge',
+        p_max_requests: RATE_LIMIT_MAX_REQUESTS,
+        p_window_minutes: RATE_LIMIT_WINDOW_MINUTES,
+      });
+
+    if (rateLimitError) {
+      console.error('Rate limit check failed:', rateLimitError);
+      // Continue without rate limiting if check fails (fail open for usability)
+    } else if (rateLimitResult && !rateLimitResult.allowed) {
+      console.warn('Rate limit exceeded for:', rateLimitIdentifier, rateLimitResult);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Muitas tentativas de assinatura. Tente novamente mais tarde.',
+          retry_after_seconds: rateLimitResult.retry_after_seconds,
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retry_after_seconds || 3600),
+          } 
+        }
+      );
+    }
+
+    console.log('Rate limit passed:', rateLimitResult);
+
     const body: CreateVIPChargeRequest = await req.json();
     
     // Validate plan type
@@ -81,6 +137,25 @@ Deno.serve(async (req) => {
           success: false, 
           error: 'Você já possui uma assinatura VIP ativa',
           expires_at: existingSub.expires_at 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check for pending payment subscriptions to avoid duplicates
+    const { data: pendingSub } = await supabase
+      .from('vip_subscriptions')
+      .select('id, created_at')
+      .eq('user_id', userId)
+      .eq('status', 'pending_payment')
+      .gt('created_at', new Date(Date.now() - 15 * 60 * 1000).toISOString()) // Created in last 15 min
+      .maybeSingle();
+
+    if (pendingSub) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Você já tem um pagamento pendente. Aguarde a expiração ou complete o pagamento atual.',
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
