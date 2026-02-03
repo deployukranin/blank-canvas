@@ -16,12 +16,18 @@ export interface VideoCategory {
   icon: string;
 }
 
+export interface AudioDuration {
+  id: string;
+  label: string;
+  minutes: number;
+  price: number;
+}
+
 export interface AudioCategory {
   id: string;
   name: string;
   description: string;
   icon: string;
-  basePrice: number;
 }
 
 export interface VideoRules {
@@ -36,6 +42,7 @@ export interface VideoConfig {
   durations: VideoDuration[];
   categories: VideoCategory[];
   audioCategories: AudioCategory[];
+  audioDurations: AudioDuration[];
   rules: VideoRules;
   deliveryDays: number;
 }
@@ -97,29 +104,32 @@ export const defaultVideoConfig: VideoConfig = {
       name: 'Sussurros',
       description: 'Áudios com sussurros suaves',
       icon: '🤫',
-      basePrice: 29.90,
     },
     {
       id: 'afirmacoes',
       name: 'Afirmações',
       description: 'Afirmações positivas para relaxar',
       icon: '💝',
-      basePrice: 34.90,
     },
     {
       id: 'para-dormir',
       name: 'Para Dormir',
       description: 'Áudios relaxantes para ajudar a dormir',
       icon: '🌙',
-      basePrice: 39.90,
     },
     {
       id: 'sons-especificos',
       name: 'Sons Específicos',
       description: 'Tapping, scratching e outros sons',
       icon: '🎵',
-      basePrice: 24.90,
     },
+  ],
+  audioDurations: [
+    { id: 'audio-5min', label: '5 minutos', minutes: 5, price: 19.90 },
+    { id: 'audio-10min', label: '10 minutos', minutes: 10, price: 34.90 },
+    { id: 'audio-15min', label: '15 minutos', minutes: 15, price: 49.90 },
+    { id: 'audio-20min', label: '20 minutos', minutes: 20, price: 64.90 },
+    { id: 'audio-30min', label: '30 minutos', minutes: 30, price: 89.90 },
   ],
   rules: {
     allowed: [
@@ -157,6 +167,7 @@ export const getVideoConfig = (): VideoConfig => {
       ...defaultVideoConfig,
       ...parsed,
       audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
+      audioDurations: parsed.audioDurations || defaultVideoConfig.audioDurations,
     };
   }
   return defaultVideoConfig;
@@ -165,6 +176,11 @@ export const getVideoConfig = (): VideoConfig => {
 // Mock function to save config (will be replaced with API call)
 export const saveVideoConfig = (config: VideoConfig): void => {
   localStorage.setItem('videoConfig', JSON.stringify(config));
+};
+
+// Calculate final price for audio based on duration
+export const calculateAudioPrice = (duration: AudioDuration): number => {
+  return duration.price;
 };
 
 // Calculate final price based on duration

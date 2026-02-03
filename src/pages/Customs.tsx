@@ -25,13 +25,15 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
-import { mockAudioCategories, type CustomCategory } from '@/lib/mock-data';
 import { 
   getVideoConfig, 
-  calculatePrice, 
+  calculatePrice,
+  calculateAudioPrice,
   type VideoConfig, 
   type VideoDuration, 
-  type VideoCategory 
+  type VideoCategory,
+  type AudioCategory,
+  type AudioDuration,
 } from '@/lib/video-config';
 import {
   Dialog,
@@ -73,10 +75,12 @@ const CustomsPage = () => {
   });
 
   // Audio state
-  const [selectedAudioCategory, setSelectedAudioCategory] = useState<CustomCategory | null>(null);
+  const [selectedAudioCategory, setSelectedAudioCategory] = useState<AudioCategory | null>(null);
+  const [selectedAudioDuration, setSelectedAudioDuration] = useState<AudioDuration | null>(null);
   const [audioFormData, setAudioFormData] = useState({ name: '', preferences: '', observations: '' });
   const [audioOrderComplete, setAudioOrderComplete] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showAudioOrderDialog, setShowAudioOrderDialog] = useState(false);
   const [showAudioPixModal, setShowAudioPixModal] = useState(false);
   const [audioChargeData, setAudioChargeData] = useState<typeof chargeData>(null);
 
@@ -223,28 +227,47 @@ const CustomsPage = () => {
   };
 
   // Audio handlers
-  const handleSelectAudioCategory = (category: CustomCategory) => {
+  const handleSelectAudioCategory = (category: AudioCategory) => {
+    setSelectedAudioCategory(category);
+  };
+
+  const handleSelectAudioDuration = (duration: AudioDuration) => {
+    setSelectedAudioDuration(duration);
+  };
+
+  const handleAudioBuyClick = () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
       return;
     }
-    setSelectedAudioCategory(category);
+    if (!selectedAudioCategory || !selectedAudioDuration) {
+      toast({ 
+        title: 'Selecione categoria e duração', 
+        description: 'Escolha uma categoria e o tempo do áudio para continuar.',
+        variant: 'destructive' 
+      });
+      return;
+    }
+    setShowAudioOrderDialog(true);
   };
 
   const handleAudioOrder = async () => {
-    if (!selectedAudioCategory || !audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+    if (!selectedAudioCategory || !selectedAudioDuration || !audioFormData.name.trim() || !audioFormData.preferences.trim()) {
       toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
       return;
     }
 
     setIsProcessing(true);
+    const audioPrice = calculateAudioPrice(selectedAudioDuration);
 
     // Create PIX charge for audio
     const result = await createCharge({
-      amount: selectedAudioCategory.basePrice,
+      amount: audioPrice,
       productType: 'audio',
       category: selectedAudioCategory.id,
       categoryName: selectedAudioCategory.name,
+      durationMinutes: selectedAudioDuration.minutes,
+      durationLabel: selectedAudioDuration.label,
       customerName: audioFormData.name,
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
@@ -254,8 +277,13 @@ const CustomsPage = () => {
 
     if (result.success) {
       setAudioChargeData(result);
+      setShowAudioOrderDialog(false);
       setShowAudioPixModal(true);
-      trackEvent('audio_pix_charge_created', { category: selectedAudioCategory.id });
+      trackEvent('audio_pix_charge_created', { 
+        category: selectedAudioCategory.id,
+        duration: selectedAudioDuration.id,
+        price: audioPrice,
+      });
     } else {
       toast({
         title: 'Erro ao gerar cobrança',
@@ -266,30 +294,42 @@ const CustomsPage = () => {
   };
 
   const handleAudioPixPaymentConfirmed = async () => {
-    if (!selectedAudioCategory) return;
+    if (!selectedAudioCategory || !selectedAudioDuration) return;
 
     setShowAudioPixModal(false);
     
     await onCustomOrder({
       type: 'audio',
       category: selectedAudioCategory.id,
+      categoryName: selectedAudioCategory.name,
+      duration: selectedAudioDuration.minutes,
+      durationLabel: selectedAudioDuration.label,
       name: audioFormData.name,
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
       status: 'pending',
     });
 
-    trackEvent('custom_audio_order', { category: selectedAudioCategory.id });
+    trackEvent('custom_audio_order', { 
+      category: selectedAudioCategory.id,
+      duration: selectedAudioDuration.id,
+    });
     setAudioOrderComplete(true);
   };
 
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
+    setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
     setAudioOrderComplete(false);
+    setShowAudioOrderDialog(false);
     setShowAudioPixModal(false);
     setAudioChargeData(null);
   };
+
+  const audioFinalPrice = selectedAudioDuration 
+    ? calculateAudioPrice(selectedAudioDuration) 
+    : 0;
 
   const finalPrice = selectedDuration 
     ? calculatePrice(selectedDuration) 
@@ -522,29 +562,96 @@ const CustomsPage = () => {
             </GlassCard>
 
             {/* Categories */}
-            <h3 className="font-display font-semibold">Categorias</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {mockAudioCategories.map((category, index) => (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <GlassCard
-                    className="p-4 text-center"
-                    onClick={() => handleSelectAudioCategory(category)}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-sm">Escolha a Categoria</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {config.audioCategories.map((category, index) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
                   >
-                    <div className="text-3xl mb-2">{category.icon}</div>
-                    <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
-                    <p className="text-xs text-muted-foreground mb-2">{category.description}</p>
-                    <div className="font-bold text-primary text-sm">
-                      R$ {category.basePrice.toFixed(2).replace('.', ',')}
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              ))}
-            </div>
+                    <GlassCard
+                      className={`p-4 text-center cursor-pointer transition-all ${
+                        selectedAudioCategory?.id === category.id 
+                          ? 'ring-2 ring-primary bg-primary/10' 
+                          : 'hover:bg-white/5'
+                      }`}
+                      onClick={() => handleSelectAudioCategory(category)}
+                    >
+                      <div className="text-3xl mb-2">{category.icon}</div>
+                      <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Durations */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-sm">Escolha a Duração</h3>
+              </div>
+              <div className="space-y-2">
+                {config.audioDurations.map((duration, index) => {
+                  const price = calculateAudioPrice(duration);
+                  return (
+                    <motion.div
+                      key={duration.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 + index * 0.05 }}
+                    >
+                      <GlassCard
+                        className={`p-4 cursor-pointer transition-all ${
+                          selectedAudioDuration?.id === duration.id 
+                            ? 'ring-2 ring-primary bg-primary/10' 
+                            : 'hover:bg-white/5'
+                        }`}
+                        onClick={() => handleSelectAudioDuration(duration)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              selectedAudioDuration?.id === duration.id 
+                                ? 'border-primary bg-primary' 
+                                : 'border-muted-foreground'
+                            }`}>
+                              {selectedAudioDuration?.id === duration.id && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span className="font-medium text-sm">{duration.label}</span>
+                          </div>
+                          <span className="font-bold text-primary">
+                            R$ {price.toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                      </GlassCard>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Spacer for fixed bottom bar */}
+            {(selectedAudioCategory || selectedAudioDuration) && <div className="h-40" />}
           </TabsContent>
         </Tabs>
 
@@ -584,6 +691,51 @@ const CustomsPage = () => {
                   className="w-full bg-gradient-to-r from-primary to-accent gap-2 h-12"
                   onClick={handleBuyClick}
                   disabled={!selectedCategory || !selectedDuration}
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Comprar Agora
+                </Button>
+              </GlassCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Audio Summary & Buy Button */}
+        <AnimatePresence>
+          {activeTab === 'audios' && (selectedAudioCategory || selectedAudioDuration) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-20 left-4 right-4 z-40"
+            >
+              <GlassCard className="p-4 bg-card/95 backdrop-blur-xl border border-primary/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Total:</span>
+                    {selectedAudioCategory && selectedAudioDuration ? (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {selectedAudioCategory.name} • {selectedAudioDuration.label}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Selecione categoria e duração
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary">
+                      R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Entrega: 3 dias
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-primary to-accent gap-2 h-12"
+                  onClick={handleAudioBuyClick}
+                  disabled={!selectedAudioCategory || !selectedAudioDuration}
                 >
                   <Sparkles className="w-5 h-5" />
                   Comprar Agora
@@ -758,12 +910,12 @@ const CustomsPage = () => {
       </Dialog>
 
       {/* Audio Order Dialog */}
-      <Dialog open={!!selectedAudioCategory && !audioOrderComplete && !showAudioPixModal} onOpenChange={() => !isProcessing && !isPixLoading && resetAudioOrder()}>
+      <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowAudioOrderDialog(false)}>
         <DialogContent className="glass mx-4">
           <DialogHeader>
-            <DialogTitle>Pedir Áudio</DialogTitle>
+            <DialogTitle>Pedir Áudio Personalizado</DialogTitle>
             <DialogDescription>
-              {selectedAudioCategory?.name} - R$ {selectedAudioCategory?.basePrice.toFixed(2).replace('.', ',')}
+              {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -786,13 +938,13 @@ const CustomsPage = () => {
               className="glass border-white/10"
             />
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={resetAudioOrder} disabled={isProcessing || isPixLoading}>
+              <Button variant="ghost" className="flex-1" onClick={() => setShowAudioOrderDialog(false)} disabled={isProcessing || isPixLoading}>
                 Cancelar
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handleAudioOrder}
-                disabled={isProcessing || isPixLoading}
+                disabled={isProcessing || isPixLoading || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
               >
                 <Send className="w-4 h-4" />
                 {isProcessing || isPixLoading ? 'Gerando PIX...' : 'Pagar com PIX'}
@@ -803,7 +955,7 @@ const CustomsPage = () => {
       </Dialog>
 
       {/* PIX Payment Modal for Audio */}
-      {audioChargeData?.success && selectedAudioCategory && (
+      {audioChargeData?.success && selectedAudioDuration && (
         <PixPaymentModal
           isOpen={showAudioPixModal}
           onClose={() => {
@@ -815,7 +967,7 @@ const CustomsPage = () => {
           brCode={audioChargeData.brCode!}
           correlationId={audioChargeData.correlationId!}
           expiresAt={audioChargeData.expiresAt!}
-          amount={selectedAudioCategory.basePrice}
+          amount={audioFinalPrice}
         />
       )}
 
