@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
+import { createAdminSession } from '@/lib/admin-session';
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { loginAsAdmin } = useAuth();
@@ -35,6 +35,16 @@ export default function AdminLogin() {
         setError('Email ou senha inválidos.');
         setIsLoading(false);
         return;
+      }
+
+      // Create admin session token for config saving
+      // We use the email+role+timestamp signed with a secret
+      // The secret is shared between client and edge function
+      try {
+        // Generate a client-side token that matches edge function verification
+        await createAdminSession(email, data.role, 'lovable-admin-2024');
+      } catch (tokenErr) {
+        console.warn('Could not create admin session token:', tokenErr);
       }
 
       const result = await loginAsAdmin(email, password, data.role);
