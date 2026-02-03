@@ -1,112 +1,134 @@
 
-
-# Plano de Implementacao
+# Plano de Alterações no Painel Admin
 
 ## Resumo
-
-Vou implementar duas melhorias no painel admin:
-
-1. **Historico de Pagamentos PIX** (`/admin/pagamentos-pix`) - Substituir a pagina de "em construcao" por um painel completo com lista de pagamentos
-2. **Reorganizacao do Config. Videos** (`/admin/videos-config`) - Separar em 4 paginas independentes no menu lateral
+Este plano aborda três modificações no painel administrativo:
+1. Remover a seção "Configurações Gerais" da página de configurações
+2. Remover a opção de tornar usuário admin na página de usuários
+3. Unificar as categorias de vídeos e áudios na página de categorias
 
 ---
 
-## Parte 1: Historico de Pagamentos PIX
+## 1. Remover "Configurações Gerais" em /admin/configuracoes
 
-### O que sera feito
+**Arquivo:** `src/pages/admin/AdminConfiguracoes.tsx`
 
-Transformar a pagina atual (que mostra apenas "Sistema em Reconstrucao") em um painel completo de pagamentos com:
+A seção "Configurações Gerais" (linhas 37-82) será removida completamente, incluindo:
+- Nome do Site
+- Descrição  
+- Preço VIP Mensal
 
-- **Cards de resumo**: Total recebido, Pendentes, Pagos, Falhos
-- **Tabela de transacoes**: Lista todos os pedidos com status de pagamento
-- **Filtros**: Por status (pendente/pago/falho) e por tipo (video/vip_subscription)
-- **Detalhes**: Modal com informacoes completas de cada pagamento incluindo split
+As seções restantes permanecerão:
+- Notificações
+- Configurações de Conteúdo
 
-### Dados disponiveis
+Também serão removidos os estados não utilizados (`siteName`, `siteDescription`, `vipPrice`) e o ícone `Palette` que não será mais necessário.
 
-A tabela `custom_orders` ja possui todos os dados necessarios:
-- `amount_cents` - Valor total
-- `payout_amount_cents` - Valor repassado ao criador (79%)
-- `status` - pending, paid, payout_done
-- `payout_status` - created, approved, failed
-- `paid_at` - Data do pagamento
-- `product_type` - video ou vip_subscription
-- `customer_name` - Nome do cliente
+---
 
-### Interface
+## 2. Remover opção de Admin em /admin/usuarios
+
+**Arquivo:** `src/pages/admin/AdminUsuarios.tsx`
+
+Alterações:
+- Remover o botão "Tornar Admin" de cada card de usuário (linhas 150-158)
+- Remover a função `toggleAdmin` que não será mais utilizada
+- Remover o filtro "Admin" das opções de filtro (manter apenas "Todos", "VIP" e "Regular")
+- Remover o card de estatísticas de "Admins" (linhas 54-58)
+- Manter apenas a badge visual indicando se um usuário é admin (exibição apenas, sem ação)
+
+---
+
+## 3. Unificar Categorias de Vídeos e Áudios
+
+**Arquivos:** 
+- `src/lib/video-config.ts`
+- `src/pages/admin/AdminVideosCategorias.tsx`
+
+### Alterações na Configuração
+
+Adicionar uma nova interface `AudioCategory` e um array `audioCategories` na configuração, espelhando a estrutura das categorias de vídeos:
 
 ```text
-+----------------------------------+
-|  Pagamentos PIX                  |
-+----------------------------------+
-| [R$ Total]  [Pendentes]  [Pagos] |
-+----------------------------------+
-| Filtros: [Todos v] [Tipo v]      |
-+----------------------------------+
-| # | Cliente | Tipo | Valor | ... |
-| 1 | Maria   | VIP  | 19,90 | ... |
-| 2 | Carlos  | Video| 49,90 | ... |
-+----------------------------------+
++-----------------------------------+
+|         VideoConfig               |
++-----------------------------------+
+| - categories (vídeos)             |
+| - audioCategories (áudios) [NOVO] |
+| - durations                       |
+| - rules                           |
++-----------------------------------+
 ```
 
----
+### Alterações na Interface Admin
 
-## Parte 2: Separacao do Config. Videos
-
-### O que sera feito
-
-Dividir a pagina atual (que usa tabs) em 4 paginas separadas no menu admin:
-
-| Rota | Titulo | Conteudo |
-|------|--------|----------|
-| `/admin/videos-config` | Video | URL do video explicativo, titulo, descricao, prazo de entrega |
-| `/admin/videos-duracao` | Duracao | Lista de duracoes com precos |
-| `/admin/videos-categorias` | Categorias | Lista de categorias com icones |
-| `/admin/videos-regras` | Regras | O que pode e o que nao pode |
-
-### Mudancas no Menu
-
-O menu lateral do AdminLayout sera atualizado para incluir as 4 novas opcoes (substituindo a unica "Config. Videos"):
+A página `AdminVideosCategorias.tsx` será reformulada para exibir duas seções:
 
 ```text
-...
-- Pedidos
-- Pagamentos PIX
-- Video           <- Novo
-- Duracao         <- Novo  
-- Categorias      <- Novo
-- Regras          <- Novo
-- Usuarios
-...
++------------------------------------------+
+|  Categorias                              |
++------------------------------------------+
+|                                          |
+|  [Categorias de Vídeos]     [Adicionar]  |
+|  +---------------------------------+     |
+|  | 🎭 Roleplay                     | [X] |
+|  | 👆 Tapping                      | [X] |
+|  | ...                             |     |
+|  +---------------------------------+     |
+|                                          |
+|  [Categorias de Áudios]     [Adicionar]  |
+|  +---------------------------------+     |
+|  | 🤫 Sussurros                    | [X] |
+|  | 💝 Afirmações                   | [X] |
+|  | ...                             |     |
+|  +---------------------------------+     |
+|                                          |
++------------------------------------------+
 ```
 
----
-
-## Arquivos a Criar/Modificar
-
-### Novos Arquivos
-1. `src/pages/admin/AdminVideosDuracao.tsx` - Pagina de duracoes
-2. `src/pages/admin/AdminVideosCategorias.tsx` - Pagina de categorias
-3. `src/pages/admin/AdminVideosRegras.tsx` - Pagina de regras
-
-### Arquivos a Modificar
-1. `src/pages/admin/AdminPagamentosPix.tsx` - Adicionar historico completo
-2. `src/pages/admin/AdminVideosConfig.tsx` - Manter apenas configuracao do video explicativo
-3. `src/pages/admin/AdminLayout.tsx` - Atualizar menu lateral
-4. `src/App.tsx` - Adicionar novas rotas
+Cada seção terá:
+- Título identificando o tipo (Vídeos/Áudios)
+- Ícone distintivo (Video/Headphones)
+- Botão de adicionar independente
+- Lista de categorias editáveis com campos para ícone, nome e descrição
 
 ---
 
-## Detalhes Tecnicos
+## Detalhes Técnicos
 
-### Pagamentos PIX
-- Query Supabase para buscar todos os pedidos ordenados por data
-- Calcular metricas: soma total, contagem por status
-- Usar componentes existentes: GlassCard, Table, Badge
-- Adicionar RLS policy para admins visualizarem todos os pedidos
+### Novas Interfaces e Tipos
 
-### Config. Videos
-- Compartilhar o mesmo hook de configuracao (`getVideoConfig`/`saveVideoConfig`)
-- Cada pagina edita apenas sua parte da configuracao
-- Botao "Salvar" em cada pagina
+```typescript
+// Em video-config.ts
+export interface AudioCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  basePrice: number;
+}
 
+export interface VideoConfig {
+  // ... campos existentes
+  audioCategories: AudioCategory[]; // NOVO
+}
+```
+
+### Categorias de Áudio Padrão
+
+As categorias de áudio serão importadas do `mock-data.ts` existente como valores padrão:
+- Sussurros (🤫) - R$ 29,90
+- Afirmações (💝) - R$ 34,90
+- Para Dormir (🌙) - R$ 39,90
+- Sons Específicos (🎵) - R$ 24,90
+
+---
+
+## Arquivos a Modificar
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `src/pages/admin/AdminConfiguracoes.tsx` | Remover seção "Configurações Gerais" |
+| `src/pages/admin/AdminUsuarios.tsx` | Remover botão e lógica de admin |
+| `src/lib/video-config.ts` | Adicionar `audioCategories` |
+| `src/pages/admin/AdminVideosCategorias.tsx` | Exibir ambas as seções |
