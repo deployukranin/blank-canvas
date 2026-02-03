@@ -38,7 +38,9 @@ const PerfilPage = () => {
   const { unreadCount } = useCommunityNotifications();
   const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { toast } = useToast();
-  const { isAdmin, isCEO } = useUserRole();
+  const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
+  const isAdmin = isAdminFn();
+  const isCEO = isCEOFn();
 
   const handleSaveAvatar = async () => {
     if (!avatarUrl.trim() || !user) return;
