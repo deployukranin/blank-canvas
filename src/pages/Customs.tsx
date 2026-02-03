@@ -120,7 +120,7 @@ const CustomsPage = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
     setIsProcessing(true);
-    const finalPrice = calculatePrice(selectedDuration);
+    const finalPrice = calculatePrice(selectedDuration, selectedCategory || undefined);
 
     // Create PIX charge
     const result = await createCharge({
@@ -181,7 +181,7 @@ const CustomsPage = () => {
       categoryName: selectedCategory.name,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration),
+      price: calculatePrice(selectedDuration, selectedCategory || undefined),
       ...personalizationData,
       status: 'pending',
     });
@@ -196,7 +196,7 @@ const CustomsPage = () => {
       categoryIcon: selectedCategory.icon,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration),
+      price: calculatePrice(selectedDuration, selectedCategory || undefined),
       status: 'pending',
       estimatedDelivery: deliveryDate.toISOString().split('T')[0],
       personalization: {
@@ -332,7 +332,7 @@ const CustomsPage = () => {
     : 0;
 
   const finalPrice = selectedDuration 
-    ? calculatePrice(selectedDuration) 
+    ? calculatePrice(selectedDuration, selectedCategory || undefined) 
     : 0;
 
   if (!config) {
@@ -469,6 +469,12 @@ const CustomsPage = () => {
                       <div className="text-3xl mb-2">{category.icon}</div>
                       <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
                       <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      {category.extraPrice && category.extraPrice > 0 && (
+                        <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-medium">
+                          <Sparkles className="w-3 h-3" />
+                          +R$ {category.extraPrice.toFixed(2).replace('.', ',')}
+                        </div>
+                      )}
                     </GlassCard>
                   </motion.div>
                 ))}
