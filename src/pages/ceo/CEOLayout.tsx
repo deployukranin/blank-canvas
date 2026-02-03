@@ -3,12 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  Palette, 
-  Image, 
+  Sparkles, 
   Link2, 
   ArrowLeft,
   Crown,
-  Sparkles,
   LogOut,
   Shield
 } from 'lucide-react';
@@ -22,11 +20,7 @@ interface CEOLayoutProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/ceo' },
-  { icon: Image, label: 'Branding', path: '/ceo/branding' },
-  { icon: Palette, label: 'Cores', path: '/ceo/cores' },
-  { icon: Sparkles, label: 'Ícones', path: '/ceo/icones' },
-  { icon: LayoutDashboard, label: 'Explorar', path: '/ceo/explorar' },
-  { icon: LayoutDashboard, label: 'Comunidade', path: '/ceo/comunidade' },
+  { icon: Sparkles, label: 'Personalização', path: '/ceo/personalizacao' },
   { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
 ];
 

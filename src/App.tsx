@@ -40,13 +40,8 @@ import Notificacoes from "./pages/Notificacoes";
 
 // CEO Pages
 import CEODashboard from "./pages/ceo/CEODashboard";
-import CEOBranding from "./pages/ceo/CEOBranding";
-import CEOCores from "./pages/ceo/CEOCores";
-import CEOIcones from "./pages/ceo/CEOIcones";
-import CEOExplorar from "./pages/ceo/CEOExplorar";
-import CEOComunidade from "./pages/ceo/CEOComunidade";
+import CEOPersonalizacao from "./pages/ceo/CEOPersonalizacao";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
-import CEOLoja from "./pages/ceo/CEOLoja";
 import Setup from "./pages/Setup";
 
 const queryClient = new QueryClient();
@@ -93,13 +88,8 @@ const App = () => (
 
               {/* CEO Routes */}
               <Route path="/ceo" element={<CEODashboard />} />
-              <Route path="/ceo/branding" element={<CEOBranding />} />
-              <Route path="/ceo/cores" element={<CEOCores />} />
-              <Route path="/ceo/icones" element={<CEOIcones />} />
-              <Route path="/ceo/explorar" element={<CEOExplorar />} />
-              <Route path="/ceo/comunidade" element={<CEOComunidade />} />
+              <Route path="/ceo/personalizacao" element={<CEOPersonalizacao />} />
               <Route path="/ceo/integracoes" element={<CEOIntegracoes />} />
-              <Route path="/ceo/loja" element={<CEOLoja />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
