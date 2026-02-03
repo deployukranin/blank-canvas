@@ -1,134 +1,155 @@
 
-# Plano de Alterações no Painel Admin
+# Plano: Consolidar Abas do Painel Admin (Vídeos e Áudios)
 
-## Resumo
-Este plano aborda três modificações no painel administrativo:
-1. Remover a seção "Configurações Gerais" da página de configurações
-2. Remover a opção de tornar usuário admin na página de usuários
-3. Unificar as categorias de vídeos e áudios na página de categorias
+## Situação Atual
 
----
+O painel admin possui **4 abas separadas** relacionadas a vídeos:
+- **Vídeo** (`/admin/videos-config`) - Vídeo explicativo e prazo de entrega
+- **Duração** (`/admin/videos-duracao`) - Preços por tempo de vídeo
+- **Categorias** (`/admin/videos-categorias`) - Categorias de vídeos E áudios juntas
+- **Regras** (`/admin/videos-regras`) - O que pode/não pode nos vídeos
 
-## 1. Remover "Configurações Gerais" em /admin/configuracoes
+## Nova Estrutura Proposta
 
-**Arquivo:** `src/pages/admin/AdminConfiguracoes.tsx`
+Consolidar em **2 abas principais**:
 
-A seção "Configurações Gerais" (linhas 37-82) será removida completamente, incluindo:
-- Nome do Site
-- Descrição  
-- Preço VIP Mensal
-
-As seções restantes permanecerão:
-- Notificações
-- Configurações de Conteúdo
-
-Também serão removidos os estados não utilizados (`siteName`, `siteDescription`, `vipPrice`) e o ícone `Palette` que não será mais necessário.
-
----
-
-## 2. Remover opção de Admin em /admin/usuarios
-
-**Arquivo:** `src/pages/admin/AdminUsuarios.tsx`
-
-Alterações:
-- Remover o botão "Tornar Admin" de cada card de usuário (linhas 150-158)
-- Remover a função `toggleAdmin` que não será mais utilizada
-- Remover o filtro "Admin" das opções de filtro (manter apenas "Todos", "VIP" e "Regular")
-- Remover o card de estatísticas de "Admins" (linhas 54-58)
-- Manter apenas a badge visual indicando se um usuário é admin (exibição apenas, sem ação)
+```text
++------------------------------------------+
+|  Painel Admin - Menu Lateral             |
++------------------------------------------+
+| - Dashboard                              |
+| - Ideias                                 |
+| - Pedidos                                |
+| - Pagamentos PIX                         |
+| - Preços VIP                             |
+| - Vídeos         <- CONSOLIDADO          |
+| - Áudios         <- NOVA ABA             |
+| - Usuários                               |
+| - Conteúdo                               |
+| - Configurações                          |
++------------------------------------------+
+```
 
 ---
 
-## 3. Unificar Categorias de Vídeos e Áudios
+## Aba "Vídeos" (`/admin/videos`)
 
-**Arquivos:** 
-- `src/lib/video-config.ts`
+Uma página única com abas internas contendo:
+
+| Aba Interna | Conteúdo |
+|-------------|----------|
+| **Geral** | Vídeo explicativo, título, descrição, prazo de entrega |
+| **Categorias** | Categorias de vídeos (Roleplay, Tapping, etc.) |
+| **Preços** | Durações e preços (5min, 10min, 15min...) |
+| **Regras** | O que pode/não pode |
+
+---
+
+## Aba "Áudios" (`/admin/audios`)
+
+Uma página dedicada para áudios com:
+
+| Seção | Conteúdo |
+|-------|----------|
+| **Categorias** | Categorias de áudios (Sussurros, Afirmações, etc.) |
+| **Preços** | Preço base por categoria |
+
+---
+
+## Alterações Necessárias
+
+### 1. Criar Nova Página Consolidada de Vídeos
+**Arquivo:** `src/pages/admin/AdminVideos.tsx` (NOVO)
+
+Esta página terá abas internas usando o componente `Tabs`:
+- Importa e combina a lógica de `AdminVideosConfig`, `AdminVideosDuracao`, `AdminVideosCategorias` (parte de vídeos) e `AdminVideosRegras`
+- Interface unificada com botão "Salvar" global
+
+### 2. Criar Nova Página de Áudios
+**Arquivo:** `src/pages/admin/AdminAudios.tsx` (NOVO)
+
+Página dedicada para gerenciar:
+- Categorias de áudios com ícone, nome, descrição e preço
+- Funcionalidade similar à seção de áudios do atual `AdminVideosCategorias`
+
+### 3. Atualizar Rotas
+**Arquivo:** `src/App.tsx`
+
+```text
+Remover:
+- /admin/videos-config
+- /admin/videos-duracao
+- /admin/videos-categorias
+- /admin/videos-regras
+
+Adicionar:
+- /admin/videos → AdminVideos
+- /admin/audios → AdminAudios
+```
+
+### 4. Atualizar Menu Lateral
+**Arquivo:** `src/pages/admin/AdminLayout.tsx`
+
+```text
+Substituir no menuItems:
+- 4 itens (Vídeo, Duração, Categorias, Regras)
+Por:
+- 2 itens (Vídeos, Áudios)
+```
+
+### 5. Remover Páginas Antigas
+**Arquivos a excluir:**
+- `src/pages/admin/AdminVideosConfig.tsx`
+- `src/pages/admin/AdminVideosDuracao.tsx`
 - `src/pages/admin/AdminVideosCategorias.tsx`
-
-### Alterações na Configuração
-
-Adicionar uma nova interface `AudioCategory` e um array `audioCategories` na configuração, espelhando a estrutura das categorias de vídeos:
-
-```text
-+-----------------------------------+
-|         VideoConfig               |
-+-----------------------------------+
-| - categories (vídeos)             |
-| - audioCategories (áudios) [NOVO] |
-| - durations                       |
-| - rules                           |
-+-----------------------------------+
-```
-
-### Alterações na Interface Admin
-
-A página `AdminVideosCategorias.tsx` será reformulada para exibir duas seções:
-
-```text
-+------------------------------------------+
-|  Categorias                              |
-+------------------------------------------+
-|                                          |
-|  [Categorias de Vídeos]     [Adicionar]  |
-|  +---------------------------------+     |
-|  | 🎭 Roleplay                     | [X] |
-|  | 👆 Tapping                      | [X] |
-|  | ...                             |     |
-|  +---------------------------------+     |
-|                                          |
-|  [Categorias de Áudios]     [Adicionar]  |
-|  +---------------------------------+     |
-|  | 🤫 Sussurros                    | [X] |
-|  | 💝 Afirmações                   | [X] |
-|  | ...                             |     |
-|  +---------------------------------+     |
-|                                          |
-+------------------------------------------+
-```
-
-Cada seção terá:
-- Título identificando o tipo (Vídeos/Áudios)
-- Ícone distintivo (Video/Headphones)
-- Botão de adicionar independente
-- Lista de categorias editáveis com campos para ícone, nome e descrição
+- `src/pages/admin/AdminVideosRegras.tsx`
 
 ---
 
-## Detalhes Técnicos
+## Interface Visual das Novas Páginas
 
-### Novas Interfaces e Tipos
+### Página de Vídeos (com abas internas)
 
-```typescript
-// Em video-config.ts
-export interface AudioCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  basePrice: number;
-}
-
-export interface VideoConfig {
-  // ... campos existentes
-  audioCategories: AudioCategory[]; // NOVO
-}
+```text
++--------------------------------------------------+
+|  Vídeos                               [Salvar]   |
++--------------------------------------------------+
+|  [Geral] [Categorias] [Preços] [Regras]          |
++--------------------------------------------------+
+|                                                  |
+|  (Conteúdo da aba selecionada)                   |
+|                                                  |
++--------------------------------------------------+
 ```
 
-### Categorias de Áudio Padrão
+### Página de Áudios
 
-As categorias de áudio serão importadas do `mock-data.ts` existente como valores padrão:
-- Sussurros (🤫) - R$ 29,90
-- Afirmações (💝) - R$ 34,90
-- Para Dormir (🌙) - R$ 39,90
-- Sons Específicos (🎵) - R$ 24,90
+```text
++--------------------------------------------------+
+|  Áudios                               [Salvar]   |
++--------------------------------------------------+
+|                                                  |
+|  Categorias de Áudios              [Adicionar]   |
+|  +--------------------------------------------+  |
+|  | 🤫 Sussurros      R$ 29,90              [X] |  |
+|  | 💝 Afirmações     R$ 34,90              [X] |  |
+|  | 🌙 Para Dormir    R$ 39,90              [X] |  |
+|  +--------------------------------------------+  |
+|                                                  |
++--------------------------------------------------+
+```
 
 ---
 
-## Arquivos a Modificar
+## Resumo de Arquivos
 
-| Arquivo | Alteração |
-|---------|-----------|
-| `src/pages/admin/AdminConfiguracoes.tsx` | Remover seção "Configurações Gerais" |
-| `src/pages/admin/AdminUsuarios.tsx` | Remover botão e lógica de admin |
-| `src/lib/video-config.ts` | Adicionar `audioCategories` |
-| `src/pages/admin/AdminVideosCategorias.tsx` | Exibir ambas as seções |
+| Ação | Arquivo |
+|------|---------|
+| Criar | `src/pages/admin/AdminVideos.tsx` |
+| Criar | `src/pages/admin/AdminAudios.tsx` |
+| Editar | `src/pages/admin/AdminLayout.tsx` |
+| Editar | `src/App.tsx` |
+| Excluir | `src/pages/admin/AdminVideosConfig.tsx` |
+| Excluir | `src/pages/admin/AdminVideosDuracao.tsx` |
+| Excluir | `src/pages/admin/AdminVideosCategorias.tsx` |
+| Excluir | `src/pages/admin/AdminVideosRegras.tsx` |
