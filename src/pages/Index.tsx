@@ -13,7 +13,6 @@ import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { useVideoFavorites } from '@/hooks/use-video-favorites';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
-import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
 
 const Index = () => {
@@ -165,38 +164,6 @@ const Index = () => {
           </motion.div>
         )}
 
-        {/* Feed Preview */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Novidades</h3>
-            <Link to="/comunidade" className="text-primary text-sm font-medium">
-              Ver tudo
-            </Link>
-          </div>
-
-          <div className="space-y-3">
-            {mockFeedPosts.slice(0, 2).map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-              >
-                <GlassCard className="p-4" hover={false}>
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm">🌙</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm mb-1 truncate">{post.title}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{post.content}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* VIP CTA (only if not VIP) */}
         {(!user || !user.isVIP) && (

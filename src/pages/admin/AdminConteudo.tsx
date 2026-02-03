@@ -8,10 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockFeedPosts, FeedPost } from '@/lib/mock-data';
+import { type FeedPost } from '@/lib/mock-data';
 
 const AdminConteudo: React.FC = () => {
-  const [posts, setPosts] = useState<FeedPost[]>(mockFeedPosts);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newPost, setNewPost] = useState({
     title: '',

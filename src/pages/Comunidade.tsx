@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { mockFeedPosts, mockForumIdeas, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
 import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
 // Content moderation removed - inline simple check
 const moderateContent = (content: string) => ({ isBlocked: false, blockedWords: [] as string[] });
@@ -457,7 +457,7 @@ const ComunidadePage = () => {
   })();
 
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [ideas, setIdeas] = useState<ForumIdea[]>(mockForumIdeas);
+  const [ideas, setIdeas] = useState<ForumIdea[]>([]);
   const [votedIdeas, setVotedIdeas] = useState<string[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });
@@ -864,9 +864,13 @@ const ComunidadePage = () => {
           )}
 
           <TabsContent value="avisos" className="space-y-4 mt-0">
-            {mockFeedPosts.map((post, index) => (
-              <AvisoCard key={post.id} post={post} index={index} />
-            ))}
+            <GlassCard className="p-8 text-center">
+              <Bell className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="font-semibold text-lg mb-2">Nenhum aviso ainda</h3>
+              <p className="text-sm text-muted-foreground">
+                Novos avisos aparecerão aqui.
+              </p>
+            </GlassCard>
           </TabsContent>
           <TabsContent value="ideias" className="space-y-4 mt-0">
             {/* Create Idea Button */}
