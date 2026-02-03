@@ -152,7 +152,7 @@ const AdminVipPrecos = () => {
                   <Crown className="w-5 h-5 text-primary" />
                   <h3 className="font-semibold">Plano {planIndex + 1}</h3>
                   <Badge variant="outline" className="ml-auto">
-                    {plan.type === 'monthly' ? 'Mensal' : 'Anual'}
+                    {plan.type === 'monthly' ? 'Mensal' : plan.type === 'quarterly' ? 'Trimestral' : 'Anual'}
                   </Badge>
                 </div>
 
@@ -172,13 +172,14 @@ const AdminVipPrecos = () => {
                     <label className="text-sm font-medium mb-1 block">Tipo</label>
                     <Select
                       value={plan.type}
-                      onValueChange={(value: 'monthly' | 'yearly') => updatePlan(planIndex, 'type', value)}
+                      onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => updatePlan(planIndex, 'type', value)}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="monthly">Mensal</SelectItem>
+                        <SelectItem value="quarterly">Trimestral</SelectItem>
                         <SelectItem value="yearly">Anual</SelectItem>
                       </SelectContent>
                     </Select>
@@ -257,7 +258,7 @@ const AdminVipPrecos = () => {
                     <p className="font-semibold">{plan.name}</p>
                     <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {plan.type === 'monthly' ? '/mês' : '/ano'}
+                      {plan.type === 'monthly' ? '/mês' : plan.type === 'quarterly' ? '/trimestre' : '/ano'}
                     </p>
                   </div>
                 </div>
