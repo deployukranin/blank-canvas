@@ -1,12 +1,10 @@
 /**
  * Configuration Storage - Persists app configurations to Supabase
  * 
- * Uses edge function for saving (bypasses RLS for admin users)
+ * Uses edge function for saving (bypasses RLS with service role)
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import type { Json } from '@/integrations/supabase/types';
-import { clearAdminSession, getAdminToken } from '@/lib/admin-session';
 
 export type ConfigKey = 
   | 'video_config' 
@@ -45,41 +43,20 @@ export const saveConfig = async <T>(
   value: T
 ): Promise<boolean> => {
   try {
-    // Get admin token if available
-    const adminToken = getAdminToken();
-    
-    // Build headers
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (adminToken) {
-      headers['x-admin-token'] = adminToken;
-    }
-
-    // Call edge function to save config
+    // Call edge function to save config (no auth required)
     const { data, error } = await supabase.functions.invoke('save-app-config', {
       body: {
         config_key: key,
         config_value: value,
       },
-      headers,
     });
 
     if (error) {
-      // If the admin token is invalid/expired, stop retry loops by clearing it.
-      const status = (error as unknown as { status?: number }).status;
-      if (status === 401) {
-        clearAdminSession();
-      }
       console.error(`Error saving config ${key}:`, error);
       return false;
     }
 
     if (!data?.success) {
-      if (data?.error === 'Não autorizado') {
-        clearAdminSession();
-      }
       console.error(`Failed to save config ${key}:`, data?.error);
       return false;
     }

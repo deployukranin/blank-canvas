@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
-import { hasAdminSession } from '@/lib/admin-session';
 // Available Lucide icons for customization
 export const availableLucideIcons = [
   // Navigation & UI
@@ -986,14 +985,9 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     root.style.setProperty('--sidebar-primary', primary);
   }, [config.colors]);
 
-  // Debounced save to database whenever config changes (only if admin session exists)
+  // Debounced save to database whenever config changes
   useEffect(() => {
     if (!initialLoadRef.current) return;
-    
-    // Only save if there's an admin session
-    if (!hasAdminSession()) {
-      return;
-    }
     
     // Clear existing timeout
     if (saveTimeoutRef.current) {
