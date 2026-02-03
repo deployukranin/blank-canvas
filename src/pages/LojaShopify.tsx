@@ -4,6 +4,17 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Button } from '@/components/ui/button';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
+import { GlassCard } from '@/components/ui/GlassCard';
+
+// Produtos exemplo para mostrar ao público
+const exampleProducts = [
+  { id: 1, name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
+  { id: 2, name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
+  { id: 3, name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
+  { id: 4, name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
+  { id: 5, name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
+  { id: 6, name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+];
 
 const LojaShopify = () => {
   const { config } = useWhiteLabel();
@@ -26,12 +37,6 @@ const LojaShopify = () => {
     window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleCopyCoupon = () => {
-    if (couponCode) {
-      navigator.clipboard.writeText(couponCode);
-    }
-  };
-
   const handleCopyCouponButton = () => {
     if (couponCode) {
       navigator.clipboard.writeText(couponCode);
@@ -39,9 +44,14 @@ const LojaShopify = () => {
     }
   };
 
+  // Calcula preço com 80% de desconto
+  const calculateDiscountedPrice = (originalPrice: number) => {
+    return originalPrice * 0.2; // 80% off = pagar apenas 20%
+  };
+
   return (
     <MobileLayout hideHeader>
-      <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center px-6 py-12 gap-6">
+      <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center px-6 py-8 gap-6">
         {/* Store Icon */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -148,6 +158,53 @@ const LojaShopify = () => {
             Nenhuma URL de loja configurada. Configure no painel CEO.
           </motion.p>
         )}
+
+        {/* Example Products Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="w-full max-w-sm space-y-4 pt-4"
+        >
+          <div className="text-center">
+            <h2 className="font-display font-semibold text-lg">Exemplos de Produtos</h2>
+            <p className="text-muted-foreground text-sm">Veja quanto você economiza!</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {exampleProducts.map((product, index) => {
+              const discountedPrice = calculateDiscountedPrice(product.originalPrice);
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.05 }}
+                >
+                  <GlassCard className="p-3 h-full">
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20">
+                        <span className="text-2xl">{product.emoji}</span>
+                      </div>
+                      <h3 className="font-semibold text-sm leading-tight">{product.name}</h3>
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-muted-foreground line-through">
+                          R$ {product.originalPrice.toFixed(2).replace('.', ',')}
+                        </p>
+                        <p className="text-primary font-bold text-base">
+                          R$ {discountedPrice.toFixed(2).replace('.', ',')}
+                        </p>
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-semibold">
+                          -80% OFF
+                        </span>
+                      </div>
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
       </div>
     </MobileLayout>
   );
