@@ -1,44 +1,89 @@
 
-# Plano: Controle de Visibilidade das Abas de Navegacao
-
-## Status: ✅ IMPLEMENTADO
+# Plano: Login Unificado (Admin + Usuário)
 
 ## Objetivo
+Permitir que admins e usuários comuns façam login pelo mesmo formulário, sem precisar selecionar uma aba separada. O sistema detecta automaticamente o tipo de conta.
 
-Permitir que o CEO habilite/desabilite (oculte) as abas da barra de navegacao inferior do app diretamente no Painel CEO.
+---
 
-## O que foi implementado
+## Como vai funcionar
 
-### 1. WhiteLabelContext.tsx
-- Nova interface `NavTabConfig` com: id, label, path, icon, enabled, order
-- Nova constante `defaultNavigationTabs` com as 5 abas padrão
-- Campo `navigationTabs` adicionado ao `WhiteLabelConfig`
-- Função `updateNavigationTabs()` para atualizar abas
-- Função `resetNavigationTabsToDefaults()` para resetar
-- Merge de dados para compatibilidade com configs antigas
+1. **Formulário único de login** - Apenas duas abas: "Entrar" e "Criar Conta"
+2. **Detecção automática** - Ao fazer login:
+   - Primeiro verifica se são credenciais de admin/CEO (configuradas no painel CEO)
+   - Se não forem, tenta autenticar normalmente via backend
+3. **Redirecionamento inteligente**:
+   - Admin → vai para `/admin`
+   - CEO → vai para `/ceo`
+   - Usuário comum → vai para `/` (home)
 
-### 2. BottomNav.tsx
-- Agora lê abas do `config.navigationTabs`
-- Filtra apenas abas com `enabled: true`
-- Ordena por campo `order`
+---
 
-### 3. CEOPersonalizacao.tsx
-- Nova aba "Navegação" com ícone de navegação
-- Interface para cada aba mostrando:
-  - Switch para habilitar/desabilitar
-  - Seletor de ícone (Lucide ou emoji)
-  - Campo para editar label
-  - Indicação da rota
-- Preview em tempo real da barra de navegação
-- Validação: mínimo 2 abas visíveis
-- Botão "Resetar para padrão"
-- Botão "Salvar Navegação"
+## Fluxo visual
 
-## Arquivos modificados
+```text
+┌─────────────────────────────────┐
+│         Bem-vindo!              │
+│   Entre ou crie sua conta       │
+│                                 │
+│  ┌─────────┐ ┌─────────────┐    │
+│  │ Entrar  │ │ Criar Conta │    │
+│  └─────────┘ └─────────────┘    │
+│                                 │
+│  Email: [________________]      │
+│  Senha: [________________]      │
+│                                 │
+│  [        Entrar        ]       │
+└─────────────────────────────────┘
+```
 
-| Arquivo | Alteração |
-|---------|-----------|
-| `src/contexts/WhiteLabelContext.tsx` | +NavTabConfig, +defaultNavigationTabs, +updateNavigationTabs |
-| `src/components/layout/BottomNav.tsx` | Usa config.navigationTabs |
-| `src/pages/ceo/CEOPersonalizacao.tsx` | +Aba Navegação com UI completa |
+---
 
+## Mudanças Técnicas
+
+### 1. Arquivo: `src/pages/Auth.tsx`
+
+- **Remover** a terceira aba "Admin" do componente `Tabs`
+- **Modificar** `handleLogin` para:
+  1. Verificar se email/senha correspondem às credenciais admin ou CEO
+  2. Se sim, usar `loginAsAdmin()` e redirecionar para painel apropriado
+  3. Se não, fazer login normal via Supabase
+  4. Após login normal, consultar `user_roles` para verificar se tem papel admin/CEO e redirecionar
+
+### 2. Lógica de detecção no `handleLogin`:
+
+```text
+1. Usuário digita email + senha
+2. Verificar contra adminCredentials (WhiteLabel)
+   ├─ Match como CEO → loginAsAdmin(ceo) → /ceo
+   ├─ Match como Admin → loginAsAdmin(admin) → /admin
+   └─ Sem match → continuar com Supabase Auth
+3. Se Supabase Auth sucesso:
+   ├─ Buscar roles do user_roles
+   ├─ Se isCEO → /ceo
+   ├─ Se isAdmin → /admin
+   └─ Senão → /
+4. Se falhar → mostrar erro
+```
+
+### 3. Remoção de código não utilizado
+- Estados `adminEmail` e `adminPassword` 
+- Função `handleAdminLogin`
+- Import do ícone `Shield`
+
+---
+
+## Benefícios
+
+- **Experiência simplificada** - Um único formulário para todos
+- **Menos confusão** - Usuários não precisam saber que existe área admin
+- **Segurança mantida** - Credenciais admin continuam funcionando igual
+- **Detecção automática de roles** - Usuários com papel no banco são redirecionados corretamente
+
+---
+
+## Arquivos afetados
+
+| Arquivo | Mudança |
+|---------|---------|
+| `src/pages/Auth.tsx` | Remover aba Admin, unificar lógica de login |
