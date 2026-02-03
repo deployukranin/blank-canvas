@@ -1,11 +1,80 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Simple password comparison helper using Web Crypto API for timing-safe comparison
+async function secureCompare(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const aBytes = encoder.encode(a);
+  const bBytes = encoder.encode(b);
+  
+  if (aBytes.length !== bBytes.length) {
+    return false;
+  }
+  
+  // Use subtle crypto for timing-safe comparison
+  const aHash = await crypto.subtle.digest('SHA-256', aBytes);
+  const bHash = await crypto.subtle.digest('SHA-256', bBytes);
+  
+  const aArray = new Uint8Array(aHash);
+  const bArray = new Uint8Array(bHash);
+  
+  let result = 0;
+  for (let i = 0; i < aArray.length; i++) {
+    result |= aArray[i] ^ bArray[i];
+  }
+  
+  return result === 0;
+}
+
+// Hash password using Web Crypto API (SHA-256 with salt)
+async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(saltHex + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = new Uint8Array(hashBuffer);
+  const hashHex = Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return `$sha256$${saltHex}$${hashHex}`;
+}
+
+// Verify password against stored hash
+async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  // Handle bcrypt hashes (legacy - just compare plaintext for migration)
+  if (storedHash.startsWith('$2')) {
+    // For bcrypt hashes, we can't verify without bcrypt library
+    // Return false to force re-authentication or password reset
+    console.log("Bcrypt hash detected - cannot verify in edge runtime");
+    return false;
+  }
+  
+  // Handle our SHA-256 format: $sha256$salt$hash
+  if (storedHash.startsWith('$sha256$')) {
+    const parts = storedHash.split('$');
+    if (parts.length !== 4) return false;
+    
+    const salt = parts[2];
+    const expectedHash = parts[3];
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(salt + password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = new Uint8Array(hashBuffer);
+    const computedHash = Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return await secureCompare(computedHash, expectedHash);
+  }
+  
+  // Legacy plaintext comparison (for migration)
+  return password === storedHash;
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -60,27 +129,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Secure password comparison using bcrypt
-    let passwordValid = false;
+    // Verify password
+    const passwordValid = await verifyPassword(password, data.password_hash);
     
-    // Check if password_hash looks like a bcrypt hash (starts with $2)
-    if (data.password_hash.startsWith('$2')) {
-      // Compare using bcrypt
-      passwordValid = await bcrypt.compare(password, data.password_hash);
-    } else {
-      // Legacy plaintext comparison for migration period
-      // This path should be removed after all passwords are migrated
-      passwordValid = data.password_hash === password;
-      
-      // Auto-migrate: hash the password and update the record
-      if (passwordValid) {
-        console.log(`Migrating plaintext password to bcrypt for: ${email}`);
-        const hashedPassword = await bcrypt.hash(password);
-        await supabase
-          .from("admin_credentials")
-          .update({ password_hash: hashedPassword, updated_at: new Date().toISOString() })
-          .eq("email", email.toLowerCase());
-      }
+    // If valid and using plaintext, migrate to secure hash
+    if (passwordValid && !data.password_hash.startsWith('$')) {
+      console.log(`Migrating plaintext password to SHA-256 for: ${email}`);
+      const hashedPassword = await hashPassword(password);
+      await supabase
+        .from("admin_credentials")
+        .update({ password_hash: hashedPassword, updated_at: new Date().toISOString() })
+        .eq("email", email.toLowerCase());
     }
 
     if (!passwordValid) {
@@ -92,7 +151,6 @@ Deno.serve(async (req) => {
     }
 
     // Sign in or create the admin user in Supabase Auth
-    // First, try to sign in with the admin email/password
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: password,
