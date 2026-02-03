@@ -120,7 +120,7 @@ const CustomsPage = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
     setIsProcessing(true);
-    const finalPrice = calculatePrice(selectedDuration);
+    const finalPrice = calculatePrice(selectedDuration, selectedCategory);
 
     // Create PIX charge
     const result = await createCharge({
@@ -181,8 +181,11 @@ const CustomsPage = () => {
       categoryName: selectedCategory.name,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration),
-      ...personalizationData,
+      price: calculatePrice(selectedDuration, selectedCategory),
+      name: personalizationData.name,
+      triggers: personalizationData.triggers,
+      script: personalizationData.script,
+      observations: personalizationData.observations,
       status: 'pending',
     });
 
@@ -196,7 +199,7 @@ const CustomsPage = () => {
       categoryIcon: selectedCategory.icon,
       duration: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration),
+      price: calculatePrice(selectedDuration, selectedCategory),
       status: 'pending',
       estimatedDelivery: deliveryDate.toISOString().split('T')[0],
       personalization: {
@@ -331,9 +334,11 @@ const CustomsPage = () => {
     ? calculateAudioPrice(selectedAudioDuration) 
     : 0;
 
-  const finalPrice = selectedDuration 
-    ? calculatePrice(selectedDuration) 
+  const finalPrice = (selectedDuration && selectedCategory)
+    ? calculatePrice(selectedDuration, selectedCategory) 
     : 0;
+  
+  const categorySurcharge = selectedCategory?.surcharge || 0;
 
   if (!config) {
     return (
@@ -469,6 +474,11 @@ const CustomsPage = () => {
                       <div className="text-3xl mb-2">{category.icon}</div>
                       <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
                       <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      {(category.surcharge || 0) > 0 && (
+                        <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                          +R$ {category.surcharge?.toFixed(2)}
+                        </div>
+                      )}
                     </GlassCard>
                   </motion.div>
                 ))}
