@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Save, RotateCcw, Upload, Trash2, Plus, X, Search, Filter,
   Image, Palette, Sparkles, LayoutDashboard, Users, Eye, EyeOff, GripVertical,
-  Sun, Moon, Video, Crown, Bell, Lightbulb
+  Sun, Moon, Video, Crown, Bell, Lightbulb, Navigation
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
@@ -37,9 +37,11 @@ import {
   availableGradientColors,
   availableRoutes,
   defaultQuickActions,
+  defaultNavigationTabs,
   IconConfig, 
   IconItem,
-  QuickActionItem 
+  QuickActionItem,
+  NavTabConfig
 } from '@/contexts/WhiteLabelContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { toast } from 'sonner';
@@ -199,7 +201,7 @@ const ColorPicker = ({
 
 // ===== Main Component =====
 const CEOPersonalizacao = () => {
-  const { config, updateBranding, updateColors, updateIcons, updateQuickActions, updateCommunity, resetToDefaults, resetIconsToDefaults, resetQuickActionsToDefaults, resetCommunityToDefaults } = useWhiteLabel();
+  const { config, updateBranding, updateColors, updateIcons, updateQuickActions, updateNavigationTabs, updateCommunity, resetToDefaults, resetIconsToDefaults, resetQuickActionsToDefaults, resetCommunityToDefaults, resetNavigationTabsToDefaults } = useWhiteLabel();
   const { toast: toastHook } = useToast();
 
   // ===== Branding State =====
@@ -233,6 +235,11 @@ const CEOPersonalizacao = () => {
   const [explorarForm, setExplorarForm] = useState<QuickActionItem[]>([...config.quickActions]);
   const [showExplorarIconPicker, setShowExplorarIconPicker] = useState(false);
   const [explorarEditingIndex, setExplorarEditingIndex] = useState<number | null>(null);
+
+  // ===== Navegação State =====
+  const [navigationForm, setNavigationForm] = useState<NavTabConfig[]>([...config.navigationTabs]);
+  const [showNavIconPicker, setShowNavIconPicker] = useState(false);
+  const [navEditingIndex, setNavEditingIndex] = useState<number | null>(null);
 
   // ===== Comunidade State =====
   const [comunidadeForm, setComunidadeForm] = useState({
@@ -298,12 +305,24 @@ const CEOPersonalizacao = () => {
     });
   };
 
+  const handleSaveNavigation = () => {
+    // Validate: at least 2 tabs must be enabled
+    const enabledCount = navigationForm.filter(tab => tab.enabled).length;
+    if (enabledCount < 2) {
+      toast.error('Mantenha pelo menos 2 abas visíveis!');
+      return;
+    }
+    updateNavigationTabs(navigationForm);
+    toast.success('Navegação salva!');
+  };
+
   const handleSaveAll = () => {
     handleSaveBranding();
     handleSaveColors();
     handleSaveIcons();
     handleSaveExplorar();
     handleSaveComunidade();
+    handleSaveNavigation();
     toast.success('Todas as personalizações foram salvas!');
   };
 
@@ -418,6 +437,30 @@ const CEOPersonalizacao = () => {
     });
   };
 
+  // ===== Navigation Handlers =====
+  const handleUpdateNavTab = (index: number, updates: Partial<NavTabConfig>) => {
+    setNavigationForm(navigationForm.map((tab, i) => (i === index ? { ...tab, ...updates } : tab)));
+  };
+
+  const openNavIconPicker = (index: number) => {
+    setNavEditingIndex(index);
+    setIconSearchQuery('');
+    setShowNavIconPicker(true);
+  };
+
+  const handleSelectNavIcon = (icon: IconItem) => {
+    if (navEditingIndex !== null) {
+      handleUpdateNavTab(navEditingIndex, { icon });
+    }
+    setShowNavIconPicker(false);
+    setNavEditingIndex(null);
+  };
+
+  const handleResetNavigation = () => {
+    setNavigationForm([...defaultNavigationTabs]);
+    toast.success('Navegação resetada para o padrão!');
+  };
+
   // Color presets
   const colorPresets = [
     { name: 'Roxo ASMR', primary: '270 70% 60%', accent: '280 60% 70%', bg: '260 30% 6%' },
@@ -443,7 +486,7 @@ const CEOPersonalizacao = () => {
         </div>
 
         <Tabs defaultValue="branding" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="branding" className="gap-1">
               <Image className="w-4 h-4" />
               <span className="hidden sm:inline">Branding</span>
@@ -463,6 +506,10 @@ const CEOPersonalizacao = () => {
             <TabsTrigger value="comunidade" className="gap-1">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Comunidade</span>
+            </TabsTrigger>
+            <TabsTrigger value="navegacao" className="gap-1">
+              <Navigation className="w-4 h-4" />
+              <span className="hidden sm:inline">Navegação</span>
             </TabsTrigger>
           </TabsList>
 
@@ -974,6 +1021,104 @@ const CEOPersonalizacao = () => {
               </Button>
             </div>
           </TabsContent>
+
+          {/* ===== Navegação Tab ===== */}
+          <TabsContent value="navegacao" className="space-y-6 mt-6">
+            <GlassCard>
+              <h3 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
+                <Navigation className="w-5 h-5 text-amber-400" />
+                Abas de Navegação
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Configure quais abas aparecem na barra de navegação inferior. Mantenha pelo menos 2 abas visíveis.
+              </p>
+              
+              <div className="space-y-4">
+                {navigationForm.sort((a, b) => a.order - b.order).map((tab, index) => {
+                  const originalIndex = navigationForm.findIndex(t => t.id === tab.id);
+                  const enabledCount = navigationForm.filter(t => t.enabled).length;
+                  const isLastEnabled = tab.enabled && enabledCount <= 2;
+                  
+                  return (
+                    <div
+                      key={tab.id}
+                      className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card/50"
+                    >
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <GripVertical className="w-4 h-4" />
+                        <span className="text-sm font-mono w-6">{tab.order + 1}</span>
+                      </div>
+                      
+                      <button
+                        onClick={() => openNavIconPicker(originalIndex)}
+                        className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors"
+                      >
+                        <DynamicIcon icon={tab.icon} size={20} />
+                      </button>
+                      
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          value={tab.label}
+                          onChange={(e) => handleUpdateNavTab(originalIndex, { label: e.target.value })}
+                          placeholder="Nome da aba"
+                          className="h-8"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Rota: <code className="bg-muted px-1 rounded">{tab.path}</code>
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`nav-${tab.id}`} className="text-sm text-muted-foreground">
+                          {tab.enabled ? 'Visível' : 'Oculto'}
+                        </Label>
+                        <Switch
+                          id={`nav-${tab.id}`}
+                          checked={tab.enabled}
+                          onCheckedChange={(checked) => handleUpdateNavTab(originalIndex, { enabled: checked })}
+                          disabled={isLastEnabled && tab.enabled}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Preview */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <h4 className="text-sm font-medium mb-3">Preview da navegação:</h4>
+                <div className="bg-background rounded-xl p-3 border border-border">
+                  <div className="flex items-center justify-around">
+                    {navigationForm
+                      .filter(tab => tab.enabled)
+                      .sort((a, b) => a.order - b.order)
+                      .map((tab) => (
+                        <div
+                          key={tab.id}
+                          className="flex flex-col items-center gap-1 py-2 px-3"
+                        >
+                          <DynamicIcon icon={tab.icon} size={18} className="text-primary" />
+                          <span className="text-[10px] font-medium text-primary">
+                            {tab.label}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={handleResetNavigation} className="gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Resetar para padrão
+              </Button>
+              <Button onClick={handleSaveNavigation} className="gap-2 bg-amber-500 hover:bg-amber-600 text-amber-950">
+                <Save className="w-4 h-4" />
+                Salvar Navegação
+              </Button>
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* Icon Picker Dialog */}
@@ -1095,6 +1240,72 @@ const CEOPersonalizacao = () => {
                       <button
                         key={emoji.id}
                         onClick={() => handleSelectExplorarIcon({ type: 'emoji', value: emoji.emoji })}
+                        className="p-2 text-xl rounded-lg hover:bg-primary/20 transition-colors"
+                        title={emoji.label}
+                      >
+                        {emoji.emoji}
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
+
+        {/* Navigation Icon Picker Dialog */}
+        <Dialog open={showNavIconPicker} onOpenChange={setShowNavIconPicker}>
+          <DialogContent className="max-w-xl max-h-[70vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Escolher Ícone de Navegação</DialogTitle>
+            </DialogHeader>
+            
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar..."
+                  value={iconSearchQuery}
+                  onChange={(e) => setIconSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <Tabs defaultValue="lucide" className="flex-1 flex flex-col overflow-hidden">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="lucide">Vetoriais</TabsTrigger>
+                <TabsTrigger value="emoji">Emojis</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="lucide" className="mt-4 flex-1 overflow-hidden">
+                <ScrollArea className="h-[300px]">
+                  <div className="grid grid-cols-8 gap-1">
+                    {filteredLucideIcons.slice(0, 100).map((icon) => {
+                      const IconComponent = getLucideIcon(icon.id);
+                      if (!IconComponent) return null;
+                      return (
+                        <button
+                          key={icon.id}
+                          onClick={() => handleSelectNavIcon({ type: 'lucide', value: icon.id })}
+                          className="p-2 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center"
+                          title={icon.label}
+                        >
+                          <IconComponent size={18} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="emoji" className="mt-4 flex-1 overflow-hidden">
+                <ScrollArea className="h-[300px]">
+                  <div className="grid grid-cols-8 gap-2">
+                    {availableEmojis.filter(e => e.label.toLowerCase().includes(iconSearchQuery.toLowerCase())).map((emoji) => (
+                      <button
+                        key={emoji.id}
+                        onClick={() => handleSelectNavIcon({ type: 'emoji', value: emoji.emoji })}
                         className="p-2 text-xl rounded-lg hover:bg-primary/20 transition-colors"
                         title={emoji.label}
                       >
