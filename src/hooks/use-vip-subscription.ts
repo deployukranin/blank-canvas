@@ -7,7 +7,7 @@ export interface VIPSubscription {
   id: string;
   user_id: string;
   status: 'active' | 'pending_payment' | 'cancelled' | 'expired';
-  plan_type: 'monthly' | 'yearly';
+  plan_type: 'monthly' | 'quarterly' | 'yearly';
   price_cents: number;
   started_at: string;
   expires_at: string;
@@ -33,7 +33,7 @@ export interface VIPChargeResult {
   brCode?: string;
   expiresAt?: string;
   amountCents?: number;
-  planType?: 'monthly' | 'yearly';
+  planType?: 'monthly' | 'quarterly' | 'yearly';
   error?: string;
 }
 
@@ -118,7 +118,7 @@ export const useVIPSubscription = () => {
 
   // Create VIP charge via edge function (OpenPix)
   const createCharge = useCallback(async (
-    planType: 'monthly' | 'yearly' = 'monthly',
+    planType: 'monthly' | 'quarterly' | 'yearly' = 'monthly',
     customerName?: string
   ): Promise<VIPChargeResult> => {
     if (!isAuthenticated || !userId) {
