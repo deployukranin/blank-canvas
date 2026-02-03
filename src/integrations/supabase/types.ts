@@ -412,6 +412,16 @@ export type Database = {
         Returns: Json
       }
       cleanup_old_rate_limits: { Args: never; Returns: number }
+      get_admin_credentials_safe: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          role: string
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
