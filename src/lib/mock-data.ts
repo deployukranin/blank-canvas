@@ -83,7 +83,7 @@ export const mockVideoIdeas: VideoIdea[] = [
     votes: 47,
     status: 'active',
     authorName: 'Luna',
-    createdAt: '2024-01-15',
+    createdAt: '2026-02-03',
   },
   {
     id: '2',
@@ -92,7 +92,7 @@ export const mockVideoIdeas: VideoIdea[] = [
     votes: 32,
     status: 'active',
     authorName: 'Carlos M.',
-    createdAt: '2024-01-14',
+    createdAt: '2026-02-02',
   },
   {
     id: '3',
@@ -101,7 +101,7 @@ export const mockVideoIdeas: VideoIdea[] = [
     votes: 28,
     status: 'active',
     authorName: 'Ana B.',
-    createdAt: '2024-01-13',
+    createdAt: '2026-02-01',
   },
   {
     id: '4',
@@ -110,7 +110,7 @@ export const mockVideoIdeas: VideoIdea[] = [
     votes: 41,
     status: 'active',
     authorName: 'Pedro',
-    createdAt: '2024-01-12',
+    createdAt: '2026-01-31',
   },
   {
     id: '5',
@@ -119,7 +119,7 @@ export const mockVideoIdeas: VideoIdea[] = [
     votes: 19,
     status: 'active',
     authorName: 'Mariana',
-    createdAt: '2024-01-11',
+    createdAt: '2026-01-30',
   },
 ];
 
@@ -287,7 +287,7 @@ export const mockFeedPosts: FeedPost[] = [
     type: 'announcement',
     title: '🎉 Novo horário de lives!',
     content: 'A partir de agora, nossas lives serão toda sexta-feira às 21h! Marquem na agenda e venham relaxar comigo.',
-    createdAt: '2024-01-16T18:00:00',
+    createdAt: '2026-02-03T18:00:00',
     isPinned: true,
     authorUsername: 'luna_asmr',
     authorAvatar: '🌙',
@@ -297,7 +297,7 @@ export const mockFeedPosts: FeedPost[] = [
     type: 'news',
     title: 'Novo microfone chegou! 🎙️',
     content: 'Finalmente chegou o microfone novo que vocês tanto pediram. Os próximos vídeos vão ter uma qualidade de áudio incrível. Mal posso esperar para vocês ouvirem!',
-    createdAt: '2024-01-15T14:30:00',
+    createdAt: '2026-02-02T14:30:00',
     authorUsername: 'luna_asmr',
     authorAvatar: '🌙',
   },
@@ -306,7 +306,7 @@ export const mockFeedPosts: FeedPost[] = [
     type: 'exclusive',
     title: '✨ Prévia do vídeo de amanhã',
     content: 'Para os VIPs: o vídeo de amanhã vai ser um roleplay de loja de cristais! Vocês vão amar os sons das pedras.',
-    createdAt: '2024-01-14T20:00:00',
+    createdAt: '2026-02-01T20:00:00',
     authorUsername: 'luna_asmr',
     authorAvatar: '🌙',
   },
@@ -315,7 +315,7 @@ export const mockFeedPosts: FeedPost[] = [
     type: 'news',
     title: 'Obrigada por 100k! 💜',
     content: 'Não tenho palavras para agradecer o carinho de vocês. 100 mil inscritos é um sonho realizado. Vem conteúdo especial por aí!',
-    createdAt: '2024-01-13T16:00:00',
+    createdAt: '2026-01-31T16:00:00',
     authorUsername: 'luna_asmr',
     authorAvatar: '🌙',
   },
@@ -330,7 +330,7 @@ export const mockForumIdeas: ForumIdea[] = [
     votes: 47,
     authorUsername: 'relaxed_user',
     authorAvatar: '😴',
-    createdAt: '2024-01-15T10:00:00',
+    createdAt: '2026-02-03T10:00:00',
     commentsCount: 2,
     comments: [
       {
@@ -339,7 +339,7 @@ export const mockForumIdeas: ForumIdea[] = [
         content: 'Adorei essa ideia! Chuva + digitação seria perfeito para estudar.',
         authorUsername: 'study_lover',
         authorAvatar: '📖',
-        createdAt: '2024-01-15T12:00:00',
+        createdAt: '2026-02-03T12:00:00',
       },
       {
         id: 'c2',
@@ -347,7 +347,7 @@ export const mockForumIdeas: ForumIdea[] = [
         content: 'Apoio total! Combina muito bem esses dois sons.',
         authorUsername: 'sleepy_head',
         authorAvatar: '😪',
-        createdAt: '2024-01-15T14:30:00',
+        createdAt: '2026-02-03T14:30:00',
       },
     ],
   },
@@ -358,7 +358,7 @@ export const mockForumIdeas: ForumIdea[] = [
     votes: 32,
     authorUsername: 'book_lover',
     authorAvatar: '📚',
-    createdAt: '2024-01-14T15:30:00',
+    createdAt: '2026-02-02T15:30:00',
     commentsCount: 1,
     comments: [
       {
@@ -367,7 +367,7 @@ export const mockForumIdeas: ForumIdea[] = [
         content: 'Biblioteca é meu cenário favorito de ASMR!',
         authorUsername: 'quiet_reader',
         authorAvatar: '🤫',
-        createdAt: '2024-01-14T18:00:00',
+        createdAt: '2026-02-02T18:00:00',
       },
     ],
   },
@@ -378,7 +378,7 @@ export const mockForumIdeas: ForumIdea[] = [
     votes: 28,
     authorUsername: 'tingle_fan',
     authorAvatar: '✨',
-    createdAt: '2024-01-13T20:00:00',
+    createdAt: '2026-02-01T20:00:00',
     commentsCount: 0,
     comments: [],
   },
@@ -389,7 +389,7 @@ export const mockForumIdeas: ForumIdea[] = [
     votes: 41,
     authorUsername: 'art_whisper',
     authorAvatar: '🎨',
-    createdAt: '2024-01-12T18:45:00',
+    createdAt: '2026-01-31T18:45:00',
     commentsCount: 1,
     comments: [
       {
@@ -398,7 +398,7 @@ export const mockForumIdeas: ForumIdea[] = [
         content: 'Seria incrível ver o desenho sendo feito enquanto ouve os sons!',
         authorUsername: 'creative_soul',
         authorAvatar: '🎨',
-        createdAt: '2024-01-12T20:00:00',
+        createdAt: '2026-01-31T20:00:00',
       },
     ],
   },
