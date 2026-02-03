@@ -91,7 +91,9 @@ export const usePWAInstall = (): UsePWAInstall => {
     setDismissed(true);
   }, []);
 
-  const canInstall = Boolean(deferredPrompt) && !isInstalled && !dismissed && isAndroid();
+  // TEMP: Force show for visual testing - remove after testing
+  const canInstall = !isInstalled && !dismissed;
+  // const canInstall = Boolean(deferredPrompt) && !isInstalled && !dismissed && isAndroid();
 
   return {
     canInstall,
