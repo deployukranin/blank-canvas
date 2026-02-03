@@ -3,7 +3,7 @@ import { ExternalLink, Tag, ShoppingBag, Sparkles, Copy } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Button } from '@/components/ui/button';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 const LojaShopify = () => {
   const { config } = useWhiteLabel();
@@ -35,6 +35,7 @@ const LojaShopify = () => {
   const handleCopyCouponButton = () => {
     if (couponCode) {
       navigator.clipboard.writeText(couponCode);
+      toast.success('Cupom copiado!');
     }
   };
 
