@@ -5,7 +5,7 @@
 export interface VipPlan {
   id: string;
   name: string;
-  type: 'monthly' | 'yearly';
+  type: 'monthly' | 'quarterly' | 'yearly';
   price: number;
   description: string;
   features: string[];
@@ -29,6 +29,18 @@ export const defaultVipConfig: VipConfig = {
         'Vídeos antecipados',
         'Chat exclusivo',
         'Bastidores',
+      ],
+    },
+    {
+      id: 'quarterly',
+      name: 'Trimestral',
+      type: 'quarterly',
+      price: 49.90,
+      description: 'Acesso VIP por 3 meses (economia de 16%)',
+      features: [
+        'Tudo do plano mensal',
+        'Economia de 16%',
+        'Acesso antecipado a novidades',
       ],
     },
     {
