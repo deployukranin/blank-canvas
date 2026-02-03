@@ -368,38 +368,40 @@ const CustomsPage = () => {
 
           {/* Videos Tab Content */}
           <TabsContent value="videos" className="mt-6 space-y-6">
-            {/* Preview Section - Video or Image */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <GlassCard className="overflow-hidden p-0">
-                {config.previewType === 'video' && config.previewVideoUrl ? (
-                  <VideoPlayer
-                    videoUrl={config.previewVideoUrl}
-                    title={config.previewTitle}
-                    description={config.previewDescription}
-                  />
-                ) : config.previewType === 'image' && config.previewImageUrl ? (
-                  <div className="aspect-video bg-black">
-                    <img 
-                      src={config.previewImageUrl} 
-                      alt={config.previewTitle}
-                      className="w-full h-full object-cover"
+            {/* Preview Section - Video or Image (only if enabled) */}
+            {config.previewEnabled && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <GlassCard className="overflow-hidden p-0">
+                  {config.previewType === 'video' && config.previewVideoUrl ? (
+                    <VideoPlayer
+                      videoUrl={config.previewVideoUrl}
+                      title={config.previewTitle}
+                      description={config.previewDescription}
                     />
+                  ) : config.previewType === 'image' && config.previewImageUrl ? (
+                    <div className="aspect-video bg-black">
+                      <img 
+                        src={config.previewImageUrl} 
+                        alt={config.previewTitle}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <VideoPlaceholder
+                      title={config.previewTitle}
+                      description={config.previewDescription}
+                    />
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm mb-1">{config.previewTitle}</h3>
+                    <p className="text-xs text-muted-foreground">{config.previewDescription}</p>
                   </div>
-                ) : (
-                  <VideoPlaceholder
-                    title={config.previewTitle}
-                    description={config.previewDescription}
-                  />
-                )}
-                <div className="p-4">
-                  <h3 className="font-semibold text-sm mb-1">{config.previewTitle}</h3>
-                  <p className="text-xs text-muted-foreground">{config.previewDescription}</p>
-                </div>
-              </GlassCard>
-            </motion.div>
+                </GlassCard>
+              </motion.div>
+            )}
 
             {/* Rules Section */}
             <motion.div
