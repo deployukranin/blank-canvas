@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, ImageIcon, Loader2 } from 'lucide-react';
+import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -180,6 +180,29 @@ const AdminVideos = () => {
                 Seção "Como Funciona"
               </h3>
               
+              {/* Toggle: Show/Hide Preview Section */}
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg mb-4">
+                <div className="flex items-center gap-3">
+                  {config.previewEnabled ? (
+                    <Eye className="w-5 h-5 text-primary" />
+                  ) : (
+                    <EyeOff className="w-5 h-5 text-muted-foreground" />
+                  )}
+                  <div>
+                    <span className="font-medium text-sm">Exibir Seção</span>
+                    <p className="text-xs text-muted-foreground">
+                      {config.previewEnabled ? 'Visível na página de pedidos' : 'Oculto da página de pedidos'}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={config.previewEnabled}
+                  onCheckedChange={(checked) => 
+                    setConfig({ ...config, previewEnabled: checked })
+                  }
+                />
+              </div>
+
               {/* Toggle: Video or Image */}
               <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg mb-4">
                 <div className="flex items-center gap-3">
@@ -202,12 +225,13 @@ const AdminVideos = () => {
                     onCheckedChange={(checked) => 
                       setConfig({ ...config, previewType: checked ? 'video' : 'image' })
                     }
+                    disabled={!config.previewEnabled}
                   />
                   <span className="text-xs text-muted-foreground">Vídeo</span>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                 {config.previewType === 'video' ? (
                   <div>
                     <label className="text-sm font-medium mb-2 block">URL do Vídeo (YouTube Embed)</label>
@@ -215,6 +239,7 @@ const AdminVideos = () => {
                       placeholder="https://www.youtube.com/embed/..."
                       value={config.previewVideoUrl}
                       onChange={e => setConfig({ ...config, previewVideoUrl: e.target.value })}
+                      disabled={!config.previewEnabled}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
@@ -227,6 +252,7 @@ const AdminVideos = () => {
                       placeholder="https://exemplo.com/imagem.jpg"
                       value={config.previewImageUrl}
                       onChange={e => setConfig({ ...config, previewImageUrl: e.target.value })}
+                      disabled={!config.previewEnabled}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Insira a URL de uma imagem (JPG, PNG, WebP)
@@ -240,6 +266,7 @@ const AdminVideos = () => {
                     placeholder="Título do vídeo"
                     value={config.previewTitle}
                     onChange={e => setConfig({ ...config, previewTitle: e.target.value })}
+                    disabled={!config.previewEnabled}
                   />
                 </div>
                 <div>
@@ -249,6 +276,7 @@ const AdminVideos = () => {
                     value={config.previewDescription}
                     onChange={e => setConfig({ ...config, previewDescription: e.target.value })}
                     className="min-h-[80px]"
+                    disabled={!config.previewEnabled}
                   />
                 </div>
                 <div>
@@ -267,7 +295,7 @@ const AdminVideos = () => {
             </GlassCard>
 
             {/* Preview */}
-            {(config.previewType === 'video' ? config.previewVideoUrl : config.previewImageUrl) && (
+            {config.previewEnabled && (config.previewType === 'video' ? config.previewVideoUrl : config.previewImageUrl) && (
               <GlassCard className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <Eye className="w-5 h-5 text-primary" />

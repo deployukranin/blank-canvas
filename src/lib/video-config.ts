@@ -43,6 +43,7 @@ export interface VideoConfig {
   previewType: 'video' | 'image';
   previewTitle: string;
   previewDescription: string;
+  previewEnabled: boolean; // Toggle to show/hide "Como Funciona" section
   
   // Audio preview settings
   audioPreviewUrl: string;
@@ -63,6 +64,7 @@ export const defaultVideoConfig: VideoConfig = {
   previewType: 'video',
   previewTitle: 'Como funcionam os vídeos personalizados?',
   previewDescription: 'Assista este vídeo explicativo para entender como funciona o processo de compra, personalização e entrega do seu vídeo ASMR exclusivo.',
+  previewEnabled: true,
   audioPreviewUrl: '',
   audioPreviewEnabled: true,
   deliveryDays: 7,
@@ -181,6 +183,7 @@ export const getVideoConfig = (): VideoConfig => {
         ...parsed,
         previewType: parsed.previewType || defaultVideoConfig.previewType,
         previewImageUrl: parsed.previewImageUrl || defaultVideoConfig.previewImageUrl,
+        previewEnabled: parsed.previewEnabled ?? defaultVideoConfig.previewEnabled,
         audioPreviewUrl: parsed.audioPreviewUrl || defaultVideoConfig.audioPreviewUrl,
         audioPreviewEnabled: parsed.audioPreviewEnabled ?? defaultVideoConfig.audioPreviewEnabled,
         audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
