@@ -1,155 +1,164 @@
 
-# Plano: Consolidar Abas do Painel Admin (Vídeos e Áudios)
+# Plano: Separar Configuração YouTube entre CEO e Admin
 
-## Situação Atual
+## Situacao Atual
 
-O painel admin possui **4 abas separadas** relacionadas a vídeos:
-- **Vídeo** (`/admin/videos-config`) - Vídeo explicativo e prazo de entrega
-- **Duração** (`/admin/videos-duracao`) - Preços por tempo de vídeo
-- **Categorias** (`/admin/videos-categorias`) - Categorias de vídeos E áudios juntas
-- **Regras** (`/admin/videos-regras`) - O que pode/não pode nos vídeos
+A pagina `AdminYoutube.tsx` atualmente:
+- Permite configurar o Channel ID (campo de input)
+- Mostra o Channel ID configurado
+- Lista os videos e gerencia categorias
 
-## Nova Estrutura Proposta
+O problema: o Channel ID nao deve ser visivel/editavel no painel Admin.
 
-Consolidar em **2 abas principais**:
+## Nova Estrutura
 
 ```text
-+------------------------------------------+
-|  Painel Admin - Menu Lateral             |
-+------------------------------------------+
-| - Dashboard                              |
-| - Ideias                                 |
-| - Pedidos                                |
-| - Pagamentos PIX                         |
-| - Preços VIP                             |
-| - Vídeos         <- CONSOLIDADO          |
-| - Áudios         <- NOVA ABA             |
-| - Usuários                               |
-| - Conteúdo                               |
-| - Configurações                          |
-+------------------------------------------+
+Painel CEO (Integracoes)          Painel Admin (YouTube)
++------------------------+        +------------------------+
+| Channel ID: UC...      |        | Galeria de Videos      |
+| [Campo editavel]       |        | 150 videos encontrados |
+| Limite por categoria   |        |                        |
+| Badge "Novo" dias      |   -->  | [Gerenciar Categorias] |
+| etc...                 |        | - Roleplay (32)        |
+|                        |        | - Tapping (28)         |
+| [Salvar]               |        | - Eating (45)          |
++------------------------+        +------------------------+
+
+CEO configura o canal       Admin apenas gerencia
+e parametros gerais         videos e categorias
 ```
 
 ---
 
-## Aba "Vídeos" (`/admin/videos`)
+## Alteracoes Necessarias
 
-Uma página única com abas internas contendo:
+### 1. Refatorar AdminYoutube.tsx
 
-| Aba Interna | Conteúdo |
-|-------------|----------|
-| **Geral** | Vídeo explicativo, título, descrição, prazo de entrega |
-| **Categorias** | Categorias de vídeos (Roleplay, Tapping, etc.) |
-| **Preços** | Durações e preços (5min, 10min, 15min...) |
-| **Regras** | O que pode/não pode |
+**Remover:**
+- Secao de configuracao do Channel ID
+- Input do Channel ID
+- Exibicao do Channel ID configurado
+- Estado local `channelId` e `tempChannelId`
+- localStorage para channel ID
 
----
+**Adicionar:**
+- Consumir `useWhiteLabel()` para obter o `channelId` da config do CEO
+- Estado vazio quando canal nao configurado (com instrucao para ir ao painel CEO)
 
-## Aba "Áudios" (`/admin/audios`)
+### 2. Manter no AdminYoutube
 
-Uma página dedicada para áudios com:
+- Botao "Atualizar Videos"
+- Lista de videos com thumbnails
+- Gerenciador de categorias (`YouTubeCategoryManager`)
+- Salvar categorias (no contexto WhiteLabel, nao localStorage)
 
-| Seção | Conteúdo |
-|-------|----------|
-| **Categorias** | Categorias de áudios (Sussurros, Afirmações, etc.) |
-| **Preços** | Preço base por categoria |
+### 3. Atualizar Integracao de Categorias
 
----
-
-## Alterações Necessárias
-
-### 1. Criar Nova Página Consolidada de Vídeos
-**Arquivo:** `src/pages/admin/AdminVideos.tsx` (NOVO)
-
-Esta página terá abas internas usando o componente `Tabs`:
-- Importa e combina a lógica de `AdminVideosConfig`, `AdminVideosDuracao`, `AdminVideosCategorias` (parte de vídeos) e `AdminVideosRegras`
-- Interface unificada com botão "Salvar" global
-
-### 2. Criar Nova Página de Áudios
-**Arquivo:** `src/pages/admin/AdminAudios.tsx` (NOVO)
-
-Página dedicada para gerenciar:
-- Categorias de áudios com ícone, nome, descrição e preço
-- Funcionalidade similar à seção de áudios do atual `AdminVideosCategorias`
-
-### 3. Atualizar Rotas
-**Arquivo:** `src/App.tsx`
-
-```text
-Remover:
-- /admin/videos-config
-- /admin/videos-duracao
-- /admin/videos-categorias
-- /admin/videos-regras
-
-Adicionar:
-- /admin/videos → AdminVideos
-- /admin/audios → AdminAudios
-```
-
-### 4. Atualizar Menu Lateral
-**Arquivo:** `src/pages/admin/AdminLayout.tsx`
-
-```text
-Substituir no menuItems:
-- 4 itens (Vídeo, Duração, Categorias, Regras)
-Por:
-- 2 itens (Vídeos, Áudios)
-```
-
-### 5. Remover Páginas Antigas
-**Arquivos a excluir:**
-- `src/pages/admin/AdminVideosConfig.tsx`
-- `src/pages/admin/AdminVideosDuracao.tsx`
-- `src/pages/admin/AdminVideosCategorias.tsx`
-- `src/pages/admin/AdminVideosRegras.tsx`
+Atualmente as categorias sao salvas em `localStorage` separado. Devemos:
+- Usar o mesmo contexto WhiteLabel que o CEO usa
+- As categorias ficam em `config.youtube.categories` e `config.youtube.videoCategoryMap`
 
 ---
 
-## Interface Visual das Novas Páginas
+## Interface Visual Proposta
 
-### Página de Vídeos (com abas internas)
+### Admin YouTube (sem canal configurado)
 
 ```text
 +--------------------------------------------------+
-|  Vídeos                               [Salvar]   |
-+--------------------------------------------------+
-|  [Geral] [Categorias] [Preços] [Regras]          |
+|  YouTube                                         |
 +--------------------------------------------------+
 |                                                  |
-|  (Conteúdo da aba selecionada)                   |
+|      [icone YouTube grande cinza]                |
+|                                                  |
+|      Canal nao configurado                       |
+|                                                  |
+|      O ID do canal do YouTube deve ser           |
+|      configurado no Painel CEO em Integracoes.   |
 |                                                  |
 +--------------------------------------------------+
 ```
 
-### Página de Áudios
+### Admin YouTube (com canal configurado)
 
 ```text
 +--------------------------------------------------+
-|  Áudios                               [Salvar]   |
+|  YouTube                          [Atualizar]    |
 +--------------------------------------------------+
 |                                                  |
-|  Categorias de Áudios              [Adicionar]   |
+|  Videos do Canal                                 |
+|  150 videos encontrados                          |
+|                                                  |
+|  +------+ +------+ +------+ +------+ +------+    |
+|  |thumb1| |thumb2| |thumb3| |thumb4| |thumb5|    |
+|  +------+ +------+ +------+ +------+ +------+    |
+|  titulo.. titulo.. titulo.. titulo.. titulo..    |
+|                                                  |
++--------------------------------------------------+
+|                                                  |
+|  Gerenciar Categorias               [Salvar]     |
 |  +--------------------------------------------+  |
-|  | 🤫 Sussurros      R$ 29,90              [X] |  |
-|  | 💝 Afirmações     R$ 34,90              [X] |  |
-|  | 🌙 Para Dormir    R$ 39,90              [X] |  |
+|  | Roleplay     | 32 videos      [Editar]     |  |
+|  | Tapping      | 28 videos      [Editar]     |  |
+|  | Eating       | 45 videos      [Editar]     |  |
 |  +--------------------------------------------+  |
 |                                                  |
 +--------------------------------------------------+
+```
+
+---
+
+## Codigo - Alteracoes
+
+### AdminYoutube.tsx
+
+```typescript
+// ANTES
+const [channelId, setChannelId] = useState(() => {
+  return localStorage.getItem(STORAGE_KEY_CHANNEL) || "";
+});
+
+// DEPOIS
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+
+const { config, updateYouTube } = useWhiteLabel();
+const channelId = config.youtube?.channelId?.trim() || "";
+```
+
+**Remover completamente:**
+- STORAGE_KEY_CHANNEL
+- tempChannelId state
+- handleSaveChannel function
+- Secao "Canal do YouTube" com input
+
+**Ajustar salvar categorias:**
+```typescript
+// ANTES - localStorage
+localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(...));
+
+// DEPOIS - WhiteLabel context
+updateYouTube({
+  ...config.youtube,
+  categories: categorizationDraft.categories,
+  videoCategoryMap: categorizationDraft.videoCategoryMap,
+});
 ```
 
 ---
 
 ## Resumo de Arquivos
 
-| Ação | Arquivo |
+| Acao | Arquivo |
 |------|---------|
-| Criar | `src/pages/admin/AdminVideos.tsx` |
-| Criar | `src/pages/admin/AdminAudios.tsx` |
-| Editar | `src/pages/admin/AdminLayout.tsx` |
-| Editar | `src/App.tsx` |
-| Excluir | `src/pages/admin/AdminVideosConfig.tsx` |
-| Excluir | `src/pages/admin/AdminVideosDuracao.tsx` |
-| Excluir | `src/pages/admin/AdminVideosCategorias.tsx` |
-| Excluir | `src/pages/admin/AdminVideosRegras.tsx` |
+| Editar | `src/pages/admin/AdminYoutube.tsx` |
+
+Nenhum arquivo novo sera criado. A configuracao do Channel ID ja existe no CEOIntegracoes.
+
+---
+
+## Beneficios
+
+1. **Separacao de responsabilidades**: CEO configura, Admin gerencia
+2. **Seguranca**: Channel ID nao fica visivel para admins comuns
+3. **Dados centralizados**: Categorias ficam no mesmo contexto WhiteLabel
+4. **Menos duplicacao**: Remove localStorage redundante
