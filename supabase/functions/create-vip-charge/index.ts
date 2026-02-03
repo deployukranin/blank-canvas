@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface CreateVIPChargeRequest {
-  planType: 'monthly' | 'yearly';
+  planType: 'monthly' | 'quarterly' | 'yearly';
   customerName?: string;
 }
 
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     const body: CreateVIPChargeRequest = await req.json();
     
     // Validate plan type
-    if (!body.planType || !['monthly', 'yearly'].includes(body.planType)) {
+    if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid plan type' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -86,10 +86,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Set prices (in cents)
-    const priceMonthly = 1990; // R$ 19,90
-    const priceYearly = 19900; // R$ 199,00
-    const amountCents = body.planType === 'monthly' ? priceMonthly : priceYearly;
+    // Set prices (in cents) - these should match admin config
+    const prices: Record<string, number> = {
+      monthly: 1990,   // R$ 19,90
+      quarterly: 4990, // R$ 49,90
+      yearly: 19990,   // R$ 199,90
+    };
+    const amountCents = prices[body.planType] || prices.monthly;
     
     // Generate unique correlationID
     const correlationID = `vip_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -102,9 +105,18 @@ Deno.serve(async (req) => {
     const subscriptionExpiresAt = new Date();
     if (body.planType === 'monthly') {
       subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 1);
+    } else if (body.planType === 'quarterly') {
+      subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 3);
     } else {
       subscriptionExpiresAt.setFullYear(subscriptionExpiresAt.getFullYear() + 1);
     }
+
+    // Plan name for display
+    const planNames: Record<string, string> = {
+      monthly: 'Mensal',
+      quarterly: 'Trimestral',
+      yearly: 'Anual',
+    };
 
     // Create charge in OpenPix
     console.log('Calling OpenPix API for VIP charge...');
@@ -117,7 +129,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         correlationID,
         value: amountCents,
-        comment: `Assinatura VIP ${body.planType === 'monthly' ? 'Mensal' : 'Anual'}`,
+        comment: `Assinatura VIP ${planNames[body.planType]}`,
         expiresIn: 900, // 15 minutes in seconds
         additionalInfo: [
           { key: 'user_id', value: userId },
@@ -174,7 +186,7 @@ Deno.serve(async (req) => {
         product_type: 'vip_subscription',
         product_id: subscription.id,
         category: body.planType,
-        category_name: `VIP ${body.planType === 'monthly' ? 'Mensal' : 'Anual'}`,
+        category_name: `VIP ${planNames[body.planType]}`,
         customer_name: body.customerName || userEmail,
         amount_cents: amountCents,
         correlation_id: correlationID,

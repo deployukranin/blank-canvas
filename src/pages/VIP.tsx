@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { mockVIPBenefits } from '@/lib/mock-data';
 import { useVIPSubscription, VIPChargeResult } from '@/hooks/use-vip-subscription';
+import { getVipConfig, type VipPlan } from '@/lib/vip-config';
 import {
   Dialog,
   DialogContent,
@@ -36,13 +37,20 @@ const VIPPage = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<VipPlan | null>(null);
   const [chargeData, setChargeData] = useState<VIPChargeResult | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('pending');
+  const [vipPlans, setVipPlans] = useState<VipPlan[]>([]);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  const VIP_MONTHLY_PRICE = 19.90;
-  const VIP_YEARLY_PRICE = 199.00;
+  // Load VIP config
+  useEffect(() => {
+    const config = getVipConfig();
+    setVipPlans(config.plans);
+    if (config.plans.length > 0) {
+      setSelectedPlan(config.plans[0]);
+    }
+  }, []);
 
   // Poll for payment status
   useEffect(() => {
@@ -67,6 +75,37 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, checkPaymentStatus, refreshSubscription]);
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const getPlanLabel = (type: string) => {
+    switch (type) {
+      case 'monthly': return '/mês';
+      case 'quarterly': return '/trimestre';
+      case 'yearly': return '/ano';
+      default: return '';
+    }
+  };
+
+  const getPlanBadgeLabel = (type: string) => {
+    switch (type) {
+      case 'monthly': return 'Plano Mensal';
+      case 'quarterly': return 'Plano Trimestral';
+      case 'yearly': return 'Plano Anual';
+      default: return '';
+    }
+  };
+
+  const getDiscountBadge = (plan: VipPlan) => {
+    if (plan.type === 'quarterly') return '-16%';
+    if (plan.type === 'yearly') return '-17%';
+    return null;
+  };
+
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
@@ -76,8 +115,9 @@ const VIPPage = () => {
   };
 
   const handleConfirmSubscription = async () => {
+    if (!selectedPlan) return;
     setIsProcessing(true);
-    const result = await createCharge(selectedPlan);
+    const result = await createCharge(selectedPlan.type as 'monthly' | 'yearly');
     setIsProcessing(false);
     
     if (result.success) {
@@ -101,6 +141,9 @@ const VIPPage = () => {
       clearInterval(pollingRef.current);
     }
   };
+
+  // Get featured plan (monthly for hero display)
+  const featuredPlan = vipPlans.find(p => p.type === 'monthly') || vipPlans[0];
 
   if (isLoading) {
     return (
@@ -138,7 +181,7 @@ const VIPPage = () => {
               </h2>
 
               <Badge className="bg-vip/20 text-vip mb-4">
-                {subscription.plan_type === 'monthly' ? 'Plano Mensal' : 'Plano Anual'}
+                {getPlanBadgeLabel(subscription.plan_type)}
               </Badge>
 
               <p className="text-muted-foreground text-sm mb-2">
@@ -223,13 +266,17 @@ const VIPPage = () => {
               Assinatura <span className="text-vip">VIP</span>
             </h2>
 
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-muted-foreground line-through">R$ 39,90</span>
-              <span className="font-display text-3xl font-bold text-vip">
-                R$ {VIP_MONTHLY_PRICE.toFixed(2).replace('.', ',')}
-              </span>
-              <span className="text-muted-foreground">/mês</span>
-            </div>
+            {featuredPlan && (
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <span className="text-muted-foreground line-through">
+                  {formatCurrency(featuredPlan.price * 2)}
+                </span>
+                <span className="font-display text-3xl font-bold text-vip">
+                  {formatCurrency(featuredPlan.price)}
+                </span>
+                <span className="text-muted-foreground">{getPlanLabel(featuredPlan.type)}</span>
+              </div>
+            )}
 
             <Button
               onClick={handleSubscribe}
@@ -291,7 +338,7 @@ const VIPPage = () => {
 
       {/* Purchase Dialog - Plan Selection */}
       <Dialog open={showPurchaseDialog} onOpenChange={setShowPurchaseDialog}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-vip" />
@@ -303,59 +350,60 @@ const VIPPage = () => {
           </DialogHeader>
           <div className="space-y-4">
             {/* Plan Selection */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setSelectedPlan('monthly')}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
-                  selectedPlan === 'monthly'
-                    ? 'border-vip bg-vip/10'
-                    : 'border-border hover:border-vip/50'
-                }`}
-              >
-                <div className="font-semibold text-sm mb-1">Mensal</div>
-                <div className="text-lg font-bold text-vip">
-                  R$ {VIP_MONTHLY_PRICE.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs text-muted-foreground">/mês</div>
-              </button>
-
-              <button
-                onClick={() => setSelectedPlan('yearly')}
-                className={`p-4 rounded-xl border-2 transition-all text-left relative ${
-                  selectedPlan === 'yearly'
-                    ? 'border-vip bg-vip/10'
-                    : 'border-border hover:border-vip/50'
-                }`}
-              >
-                <Badge className="absolute -top-2 -right-2 bg-green-500 text-xs">
-                  -17%
-                </Badge>
-                <div className="font-semibold text-sm mb-1">Anual</div>
-                <div className="text-lg font-bold text-vip">
-                  R$ {VIP_YEARLY_PRICE.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs text-muted-foreground">/ano</div>
-              </button>
+            <div className={`grid gap-3 ${vipPlans.length === 2 ? 'grid-cols-2' : vipPlans.length >= 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1'}`}>
+              {vipPlans.map((plan) => {
+                const discount = getDiscountBadge(plan);
+                return (
+                  <button
+                    key={plan.id}
+                    onClick={() => setSelectedPlan(plan)}
+                    className={`p-4 rounded-xl border-2 transition-all text-left relative ${
+                      selectedPlan?.id === plan.id
+                        ? 'border-vip bg-vip/10'
+                        : 'border-border hover:border-vip/50'
+                    }`}
+                  >
+                    {discount && (
+                      <Badge className="absolute -top-2 -right-2 bg-green-500 text-xs">
+                        {discount}
+                      </Badge>
+                    )}
+                    <div className="font-semibold text-sm mb-1">{plan.name}</div>
+                    <div className="text-lg font-bold text-vip">
+                      {formatCurrency(plan.price)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{getPlanLabel(plan.type)}</div>
+                    {plan.description && (
+                      <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                        {plan.description}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="p-3 rounded-xl bg-vip/10 border border-vip/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-sm">
-                  {selectedPlan === 'monthly' ? 'VIP Mensal' : 'VIP Anual'}
-                </span>
-                <span className="font-bold text-vip">
-                  R$ {(selectedPlan === 'monthly' ? VIP_MONTHLY_PRICE : VIP_YEARLY_PRICE).toFixed(2).replace('.', ',')}
-                </span>
+            {selectedPlan && (
+              <div className="p-3 rounded-xl bg-vip/10 border border-vip/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-sm">
+                    {selectedPlan.name}
+                  </span>
+                  <span className="font-bold text-vip">
+                    {formatCurrency(selectedPlan.price)}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {selectedPlan.features.slice(0, 4).map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs">
+                      <Check className="w-3 h-3 text-vip flex-shrink-0" />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-1">
-                {mockVIPBenefits.slice(0, 3).map((b) => (
-                  <div key={b.title} className="flex items-center gap-2 text-xs">
-                    <Check className="w-3 h-3 text-vip" />
-                    <span>{b.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
+
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowPurchaseDialog(false)}>
                 Cancelar
@@ -363,7 +411,7 @@ const VIPPage = () => {
               <Button
                 className="flex-1 bg-gradient-to-r from-vip to-amber-400 text-vip-foreground"
                 onClick={handleConfirmSubscription}
-                disabled={isProcessing}
+                disabled={isProcessing || !selectedPlan}
               >
                 {isProcessing ? (
                   <>
@@ -425,10 +473,10 @@ const VIPPage = () => {
               {/* Amount */}
               <div className="text-center">
                 <span className="text-2xl font-bold text-vip">
-                  R$ {((chargeData?.amountCents || 0) / 100).toFixed(2).replace('.', ',')}
+                  {formatCurrency((chargeData?.amountCents || 0) / 100)}
                 </span>
                 <span className="text-sm text-muted-foreground ml-2">
-                  ({chargeData?.planType === 'monthly' ? 'Mensal' : 'Anual'})
+                  ({getPlanBadgeLabel(chargeData?.planType || 'monthly')})
                 </span>
               </div>
 
