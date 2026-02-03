@@ -368,18 +368,26 @@ const CustomsPage = () => {
 
           {/* Videos Tab Content */}
           <TabsContent value="videos" className="mt-6 space-y-6">
-            {/* Video Preview Section */}
+            {/* Preview Section - Video or Image */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <GlassCard className="overflow-hidden p-0">
-                {config.previewVideoUrl ? (
+                {config.previewType === 'video' && config.previewVideoUrl ? (
                   <VideoPlayer
                     videoUrl={config.previewVideoUrl}
                     title={config.previewTitle}
                     description={config.previewDescription}
                   />
+                ) : config.previewType === 'image' && config.previewImageUrl ? (
+                  <div className="aspect-video bg-black">
+                    <img 
+                      src={config.previewImageUrl} 
+                      alt={config.previewTitle}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ) : (
                   <VideoPlaceholder
                     title={config.previewTitle}
@@ -544,32 +552,47 @@ const CustomsPage = () => {
 
           {/* Audios Tab Content */}
           <TabsContent value="audios" className="mt-6 space-y-4">
-            {/* Preview Player */}
-            <GlassCard className="p-4">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                </button>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm">Preview</h3>
-                  <p className="text-xs text-muted-foreground">Ouça um exemplo de áudio</p>
+            {/* Preview Player - only show if enabled */}
+            {config.audioPreviewEnabled && (
+              <GlassCard className="p-4">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center"
+                  >
+                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                  </button>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm">Preview</h3>
+                    <p className="text-xs text-muted-foreground">Ouça um exemplo de áudio</p>
+                  </div>
+                  <div className="flex items-end gap-0.5 h-8">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        animate={isPlaying ? { height: [8, Math.random() * 24 + 8, 8] } : {}}
+                        transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.02 }}
+                        className="w-1 bg-primary/40 rounded-full"
+                        style={{ height: 8 }}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-end gap-0.5 h-8">
-                  {Array.from({ length: 20 }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      animate={isPlaying ? { height: [8, Math.random() * 24 + 8, 8] } : {}}
-                      transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.02 }}
-                      className="w-1 bg-primary/40 rounded-full"
-                      style={{ height: 8 }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </GlassCard>
+                {config.audioPreviewUrl && (
+                  <audio 
+                    className="hidden" 
+                    src={config.audioPreviewUrl}
+                    ref={(audio) => {
+                      if (audio) {
+                        if (isPlaying) audio.play();
+                        else audio.pause();
+                      }
+                    }}
+                    onEnded={() => setIsPlaying(false)}
+                  />
+                )}
+              </GlassCard>
+            )}
 
             {/* Categories */}
             <motion.div

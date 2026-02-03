@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Headphones, Clock } from 'lucide-react';
+import { Save, Plus, Trash2, Headphones, Clock, Music, Eye, EyeOff } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import {
   getVideoConfig,
@@ -124,6 +125,63 @@ const AdminAudios = () => {
             {isSaving ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
+
+        {/* Audio Preview Section */}
+        <GlassCard className="p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Music className="w-5 h-5 text-primary" />
+            Preview de Áudio
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Toggle: Show/Hide Preview */}
+            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-3">
+                {config.audioPreviewEnabled ? (
+                  <Eye className="w-5 h-5 text-primary" />
+                ) : (
+                  <EyeOff className="w-5 h-5 text-muted-foreground" />
+                )}
+                <div>
+                  <span className="font-medium text-sm">Exibir Preview</span>
+                  <p className="text-xs text-muted-foreground">
+                    {config.audioPreviewEnabled ? 'Visível na página de pedidos' : 'Oculto da página de pedidos'}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={config.audioPreviewEnabled}
+                onCheckedChange={(checked) => 
+                  setConfig({ ...config, audioPreviewEnabled: checked })
+                }
+              />
+            </div>
+
+            {/* Audio URL */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">URL do Áudio (MP3)</label>
+              <Input
+                placeholder="https://exemplo.com/audio-preview.mp3"
+                value={config.audioPreviewUrl}
+                onChange={e => setConfig({ ...config, audioPreviewUrl: e.target.value })}
+                disabled={!config.audioPreviewEnabled}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                URL de um arquivo MP3 para preview
+              </p>
+            </div>
+
+            {/* Audio Preview Player */}
+            {config.audioPreviewEnabled && config.audioPreviewUrl && (
+              <div className="p-3 bg-muted/30 rounded-lg">
+                <p className="text-sm font-medium mb-2">Pré-visualização:</p>
+                <audio controls className="w-full" src={config.audioPreviewUrl}>
+                  Seu navegador não suporta áudio.
+                </audio>
+              </div>
+            )}
+          </div>
+        </GlassCard>
 
         {/* Durations Section */}
         <GlassCard className="p-6">
