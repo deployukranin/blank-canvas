@@ -6,6 +6,30 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Hash password using SHA-256 with salt
+async function hashPassword(password: string, salt: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `$sha256$${salt}$${hashHex}`;
+}
+
+// Verify password against stored hash
+async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  // Parse the stored hash format: $sha256$salt$hash
+  const parts = storedHash.split("$");
+  if (parts.length !== 4 || parts[1] !== "sha256") {
+    // Fallback: plain text comparison (for development)
+    return password === storedHash;
+  }
+  
+  const salt = parts[2];
+  const expectedHash = await hashPassword(password, salt);
+  return expectedHash === storedHash;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -43,8 +67,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Simple password comparison (in production, use proper hashing)
-    if (data.password_hash !== password) {
+    // Verify password against stored hash
+    const isValid = await verifyPassword(password, data.password_hash);
+    
+    if (!isValid) {
       console.log("Password mismatch for email:", email);
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas" }),
