@@ -8,6 +8,7 @@ import { useVIPSubscription, VIPContent, VIPChargeResult } from '@/hooks/use-vip
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { getVipConfig } from '@/lib/vip-config';
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,22 @@ const getBenefitIcon = (icon: string) => {
   }
 };
 
+const getPlanLabel = (type: 'monthly' | 'quarterly' | 'yearly') => {
+  switch (type) {
+    case 'monthly': return 'Mensal';
+    case 'quarterly': return 'Trimestral';
+    case 'yearly': return 'Anual';
+  }
+};
+
+const getPlanSuffix = (type: 'monthly' | 'quarterly' | 'yearly') => {
+  switch (type) {
+    case 'monthly': return '/mês';
+    case 'quarterly': return '/trimestre';
+    case 'yearly': return '/ano';
+  }
+};
+
 export const VIPAreaContent = () => {
   const { config } = useWhiteLabel();
   const { session } = useAuth();
@@ -72,13 +89,14 @@ export const VIPAreaContent = () => {
   const [showSubscribeDialog, setShowSubscribeDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [chargeData, setChargeData] = useState<VIPChargeResult | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  const VIP_MONTHLY_PRICE = 19.90;
-  const VIP_YEARLY_PRICE = 199.00;
+  const vipConfig = getVipConfig();
+  const monthlyPlan = vipConfig.plans.find(p => p.type === 'monthly');
+  const VIP_MONTHLY_PRICE = monthlyPlan?.price || 19.90;
 
   // Poll for payment status
   useEffect(() => {
@@ -318,39 +336,34 @@ export const VIPAreaContent = () => {
 
           <div className="space-y-4">
             {/* Plan Selection */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setSelectedPlan('monthly')}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
-                  selectedPlan === 'monthly'
-                    ? 'border-vip bg-vip/10'
-                    : 'border-border hover:border-vip/50'
-                }`}
-              >
-                <div className="font-semibold text-sm mb-1">Mensal</div>
-                <div className="text-lg font-bold text-vip">
-                  R$ {VIP_MONTHLY_PRICE.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs text-muted-foreground">/mês</div>
-              </button>
-
-              <button
-                onClick={() => setSelectedPlan('yearly')}
-                className={`p-4 rounded-xl border-2 transition-all text-left relative ${
-                  selectedPlan === 'yearly'
-                    ? 'border-vip bg-vip/10'
-                    : 'border-border hover:border-vip/50'
-                }`}
-              >
-                <Badge className="absolute -top-2 -right-2 bg-green-500 text-xs">
-                  -17%
-                </Badge>
-                <div className="font-semibold text-sm mb-1">Anual</div>
-                <div className="text-lg font-bold text-vip">
-                  R$ {VIP_YEARLY_PRICE.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs text-muted-foreground">/ano</div>
-              </button>
+            <div className="grid grid-cols-3 gap-2">
+              {vipConfig.plans.map((plan) => {
+                const isSelected = selectedPlan === plan.type;
+                const savings = plan.features.find(f => f.toLowerCase().includes('economia'))?.match(/\d+/)?.[0];
+                
+                return (
+                  <button
+                    key={plan.id}
+                    onClick={() => setSelectedPlan(plan.type)}
+                    className={`p-3 rounded-xl border-2 transition-all text-left relative ${
+                      isSelected
+                        ? 'border-vip bg-vip/10'
+                        : 'border-border hover:border-vip/50'
+                    }`}
+                  >
+                    {savings && (
+                      <Badge className="absolute -top-2 -right-2 bg-green-500 text-[10px] px-1.5">
+                        -{savings}%
+                      </Badge>
+                    )}
+                    <div className="font-semibold text-xs mb-1">{getPlanLabel(plan.type)}</div>
+                    <div className="text-base font-bold text-vip">
+                      R$ {plan.price.toFixed(2).replace('.', ',')}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">{getPlanSuffix(plan.type)}</div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Benefits Summary */}
