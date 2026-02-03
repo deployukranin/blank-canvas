@@ -37,9 +37,17 @@ export interface VideoRules {
 }
 
 export interface VideoConfig {
+  // Video preview settings
   previewVideoUrl: string;
+  previewImageUrl: string;
+  previewType: 'video' | 'image';
   previewTitle: string;
   previewDescription: string;
+  
+  // Audio preview settings
+  audioPreviewUrl: string;
+  audioPreviewEnabled: boolean;
+  
   durations: VideoDuration[];
   categories: VideoCategory[];
   audioCategories: AudioCategory[];
@@ -51,8 +59,12 @@ export interface VideoConfig {
 // Default configuration - will be replaced with database values
 export const defaultVideoConfig: VideoConfig = {
   previewVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+  previewImageUrl: '',
+  previewType: 'video',
   previewTitle: 'Como funcionam os vídeos personalizados?',
   previewDescription: 'Assista este vídeo explicativo para entender como funciona o processo de compra, personalização e entrega do seu vídeo ASMR exclusivo.',
+  audioPreviewUrl: '',
+  audioPreviewEnabled: true,
   deliveryDays: 7,
   durations: [
     { id: '5min', label: '5 minutos', minutes: 5, price: 49.90 },
@@ -167,6 +179,10 @@ export const getVideoConfig = (): VideoConfig => {
     return {
       ...defaultVideoConfig,
       ...parsed,
+      previewType: parsed.previewType || defaultVideoConfig.previewType,
+      previewImageUrl: parsed.previewImageUrl || defaultVideoConfig.previewImageUrl,
+      audioPreviewUrl: parsed.audioPreviewUrl || defaultVideoConfig.audioPreviewUrl,
+      audioPreviewEnabled: parsed.audioPreviewEnabled ?? defaultVideoConfig.audioPreviewEnabled,
       audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
       audioDurations: parsed.audioDurations || defaultVideoConfig.audioDurations,
     };

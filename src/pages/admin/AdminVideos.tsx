@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye } from 'lucide-react';
+import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, Image, ImageIcon } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import {
   getVideoConfig,
@@ -157,20 +158,63 @@ const AdminVideos = () => {
             <GlassCard className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Video className="w-5 h-5 text-primary" />
-                Vídeo Explicativo
+                Seção "Como Funciona"
               </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">URL do Vídeo (YouTube Embed)</label>
-                  <Input
-                    placeholder="https://www.youtube.com/embed/..."
-                    value={config.previewVideoUrl}
-                    onChange={e => setConfig({ ...config, previewVideoUrl: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
-                  </p>
+              
+              {/* Toggle: Video or Image */}
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg mb-4">
+                <div className="flex items-center gap-3">
+                  {config.previewType === 'video' ? (
+                    <Video className="w-5 h-5 text-primary" />
+                  ) : (
+                    <ImageIcon className="w-5 h-5 text-primary" />
+                  )}
+                  <div>
+                    <span className="font-medium text-sm">Tipo de Mídia</span>
+                    <p className="text-xs text-muted-foreground">
+                      {config.previewType === 'video' ? 'Vídeo do YouTube' : 'Imagem'}
+                    </p>
+                  </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Imagem</span>
+                  <Switch
+                    checked={config.previewType === 'video'}
+                    onCheckedChange={(checked) => 
+                      setConfig({ ...config, previewType: checked ? 'video' : 'image' })
+                    }
+                  />
+                  <span className="text-xs text-muted-foreground">Vídeo</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {config.previewType === 'video' ? (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">URL do Vídeo (YouTube Embed)</label>
+                    <Input
+                      placeholder="https://www.youtube.com/embed/..."
+                      value={config.previewVideoUrl}
+                      onChange={e => setConfig({ ...config, previewVideoUrl: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">URL da Imagem</label>
+                    <Input
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={config.previewImageUrl}
+                      onChange={e => setConfig({ ...config, previewImageUrl: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Insira a URL de uma imagem (JPG, PNG, WebP)
+                    </p>
+                  </div>
+                )}
+                
                 <div>
                   <label className="text-sm font-medium mb-2 block">Título</label>
                   <Input
@@ -204,20 +248,28 @@ const AdminVideos = () => {
             </GlassCard>
 
             {/* Preview */}
-            {config.previewVideoUrl && (
+            {(config.previewType === 'video' ? config.previewVideoUrl : config.previewImageUrl) && (
               <GlassCard className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <Eye className="w-5 h-5 text-primary" />
                   Pré-visualização
                 </h3>
                 <div className="aspect-video w-full max-w-xl rounded-lg overflow-hidden bg-black/50">
-                  <iframe
-                    src={config.previewVideoUrl}
-                    title={config.previewTitle}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  {config.previewType === 'video' ? (
+                    <iframe
+                      src={config.previewVideoUrl}
+                      title={config.previewTitle}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <img 
+                      src={config.previewImageUrl} 
+                      alt={config.previewTitle}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="mt-4">
                   <h4 className="font-medium">{config.previewTitle}</h4>
