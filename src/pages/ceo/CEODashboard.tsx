@@ -26,11 +26,8 @@ const CEODashboard = () => {
   ];
 
   const quickLinks = [
-    { icon: Image, label: 'Editar Banner', path: '/ceo/branding', description: 'Personalizar banner e logo' },
-    { icon: Palette, label: 'Mudar Cores', path: '/ceo/cores', description: 'Alterar tema do app' },
-    { icon: Sparkles, label: 'Customizar Ícones', path: '/ceo/icones', description: 'Alterar emojis do app' },
-    { icon: Link2, label: 'Conectar APIs', path: '/ceo/integracoes', description: 'Configurar integrações' },
-    { icon: Crown, label: 'Configurar Loja', path: '/ceo/loja', description: 'Textos e logos dos produtos' },
+    { icon: Sparkles, label: 'Personalização', path: '/ceo/personalizacao', description: 'Branding, cores, ícones e seções' },
+    { icon: Link2, label: 'Integrações', path: '/ceo/integracoes', description: 'YouTube, Shopify e configurações' },
   ];
 
   return (
