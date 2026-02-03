@@ -14,7 +14,9 @@ import {
   ArrowLeft,
   Shield,
   CreditCard,
-  Crown
+  Crown,
+  Video,
+  Headphones
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,10 +33,8 @@ const menuItems = [
   { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
   { path: '/admin/pagamentos-pix', icon: CreditCard, label: 'Pagamentos PIX' },
   { path: '/admin/vip-precos', icon: Crown, label: 'Preços VIP' },
-  { path: '/admin/videos-config', icon: FileText, label: 'Vídeo' },
-  { path: '/admin/videos-duracao', icon: FileText, label: 'Duração' },
-  { path: '/admin/videos-categorias', icon: FileText, label: 'Categorias' },
-  { path: '/admin/videos-regras', icon: FileText, label: 'Regras' },
+  { path: '/admin/videos', icon: Video, label: 'Vídeos' },
+  { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
   { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },

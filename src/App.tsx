@@ -31,10 +31,8 @@ import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminPagamentosPix from "./pages/admin/AdminPagamentosPix";
 import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
-import AdminVideosConfig from "./pages/admin/AdminVideosConfig";
-import AdminVideosDuracao from "./pages/admin/AdminVideosDuracao";
-import AdminVideosCategorias from "./pages/admin/AdminVideosCategorias";
-import AdminVideosRegras from "./pages/admin/AdminVideosRegras";
+import AdminVideos from "./pages/admin/AdminVideos";
+import AdminAudios from "./pages/admin/AdminAudios";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
@@ -87,10 +85,8 @@ const App = () => (
               <Route path="/admin/pedidos" element={<AdminPedidos />} />
               <Route path="/admin/pagamentos-pix" element={<AdminPagamentosPix />} />
               <Route path="/admin/vip-precos" element={<AdminVipPrecos />} />
-              <Route path="/admin/videos-config" element={<AdminVideosConfig />} />
-              <Route path="/admin/videos-duracao" element={<AdminVideosDuracao />} />
-              <Route path="/admin/videos-categorias" element={<AdminVideosCategorias />} />
-              <Route path="/admin/videos-regras" element={<AdminVideosRegras />} />
+              <Route path="/admin/videos" element={<AdminVideos />} />
+              <Route path="/admin/audios" element={<AdminAudios />} />
               <Route path="/admin/usuarios" element={<AdminUsuarios />} />
               <Route path="/admin/conteudo" element={<AdminConteudo />} />
               <Route path="/admin/configuracoes" element={<AdminConfiguracoes />} />
