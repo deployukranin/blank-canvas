@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
 import Loja from "./pages/Loja";
@@ -55,7 +54,6 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <PWAInstallPrompt />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
