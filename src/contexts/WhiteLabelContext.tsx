@@ -729,6 +729,7 @@ export interface WhiteLabelConfig {
       id: string;
       name: string;
       originalPrice: number;
+      salePrice: number;
       emoji: string;
     }>;
   };
@@ -811,12 +812,12 @@ const defaultConfig: WhiteLabelConfig = {
     couponCode: '',
     couponLabel: 'Use o cupom',
     exampleProducts: [
-      { id: '1', name: 'Netflix Premium', originalPrice: 55.90, emoji: '🎬' },
-      { id: '2', name: 'Spotify Premium', originalPrice: 34.90, emoji: '🎵' },
-      { id: '3', name: 'Disney+', originalPrice: 43.90, emoji: '✨' },
-      { id: '4', name: 'YouTube Premium', originalPrice: 45.90, emoji: '▶️' },
-      { id: '5', name: 'HBO Max', originalPrice: 49.90, emoji: '🎭' },
-      { id: '6', name: 'Amazon Prime', originalPrice: 19.90, emoji: '📦' },
+      { id: '1', name: 'Netflix Premium', originalPrice: 55.90, salePrice: 11.18, emoji: '🎬' },
+      { id: '2', name: 'Spotify Premium', originalPrice: 34.90, salePrice: 6.98, emoji: '🎵' },
+      { id: '3', name: 'Disney+', originalPrice: 43.90, salePrice: 8.78, emoji: '✨' },
+      { id: '4', name: 'YouTube Premium', originalPrice: 45.90, salePrice: 9.18, emoji: '▶️' },
+      { id: '5', name: 'HBO Max', originalPrice: 49.90, salePrice: 9.98, emoji: '🎭' },
+      { id: '6', name: 'Amazon Prime', originalPrice: 19.90, salePrice: 3.98, emoji: '📦' },
     ],
   },
   tokens: {
