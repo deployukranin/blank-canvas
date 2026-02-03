@@ -1,30 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, XCircle, Eye, Trash2, Users, MessageCircle, Lightbulb } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Trash2, Users, MessageCircle, Lightbulb } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockAdminReports, AdminReport } from '@/lib/admin-mock-data';
 import { getCommunityReports, updateReportStatus, type CommunityReport } from '@/lib/community-reports';
 
 const AdminDenuncias: React.FC = () => {
-  const [reports, setReports] = useState<AdminReport[]>(mockAdminReports);
   const [communityReports, setCommunityReports] = useState<CommunityReport[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'reviewed' | 'dismissed' | 'action_taken'>('all');
-  const [activeTab, setActiveTab] = useState('community');
 
   useEffect(() => {
     setCommunityReports(getCommunityReports());
   }, []);
 
-  const filteredReports = reports.filter(report => filter === 'all' || report.status === filter);
   const filteredCommunityReports = communityReports.filter(report => filter === 'all' || report.status === filter);
-
-  const handleStatusChange = (id: string, newStatus: AdminReport['status']) => {
-    setReports(reports.map(report => report.id === id ? { ...report, status: newStatus } : report));
-  };
 
   const handleCommunityStatusChange = (id: string, newStatus: CommunityReport['status']) => {
     updateReportStatus(id, newStatus);
