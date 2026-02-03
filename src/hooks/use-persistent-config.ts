@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig, type ConfigKey } from '@/lib/config-storage';
 import { useToast } from '@/hooks/use-toast';
+import { hasAdminSession } from '@/lib/admin-session';
 
 interface UsePersistentConfigOptions<T> {
   configKey: ConfigKey;
@@ -85,9 +86,15 @@ export function usePersistentConfig<T>({
     loadFromDb();
   }, [configKey, localStorageKey]);
 
-  // Debounced save to database
+  // Debounced save to database (only if admin session exists)
   const debouncedSave = useCallback(async (newConfig: T) => {
     if (!initialLoadDoneRef.current) return;
+    
+    // Only save if there's an admin session
+    if (!hasAdminSession()) {
+      console.log('No admin session, skipping auto-save');
+      return;
+    }
     
     pendingConfigRef.current = newConfig;
     
