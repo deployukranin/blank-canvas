@@ -30,6 +30,34 @@ async function verifyPassword(password: string, storedHash: string): Promise<boo
   return expectedHash === storedHash;
 }
 
+// Create an HMAC-signed admin token to be used as x-admin-token
+async function createAdminToken(email: string, role: string): Promise<string | null> {
+  const secret = Deno.env.get("ADMIN_SESSION_SECRET");
+  if (!secret) {
+    console.error("ADMIN_SESSION_SECRET not set");
+    return null;
+  }
+
+  const timestamp = Date.now();
+  const payload = btoa(`${email}:${role}:${timestamp}`);
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+  const signatureHex = Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return `${payload}.${signatureHex}`;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -80,11 +108,14 @@ Deno.serve(async (req) => {
 
     console.log(`Admin login successful: ${email} as ${data.role}`);
 
+    const admin_token = await createAdminToken(data.email, data.role);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         role: data.role,
-        email: data.email 
+        email: data.email,
+        admin_token,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
