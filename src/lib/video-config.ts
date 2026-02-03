@@ -151,7 +151,13 @@ export const getVideoConfig = (): VideoConfig => {
   // In the future, this will fetch from the database
   const savedConfig = localStorage.getItem('videoConfig');
   if (savedConfig) {
-    return JSON.parse(savedConfig);
+    const parsed = JSON.parse(savedConfig);
+    // Merge with defaults to ensure new fields are present
+    return {
+      ...defaultVideoConfig,
+      ...parsed,
+      audioCategories: parsed.audioCategories || defaultVideoConfig.audioCategories,
+    };
   }
   return defaultVideoConfig;
 };
