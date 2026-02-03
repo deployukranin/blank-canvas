@@ -833,6 +833,7 @@ interface WhiteLabelContextType {
   updateNavigationTabs: (tabs: NavTabConfig[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
   updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
+  updateShopify: (shopify: Partial<WhiteLabelConfig['shopify']>) => void;
   updateToken: <K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,
     tokenValue: Partial<WhiteLabelConfig['tokens'][K]>
@@ -997,6 +998,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, []);
 
+  const updateShopify = useCallback((shopify: Partial<WhiteLabelConfig['shopify']>) => {
+    setConfig(prev => ({
+      ...prev,
+      shopify: { ...prev.shopify, ...shopify },
+    }));
+  }, []);
+
   const updateToken = useCallback(<K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,
     tokenValue: Partial<WhiteLabelConfig['tokens'][K]>
@@ -1071,6 +1079,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateNavigationTabs,
         updateCommunity,
         updateYouTube,
+        updateShopify,
         updateToken,
         resetToDefaults,
         resetIconsToDefaults,
@@ -1104,6 +1113,7 @@ export const useWhiteLabel = () => {
       updateNavigationTabs: noop,
       updateCommunity: noop,
       updateYouTube: noop,
+      updateShopify: noop,
       updateToken: noop as any,
       resetToDefaults: noop,
       resetIconsToDefaults: noop,

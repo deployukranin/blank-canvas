@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Youtube } from 'lucide-react';
+import { Save, Youtube, ShoppingBag, Tag, ExternalLink } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManage
 import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
 
 const CEOIntegracoes = () => {
-  const { config, updateYouTube } = useWhiteLabel();
+  const { config, updateYouTube, updateShopify } = useWhiteLabel();
 
   const [youtubeDraft, setYoutubeDraft] = useState({
     enabled: config.youtube?.enabled ?? true,
@@ -35,6 +35,13 @@ const CEOIntegracoes = () => {
     videoCategoryMap: config.youtube?.videoCategoryMap ?? {},
   });
 
+  const [shopifyDraft, setShopifyDraft] = useState({
+    enabled: config.shopify?.enabled ?? false,
+    storeUrl: config.shopify?.storeUrl ?? '',
+    couponCode: config.shopify?.couponCode ?? '',
+    couponLabel: config.shopify?.couponLabel ?? 'Use o cupom',
+  });
+
   const channelId = youtubeDraft.channelId.trim();
 
   const { data: ytData } = useYouTubeVideos({
@@ -46,15 +53,96 @@ const CEOIntegracoes = () => {
 
   const handleSave = () => {
     updateYouTube(youtubeDraft);
+    updateShopify(shopifyDraft);
     toast.success("Configurações de integrações salvas!");
+  };
+
+  const handleSaveShopify = () => {
+    updateShopify(shopifyDraft);
+    toast.success("Configurações da Loja Parceira salvas!");
   };
 
   return (
     <CEOLayout title="Integrações Externas">
       <div className="space-y-8 max-w-4xl">
 
-        {/* YouTube */}
+        {/* Loja Parceira */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <GlassCard>
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-lg">Loja Parceira</h3>
+                  <p className="text-sm text-muted-foreground">Configure a loja externa e cupom de desconto</p>
+                </div>
+              </div>
+              <Switch
+                checked={shopifyDraft.enabled}
+                onCheckedChange={(checked) => setShopifyDraft((prev) => ({ ...prev, enabled: checked }))}
+              />
+            </div>
+
+            {shopifyDraft.enabled && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div>
+                  <Label className="text-sm flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4" />
+                    URL da Loja
+                  </Label>
+                  <Input
+                    value={shopifyDraft.storeUrl}
+                    onChange={(e) => setShopifyDraft((prev) => ({ ...prev, storeUrl: e.target.value }))}
+                    placeholder="https://minhaloja.com.br"
+                    className="mt-2"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    URL completa da loja parceira (será aberta em nova aba).
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm flex items-center gap-2">
+                      <Tag className="w-4 h-4" />
+                      Código do Cupom
+                    </Label>
+                    <Input
+                      value={shopifyDraft.couponCode}
+                      onChange={(e) => setShopifyDraft((prev) => ({ ...prev, couponCode: e.target.value.toUpperCase() }))}
+                      placeholder="MEUCUPOM30"
+                      className="mt-2 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Texto do Cupom</Label>
+                    <Input
+                      value={shopifyDraft.couponLabel}
+                      onChange={(e) => setShopifyDraft((prev) => ({ ...prev, couponLabel: e.target.value }))}
+                      placeholder="Use o cupom"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end pt-2">
+                  <Button
+                    onClick={handleSaveShopify}
+                    className="gap-2 bg-gradient-to-r from-primary to-accent"
+                  >
+                    <Save className="w-4 h-4" />
+                    Salvar Loja
+                  </Button>
+                </div>
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
+
+        {/* YouTube */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <GlassCard>
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
