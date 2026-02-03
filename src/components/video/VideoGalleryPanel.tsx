@@ -117,8 +117,12 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
             </p>
           </div>
         ) : error ? (
-          <div className="glass rounded-xl p-4">
-            <p className="text-sm text-muted-foreground">Não foi possível carregar os vídeos agora. Tente novamente.</p>
+          <div className="glass rounded-xl p-6 text-center">
+            <p className="text-sm text-muted-foreground mb-2">
+              {error.message?.includes("quota") || error.message?.includes("Quota")
+                ? "⚠️ Limite diário da API do YouTube atingido. Os vídeos estarão disponíveis novamente amanhã."
+                : "Não foi possível carregar os vídeos agora. Tente novamente mais tarde."}
+            </p>
           </div>
         ) : (
           <VideoGalleryByCategory
