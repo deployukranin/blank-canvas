@@ -1,164 +1,162 @@
 
-# Plano: Separar Configuração YouTube entre CEO e Admin
+# Plano: Pop-up de Instalacao PWA para Android
 
-## Situacao Atual
+## Objetivo
 
-A pagina `AdminYoutube.tsx` atualmente:
-- Permite configurar o Channel ID (campo de input)
-- Mostra o Channel ID configurado
-- Lista os videos e gerencia categorias
+Criar um pop-up amigavel que aparece automaticamente quando o usuario abre o app no Android, convidando-o a instalar o PWA na tela inicial.
 
-O problema: o Channel ID nao deve ser visivel/editavel no painel Admin.
+## Como Funciona o PWA Install Prompt
 
-## Nova Estrutura
+O navegador Chrome no Android dispara um evento `beforeinstallprompt` quando o app atende aos criterios de instalacao PWA. Precisamos:
+
+1. Capturar esse evento
+2. Armazena-lo para uso posterior
+3. Mostrar nosso proprio pop-up customizado
+4. Chamar o prompt nativo quando o usuario clicar em "Instalar"
 
 ```text
-Painel CEO (Integracoes)          Painel Admin (YouTube)
-+------------------------+        +------------------------+
-| Channel ID: UC...      |        | Galeria de Videos      |
-| [Campo editavel]       |        | 150 videos encontrados |
-| Limite por categoria   |        |                        |
-| Badge "Novo" dias      |   -->  | [Gerenciar Categorias] |
-| etc...                 |        | - Roleplay (32)        |
-|                        |        | - Tapping (28)         |
-| [Salvar]               |        | - Eating (45)          |
-+------------------------+        +------------------------+
-
-CEO configura o canal       Admin apenas gerencia
-e parametros gerais         videos e categorias
+Fluxo do Usuario:
++------------------+     +------------------+     +------------------+
+|  Abre o App no   | --> |  Pop-up Aparece  | --> | Clica "Instalar" |
+|  Chrome Android  |     |  (customizado)   |     |                  |
++------------------+     +------------------+     +------------------+
+                                 |                        |
+                                 v                        v
+                         +------------------+     +------------------+
+                         | Clica "Agora nao"| --> |  Prompt Nativo   |
+                         | (salva dismiss)  |     |  do Chrome       |
+                         +------------------+     +------------------+
 ```
 
 ---
 
-## Alteracoes Necessarias
+## Arquivos a Criar/Editar
 
-### 1. Refatorar AdminYoutube.tsx
-
-**Remover:**
-- Secao de configuracao do Channel ID
-- Input do Channel ID
-- Exibicao do Channel ID configurado
-- Estado local `channelId` e `tempChannelId`
-- localStorage para channel ID
-
-**Adicionar:**
-- Consumir `useWhiteLabel()` para obter o `channelId` da config do CEO
-- Estado vazio quando canal nao configurado (com instrucao para ir ao painel CEO)
-
-### 2. Manter no AdminYoutube
-
-- Botao "Atualizar Videos"
-- Lista de videos com thumbnails
-- Gerenciador de categorias (`YouTubeCategoryManager`)
-- Salvar categorias (no contexto WhiteLabel, nao localStorage)
-
-### 3. Atualizar Integracao de Categorias
-
-Atualmente as categorias sao salvas em `localStorage` separado. Devemos:
-- Usar o mesmo contexto WhiteLabel que o CEO usa
-- As categorias ficam em `config.youtube.categories` e `config.youtube.videoCategoryMap`
+| Acao  | Arquivo                                      |
+|-------|----------------------------------------------|
+| Criar | `src/hooks/use-pwa-install.ts`               |
+| Criar | `src/components/pwa/PWAInstallPrompt.tsx`    |
+| Editar| `src/App.tsx`                                |
 
 ---
 
-## Interface Visual Proposta
+## Implementacao Detalhada
 
-### Admin YouTube (sem canal configurado)
+### 1. Hook: use-pwa-install.ts
 
-```text
-+--------------------------------------------------+
-|  YouTube                                         |
-+--------------------------------------------------+
-|                                                  |
-|      [icone YouTube grande cinza]                |
-|                                                  |
-|      Canal nao configurado                       |
-|                                                  |
-|      O ID do canal do YouTube deve ser           |
-|      configurado no Painel CEO em Integracoes.   |
-|                                                  |
-+--------------------------------------------------+
-```
-
-### Admin YouTube (com canal configurado)
-
-```text
-+--------------------------------------------------+
-|  YouTube                          [Atualizar]    |
-+--------------------------------------------------+
-|                                                  |
-|  Videos do Canal                                 |
-|  150 videos encontrados                          |
-|                                                  |
-|  +------+ +------+ +------+ +------+ +------+    |
-|  |thumb1| |thumb2| |thumb3| |thumb4| |thumb5|    |
-|  +------+ +------+ +------+ +------+ +------+    |
-|  titulo.. titulo.. titulo.. titulo.. titulo..    |
-|                                                  |
-+--------------------------------------------------+
-|                                                  |
-|  Gerenciar Categorias               [Salvar]     |
-|  +--------------------------------------------+  |
-|  | Roleplay     | 32 videos      [Editar]     |  |
-|  | Tapping      | 28 videos      [Editar]     |  |
-|  | Eating       | 45 videos      [Editar]     |  |
-|  +--------------------------------------------+  |
-|                                                  |
-+--------------------------------------------------+
-```
-
----
-
-## Codigo - Alteracoes
-
-### AdminYoutube.tsx
+Hook customizado para gerenciar o estado de instalacao PWA:
 
 ```typescript
-// ANTES
-const [channelId, setChannelId] = useState(() => {
-  return localStorage.getItem(STORAGE_KEY_CHANNEL) || "";
-});
+// Funcionalidades:
+// - Captura o evento beforeinstallprompt
+// - Detecta se esta em Android
+// - Verifica se ja esta instalado (standalone mode)
+// - Controla se o prompt ja foi dispensado
+// - Expoe funcao para disparar instalacao
 
-// DEPOIS
-import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
-
-const { config, updateYouTube } = useWhiteLabel();
-const channelId = config.youtube?.channelId?.trim() || "";
+interface UsePWAInstall {
+  canInstall: boolean;        // Pode mostrar o prompt?
+  isInstalled: boolean;       // Ja esta instalado?
+  isAndroid: boolean;         // Esta em Android?
+  promptInstall: () => void;  // Dispara instalacao
+  dismissPrompt: () => void;  // Usuario recusou
+}
 ```
 
-**Remover completamente:**
-- STORAGE_KEY_CHANNEL
-- tempChannelId state
-- handleSaveChannel function
-- Secao "Canal do YouTube" com input
+**Logica de Exibicao:**
+- So mostra se `beforeinstallprompt` foi capturado
+- So mostra em Android (user agent check)
+- Nao mostra se ja instalado (standalone mode)
+- Nao mostra se usuario ja recusou recentemente (localStorage com expiracao de 7 dias)
 
-**Ajustar salvar categorias:**
+### 2. Componente: PWAInstallPrompt.tsx
+
+Pop-up visual com design glassmorphism seguindo o tema do app:
+
+```text
++--------------------------------------------------+
+|  [X]                                             |
+|                                                  |
+|      [Icone do App - icon-192.png]               |
+|                                                  |
+|      Instale o ASMR Luna!                        |
+|                                                  |
+|      Adicione nosso app na sua tela inicial      |
+|      para acesso rapido e experiencia offline.   |
+|                                                  |
+|      +--------------------+  +----------------+  |
+|      |     Instalar       |  |   Agora nao    |  |
+|      +--------------------+  +----------------+  |
+|                                                  |
++--------------------------------------------------+
+```
+
+**Caracteristicas:**
+- Animacao de entrada (slide-up com framer-motion)
+- Backdrop blur seguindo o padrao glass do app
+- Botao primario gradiente para "Instalar"
+- Botao secundario ghost para "Agora nao"
+- Fecha automaticamente apos instalacao bem-sucedida
+
+### 3. Integracao no App.tsx
+
+Adicionar o componente PWAInstallPrompt no nivel raiz:
+
+```tsx
+// Dentro do App component, apos os Toasters:
+<PWAInstallPrompt />
+```
+
+---
+
+## Deteccao de Plataforma
+
 ```typescript
-// ANTES - localStorage
-localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(...));
+const isAndroid = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return userAgent.includes('android');
+};
 
-// DEPOIS - WhiteLabel context
-updateYouTube({
-  ...config.youtube,
-  categories: categorizationDraft.categories,
-  videoCategoryMap: categorizationDraft.videoCategoryMap,
-});
+const isStandalone = () => {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as any).standalone === true;
+};
 ```
 
 ---
 
-## Resumo de Arquivos
+## Persistencia do Dismiss
 
-| Acao | Arquivo |
-|------|---------|
-| Editar | `src/pages/admin/AdminYoutube.tsx` |
+Para nao irritar o usuario:
 
-Nenhum arquivo novo sera criado. A configuracao do Channel ID ja existe no CEOIntegracoes.
+```typescript
+const DISMISS_KEY = 'pwa-install-dismissed';
+const DISMISS_DAYS = 7; // Mostra novamente apos 7 dias
+
+const wasDismissed = () => {
+  const dismissed = localStorage.getItem(DISMISS_KEY);
+  if (!dismissed) return false;
+  const dismissedDate = new Date(dismissed);
+  const daysSince = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince < DISMISS_DAYS;
+};
+```
 
 ---
 
-## Beneficios
+## Consideracoes de UX
 
-1. **Separacao de responsabilidades**: CEO configura, Admin gerencia
-2. **Seguranca**: Channel ID nao fica visivel para admins comuns
-3. **Dados centralizados**: Categorias ficam no mesmo contexto WhiteLabel
-4. **Menos duplicacao**: Remove localStorage redundante
+1. **Delay inicial**: Mostrar o pop-up apos 2-3 segundos para nao interromper imediatamente
+2. **Nao bloqueia**: O pop-up aparece na parte inferior, permitindo uso do app
+3. **Feedback visual**: Animacao suave ao aparecer/desaparecer
+4. **iOS**: Nao mostra o pop-up automatico (iOS nao suporta beforeinstallprompt), mas podemos mostrar instrucoes manuais
+
+---
+
+## Resumo
+
+Este plano adiciona um pop-up de instalacao PWA amigavel que:
+- Aparece automaticamente no Android/Chrome
+- Respeita a escolha do usuario (dismiss por 7 dias)
+- Segue o design system existente (glassmorphism)
+- Usa o prompt nativo do Chrome para instalacao real
