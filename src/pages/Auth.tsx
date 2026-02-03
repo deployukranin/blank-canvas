@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +13,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { config } = useWhiteLabel();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp, loginAsAdmin } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,20 +23,6 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
-
-  // Admin credentials from WhiteLabel config
-  const adminCredentials = useMemo(() => [
-    { 
-      email: config.adminCredentials?.ceo?.email || 'ceo@whisperscape.com',
-      password: config.adminCredentials?.ceo?.password || 'ceo123',
-      role: 'ceo' as const 
-    },
-    { 
-      email: config.adminCredentials?.admin?.email || 'admin@whisperscape.com',
-      password: config.adminCredentials?.admin?.password || 'admin123',
-      role: 'admin' as const 
-    },
-  ], [config.adminCredentials]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -69,6 +53,23 @@ const Auth = () => {
     };
   };
 
+  const checkAdminCredentials = async (email: string, password: string): Promise<{ success: boolean; role?: 'admin' | 'ceo' }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-admin-login', {
+        body: { email, password }
+      });
+
+      if (error || !data?.success) {
+        return { success: false };
+      }
+
+      return { success: true, role: data.role };
+    } catch (err) {
+      console.error('Error checking admin credentials:', err);
+      return { success: false };
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -84,16 +85,14 @@ const Auth = () => {
 
     setIsSubmitting(true);
 
-    // First check if it's an admin/CEO mock credential
-    const adminMatch = adminCredentials.find(
-      a => a.email.toLowerCase() === loginEmail.toLowerCase() && a.password === loginPassword
-    );
+    // First check if it's an admin/CEO credential from the database
+    const adminCheck = await checkAdminCredentials(loginEmail, loginPassword);
 
-    if (adminMatch) {
-      const result = await loginAsAdmin(loginEmail, loginPassword, adminMatch.role);
+    if (adminCheck.success && adminCheck.role) {
+      const result = await loginAsAdmin(loginEmail, loginPassword, adminCheck.role);
       if (result.success) {
-        toast.success(adminMatch.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
-        navigate(adminMatch.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
+        toast.success(adminCheck.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
+        navigate(adminCheck.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
       }
       setIsSubmitting(false);
       return;
