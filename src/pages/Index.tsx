@@ -198,29 +198,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* VIP CTA (only if not VIP) */}
-        {(!user || !user.isVIP) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Link to="/vip">
-              <GlassCard glow className="p-4 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-vip/30 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                <div className="flex items-center gap-4 relative">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-vip to-amber-400 flex items-center justify-center">
-                    <DynamicIcon icon={config.icons.featureVIP} size={24} className="text-vip-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-display font-semibold text-vip">Seja VIP</p>
-                    <p className="text-xs text-muted-foreground">Acesso exclusivo ao Discord e muito mais</p>
-                  </div>
-                </div>
-              </GlassCard>
-            </Link>
-          </motion.div>
-        )}
       </div>
 
       {/* Modal para assistir vídeo */}
