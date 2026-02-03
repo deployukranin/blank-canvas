@@ -236,6 +236,68 @@ export type Database = {
         }
         Relationships: []
       }
+      video_idea_votes: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_idea_votes_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "video_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_ideas: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+          votes: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          votes?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          votes?: number
+        }
+        Relationships: []
+      }
       video_reactions: {
         Row: {
           created_at: string
@@ -494,6 +556,7 @@ export type Database = {
       }
       is_vip: { Args: { check_user_id: string }; Returns: boolean }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
+      toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "ceo"

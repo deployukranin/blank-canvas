@@ -1,17 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ThumbsUp, Flag, Trash2, Eye, CheckCircle } from 'lucide-react';
+import { Search, ThumbsUp, Trash2, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { mockVideoIdeas, VideoIdea } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface VideoIdea {
+  id: string;
+  title: string;
+  description: string;
+  votes: number;
+  status: 'active' | 'reported' | 'removed';
+  user_id: string | null;
+  created_at: string;
+}
 
 const AdminIdeias: React.FC = () => {
-  const [ideas, setIdeas] = useState<VideoIdea[]>(mockVideoIdeas);
+  const { toast } = useToast();
+  const [ideas, setIdeas] = useState<VideoIdea[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'reported' | 'removed'>('all');
+
+  const fetchIdeas = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('video_ideas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setIdeas((data || []).map(idea => ({
+        ...idea,
+        status: idea.status as 'active' | 'reported' | 'removed',
+      })));
+    } catch (err) {
+      console.error('Error fetching ideas:', err);
+      toast({
+        title: 'Erro ao carregar ideias',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchIdeas();
+  }, [fetchIdeas]);
 
   const filteredIdeas = ideas.filter(idea => {
     const matchesSearch = idea.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -20,10 +62,53 @@ const AdminIdeias: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleStatusChange = (id: string, newStatus: 'active' | 'removed' | 'reported') => {
-    setIdeas(ideas.map(idea => 
-      idea.id === id ? { ...idea, status: newStatus } : idea
-    ));
+  const handleStatusChange = async (id: string, newStatus: 'active' | 'removed' | 'reported') => {
+    try {
+      const { error } = await supabase
+        .from('video_ideas')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setIdeas(ideas.map(idea => 
+        idea.id === id ? { ...idea, status: newStatus } : idea
+      ));
+
+      toast({
+        title: 'Status atualizado',
+        description: `Ideia ${newStatus === 'active' ? 'aprovada' : newStatus === 'removed' ? 'removida' : 'marcada'}`,
+      });
+    } catch (err) {
+      console.error('Error updating status:', err);
+      toast({
+        title: 'Erro ao atualizar',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('video_ideas')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setIdeas(ideas.filter(idea => idea.id !== id));
+
+      toast({
+        title: 'Ideia excluída',
+      });
+    } catch (err) {
+      console.error('Error deleting idea:', err);
+      toast({
+        title: 'Erro ao excluir',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -65,77 +150,92 @@ const AdminIdeias: React.FC = () => {
                   {f === 'all' ? 'Todas' : f === 'active' ? 'Ativas' : f === 'reported' ? 'Denunciadas' : 'Removidas'}
                 </Button>
               ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchIdeas}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
           </div>
         </GlassCard>
 
-        {/* Ideas List */}
-        <div className="space-y-4">
-          {filteredIdeas.map((idea, index) => (
-            <motion.div
-              key={idea.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <GlassCard className="p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{idea.title}</h3>
-                      {getStatusBadge(idea.status)}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">{idea.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <ThumbsUp className="w-3 h-3" />
-                        {idea.votes} votos
-                      </span>
-                      <span>Por: {idea.authorName}</span>
-                      <span>{idea.createdAt}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    {idea.status !== 'active' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        onClick={() => handleStatusChange(idea.id, 'active')}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Aprovar
-                      </Button>
-                    )}
-                    {idea.status === 'active' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1 text-yellow-400 border-yellow-400/50"
-                        onClick={() => handleStatusChange(idea.id, 'reported')}
-                      >
-                        <Flag className="w-4 h-4" />
-                        Marcar
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1 text-red-400 border-red-400/50"
-                      onClick={() => handleStatusChange(idea.id, 'removed')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Remover
-                    </Button>
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
 
-        {filteredIdeas.length === 0 && (
+        {/* Ideas List */}
+        {!isLoading && (
+          <div className="space-y-4">
+            {filteredIdeas.map((idea, index) => (
+              <motion.div
+                key={idea.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <GlassCard className="p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold">{idea.title}</h3>
+                        {getStatusBadge(idea.status)}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">{idea.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3" />
+                          {idea.votes} votos
+                        </span>
+                        <span>{new Date(idea.created_at).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      {idea.status !== 'active' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          onClick={() => handleStatusChange(idea.id, 'active')}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Aprovar
+                        </Button>
+                      )}
+                      {idea.status === 'active' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          onClick={() => handleStatusChange(idea.id, 'removed')}
+                        >
+                          Ocultar
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 text-destructive border-destructive/50 hover:bg-destructive/10"
+                        onClick={() => handleDelete(idea.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Excluir
+                      </Button>
+                    </div>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && filteredIdeas.length === 0 && (
           <GlassCard className="p-8 text-center">
             <p className="text-muted-foreground">Nenhuma ideia encontrada</p>
           </GlassCard>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, ThumbsUp, Flag, Send, AlertCircle } from 'lucide-react';
+import { ThumbsUp, Flag, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { mockVideoIdeas, type VideoIdea } from '@/lib/mock-data';
 import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { useVideoIdeas } from '@/hooks/use-video-ideas';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +20,9 @@ import {
 } from '@/components/ui/dialog';
 
 const IdeiasPage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [ideas, setIdeas] = useState<VideoIdea[]>(mockVideoIdeas);
+  const { ideas, isLoading, toggleVote, submitIdea, reportIdea } = useVideoIdeas();
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportingId, setReportingId] = useState<string | null>(null);
@@ -37,19 +37,27 @@ const IdeiasPage = () => {
       return;
     }
 
-    setIdeas(prev =>
-      prev.map(idea =>
-        idea.id === ideaId
-          ? { ...idea, votes: idea.hasVoted ? idea.votes - 1 : idea.votes + 1, hasVoted: !idea.hasVoted }
-          : idea
-      )
-    );
-
-    trackEvent('idea_vote', { ideaId, userId: user?.id });
+    const result = await toggleVote(ideaId);
+    
+    if (!result.success) {
+      toast({
+        title: 'Erro ao votar',
+        description: result.error,
+        variant: 'destructive',
+      });
+    } else {
+      trackEvent('idea_vote', { ideaId });
+    }
   };
 
   const handleSubmitIdea = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setAuthMessage('Faça login para enviar ideias');
+      setShowAuthModal(true);
+      return;
+    }
 
     if (!newIdea.title.trim() || !newIdea.description.trim()) {
       toast({
@@ -61,28 +69,23 @@ const IdeiasPage = () => {
     }
 
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const idea: VideoIdea = {
-      id: `idea-${Date.now()}`,
-      title: newIdea.title,
-      description: newIdea.description,
-      votes: 0,
-      status: 'active',
-      authorName: user?.username || 'Anônimo',
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    setIdeas(prev => [idea, ...prev]);
-    setNewIdea({ title: '', description: '' });
+    const result = await submitIdea(newIdea.title, newIdea.description);
     setIsSubmitting(false);
 
-    trackEvent('idea_submitted', { ideaId: idea.id });
-
-    toast({
-      title: 'Ideia enviada! 🎉',
-      description: 'Sua sugestão foi publicada',
-    });
+    if (result.success) {
+      setNewIdea({ title: '', description: '' });
+      trackEvent('idea_submitted', { ideaId: result.idea?.id });
+      toast({
+        title: 'Ideia enviada! 🎉',
+        description: 'Sua sugestão foi publicada',
+      });
+    } else {
+      toast({
+        title: 'Erro ao enviar',
+        description: result.error,
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleReport = async (ideaId: string) => {
@@ -95,8 +98,7 @@ const IdeiasPage = () => {
       return;
     }
 
-    // Report functionality removed - just show feedback
-    console.log('[Report] Idea reported:', { ideaId, reason: reportReason });
+    await reportIdea(ideaId, reportReason);
 
     toast({
       title: 'Denúncia enviada',
@@ -106,9 +108,7 @@ const IdeiasPage = () => {
     setReportReason('');
   };
 
-  const sortedIdeas = [...ideas]
-    .filter(idea => idea.status === 'active')
-    .sort((a, b) => b.votes - a.votes);
+  const sortedIdeas = [...ideas].sort((a, b) => b.votes - a.votes);
 
   return (
     <MobileLayout title="Ideias de Vídeos">
@@ -135,11 +135,29 @@ const IdeiasPage = () => {
               disabled={isSubmitting}
               className="w-full bg-gradient-to-r from-primary to-accent"
             >
-              <Send className="w-4 h-4 mr-2" />
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
               {isSubmitting ? 'Enviando...' : 'Enviar Ideia'}
             </Button>
           </form>
         </GlassCard>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && sortedIdeas.length === 0 && (
+          <GlassCard className="p-8 text-center">
+            <p className="text-muted-foreground">Nenhuma ideia ainda. Seja o primeiro a sugerir!</p>
+          </GlassCard>
+        )}
 
         {/* Ideas List */}
         <div className="space-y-3">
@@ -169,9 +187,9 @@ const IdeiasPage = () => {
                       <h4 className="font-semibold text-sm mb-1">{idea.title}</h4>
                       <p className="text-muted-foreground text-xs mb-2 line-clamp-2">{idea.description}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{idea.authorName}</span>
+                        <span>{idea.authorName || 'Usuário'}</span>
                         <span>•</span>
-                        <span>{new Date(idea.createdAt).toLocaleDateString('pt-BR')}</span>
+                        <span>{new Date(idea.created_at).toLocaleDateString('pt-BR')}</span>
                       </div>
                     </div>
 
