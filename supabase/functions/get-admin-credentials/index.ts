@@ -13,16 +13,58 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create Supabase client with service role to bypass RLS
+    // Verify the caller is authenticated and has CEO role
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Verify the user's JWT
+    const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
-    // Query admin_credentials table
-    const { data, error } = await supabase
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claims, error: claimsError } = await userSupabase.auth.getClaims(token);
+    
+    if (claimsError || !claims?.claims) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Token inválido" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = claims.claims.sub;
+    
+    // Use service role to check if user has CEO role
+    const serviceSupabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data: roleData, error: roleError } = await serviceSupabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "ceo")
+      .single();
+
+    if (roleError || !roleData) {
+      console.log("User is not a CEO:", userId);
+      return new Response(
+        JSON.stringify({ success: false, error: "Acesso restrito ao CEO" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Query admin_credentials table - NEVER return password_hash
+    const { data, error } = await serviceSupabase
       .from("admin_credentials")
-      .select("id, role, email, password_hash")
+      .select("id, role, email, created_at, updated_at")
       .order("role");
 
     if (error) {
@@ -33,7 +75,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Fetched ${data?.length || 0} admin credentials`);
+    console.log(`Fetched ${data?.length || 0} admin credentials (without passwords)`);
 
     return new Response(
       JSON.stringify({ 

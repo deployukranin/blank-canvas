@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Crown, Eye, EyeOff, Save, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Shield, Crown, Eye, EyeOff, Save, Loader2, RefreshCw, Lock, CheckCircle } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ interface AdminCredential {
   id: string;
   role: string;
   email: string;
-  password_hash: string;
+  updated_at: string;
 }
 
 interface CredentialCardProps {
@@ -20,7 +20,7 @@ interface CredentialCardProps {
   icon: React.ReactNode;
   title: string;
   email: string;
-  password: string;
+  updatedAt?: string;
   onSave: (email: string, password: string) => Promise<void>;
   otherEmail: string;
   isSaving: boolean;
@@ -31,23 +31,26 @@ const CredentialCard = ({
   icon, 
   title, 
   email: initialEmail, 
-  password: initialPassword,
+  updatedAt,
   onSave,
   otherEmail,
   isSaving
 }: CredentialCardProps) => {
   const [email, setEmail] = useState(initialEmail);
-  const [password, setPassword] = useState(initialPassword);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
 
   useEffect(() => {
     setEmail(initialEmail);
-    setPassword(initialPassword);
-  }, [initialEmail, initialPassword]);
+    // Don't set password - it's not returned from the server
+    setPassword('');
+    setConfirmPassword('');
+  }, [initialEmail]);
 
   const validateAndSave = async () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
     
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,12 +67,21 @@ const CredentialCard = ({
       newErrors.password = 'Senha é obrigatória';
     } else if (password.length < 6) {
       newErrors.password = 'Senha deve ter no mínimo 6 caracteres';
+    } else if (password.length > 128) {
+      newErrors.password = 'Senha muito longa';
+    }
+
+    // Validate confirm password
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'As senhas não coincidem';
     }
     
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length === 0) {
       await onSave(email.trim(), password);
+      setPassword('');
+      setConfirmPassword('');
     }
   };
 
@@ -85,7 +97,14 @@ const CredentialCard = ({
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${role === 'ceo' ? 'bg-yellow-500/20' : 'bg-primary/20'}`}>
           <span className={iconColor}>{icon}</span>
         </div>
-        <h4 className="font-display font-semibold">{title}</h4>
+        <div>
+          <h4 className="font-display font-semibold">{title}</h4>
+          {updatedAt && (
+            <p className="text-xs text-muted-foreground">
+              Atualizado: {new Date(updatedAt).toLocaleDateString('pt-BR')}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -108,7 +127,7 @@ const CredentialCard = ({
         </div>
 
         <div>
-          <Label className="text-sm">Senha</Label>
+          <Label className="text-sm">Nova Senha</Label>
           <div className="relative mt-1.5">
             <Input
               type={showPassword ? 'text' : 'password'}
@@ -117,7 +136,7 @@ const CredentialCard = ({
                 setPassword(e.target.value);
                 if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
               }}
-              placeholder="••••••••"
+              placeholder="Digite a nova senha"
               className="pr-10"
               disabled={isSaving}
             />
@@ -134,6 +153,26 @@ const CredentialCard = ({
           )}
         </div>
 
+        <div>
+          <Label className="text-sm">Confirmar Senha</Label>
+          <div className="relative mt-1.5">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: undefined }));
+              }}
+              placeholder="Confirme a nova senha"
+              className="pr-10"
+              disabled={isSaving}
+            />
+          </div>
+          {errors.confirmPassword && (
+            <p className="text-xs text-destructive mt-1">{errors.confirmPassword}</p>
+          )}
+        </div>
+
         <Button 
           onClick={validateAndSave}
           className="w-full gap-2"
@@ -145,7 +184,7 @@ const CredentialCard = ({
           ) : (
             <Save className="w-4 h-4" />
           )}
-          Salvar
+          Salvar Credenciais
         </Button>
       </div>
     </div>
@@ -160,7 +199,7 @@ export const AdminCredentialsManager = () => {
   const fetchCredentials = async () => {
     setIsLoading(true);
     try {
-      // Use edge function to get credentials (bypasses RLS)
+      // Use edge function to get credentials (returns only email, role - no password)
       const { data, error } = await supabase.functions.invoke('get-admin-credentials');
       
       if (error) {
@@ -257,10 +296,10 @@ export const AdminCredentialsManager = () => {
             role="admin"
             icon={<Shield className="w-5 h-5" />}
             title="Conta Admin"
-            email={adminCred?.email || 'admin@whisperscape.com'}
-            password={adminCred?.password_hash || 'admin123'}
+            email={adminCred?.email || ''}
+            updatedAt={adminCred?.updated_at}
             onSave={(email, password) => handleSave('admin', email, password)}
-            otherEmail={ceoCred?.email || 'ceo@whisperscape.com'}
+            otherEmail={ceoCred?.email || ''}
             isSaving={isSaving}
           />
           
@@ -268,20 +307,32 @@ export const AdminCredentialsManager = () => {
             role="ceo"
             icon={<Crown className="w-5 h-5" />}
             title="Conta CEO"
-            email={ceoCred?.email || 'ceo@whisperscape.com'}
-            password={ceoCred?.password_hash || 'ceo123'}
+            email={ceoCred?.email || ''}
+            updatedAt={ceoCred?.updated_at}
             onSave={(email, password) => handleSave('ceo', email, password)}
-            otherEmail={adminCred?.email || 'admin@whisperscape.com'}
+            otherEmail={adminCred?.email || ''}
             isSaving={isSaving}
           />
         </div>
 
         <div className="flex items-start gap-2 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-          <Shield className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Armazenamento Seguro</p>
+            <p className="font-medium text-foreground mb-1">Segurança Aprimorada</p>
             <p>
-              As credenciais são armazenadas de forma segura no banco de dados da plataforma.
+              As senhas são criptografadas com bcrypt antes de serem armazenadas. 
+              Cada login gera uma sessão autenticada via Supabase Auth.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 p-4 rounded-xl bg-primary/10 border border-primary/20 mt-4">
+          <Lock className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-muted-foreground">
+            <p className="font-medium text-foreground mb-1">Nota de Segurança</p>
+            <p>
+              As senhas não são exibidas por motivos de segurança. 
+              Para alterar uma senha, digite a nova senha e confirme.
             </p>
           </div>
         </div>

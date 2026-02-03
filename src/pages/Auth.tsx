@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, signIn, signUp, loginAsAdmin } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -53,20 +53,35 @@ const Auth = () => {
     };
   };
 
-  const checkAdminCredentials = async (email: string, password: string): Promise<{ success: boolean; role?: 'admin' | 'ceo' }> => {
+  const handleAdminLogin = async (email: string, password: string): Promise<boolean> => {
     try {
+      // Try to authenticate via the admin login edge function
       const { data, error } = await supabase.functions.invoke('validate-admin-login', {
         body: { email, password }
       });
 
-      if (error || !data?.success) {
-        return { success: false };
+      if (error || !data?.success || !data?.session) {
+        return false;
       }
 
-      return { success: true, role: data.role };
+      // Set the session from the edge function response
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        return false;
+      }
+
+      // Navigate based on role
+      toast.success(data.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
+      navigate(data.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
+      return true;
     } catch (err) {
-      console.error('Error checking admin credentials:', err);
-      return { success: false };
+      console.error('Error in admin login:', err);
+      return false;
     }
   };
 
@@ -85,15 +100,9 @@ const Auth = () => {
 
     setIsSubmitting(true);
 
-    // First check if it's an admin/CEO credential from the database
-    const adminCheck = await checkAdminCredentials(loginEmail, loginPassword);
-
-    if (adminCheck.success && adminCheck.role) {
-      const result = await loginAsAdmin(loginEmail, loginPassword, adminCheck.role);
-      if (result.success) {
-        toast.success(adminCheck.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
-        navigate(adminCheck.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
-      }
+    // First try admin login (which also sets a proper Supabase session)
+    const adminLoginSuccess = await handleAdminLogin(loginEmail, loginPassword);
+    if (adminLoginSuccess) {
       setIsSubmitting(false);
       return;
     }
