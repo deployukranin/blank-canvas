@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, Settings, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, Link as LinkIcon, Check, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { HandleSelector } from '@/components/profile/HandleSelector';
 import { useProfile } from '@/hooks/use-profile';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const quickAccessItems = [
   { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -20,7 +23,6 @@ const quickAccessItems = [
 ];
 
 const menuItems = [
-  { icon: Settings, label: 'Configurações', description: 'Preferências do app', path: '/perfil/configuracoes' },
   { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '/ajuda' },
   { icon: FileText, label: 'Termos de Uso', description: 'Leia nossos termos', path: '/termos' },
   { icon: Shield, label: 'Privacidade', description: 'Política de privacidade', path: '/privacidade' },
@@ -29,9 +31,35 @@ const menuItems = [
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
   const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
+  const { toast } = useToast();
+
+  const handleSaveAvatar = async () => {
+    if (!avatarUrl.trim() || !user) return;
+    
+    setIsSavingAvatar(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl.trim() })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({ title: 'Foto atualizada!', description: 'Sua foto de perfil foi salva.' });
+      setAvatarUrl('');
+      refetchProfile();
+    } catch (err) {
+      console.error('Error saving avatar:', err);
+      toast({ title: 'Erro ao salvar', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -72,11 +100,15 @@ const PerfilPage = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <GlassCard className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={profile?.handle || user.username} className="w-full h-full rounded-full object-cover" />
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+              {profile?.avatar_url || user?.avatar ? (
+                <img 
+                  src={profile?.avatar_url || user?.avatar} 
+                  alt={profile?.handle || user?.username} 
+                  className="w-full h-full rounded-full object-cover" 
+                />
               ) : (
-                <span className="text-2xl font-bold text-white">
+                <span className="text-2xl font-bold text-primary-foreground">
                   {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -97,16 +129,58 @@ const PerfilPage = () => {
           </GlassCard>
         </motion.div>
 
-        {/* Handle Selector */}
+        {/* Handle Selector - only show if no handle set */}
+        {!profile?.handle && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <HandleSelector 
+              currentHandle={profile?.handle} 
+              onHandleSet={() => refetchProfile()}
+            />
+          </motion.div>
+        )}
+
+        {/* Avatar URL Input */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          transition={{ delay: 0.08 }}
         >
-          <HandleSelector 
-            currentHandle={profile?.handle} 
-            onHandleSet={() => refetchProfile()}
-          />
+          <GlassCard className="p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <LinkIcon className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Foto de perfil</p>
+                <p className="text-xs text-muted-foreground">Cole o link de uma imagem</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://exemplo.com/foto.jpg"
+                className="flex-1"
+                disabled={isSavingAvatar}
+              />
+              <Button 
+                onClick={handleSaveAvatar} 
+                disabled={!avatarUrl.trim() || isSavingAvatar}
+                size="sm"
+                className="shrink-0"
+              >
+                {isSavingAvatar ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </GlassCard>
         </motion.div>
 
         {/* Quick Access - Ideias & VIP */}
@@ -129,7 +203,7 @@ const PerfilPage = () => {
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
                       <item.icon className="w-5 h-5 text-white" />
                       {badgeCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
                           {badgeCount > 9 ? '9+' : badgeCount}
                         </span>
                       )}
