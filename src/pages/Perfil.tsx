@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, Link as LinkIcon, Check, Loader2 } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, Link as LinkIcon, Check, Loader2, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -14,6 +14,7 @@ import { HandleSelector } from '@/components/profile/HandleSelector';
 import { useProfile } from '@/hooks/use-profile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const quickAccessItems = [
   { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -37,6 +38,7 @@ const PerfilPage = () => {
   const { unreadCount } = useCommunityNotifications();
   const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { toast } = useToast();
+  const { isAdmin, isCEO } = useUserRole();
 
   const handleSaveAvatar = async () => {
     if (!avatarUrl.trim() || !user) return;
@@ -183,11 +185,37 @@ const PerfilPage = () => {
           </GlassCard>
         </motion.div>
 
+        {/* Admin Dashboard Link */}
+        {(isAdmin || isCEO) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Link to={isCEO ? '/ceo' : '/admin'}>
+              <GlassCard className="p-4" hover>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <LayoutDashboard className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Dashboard</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isCEO ? 'Painel CEO' : 'Painel Admin'}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </div>
+              </GlassCard>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Quick Access - Ideias & VIP */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.12 }}
           className="space-y-2"
         >
           <h3 className="text-sm font-medium text-muted-foreground px-1">Acesso Rápido</h3>
