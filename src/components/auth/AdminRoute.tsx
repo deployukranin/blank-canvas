@@ -3,7 +3,6 @@ import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { hasAdminSession, getAdminSessionInfo } from "@/lib/admin-session";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -21,35 +20,7 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
 
   const checkPermission = async () => {
     try {
-      // First check for admin session token (from admin_credentials login)
-      if (hasAdminSession()) {
-        const adminInfo = getAdminSessionInfo();
-        if (adminInfo) {
-          let hasAccess = false;
-          
-          if (requiredRole === 'ceo') {
-            hasAccess = adminInfo.role === 'ceo';
-          } else {
-            // For admin routes, both admin and ceo have access
-            hasAccess = ['admin', 'ceo'].includes(adminInfo.role);
-          }
-          
-          setIsAuthorized(hasAccess);
-          
-          if (!hasAccess) {
-            toast({
-              variant: "destructive",
-              title: "Acesso Negado",
-              description: `Você precisa de permissão de ${requiredRole.toUpperCase()} para acessar esta área.`
-            });
-          }
-          
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Then check for Supabase session with user_roles
+      // Check for Supabase session with user_roles
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
