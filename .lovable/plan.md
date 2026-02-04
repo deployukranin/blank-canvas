@@ -1,204 +1,161 @@
 
-# Plano: Limpeza de Dados Mock para Produção
 
-## Objetivo
-Remover todos os dados falsos/mock do aplicativo para deixá-lo limpo e pronto para produção. As páginas que usam esses dados ficarão vazias até que dados reais sejam adicionados.
+# Plano de Correção de Erros de Build e Funcionamento
 
----
-
-## Arquivos de Dados Mock a Remover
-
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/lib/mock-data.ts` | Ideias de vídeo, assinaturas, posts do feed, benefícios VIP |
-| `src/lib/admin-mock-data.ts` | Usuários fake, pedidos fake, denúncias fake, estatísticas fake |
+## Resumo do Problema
+Após suas atualizações de segurança, foram identificados **3 erros críticos de build** e alguns problemas de funcionamento relacionados a referências incorretas de tabelas e localização de arquivos.
 
 ---
 
-## Páginas Afetadas e Mudanças
+## Problemas Identificados
 
-### 1. Página Inicial (`src/pages/Index.tsx`)
-- **Atual**: Mostra 2 posts de novidades do `mockFeedPosts`
-- **Mudança**: Remover seção "Novidades" ou mostrar mensagem "Nenhuma novidade"
+### Erro 1: MetricsExportManager no Local Errado
+**Arquivo:** `src/components/ceo/MetricsExportManager.tsx`
 
-### 2. Página de Ideias (`src/pages/Ideias.tsx`)
-- **Atual**: Lista ideias do `mockVideoIdeas`
-- **Mudança**: Iniciar com lista vazia, só mostrar ideias criadas por usuários reais
+O arquivo contém código de **Edge Function** (Deno) mas está localizado na pasta de componentes React do frontend. Isso causa múltiplos erros de compilação porque o frontend não suporta imports de Deno.
 
-### 3. Comunidade (`src/pages/Comunidade.tsx`)
-- **Atual**: Mostra posts e ideias do `mockFeedPosts` e `mockForumIdeas`
-- **Mudança**: Iniciar com listas vazias
+**Erros gerados:**
+- Cannot find module 'https://deno.land/std@0.168.0/http/server.ts'
+- Cannot find module 'https://esm.sh/@supabase/supabase-js@2'
+- Cannot find name 'Deno'
 
-### 4. Loja (`src/pages/Loja.tsx`)
-- **Atual**: Lista assinaturas do `mockSubscriptions`
-- **Mudança**: Mostrar mensagem "Em breve" ou lista vazia
-
-### 5. Produto Assinatura (`src/pages/ProdutoAssinatura.tsx`)
-- **Atual**: Busca produto do `mockSubscriptions`
-- **Mudança**: Mostrar "Produto não encontrado" se não existir
-
-### 6. Admin Dashboard (`src/pages/admin/AdminDashboard.tsx`)
-- **Atual**: Mostra estatísticas fake (1.234 usuários, R$ 4.890, etc.)
-- **Mudança**: Mostrar zeros ou buscar dados reais do banco
-
-### 7. Admin Usuários (`src/pages/admin/AdminUsuarios.tsx`)
-- **Atual**: Lista usuários fake do `mockAdminUsers`
-- **Mudança**: Buscar usuários reais da tabela `profiles`
-
-### 8. Admin Pedidos (`src/pages/admin/AdminPedidos.tsx`)
-- **Atual**: Lista pedidos fake do `mockAdminOrders`
-- **Mudança**: Buscar pedidos reais da tabela `custom_orders`
-
-### 9. Admin Conteúdo (`src/pages/admin/AdminConteudo.tsx`)
-- **Atual**: Lista posts do `mockFeedPosts`
-- **Mudança**: Iniciar vazio (sem tabela de posts no banco ainda)
-
-### 10. Admin Denúncias (`src/pages/admin/AdminDenuncias.tsx`)
-- **Atual**: Lista denúncias fake do `mockAdminReports`
-- **Mudança**: Iniciar vazio
+**Solução:** Deletar o arquivo `src/components/ceo/MetricsExportManager.tsx`. A Edge Function correta já existe em `supabase/functions/export-metrics/index.ts`.
 
 ---
 
-## Mudanças Técnicas Detalhadas
+### Erro 2: AdminRoute Buscando Coluna Inexistente
+**Arquivo:** `src/components/auth/AdminRoute.tsx`
 
-### Fase 1: Atualizar Páginas Públicas
+O componente busca `profiles.role`, mas a tabela `profiles` não possui essa coluna. O sistema RBAC do projeto usa a tabela separada `user_roles`.
 
-**`src/pages/Index.tsx`**
-```typescript
-// REMOVER: import { mockFeedPosts } from '@/lib/mock-data';
-// REMOVER: seção "Novidades" com mockFeedPosts
-// OU: mostrar "Nenhuma novidade ainda"
-```
+**Erro gerado:**
+- Property 'role' does not exist on type 'profiles'
 
-**`src/pages/Ideias.tsx`**
-```typescript
-// ANTES: const [ideas, setIdeas] = useState<VideoIdea[]>(mockVideoIdeas);
-// DEPOIS: const [ideas, setIdeas] = useState<VideoIdea[]>([]);
-```
-
-**`src/pages/Comunidade.tsx`**
-```typescript
-// ANTES: useState com mockFeedPosts e mockForumIdeas
-// DEPOIS: useState com arrays vazios []
-```
-
-**`src/pages/Loja.tsx`**
-```typescript
-// ANTES: lista mockSubscriptions
-// DEPOIS: lista vazia ou mensagem "Em breve"
-```
-
-**`src/pages/ProdutoAssinatura.tsx`**
-```typescript
-// ANTES: busca em mockSubscriptions
-// DEPOIS: sempre mostra "Produto não encontrado"
-```
-
-### Fase 2: Atualizar Páginas Admin
-
-**`src/pages/admin/AdminDashboard.tsx`**
-```typescript
-// REMOVER: import { mockAdminStats, mockAdminOrders } from '@/lib/admin-mock-data';
-// ANTES: mockAdminStats.totalUsers, mockAdminStats.revenue
-// DEPOIS: estatísticas zeradas ou consulta real ao banco
-const stats = {
-  totalUsers: 0,
-  totalVIP: 0,
-  totalOrders: 0,
-  revenue: 0,
-  pendingOrders: 0,
-  ideasCount: 0,
-  newUsersToday: 0,
-};
-```
-
-**`src/pages/admin/AdminUsuarios.tsx`**
-```typescript
-// REMOVER: import { mockAdminUsers } from '@/lib/admin-mock-data';
-// ANTES: useState(mockAdminUsers)
-// DEPOIS: useState([]) + useEffect para buscar da tabela profiles
-```
-
-**`src/pages/admin/AdminPedidos.tsx`**
-```typescript
-// ANTES: useState(mockAdminOrders)
-// DEPOIS: useState([]) + useEffect para buscar da tabela custom_orders
-```
-
-**`src/pages/admin/AdminConteudo.tsx`**
-```typescript
-// ANTES: useState(mockFeedPosts)
-// DEPOIS: useState([])
-```
-
-**`src/pages/admin/AdminDenuncias.tsx`**
-```typescript
-// ANTES: useState(mockAdminReports)
-// DEPOIS: useState([])
-```
-
-### Fase 3: Limpeza Final
-
-**Manter os arquivos de tipos** (interfaces ainda são úteis):
-- Manter `VideoIdea`, `FeedPost`, `ForumIdea`, etc. como interfaces
-- Remover apenas os arrays de dados mock
-
-**Remover categorias mock não usadas**:
-- `mockVIPBenefits` → manter (usado em VIP)
-- `mockVideoCategories` → verificar uso
-- `mockAudioCategories` → verificar uso
-- `mockSubscriptions` → remover dados, manter tipo
+**Solução:** Alterar o `AdminRoute` para consultar a tabela `user_roles` ao invés de `profiles.role`, usando a função `has_role()` já existente no banco ou fazendo a query correta.
 
 ---
 
-## Dashboard Admin: Buscar Dados Reais
+### Erro 3: VIPAreaContent Referencia Tabela Inexistente
+**Arquivo:** `src/components/vip/VIPAreaContent.tsx`
 
-Para o dashboard mostrar dados reais, vou adicionar consultas simples:
+O componente tenta buscar dados da tabela `videos`, que não existe. O sistema de vídeos usa `youtube_videos_cache` para cache do YouTube e `vip_content` para conteúdo VIP exclusivo.
 
+**Erros gerados:**
+- Type instantiation is excessively deep
+- Argument of type 'videos' is not assignable
+
+**Solução:** Alterar a query para usar a tabela `vip_content` que já existe no banco e possui RLS configurado para usuários VIP.
+
+---
+
+## Detalhes Técnicos da Implementação
+
+### Alteração 1: Deletar Arquivo Duplicado
+
+```text
+Deletar: src/components/ceo/MetricsExportManager.tsx
+```
+
+Este arquivo é uma duplicata incorreta da Edge Function que já existe em `supabase/functions/export-metrics/index.ts`.
+
+---
+
+### Alteração 2: Corrigir AdminRoute.tsx
+
+Substituir a lógica de verificação de role:
+
+**Antes (incorreto):**
 ```typescript
-// Contar usuários
-const { count: totalUsers } = await supabase
+const { data: profile, error } = await supabase
   .from('profiles')
-  .select('*', { count: 'exact', head: true });
+  .select('role')
+  .eq('id', session.user.id)
+  .single();
 
-// Contar VIPs ativos
-const { count: totalVIP } = await supabase
-  .from('vip_subscriptions')
-  .select('*', { count: 'exact', head: true })
-  .eq('status', 'active')
-  .gt('expires_at', new Date().toISOString());
+const userRole = profile.role || 'user';
+```
 
-// Contar pedidos e receita
-const { data: orders } = await supabase
-  .from('custom_orders')
-  .select('amount_cents, status');
+**Depois (correto):**
+```typescript
+const { data: roles, error } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('user_id', session.user.id);
+
+if (error) {
+  console.error("Erro ao verificar roles:", error);
+  setLoading(false);
+  return;
+}
+
+const userRoles = roles?.map(r => r.role) || [];
+let hasAccess = false;
+
+if (requiredRole === 'ceo') {
+  hasAccess = userRoles.includes('ceo');
+} else {
+  hasAccess = userRoles.some(r => ['admin', 'ceo'].includes(r));
+}
 ```
 
 ---
 
-## Resultado Final
+### Alteração 3: Corrigir VIPAreaContent.tsx
 
-Após as mudanças:
-- Páginas públicas: mostram listas vazias ou mensagens "Em breve"
-- Dashboard admin: mostra zeros ou dados reais do banco
-- Nenhum dado fake aparece no app
-- App pronto para receber dados reais de produção
+Substituir a query de vídeos:
+
+**Antes (incorreto):**
+```typescript
+const { data: videos, error } = await supabase
+  .from('videos')
+  .select('*')
+  .eq('is_vip_exclusive', true);
+```
+
+**Depois (correto):**
+```typescript
+const { data: vipContent, error } = await supabase
+  .from('vip_content')
+  .select('*');
+
+if (error) {
+  console.error("Erro ao carregar conteúdo VIP:", error);
+  toast({
+    variant: "destructive",
+    title: "Erro de Acesso",
+    description: "Não foi possível carregar o conteúdo exclusivo."
+  });
+} else {
+  // Mapear para o formato esperado pelo componente
+  const mappedContent = (vipContent || []).map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.content,
+    video_url: item.media_url || '',
+    thumbnail_url: undefined,
+    is_vip_exclusive: true
+  }));
+  setContent(mappedContent);
+}
+```
+
+Também atualizar a interface `VipContent` para corresponder à estrutura da tabela real.
 
 ---
 
-## Arquivos a Modificar
+## Resumo das Alterações
 
-| Arquivo | Ação |
-|---------|------|
-| `src/pages/Index.tsx` | Remover seção Novidades com mock |
-| `src/pages/Ideias.tsx` | Iniciar com array vazio |
-| `src/pages/Comunidade.tsx` | Iniciar com arrays vazios |
-| `src/pages/Loja.tsx` | Iniciar vazio ou "Em breve" |
-| `src/pages/ProdutoAssinatura.tsx` | Remover busca em mock |
-| `src/pages/admin/AdminDashboard.tsx` | Zeros ou dados reais |
-| `src/pages/admin/AdminUsuarios.tsx` | Buscar da tabela profiles |
-| `src/pages/admin/AdminPedidos.tsx` | Buscar da tabela custom_orders |
-| `src/pages/admin/AdminConteudo.tsx` | Array vazio |
-| `src/pages/admin/AdminDenuncias.tsx` | Array vazio |
-| `src/lib/mock-data.ts` | Manter tipos, remover dados |
-| `src/lib/admin-mock-data.ts` | Manter tipos, remover dados |
+| Arquivo | Ação | Motivo |
+|---------|------|--------|
+| `src/components/ceo/MetricsExportManager.tsx` | Deletar | Código Deno no frontend (duplicado) |
+| `src/components/auth/AdminRoute.tsx` | Corrigir | Usar `user_roles` ao invés de `profiles.role` |
+| `src/components/vip/VIPAreaContent.tsx` | Corrigir | Usar `vip_content` ao invés de `videos` |
+
+---
+
+## Resultado Esperado
+Após as correções:
+- Build compilando sem erros
+- Rotas administrativas validando corretamente os roles
+- Área VIP carregando conteúdo da tabela correta
+
