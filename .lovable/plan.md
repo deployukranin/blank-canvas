@@ -1,161 +1,93 @@
 
 
-# Plano de Correção de Erros de Build e Funcionamento
+# Plano: Corrigir Erro de CORS na Edge Function create-pix-charge
 
-## Resumo do Problema
-Após suas atualizações de segurança, foram identificados **3 erros críticos de build** e alguns problemas de funcionamento relacionados a referências incorretas de tabelas e localização de arquivos.
+## Problema Identificado
 
----
+A edge function `create-pix-charge` possui uma lista restrita de origens permitidas (CORS) que **ainda contém URLs placeholder**:
 
-## Problemas Identificados
+```typescript
+const ALLOWED_ORIGINS = [
+  "https://seusite.lovable.app",         // Placeholder
+  "https://preview-seusite.lovable.app", // Placeholder  
+  "http://localhost:8080",
+];
+```
 
-### Erro 1: MetricsExportManager no Local Errado
-**Arquivo:** `src/components/ceo/MetricsExportManager.tsx`
+A origem real do projeto (`4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com`) nao esta incluida, resultando em bloqueio CORS com status 403 e a mensagem "Forbidden Origin".
 
-O arquivo contém código de **Edge Function** (Deno) mas está localizado na pasta de componentes React do frontend. Isso causa múltiplos erros de compilação porque o frontend não suporta imports de Deno.
+## Solucao
 
-**Erros gerados:**
-- Cannot find module 'https://deno.land/std@0.168.0/http/server.ts'
-- Cannot find module 'https://esm.sh/@supabase/supabase-js@2'
-- Cannot find name 'Deno'
+Atualizar a lista `ALLOWED_ORIGINS` na edge function para incluir as origens corretas do projeto Lovable.
 
-**Solução:** Deletar o arquivo `src/components/ceo/MetricsExportManager.tsx`. A Edge Function correta já existe em `supabase/functions/export-metrics/index.ts`.
+## Alteracoes Necessarias
 
----
+### 1. Atualizar `supabase/functions/create-pix-charge/index.ts`
 
-### Erro 2: AdminRoute Buscando Coluna Inexistente
-**Arquivo:** `src/components/auth/AdminRoute.tsx`
-
-O componente busca `profiles.role`, mas a tabela `profiles` não possui essa coluna. O sistema RBAC do projeto usa a tabela separada `user_roles`.
-
-**Erro gerado:**
-- Property 'role' does not exist on type 'profiles'
-
-**Solução:** Alterar o `AdminRoute` para consultar a tabela `user_roles` ao invés de `profiles.role`, usando a função `has_role()` já existente no banco ou fazendo a query correta.
-
----
-
-### Erro 3: VIPAreaContent Referencia Tabela Inexistente
-**Arquivo:** `src/components/vip/VIPAreaContent.tsx`
-
-O componente tenta buscar dados da tabela `videos`, que não existe. O sistema de vídeos usa `youtube_videos_cache` para cache do YouTube e `vip_content` para conteúdo VIP exclusivo.
-
-**Erros gerados:**
-- Type instantiation is excessively deep
-- Argument of type 'videos' is not assignable
-
-**Solução:** Alterar a query para usar a tabela `vip_content` que já existe no banco e possui RLS configurado para usuários VIP.
-
----
-
-## Detalhes Técnicos da Implementação
-
-### Alteração 1: Deletar Arquivo Duplicado
+Substituir os placeholders pelas URLs reais:
 
 ```text
-Deletar: src/components/ceo/MetricsExportManager.tsx
+ANTES:
+const ALLOWED_ORIGINS = [
+  "https://seusite.lovable.app",
+  "https://preview-seusite.lovable.app",
+  "http://localhost:8080",
+];
+
+DEPOIS:
+const ALLOWED_ORIGINS = [
+  "https://4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com",
+  "https://id-preview--4c756ab8-43f8-4073-a220-22b13086195b.lovable.app",
+  "https://cozy-corner-seed.lovable.app",
+  "http://localhost:8080",
+  "http://localhost:5173",
+];
 ```
 
-Este arquivo é uma duplicata incorreta da Edge Function que já existe em `supabase/functions/export-metrics/index.ts`.
+URLs incluidas:
+- **lovableproject.com**: Preview de desenvolvimento
+- **id-preview--...lovable.app**: Preview alternativo
+- **cozy-corner-seed.lovable.app**: URL publicada (producao)
+- **localhost**: Desenvolvimento local
 
----
+### 2. Deploy da Edge Function
 
-### Alteração 2: Corrigir AdminRoute.tsx
+Apos a edicao, a edge function sera reimplantada automaticamente.
 
-Substituir a lógica de verificação de role:
+## Secao Tecnica
 
-**Antes (incorreto):**
-```typescript
-const { data: profile, error } = await supabase
-  .from('profiles')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
+### Por que "Failed to fetch"?
 
-const userRole = profile.role || 'user';
+1. O browser envia uma requisicao preflight OPTIONS
+2. A edge function verifica se a origem esta na lista ALLOWED_ORIGINS
+3. Como nao esta, retorna 403 Forbidden Origin
+4. O browser bloqueia a requisicao e reporta "Failed to fetch"
+5. O frontend mostra "Erro ao gerar cobranca"
+
+### Fluxo Corrigido
+
+```text
+Browser (lovableproject.com)
+       |
+       | POST /functions/v1/create-pix-charge
+       v
+Edge Function
+       |
+       | Origin: ...lovableproject.com
+       | -> Verifica ALLOWED_ORIGINS
+       | -> Origem valida!
+       v
+Processa pagamento PIX
+       |
+       v
+Retorna QR Code
 ```
 
-**Depois (correto):**
-```typescript
-const { data: roles, error } = await supabase
-  .from('user_roles')
-  .select('role')
-  .eq('user_id', session.user.id);
+## Validacao
 
-if (error) {
-  console.error("Erro ao verificar roles:", error);
-  setLoading(false);
-  return;
-}
-
-const userRoles = roles?.map(r => r.role) || [];
-let hasAccess = false;
-
-if (requiredRole === 'ceo') {
-  hasAccess = userRoles.includes('ceo');
-} else {
-  hasAccess = userRoles.some(r => ['admin', 'ceo'].includes(r));
-}
-```
-
----
-
-### Alteração 3: Corrigir VIPAreaContent.tsx
-
-Substituir a query de vídeos:
-
-**Antes (incorreto):**
-```typescript
-const { data: videos, error } = await supabase
-  .from('videos')
-  .select('*')
-  .eq('is_vip_exclusive', true);
-```
-
-**Depois (correto):**
-```typescript
-const { data: vipContent, error } = await supabase
-  .from('vip_content')
-  .select('*');
-
-if (error) {
-  console.error("Erro ao carregar conteúdo VIP:", error);
-  toast({
-    variant: "destructive",
-    title: "Erro de Acesso",
-    description: "Não foi possível carregar o conteúdo exclusivo."
-  });
-} else {
-  // Mapear para o formato esperado pelo componente
-  const mappedContent = (vipContent || []).map(item => ({
-    id: item.id,
-    title: item.title,
-    description: item.content,
-    video_url: item.media_url || '',
-    thumbnail_url: undefined,
-    is_vip_exclusive: true
-  }));
-  setContent(mappedContent);
-}
-```
-
-Também atualizar a interface `VipContent` para corresponder à estrutura da tabela real.
-
----
-
-## Resumo das Alterações
-
-| Arquivo | Ação | Motivo |
-|---------|------|--------|
-| `src/components/ceo/MetricsExportManager.tsx` | Deletar | Código Deno no frontend (duplicado) |
-| `src/components/auth/AdminRoute.tsx` | Corrigir | Usar `user_roles` ao invés de `profiles.role` |
-| `src/components/vip/VIPAreaContent.tsx` | Corrigir | Usar `vip_content` ao invés de `videos` |
-
----
-
-## Resultado Esperado
-Após as correções:
-- Build compilando sem erros
-- Rotas administrativas validando corretamente os roles
-- Área VIP carregando conteúdo da tabela correta
+Apos a correcao:
+1. Acessar /customs
+2. Selecionar categoria e duracao
+3. Clicar em "Comprar"
+4. O modal de pagamento PIX deve abrir com o QR Code
 
