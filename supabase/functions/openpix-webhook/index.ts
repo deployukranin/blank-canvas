@@ -47,32 +47,35 @@ serve(async (req) => {
 
   try {
     const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
-    const OPENPIX_WEBHOOK_SECRET = Deno.env.get('OPENPIX_WEBHOOK_SECRET'); // <--- NOVO
+    const OPENPIX_WEBHOOK_SECRET = Deno.env.get('OPENPIX_WEBHOOK_SECRET');
     const CREATOR_PIX_KEY = Deno.env.get('CREATOR_PIX_KEY');
     const CREATOR_TAX_ID = Deno.env.get('CREATOR_TAX_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+    // 1. 🛡️ VALIDAÇÃO OBRIGATÓRIA DA CONFIGURAÇÃO (Fail Closed)
+    // Se o segredo não estiver configurado no servidor, rejeita a requisição para segurança.
+    if (!OPENPIX_WEBHOOK_SECRET) {
+      console.error('CRITICAL SECURITY ERROR: OPENPIX_WEBHOOK_SECRET is missing in environment variables.');
+      return new Response(
+        JSON.stringify({ error: 'Server misconfiguration: Webhook Secret missing' }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
     if (!OPENPIX_APP_ID || !CREATOR_PIX_KEY || !CREATOR_TAX_ID) {
-      console.error('Missing configuration');
+      console.error('Missing configuration: OPENPIX_APP_ID, CREATOR_PIX_KEY or CREATOR_TAX_ID');
       return new Response(JSON.stringify({ error: 'Server misconfigured' }), { status: 500, headers: corsHeaders });
     }
 
-    // 1. 🛡️ SEGURANÇA MÁXIMA: Verificar Assinatura
-    // Precisamos ler o corpo como TEXTO primeiro para validar o hash
+    // 2. 🛡️ VERIFICAÇÃO DA ASSINATURA (Obrigatória)
     const rawBody = await req.text();
     const signature = req.headers.get('x-webhook-signature');
 
-    // Se você configurou o segredo na OpenPix, essa verificação é obrigatória
-    if (OPENPIX_WEBHOOK_SECRET) {
-      const isValid = await verifySignature(OPENPIX_WEBHOOK_SECRET, signature, rawBody);
-      if (!isValid) {
-        console.error('⚠️ Assinatura de Webhook Inválida! Tentativa de ataque?');
-        return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: corsHeaders });
-      }
-    } else {
-        console.warn('⚠️ AVISO CRÍTICO: OPENPIX_WEBHOOK_SECRET não configurado. Seu webhook está vulnerável.');
-        // Para não quebrar seu app agora, ele passa, mas você PRECISA configurar isso.
+    const isValid = await verifySignature(OPENPIX_WEBHOOK_SECRET, signature, rawBody);
+    if (!isValid) {
+      console.error('⚠️ Assinatura de Webhook Inválida! Tentativa de ataque bloqueada.');
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: corsHeaders });
     }
 
     const payload = JSON.parse(rawBody);
