@@ -11,7 +11,7 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
-import { AdminCredentialsManager } from '@/components/ceo/AdminCredentialsManager';
+
 
 interface ExampleProduct {
   id: string;
@@ -495,8 +495,6 @@ const CEOIntegracoes = () => {
           </GlassCard>
         </motion.div>
 
-        {/* Admin Credentials */}
-        <AdminCredentialsManager />
 
         {/* Save Button */}
         <motion.div
