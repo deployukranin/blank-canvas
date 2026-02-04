@@ -28,21 +28,19 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
         return;
       }
 
-      // 2. Busca a 'role' do usuário na tabela profiles
-      // Se sua tabela de perfis tiver outro nome (ex: users), ajuste aqui.
-      const { data: profile, error } = await supabase
-        .from('profiles')
+      // 2. Busca os roles do usuário na tabela user_roles (RBAC correto)
+      const { data: roles, error } = await supabase
+        .from('user_roles')
         .select('role')
-        .eq('id', session.user.id)
-        .single();
+        .eq('user_id', session.user.id);
 
-      if (error || !profile) {
-        console.error("Erro ao verificar perfil:", error);
+      if (error) {
+        console.error("Erro ao verificar roles:", error);
         setLoading(false);
         return;
       }
 
-      const userRole = profile.role || 'user';
+      const userRoles = roles?.map(r => r.role) || [];
 
       // 3. Regras de Acesso
       // CEO tem acesso a tudo (admin e ceo)
@@ -50,10 +48,10 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
       let hasAccess = false;
 
       if (requiredRole === 'ceo') {
-        hasAccess = userRole === 'ceo' || userRole === 'super_admin';
+        hasAccess = userRoles.includes('ceo');
       } else {
-        // Para rotas de admin, aceita admin, ceo ou super_admin
-        hasAccess = ['admin', 'ceo', 'super_admin'].includes(userRole);
+        // Para rotas de admin, aceita admin ou ceo
+        hasAccess = userRoles.some(r => ['admin', 'ceo'].includes(r));
       }
 
       setIsAuthorized(hasAccess);
