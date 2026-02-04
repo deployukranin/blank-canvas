@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -13,14 +13,18 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const { toast } = useToast();
+  const hasChecked = useRef(false);
 
   useEffect(() => {
-    checkPermission();
+    // Only check once to prevent loops
+    if (!hasChecked.current) {
+      hasChecked.current = true;
+      checkPermission();
+    }
   }, []);
 
   const checkPermission = async () => {
     try {
-      // Check for Supabase session with user_roles
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
@@ -28,7 +32,6 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
         return;
       }
 
-      // Query user_roles table for RBAC
       const { data: roles, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -42,13 +45,11 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
 
       const userRoles = roles?.map(r => r.role) || [];
 
-      // Access rules
       let hasAccess = false;
 
       if (requiredRole === 'ceo') {
         hasAccess = userRoles.includes('ceo');
       } else {
-        // For admin routes, accept admin or ceo
         hasAccess = userRoles.some(r => ['admin', 'ceo'].includes(r));
       }
 
