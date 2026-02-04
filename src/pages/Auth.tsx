@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, signIn, signUp, loginAsAdmin } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -53,23 +53,6 @@ const Auth = () => {
     };
   };
 
-  const checkAdminCredentials = async (email: string, password: string): Promise<{ success: boolean; role?: 'admin' | 'ceo' }> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('validate-admin-login', {
-        body: { email, password }
-      });
-
-      if (error || !data?.success) {
-        return { success: false };
-      }
-
-      return { success: true, role: data.role };
-    } catch (err) {
-      console.error('Error checking admin credentials:', err);
-      return { success: false };
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -85,20 +68,7 @@ const Auth = () => {
 
     setIsSubmitting(true);
 
-    // First check if it's an admin/CEO credential from the database
-    const adminCheck = await checkAdminCredentials(loginEmail, loginPassword);
-
-    if (adminCheck.success && adminCheck.role) {
-      const result = await loginAsAdmin(loginEmail, loginPassword, adminCheck.role);
-      if (result.success) {
-        toast.success(adminCheck.role === 'ceo' ? '👑 Bem-vindo, CEO!' : '🛡️ Bem-vindo, Admin!');
-        navigate(adminCheck.role === 'ceo' ? '/ceo' : '/admin', { replace: true });
-      }
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Regular Supabase authentication
+    // Use standard Supabase authentication
     const result = await signIn(loginEmail, loginPassword);
     
     if (result.success) {

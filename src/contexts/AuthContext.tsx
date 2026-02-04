@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { getLocalProfile } from "@/lib/local-profile";
-import { storeAdminSession, getAdminSessionInfo, hasAdminSession, clearAdminSession } from "@/lib/admin-session";
+
 export interface User {
   id: string;
   email: string;
@@ -22,7 +22,6 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
-  loginAsAdmin: (email: string, password: string, role: "admin" | "ceo") => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
@@ -140,42 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   }, []);
 
-  const loginAsAdmin = useCallback(async (email: string, password: string, role: "admin" | "ceo") => {
-    try {
-      // Call the edge function to validate and get token
-      const { data, error } = await supabase.functions.invoke('validate-admin-login', {
-        body: { email, password }
-      });
-
-      if (error || !data?.success) {
-        return { success: false, error: data?.error || 'Credenciais inválidas' };
-      }
-
-      // Store the admin session token
-      if (data.admin_token) {
-        storeAdminSession(data.admin_token, { email: data.email, role: data.role });
-      }
-
-      // Set user state for admin
-      const adminUser: User = {
-        id: `admin-${data.role}-${Date.now()}`,
-        email: data.email,
-        username: data.role === 'ceo' ? 'CEO' : 'Admin',
-        isVIP: true,
-        isAdmin: true,
-        isCEO: data.role === 'ceo',
-        createdAt: new Date().toISOString(),
-      };
-      setUser(adminUser);
-      return { success: true };
-    } catch (err) {
-      console.error('Admin login error:', err);
-      return { success: false, error: 'Erro ao fazer login' };
-    }
-  }, []);
-
   const logout = useCallback(() => {
-    clearAdminSession();
     signOut();
   }, [signOut]);
 
@@ -216,7 +180,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
-        loginAsAdmin,
         logout,
         requireAuth,
         applyLocalProfile,
@@ -243,7 +206,6 @@ export const useAuth = (): AuthContextType => {
       signUp: asyncNoop,
       signIn: asyncNoop,
       signOut: async () => {},
-      loginAsAdmin: asyncNoop,
       logout: noop,
       requireAuth: noop,
       applyLocalProfile: noop,
