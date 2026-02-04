@@ -3,9 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // 🛡️ CONFIGURAÇÃO DE SEGURANÇA
 const ALLOWED_ORIGINS = [
-  "https://seusite.lovable.app",
-  "https://preview-seusite.lovable.app",
+  "https://4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com",
+  "https://id-preview--4c756ab8-43f8-4073-a220-22b13086195b.lovable.app",
+  "https://cozy-corner-seed.lovable.app",
   "http://localhost:8080",
+  "http://localhost:5173",
 ];
 
 const MAX_REQUESTS_PER_MINUTE = 5;
