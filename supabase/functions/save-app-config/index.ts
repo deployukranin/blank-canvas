@@ -13,7 +13,62 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Parse request body
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // 1. Validate Authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("Missing or invalid Authorization header");
+      return new Response(
+        JSON.stringify({ success: false, error: "Autenticação obrigatória" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 2. Validate JWT and get user
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user) {
+      console.error("Invalid token or user not found:", userError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Token inválido ou expirado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Check user role from user_roles table (admin or ceo required)
+    const { data: roles, error: rolesError } = await userClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    if (rolesError) {
+      console.error("Error fetching user roles:", rolesError.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Erro ao verificar permissões" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const allowedRoles = ["admin", "ceo"];
+    const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
+
+    if (!hasPermission) {
+      console.error(`Access denied for user ${user.id} - no admin/ceo role`);
+      return new Response(
+        JSON.stringify({ success: false, error: "Acesso negado: permissão de admin ou CEO necessária" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Authorized config update by user ${user.id} with roles: ${roles?.map(r => r.role).join(", ")}`);
+
+    // 4. Parse request body
     const { config_key, config_value } = await req.json();
 
     if (!config_key || config_value === undefined) {
@@ -32,13 +87,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to bypass RLS
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // 5. Use service role to save config (bypasses RLS for the actual save operation)
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if config exists
-    const { data: existing } = await supabase
+    const { data: existing } = await serviceClient
       .from("app_configurations")
       .select("id")
       .eq("config_key", config_key)
@@ -47,7 +100,7 @@ Deno.serve(async (req) => {
     let error;
     if (existing) {
       // Update existing
-      const result = await supabase
+      const result = await serviceClient
         .from("app_configurations")
         .update({
           config_value,
@@ -57,7 +110,7 @@ Deno.serve(async (req) => {
       error = result.error;
     } else {
       // Insert new
-      const result = await supabase
+      const result = await serviceClient
         .from("app_configurations")
         .insert({
           config_key,
@@ -74,7 +127,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Config ${config_key} saved successfully`);
+    console.log(`Config ${config_key} saved successfully by user ${user.id}`);
 
     return new Response(
       JSON.stringify({ success: true }),
