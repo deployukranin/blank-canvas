@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/use-user-role';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -45,24 +46,20 @@ const menuItems = [
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, session, isLoading: authLoading } = useAuth();
+  const { roles, isLoading: rolesLoading } = useUserRole();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (!user?.isAdmin) {
-      navigate('/admin/login');
-    }
-  }, [user, navigate]);
+  const isStaff = roles.some((r) => r.role === 'admin' || r.role === 'ceo');
 
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
 
-  if (!user?.isAdmin) {
-    return null;
-  }
+  // Evita pisca/loop: só decide depois que auth/roles estiverem estáveis
+  if (authLoading || (session && rolesLoading)) return null;
+  if (!session || !isStaff) return <Navigate to="/admin/login" replace />;
 
   return (
     <div className="min-h-screen bg-background">
