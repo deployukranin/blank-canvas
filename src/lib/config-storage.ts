@@ -37,13 +37,24 @@ export const loadConfig = async <T>(key: ConfigKey): Promise<T | null> => {
 /**
  * Save configuration to database via edge function
  * This bypasses RLS by using service role in the edge function
+ * REQUIRES: User must be logged in with admin/ceo role
  */
 export const saveConfig = async <T>(
   key: ConfigKey, 
   value: T
 ): Promise<boolean> => {
   try {
-    // Call edge function to save config (no auth required)
+    // Check if user is authenticated before calling edge function
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      // Silently skip saving if not logged in - this is expected behavior
+      // Configs will be loaded from DB on next visit
+      console.debug(`Skipping save for ${key}: user not authenticated`);
+      return false;
+    }
+
+    // Call edge function to save config (auth required)
     const { data, error } = await supabase.functions.invoke('save-app-config', {
       body: {
         config_key: key,
@@ -52,11 +63,21 @@ export const saveConfig = async <T>(
     });
 
     if (error) {
+      // Don't log as error if it's just permission denied (user isn't admin)
+      if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
+        console.debug(`Config ${key} not saved: user lacks admin permissions`);
+        return false;
+      }
       console.error(`Error saving config ${key}:`, error);
       return false;
     }
 
     if (!data?.success) {
+      // Handle specific errors gracefully
+      if (data?.error?.includes('Acesso negado') || data?.error?.includes('permissão')) {
+        console.debug(`Config ${key} not saved: ${data.error}`);
+        return false;
+      }
       console.error(`Failed to save config ${key}:`, data?.error);
       return false;
     }
