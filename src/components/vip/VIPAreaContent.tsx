@@ -1,492 +1,139 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Crown, Lock, Star, Gift, Zap, Heart, Video, Music, Image, FileText, Check, Loader2, Copy, Clock, RefreshCw } from 'lucide-react';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useVIPSubscription, VIPContent, VIPChargeResult } from '@/hooks/use-vip-subscription';
-import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { getVipConfig } from '@/lib/vip-config';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client"; // Verifique se o caminho está certo
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Lock, Play, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-};
-
-const getContentIcon = (type: VIPContent['content_type']) => {
-  switch (type) {
-    case 'video':
-      return <Video className="w-5 h-5 text-vip" />;
-    case 'audio':
-      return <Music className="w-5 h-5 text-vip" />;
-    case 'image':
-      return <Image className="w-5 h-5 text-vip" />;
-    default:
-      return <FileText className="w-5 h-5 text-vip" />;
-  }
-};
-
-const getBenefitIcon = (icon: string) => {
-  switch (icon) {
-    case 'star':
-      return <Star className="w-5 h-5 text-vip" />;
-    case 'gift':
-      return <Gift className="w-5 h-5 text-vip" />;
-    case 'zap':
-      return <Zap className="w-5 h-5 text-vip" />;
-    case 'heart':
-      return <Heart className="w-5 h-5 text-vip" />;
-    default:
-      return <Crown className="w-5 h-5 text-vip" />;
-  }
-};
-
-const getPlanLabel = (type: 'monthly' | 'quarterly' | 'yearly') => {
-  switch (type) {
-    case 'monthly': return 'Mensal';
-    case 'quarterly': return 'Trimestral';
-    case 'yearly': return 'Anual';
-  }
-};
-
-const getPlanSuffix = (type: 'monthly' | 'quarterly' | 'yearly') => {
-  switch (type) {
-    case 'monthly': return '/mês';
-    case 'quarterly': return '/trimestre';
-    case 'yearly': return '/ano';
-  }
-};
+// Defina a tipagem correta para o seu conteúdo
+interface VipContent {
+  id: string;
+  title: string;
+  description: string;
+  video_url: string; // ou audio_url
+  thumbnail_url?: string;
+  is_vip_exclusive: boolean;
+}
 
 export const VIPAreaContent = () => {
-  const { config } = useWhiteLabel();
-  const { session } = useAuth();
-  const isAuthenticated = !!session?.user;
-  const { 
-    isVIP, 
-    isLoading, 
-    vipContent, 
-    subscription, 
-    createCharge,
-    checkPaymentStatus,
-    copyBrCode,
-    getDaysRemaining,
-    refreshSubscription,
-  } = useVIPSubscription();
-  
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showSubscribeDialog, setShowSubscribeDialog] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
-  const [chargeData, setChargeData] = useState<VIPChargeResult | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<string>('pending');
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const [content, setContent] = useState<VipContent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isVip, setIsVip] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const vipConfig = getVipConfig();
-  const monthlyPlan = vipConfig.plans.find(p => p.type === 'monthly');
-  const VIP_MONTHLY_PRICE = monthlyPlan?.price || 19.90;
-
-  // Poll for payment status
   useEffect(() => {
-    if (chargeData?.correlationId && showPaymentDialog) {
-      const poll = async () => {
-        const status = await checkPaymentStatus(chargeData.correlationId!);
-        if (status?.status === 'paid') {
-          setPaymentStatus('paid');
-          await refreshSubscription();
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-          }
+    checkVipStatusAndLoadContent();
+  }, []);
+
+  const checkVipStatusAndLoadContent = async () => {
+    try {
+      // 1. Verifica se tem sessão
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        setLoading(false);
+        return; // Não carrega nada se não estiver logado
+      }
+
+      // 2. Verifica Status VIP (No Banco, não no LocalStorage!)
+      // A query busca uma assinatura ativa e válida
+      const { data: subscription } = await supabase
+        .from('vip_subscriptions')
+        .select('status, expires_at')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString()) // Expira no futuro
+        .maybeSingle();
+
+      const userIsVip = !!subscription;
+      setIsVip(userIsVip);
+
+      if (userIsVip) {
+        // 3. SE for VIP, busca o conteúdo
+        // Aqui confiamos no RLS do banco. Se a regra falhar, o .error avisa.
+        const { data: videos, error } = await supabase
+          .from('videos') // Nome da sua tabela de conteúdo
+          .select('*')
+          .eq('is_vip_exclusive', true); // Opcional, o RLS já deve filtrar
+
+        if (error) {
+          console.error("Erro ao carregar vídeos:", error);
+          toast({
+            variant: "destructive",
+            title: "Erro de Acesso",
+            description: "Não foi possível carregar o conteúdo exclusivo."
+          });
+        } else {
+          setContent(videos || []);
         }
-      };
-
-      pollingRef.current = setInterval(poll, 3000);
-      return () => {
-        if (pollingRef.current) {
-          clearInterval(pollingRef.current);
-        }
-      };
-    }
-  }, [chargeData?.correlationId, showPaymentDialog, checkPaymentStatus, refreshSubscription]);
-
-  const handleSubscribeClick = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-    setShowSubscribeDialog(true);
-  };
-
-  const handleConfirmSubscription = async () => {
-    setIsProcessing(true);
-    const result = await createCharge(selectedPlan);
-    setIsProcessing(false);
-    
-    if (result.success) {
-      setChargeData(result);
-      setPaymentStatus('pending');
-      setShowSubscribeDialog(false);
-      setShowPaymentDialog(true);
+      } 
+    } catch (error) {
+      console.error("Erro geral:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCopyCode = async () => {
-    if (chargeData?.brCode) {
-      await copyBrCode(chargeData.brCode);
-    }
-  };
-
-  const handleClosePayment = () => {
-    setShowPaymentDialog(false);
-    setChargeData(null);
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-    }
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-vip" />
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // User is VIP - Show exclusive content
-  if (isVIP && subscription) {
+  // Se não for VIP, mostra o "Cadeado" (Teaser)
+  if (!isVip) {
     return (
-      <div className="space-y-4">
-        {/* VIP Status Card */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <GlassCard className="p-4 bg-gradient-to-br from-vip/20 to-primary/10 border-vip/30">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-vip to-amber-400 flex items-center justify-center">
-                <Crown className="w-6 h-6 text-vip-foreground" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm">Você é VIP!</h3>
-                  <Badge variant="secondary" className="bg-vip/20 text-vip text-xs">
-                    {subscription.plan_type === 'monthly' ? 'Mensal' : 'Anual'}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {getDaysRemaining()} dias restantes
-                </p>
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* VIP Content */}
-        {vipContent.length > 0 ? (
-          <div className="space-y-3">
-            <h3 className="font-semibold text-sm flex items-center gap-2">
-              <Star className="w-4 h-4 text-vip" />
-              Conteúdo Exclusivo
-            </h3>
-            {vipContent.map((content, index) => (
-              <motion.div
-                key={content.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <GlassCard className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-vip/20 flex items-center justify-center flex-shrink-0">
-                      {getContentIcon(content.content_type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-sm">{content.title}</h4>
-                        <Badge variant="secondary" className="text-xs bg-vip/10 text-vip">
-                          {content.content_type === 'video' ? 'Vídeo' :
-                           content.content_type === 'audio' ? 'Áudio' :
-                           content.content_type === 'image' ? 'Imagem' : 'Post'}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{content.content}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatDate(content.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <GlassCard className="p-6 text-center">
-            <Crown className="w-10 h-10 mx-auto mb-3 text-vip/50" />
-            <p className="text-sm text-muted-foreground">
-              Novos conteúdos exclusivos em breve!
-            </p>
-          </GlassCard>
-        )}
+      <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
+        <Lock className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Área Exclusiva VIP</h2>
+        <p className="text-gray-600 mb-6">
+          Este conteúdo é reservado para assinantes. Desbloqueie acesso total agora.
+        </p>
+        <Button onClick={() => navigate("/plans")} size="lg" className="animate-pulse">
+          Quero ser VIP
+        </Button>
       </div>
     );
   }
 
-  // User is not VIP - Show subscription CTA
+  // Se for VIP, mostra o conteúdo real
   return (
-    <>
-      <div className="space-y-4">
-        {/* Main CTA Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <GlassCard className="p-6 text-center bg-gradient-to-br from-vip/10 to-primary/5 border-vip/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-vip/20 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-              className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-vip to-amber-400 flex items-center justify-center"
-            >
-              <Crown className="w-8 h-8 text-vip-foreground" />
-            </motion.div>
-
-            <h3 className="font-display font-semibold text-lg mb-2">
-              {config.community.vipTitle || 'Área VIP'}
-            </h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              {config.community.vipDescription || 'Acesse conteúdo exclusivo e benefícios especiais.'}
-            </p>
-
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-muted-foreground line-through text-sm">R$ 39,90</span>
-              <span className="font-display text-2xl font-bold text-vip">
-                R$ {VIP_MONTHLY_PRICE.toFixed(2).replace('.', ',')}
-              </span>
-              <span className="text-muted-foreground text-sm">/mês</span>
-            </div>
-
-            <Button
-              onClick={handleSubscribeClick}
-              className="gap-2 bg-gradient-to-r from-vip to-amber-400 text-vip-foreground hover:opacity-90"
-            >
-              <Zap className="w-4 h-4" />
-              {config.community.vipButtonLabel || 'Tornar-se VIP'}
-            </Button>
-          </GlassCard>
-        </motion.div>
-
-        {/* Benefits Grid */}
-        <div className="grid gap-3">
-          {(config.community.vipBenefits || []).map((benefit, index) => (
-            <motion.div
-              key={benefit.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <GlassCard className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-vip/20 flex items-center justify-center">
-                    {getBenefitIcon(benefit.icon)}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-sm">{benefit.title}</h4>
-                    <p className="text-xs text-muted-foreground">{benefit.description}</p>
-                  </div>
-                  <Lock className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        message="Faça login para assinar o VIP"
-      />
-
-      {/* Subscribe Dialog - Plan Selection */}
-      <Dialog open={showSubscribeDialog} onOpenChange={setShowSubscribeDialog}>
-        <DialogContent className="glass mx-4">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-vip" />
-              Assinar VIP
-            </DialogTitle>
-            <DialogDescription>
-              Escolha seu plano e pague via PIX
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Plan Selection */}
-            <div className="grid grid-cols-3 gap-2">
-              {vipConfig.plans.map((plan) => {
-                const isSelected = selectedPlan === plan.type;
-                const savings = plan.features.find(f => f.toLowerCase().includes('economia'))?.match(/\d+/)?.[0];
-                
-                return (
-                  <button
-                    key={plan.id}
-                    onClick={() => setSelectedPlan(plan.type)}
-                    className={`p-3 rounded-xl border-2 transition-all text-left relative ${
-                      isSelected
-                        ? 'border-vip bg-vip/10'
-                        : 'border-border hover:border-vip/50'
-                    }`}
-                  >
-                    {savings && (
-                      <Badge className="absolute -top-2 -right-2 bg-green-500 text-[10px] px-1.5">
-                        -{savings}%
-                      </Badge>
-                    )}
-                    <div className="font-semibold text-xs mb-1">{getPlanLabel(plan.type)}</div>
-                    <div className="text-base font-bold text-vip">
-                      R$ {plan.price.toFixed(2).replace('.', ',')}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">{getPlanSuffix(plan.type)}</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Benefits Summary */}
-            <div className="p-3 rounded-xl bg-vip/10 border border-vip/20">
-              <div className="text-xs font-medium mb-2">Incluso no VIP:</div>
-              <div className="space-y-1">
-                {(config.community.vipBenefits || []).slice(0, 4).map((benefit) => (
-                  <div key={benefit.id} className="flex items-center gap-2 text-xs">
-                    <Check className="w-3 h-3 text-vip" />
-                    <span>{benefit.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                className="flex-1"
-                onClick={() => setShowSubscribeDialog(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="flex-1 bg-gradient-to-r from-vip to-amber-400 text-vip-foreground"
-                onClick={handleConfirmSubscription}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Gerando PIX...
-                  </>
-                ) : (
-                  'Gerar PIX'
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Dialog - QR Code */}
-      <Dialog open={showPaymentDialog} onOpenChange={handleClosePayment}>
-        <DialogContent className="glass mx-4">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-vip" />
-              Pagamento PIX
-            </DialogTitle>
-            <DialogDescription>
-              {paymentStatus === 'paid' 
-                ? 'Pagamento confirmado!' 
-                : 'Escaneie o QR Code ou copie o código'}
-            </DialogDescription>
-          </DialogHeader>
-
-          {paymentStatus === 'paid' ? (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                <Check className="w-8 h-8 text-green-500" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Bem-vindo ao VIP! 👑</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Sua assinatura foi ativada com sucesso
-              </p>
-              <Button onClick={handleClosePayment} className="bg-vip text-vip-foreground">
-                Acessar Conteúdo VIP
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* QR Code */}
-              {chargeData?.qrCodeImage && (
-                <div className="flex justify-center">
-                  <div className="bg-white p-3 rounded-xl">
-                    <img 
-                      src={chargeData.qrCodeImage} 
-                      alt="QR Code PIX" 
-                      className="w-48 h-48"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Amount */}
-              <div className="text-center">
-                <span className="text-2xl font-bold text-vip">
-                  R$ {((chargeData?.amountCents || 0) / 100).toFixed(2).replace('.', ',')}
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">
-                  ({chargeData?.planType === 'monthly' ? 'Mensal' : 'Anual'})
-                </span>
-              </div>
-
-              {/* Copy Code Button */}
-              <Button
-                variant="outline"
-                className="w-full gap-2"
-                onClick={handleCopyCode}
-              >
-                <Copy className="w-4 h-4" />
-                Copiar Código PIX
-              </Button>
-
-              {/* Status */}
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Aguardando pagamento...
-              </div>
-
-              {/* Expiration */}
-              {chargeData?.expiresAt && (
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  Expira em 15 minutos
-                </div>
-              )}
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {content.map((item) => (
+        <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+          {item.thumbnail_url && (
+            <img 
+              src={item.thumbnail_url} 
+              alt={item.title} 
+              className="w-full h-48 object-cover"
+            />
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-4 w-4 text-primary" />
+              {item.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+              {item.description}
+            </p>
+            <Button className="w-full" onClick={() => window.open(item.video_url, '_blank')}>
+              Assistir Agora
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+      
+      {content.length === 0 && (
+        <div className="col-span-full text-center text-gray-500 py-10">
+          Nenhum conteúdo disponível no momento.
+        </div>
+      )}
+    </div>
   );
 };
