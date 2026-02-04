@@ -1,61 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const hasCheckedSession = useRef(false);
 
-  // Verifica sessão existente ao carregar
   useEffect(() => {
-    checkExistingSession();
+    // Only check session once on mount
+    if (!hasCheckedSession.current) {
+      hasCheckedSession.current = true;
+      checkExistingSession();
+    }
   }, []);
 
   const checkExistingSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      checkAdminRole(session.user.id);
-    }
-  };
-
-  const checkAdminRole = async (userId: string) => {
     try {
-      // Busca roles na tabela user_roles (Seguro - tabela separada com RLS)
-      const { data: roles, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id);
 
-      if (error) {
-        console.error("Erro ao verificar roles:", error);
-        return;
-      }
-
-      const userRoles = roles?.map(r => r.role) || [];
-
-      // Aceita admin ou ceo
-      if (userRoles.includes('admin') || userRoles.includes('ceo')) {
-        if (userRoles.includes('ceo')) {
-          navigate("/ceo");
-        } else {
-          navigate("/admin");
+        if (!error && roles) {
+          const userRoles = roles.map(r => r.role);
+          
+          if (userRoles.includes('ceo')) {
+            navigate("/ceo", { replace: true });
+            return;
+          } else if (userRoles.includes('admin')) {
+            navigate("/admin", { replace: true });
+            return;
+          }
         }
-      } else {
-        // Se logou mas não é admin/ceo, desloga
-        await supabase.auth.signOut();
       }
     } catch (error) {
-      console.error("Erro ao verificar permissões:", error);
+      console.error("Erro ao verificar sessão:", error);
+    } finally {
+      setCheckingSession(false);
     }
   };
 
@@ -64,7 +60,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // 1. Login Oficial do Supabase
+      // 1. Login with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -73,7 +69,7 @@ const AdminLogin = () => {
       if (error) throw new Error("Email ou senha incorretos.");
       if (!data.user) throw new Error("Erro de autenticação.");
 
-      // 2. Verificação de Cargo via user_roles (tabela segura)
+      // 2. Check user roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('role')
@@ -86,20 +82,21 @@ const AdminLogin = () => {
 
       const userRoles = roles?.map(r => r.role) || [];
 
-      // Verifica se possui role admin ou ceo
+      // Redirect based on role
       if (userRoles.includes('ceo')) {
         toast({
           title: "Acesso Permitido",
           description: "Bem-vindo ao painel, CEO."
         });
-        navigate("/ceo");
+        navigate("/ceo", { replace: true });
       } else if (userRoles.includes('admin')) {
         toast({
           title: "Acesso Permitido",
           description: "Bem-vindo ao painel, ADMIN."
         });
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else {
+        // User doesn't have admin/ceo role - sign out
         await supabase.auth.signOut();
         throw new Error("Acesso negado: Sua conta não possui permissão administrativa.");
       }
@@ -115,6 +112,18 @@ const AdminLogin = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking existing session
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verificando sessão...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -137,6 +146,7 @@ const AdminLogin = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="email"
               />
             </div>
             
@@ -152,6 +162,7 @@ const AdminLogin = () => {
                   required
                   disabled={loading}
                   className="pr-10"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -168,7 +179,6 @@ const AdminLogin = () => {
               {loading ? "Entrando..." : "Entrar no Painel"}
             </Button>
           </form>
-
 
           <p className="text-center mt-6">
             <button
