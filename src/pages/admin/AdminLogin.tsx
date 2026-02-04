@@ -124,7 +124,6 @@ const AdminLogin = () => {
             <Lock className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Acesso Restrito</CardTitle>
-          <CardDescription>Área exclusiva para Administração e CEO</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -170,12 +169,6 @@ const AdminLogin = () => {
             </Button>
           </form>
 
-          <div className="mt-6 flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-muted-foreground">
-              Apenas usuários com cargo 'admin' ou 'ceo' podem entrar.
-            </p>
-          </div>
 
           <p className="text-center mt-6">
             <button
