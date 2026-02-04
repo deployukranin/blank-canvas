@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client"; // Verifique se o caminho está certo
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-// Defina a tipagem correta para o seu conteúdo
 interface VipContent {
   id: string;
   title: string;
   description: string;
-  video_url: string; // ou audio_url
+  video_url: string;
   thumbnail_url?: string;
-  is_vip_exclusive: boolean;
 }
 
 export const VIPAreaContent = () => {
@@ -34,39 +32,44 @@ export const VIPAreaContent = () => {
       
       if (!session) {
         setLoading(false);
-        return; // Não carrega nada se não estiver logado
+        return;
       }
 
       // 2. Verifica Status VIP (No Banco, não no LocalStorage!)
-      // A query busca uma assinatura ativa e válida
       const { data: subscription } = await supabase
         .from('vip_subscriptions')
         .select('status, expires_at')
         .eq('user_id', session.user.id)
         .eq('status', 'active')
-        .gt('expires_at', new Date().toISOString()) // Expira no futuro
+        .gt('expires_at', new Date().toISOString())
         .maybeSingle();
 
       const userIsVip = !!subscription;
       setIsVip(userIsVip);
 
       if (userIsVip) {
-        // 3. SE for VIP, busca o conteúdo
-        // Aqui confiamos no RLS do banco. Se a regra falhar, o .error avisa.
-        const { data: videos, error } = await supabase
-          .from('videos') // Nome da sua tabela de conteúdo
-          .select('*')
-          .eq('is_vip_exclusive', true); // Opcional, o RLS já deve filtrar
+        // 3. SE for VIP, busca o conteúdo da tabela vip_content
+        const { data: vipContent, error } = await supabase
+          .from('vip_content')
+          .select('*');
 
         if (error) {
-          console.error("Erro ao carregar vídeos:", error);
+          console.error("Erro ao carregar conteúdo VIP:", error);
           toast({
             variant: "destructive",
             title: "Erro de Acesso",
             description: "Não foi possível carregar o conteúdo exclusivo."
           });
         } else {
-          setContent(videos || []);
+          // Mapear para o formato esperado pelo componente
+          const mappedContent: VipContent[] = (vipContent || []).map(item => ({
+            id: item.id,
+            title: item.title,
+            description: item.content,
+            video_url: item.media_url || '',
+            thumbnail_url: undefined
+          }));
+          setContent(mappedContent);
         }
       } 
     } catch (error) {
@@ -122,9 +125,11 @@ export const VIPAreaContent = () => {
             <p className="text-sm text-gray-500 mb-4 line-clamp-2">
               {item.description}
             </p>
-            <Button className="w-full" onClick={() => window.open(item.video_url, '_blank')}>
-              Assistir Agora
-            </Button>
+            {item.video_url && (
+              <Button className="w-full" onClick={() => window.open(item.video_url, '_blank')}>
+                Assistir Agora
+              </Button>
+            )}
           </CardContent>
         </Card>
       ))}
