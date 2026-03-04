@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -8,10 +8,12 @@ import {
   ArrowLeft,
   Crown,
   LogOut,
-  Shield
+  Shield,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/use-user-role';
 
 interface CEOLayoutProps {
   children: ReactNode;
@@ -28,20 +30,22 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
-  // Redirect if not CEO
-  useEffect(() => {
-    if (!user?.isCEO) {
-      navigate('/admin/login');
-    }
-  }, [user, navigate]);
+  const { isCEO, isLoading: rolesLoading } = useUserRole();
 
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
 
-  if (!user?.isCEO) {
+  if (rolesLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isCEO()) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="glass rounded-2xl p-8 text-center max-w-md">
@@ -109,7 +113,7 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
           </nav>
         </div>
 
-        {/* User info at bottom (no overlay) */}
+        {/* User info at bottom */}
         <div className="p-6 border-t border-amber-600/20 space-y-3 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
