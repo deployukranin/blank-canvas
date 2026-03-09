@@ -6,14 +6,5 @@ verify_jwt = false
 [functions.export-metrics]
 verify_jwt = false
 
-[functions.create-pix-charge]
-verify_jwt = false
-
-[functions.openpix-webhook]
-verify_jwt = false
-
-[functions.create-vip-charge]
-verify_jwt = false
-
 [functions.save-app-config]
 verify_jwt = false
