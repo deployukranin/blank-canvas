@@ -32,7 +32,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
-import AdminPagamentosPix from "./pages/admin/AdminPagamentosPix";
+
 import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
