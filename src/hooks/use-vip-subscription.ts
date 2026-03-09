@@ -45,7 +45,6 @@ export const useVIPSubscription = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [vipContent, setVIPContent] = useState<VIPContent[]>([]);
 
-  // Get the real Supabase user ID from session
   const userId = session?.user?.id;
   const isAuthenticated = !!session?.user;
 
@@ -89,7 +88,7 @@ export const useVIPSubscription = () => {
     fetchSubscription();
   }, [isAuthenticated, userId]);
 
-  // Fetch VIP content (only works if user is VIP)
+  // Fetch VIP content
   const fetchVIPContent = useCallback(async () => {
     if (!isVIP) {
       setVIPContent([]);
@@ -116,112 +115,16 @@ export const useVIPSubscription = () => {
     }
   }, [isVIP, fetchVIPContent]);
 
-  // Create VIP charge via edge function (OpenPix)
+  // TODO: Integrate new payment provider
   const createCharge = useCallback(async (
     planType: 'monthly' | 'quarterly' | 'yearly' = 'monthly',
     customerName?: string
   ): Promise<VIPChargeResult> => {
-    if (!isAuthenticated || !userId) {
-      toast({
-        title: 'Faça login primeiro',
-        description: 'Você precisa estar logado para assinar o VIP',
-        variant: 'destructive',
-      });
-      return { success: false, error: 'Não autenticado' };
-    }
-
-    try {
-      console.log('Creating VIP charge:', { planType, userId });
-      
-      const { data, error } = await supabase.functions.invoke('create-vip-charge', {
-        body: { planType, customerName },
-      });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        toast({
-          title: 'Erro ao criar cobrança',
-          description: error.message || 'Tente novamente',
-          variant: 'destructive',
-        });
-        return { success: false, error: error.message };
-      }
-
-      if (!data?.success) {
-        console.error('Charge creation failed:', data);
-        toast({
-          title: 'Erro ao processar',
-          description: data?.error || 'Não foi possível criar a cobrança',
-          variant: 'destructive',
-        });
-        return { success: false, error: data?.error };
-      }
-
-      console.log('VIP charge created:', data);
-      return {
-        success: true,
-        subscriptionId: data.subscription_id,
-        correlationId: data.correlation_id,
-        qrCodeImage: data.qr_code_image,
-        brCode: data.br_code,
-        expiresAt: data.expires_at,
-        amountCents: data.amount_cents,
-        planType: data.plan_type,
-      };
-
-    } catch (error) {
-      console.error('Unexpected error creating VIP charge:', error);
-      toast({
-        title: 'Erro inesperado',
-        description: 'Tente novamente mais tarde',
-        variant: 'destructive',
-      });
-      return { success: false, error: 'Erro inesperado' };
-    }
-  }, [isAuthenticated, userId, toast]);
-
-  // Check payment status by correlation ID
-  const checkPaymentStatus = useCallback(async (correlationId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('custom_orders')
-        .select('status, paid_at')
-        .eq('correlation_id', correlationId)
-        .single();
-
-      if (error) {
-        console.error('Error checking payment status:', error);
-        return null;
-      }
-
-      return {
-        status: data.status,
-        paidAt: data.paid_at,
-      };
-    } catch (error) {
-      console.error('Unexpected error checking status:', error);
-      return null;
-    }
-  }, []);
-
-  // Copy BR code to clipboard
-  const copyBrCode = useCallback(async (brCode: string): Promise<boolean> => {
-    try {
-      await navigator.clipboard.writeText(brCode);
-      toast({
-        title: 'Código copiado!',
-        description: 'Cole no app do seu banco para pagar',
-      });
-      return true;
-    } catch (error) {
-      console.error('Failed to copy:', error);
-      toast({
-        title: 'Erro ao copiar',
-        description: 'Copie o código manualmente',
-        variant: 'destructive',
-      });
-      return false;
-    }
+    toast({
+      title: 'Pagamento em implementação',
+      description: 'O novo meio de pagamento será integrado em breve.',
+    });
+    return { success: false, error: 'Pagamento ainda não configurado' };
   }, [toast]);
 
   // Cancel VIP subscription
@@ -259,7 +162,7 @@ export const useVIPSubscription = () => {
     }
   }, [subscription, toast]);
 
-  // Get days remaining in subscription
+  // Get days remaining
   const getDaysRemaining = useCallback(() => {
     if (!subscription) return 0;
     const expires = new Date(subscription.expires_at);
@@ -269,7 +172,7 @@ export const useVIPSubscription = () => {
     return Math.max(0, diffDays);
   }, [subscription]);
 
-  // Refresh subscription data (call after payment confirmed)
+  // Refresh subscription data
   const refreshSubscription = useCallback(async () => {
     if (!userId) return;
 
@@ -286,6 +189,15 @@ export const useVIPSubscription = () => {
       setIsVIP(true);
     }
   }, [userId]);
+
+  // Stub functions for payment (to be replaced with new provider)
+  const checkPaymentStatus = useCallback(async (_correlationId: string) => {
+    return null;
+  }, []);
+
+  const copyBrCode = useCallback(async (_brCode: string): Promise<boolean> => {
+    return false;
+  }, []);
 
   return {
     subscription,
