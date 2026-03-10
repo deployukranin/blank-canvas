@@ -279,9 +279,12 @@ const AdminPedidos: React.FC = () => {
                         <>
                           <Button
                             size="sm"
-                            onClick={() => handleStatusChange(order.id, 'processing')}
+                            className="gap-1"
+                            variant="outline"
+                            onClick={() => handleStatusChange(order.id, 'paid')}
                           >
-                            Iniciar
+                            <DollarSign className="w-4 h-4" />
+                            Confirmar Pagamento
                           </Button>
                           <Button
                             size="sm"
@@ -292,6 +295,14 @@ const AdminPedidos: React.FC = () => {
                             Cancelar
                           </Button>
                         </>
+                      )}
+                      {order.status === 'paid' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(order.id, 'processing')}
+                        >
+                          Iniciar Produção
+                        </Button>
                       )}
                       {order.status === 'processing' && (
                         <Button
