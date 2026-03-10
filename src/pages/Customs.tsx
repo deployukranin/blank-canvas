@@ -117,15 +117,16 @@ const CustomsPage = () => {
   const handlePayment = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
-    setIsProcessing(true);
+    if (!pixConfig.pixKey) {
+      toast({
+        title: 'Pagamento indisponível',
+        description: 'O PIX ainda não foi configurado pelo administrador.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // TODO: Integrar novo meio de pagamento
-    toast({
-      title: 'Pagamento em implementação',
-      description: 'O novo meio de pagamento será integrado em breve.',
-    });
-
-    setIsProcessing(false);
+    // PIX QR code is shown in the dialog — proceed to personalization after user confirms
     setShowPaymentDialog(false);
     setShowPersonalizationDialog(true);
   };
