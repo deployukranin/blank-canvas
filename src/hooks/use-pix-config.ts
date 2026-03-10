@@ -5,6 +5,7 @@ export interface PixConfig {
   pixKey: string;
   pixKeyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
   merchantName: string;
+  merchantState: string;
   merchantCity: string;
 }
 
@@ -12,6 +13,7 @@ const DEFAULT_CONFIG: PixConfig = {
   pixKey: '',
   pixKeyType: 'cpf',
   merchantName: '',
+  merchantState: '',
   merchantCity: '',
 };
 
