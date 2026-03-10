@@ -981,6 +981,8 @@ const ComunidadePage = () => {
               </GlassCard>
             )}
 
+            <AdPlaceholder format="horizontal" className="my-4" />
+
             {sortedIdeas.map((idea, index) => (
               <IdeiaCard
                 key={idea.id}

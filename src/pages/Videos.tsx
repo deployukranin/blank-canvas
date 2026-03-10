@@ -281,6 +281,8 @@ const VideosPage = () => {
           </Accordion>
         </motion.div>
 
+        <AdPlaceholder format="horizontal" className="my-4" />
+
         {/* Categories Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
