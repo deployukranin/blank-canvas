@@ -9,6 +9,36 @@ import { QrCode, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PixQRCode } from '@/components/payment/PixQRCode';
 
+const BRAZILIAN_STATES = [
+  { uf: 'AC', name: 'Acre', capital: 'RIO BRANCO' },
+  { uf: 'AL', name: 'Alagoas', capital: 'MACEIO' },
+  { uf: 'AP', name: 'Amapá', capital: 'MACAPA' },
+  { uf: 'AM', name: 'Amazonas', capital: 'MANAUS' },
+  { uf: 'BA', name: 'Bahia', capital: 'SALVADOR' },
+  { uf: 'CE', name: 'Ceará', capital: 'FORTALEZA' },
+  { uf: 'DF', name: 'Distrito Federal', capital: 'BRASILIA' },
+  { uf: 'ES', name: 'Espírito Santo', capital: 'VITORIA' },
+  { uf: 'GO', name: 'Goiás', capital: 'GOIANIA' },
+  { uf: 'MA', name: 'Maranhão', capital: 'SAO LUIS' },
+  { uf: 'MT', name: 'Mato Grosso', capital: 'CUIABA' },
+  { uf: 'MS', name: 'Mato Grosso do Sul', capital: 'CAMPO GRANDE' },
+  { uf: 'MG', name: 'Minas Gerais', capital: 'BELO HORIZONTE' },
+  { uf: 'PA', name: 'Pará', capital: 'BELEM' },
+  { uf: 'PB', name: 'Paraíba', capital: 'JOAO PESSOA' },
+  { uf: 'PR', name: 'Paraná', capital: 'CURITIBA' },
+  { uf: 'PE', name: 'Pernambuco', capital: 'RECIFE' },
+  { uf: 'PI', name: 'Piauí', capital: 'TERESINA' },
+  { uf: 'RJ', name: 'Rio de Janeiro', capital: 'RIO DE JANEIRO' },
+  { uf: 'RN', name: 'Rio Grande do Norte', capital: 'NATAL' },
+  { uf: 'RS', name: 'Rio Grande do Sul', capital: 'PORTO ALEGRE' },
+  { uf: 'RO', name: 'Rondônia', capital: 'PORTO VELHO' },
+  { uf: 'RR', name: 'Roraima', capital: 'BOA VISTA' },
+  { uf: 'SC', name: 'Santa Catarina', capital: 'FLORIANOPOLIS' },
+  { uf: 'SP', name: 'São Paulo', capital: 'SAO PAULO' },
+  { uf: 'SE', name: 'Sergipe', capital: 'ARACAJU' },
+  { uf: 'TO', name: 'Tocantins', capital: 'PALMAS' },
+];
+
 const AdminPixConfig: React.FC = () => {
   const { config, isLoading, saveConfig } = usePixConfig();
   const [form, setForm] = useState<PixConfig>(config);
@@ -19,8 +49,17 @@ const AdminPixConfig: React.FC = () => {
     setForm(config);
   }, [config]);
 
+  const handleStateChange = (uf: string) => {
+    const state = BRAZILIAN_STATES.find(s => s.uf === uf);
+    setForm(prev => ({
+      ...prev,
+      merchantState: uf,
+      merchantCity: state?.capital || '',
+    }));
+  };
+
   const handleSave = async () => {
-    if (!form.pixKey.trim() || !form.merchantName.trim() || !form.merchantCity.trim()) {
+    if (!form.pixKey.trim() || !form.merchantName.trim() || !form.merchantState) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -97,13 +136,19 @@ const AdminPixConfig: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1 block">Cidade *</label>
-              <Input
-                placeholder="Sua cidade"
-                value={form.merchantCity}
-                onChange={(e) => setForm(prev => ({ ...prev, merchantCity: e.target.value }))}
-                maxLength={15}
-              />
+              <label className="text-sm font-medium mb-1 block">Estado *</label>
+              <Select value={form.merchantState} onValueChange={handleStateChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione seu estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {BRAZILIAN_STATES.map(s => (
+                    <SelectItem key={s.uf} value={s.uf}>
+                      {s.uf} — {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

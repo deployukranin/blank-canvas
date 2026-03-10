@@ -13,6 +13,7 @@ const DEFAULT_CONFIG: PixConfig = {
   pixKey: '',
   pixKeyType: 'cpf',
   merchantName: '',
+  merchantState: '',
   merchantCity: '',
 };
 
