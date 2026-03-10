@@ -866,7 +866,10 @@ const ComunidadePage = () => {
 
           <TabsContent value="avisos" className="space-y-4 mt-0">
             {mockFeedPosts.map((post, index) => (
-              <AvisoCard key={post.id} post={post} index={index} />
+              <>
+                <AvisoCard key={post.id} post={post} index={index} />
+                {index === 1 && <AdPlaceholder format="horizontal" className="my-4" />}
+              </>
             ))}
           </TabsContent>
           <TabsContent value="ideias" className="space-y-4 mt-0">
