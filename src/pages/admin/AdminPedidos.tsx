@@ -180,11 +180,16 @@ const AdminPedidos: React.FC = () => {
     <AdminLayout title="Gerenciar Pedidos">
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <GlassCard className="p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.pending}</p>
-            <p className="text-xs text-muted-foreground">Pendentes</p>
+            <p className="text-xs text-muted-foreground">Aguardando Pgto</p>
+          </GlassCard>
+          <GlassCard className="p-4 text-center">
+            <DollarSign className="w-6 h-6 mx-auto text-emerald-400 mb-2" />
+            <p className="text-xl font-bold">{orderStats.paid}</p>
+            <p className="text-xs text-muted-foreground">Pagos</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
             <Package className="w-6 h-6 mx-auto text-blue-400 mb-2" />
