@@ -5,6 +5,7 @@ export interface PixConfig {
   pixKey: string;
   pixKeyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
   merchantName: string;
+  merchantState: string;
   merchantCity: string;
 }
 
