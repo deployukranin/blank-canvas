@@ -56,6 +56,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const { config: pixConfig, isLoading: pixLoading } = usePixConfig();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
