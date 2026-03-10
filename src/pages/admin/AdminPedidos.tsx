@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, DollarSign } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -126,8 +126,9 @@ const AdminPedidos: React.FC = () => {
         return <Badge className="bg-yellow-500/20 text-yellow-400">Pendente</Badge>;
       case 'processing':
         return <Badge className="bg-blue-500/20 text-blue-400">Processando</Badge>;
-      case 'completed':
       case 'paid':
+        return <Badge className="bg-emerald-500/20 text-emerald-400">Pago</Badge>;
+      case 'completed':
         return <Badge className="bg-green-500/20 text-green-400">Concluído</Badge>;
       case 'cancelled':
         return <Badge className="bg-red-500/20 text-red-400">Cancelado</Badge>;
@@ -159,8 +160,9 @@ const AdminPedidos: React.FC = () => {
 
   const orderStats = {
     pending: orders.filter(o => o.status === 'pending').length,
+    paid: orders.filter(o => o.status === 'paid').length,
     processing: orders.filter(o => o.status === 'processing').length,
-    completed: orders.filter(o => o.status === 'completed' || o.status === 'paid').length,
+    completed: orders.filter(o => o.status === 'completed').length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
@@ -178,11 +180,16 @@ const AdminPedidos: React.FC = () => {
     <AdminLayout title="Gerenciar Pedidos">
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <GlassCard className="p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.pending}</p>
-            <p className="text-xs text-muted-foreground">Pendentes</p>
+            <p className="text-xs text-muted-foreground">Aguardando Pgto</p>
+          </GlassCard>
+          <GlassCard className="p-4 text-center">
+            <DollarSign className="w-6 h-6 mx-auto text-emerald-400 mb-2" />
+            <p className="text-xl font-bold">{orderStats.paid}</p>
+            <p className="text-xs text-muted-foreground">Pagos</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
             <Package className="w-6 h-6 mx-auto text-blue-400 mb-2" />
@@ -279,9 +286,12 @@ const AdminPedidos: React.FC = () => {
                         <>
                           <Button
                             size="sm"
-                            onClick={() => handleStatusChange(order.id, 'processing')}
+                            className="gap-1"
+                            variant="outline"
+                            onClick={() => handleStatusChange(order.id, 'paid')}
                           >
-                            Iniciar
+                            <DollarSign className="w-4 h-4" />
+                            Confirmar Pagamento
                           </Button>
                           <Button
                             size="sm"
@@ -292,6 +302,14 @@ const AdminPedidos: React.FC = () => {
                             Cancelar
                           </Button>
                         </>
+                      )}
+                      {order.status === 'paid' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(order.id, 'processing')}
+                        >
+                          Iniciar Produção
+                        </Button>
                       )}
                       {order.status === 'processing' && (
                         <Button

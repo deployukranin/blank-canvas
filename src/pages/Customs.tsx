@@ -12,7 +12,8 @@ import {
   Info,
   Video,
   Headphones,
-  Pause
+  Pause,
+  QrCode
 } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -25,6 +26,8 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { PixQRCode } from '@/components/payment/PixQRCode';
+import { usePixConfig } from '@/hooks/use-pix-config';
 import { 
   getVideoConfig, 
   calculatePrice,
@@ -53,6 +56,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const { config: pixConfig, isLoading: pixLoading } = usePixConfig();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
@@ -113,15 +117,16 @@ const CustomsPage = () => {
   const handlePayment = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
-    setIsProcessing(true);
+    if (!pixConfig.pixKey) {
+      toast({
+        title: 'Pagamento indisponível',
+        description: 'O PIX ainda não foi configurado pelo administrador.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // TODO: Integrar novo meio de pagamento
-    toast({
-      title: 'Pagamento em implementação',
-      description: 'O novo meio de pagamento será integrado em breve.',
-    });
-
-    setIsProcessing(false);
+    // PIX QR code is shown in the dialog — proceed to personalization after user confirms
     setShowPaymentDialog(false);
     setShowPersonalizationDialog(true);
   };
@@ -713,13 +718,16 @@ const CustomsPage = () => {
         message="Faça login para fazer pedidos personalizados"
       />
 
-      {/* Video Payment Dialog */}
+      {/* Video Payment Dialog with PIX QR Code */}
       <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && setShowPaymentDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Confirmar Compra</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              Pagamento via PIX
+            </DialogTitle>
             <DialogDescription>
-              Revise os detalhes do seu pedido
+              Escaneie o QR Code para pagar
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -734,16 +742,27 @@ const CustomsPage = () => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Entrega:</span>
-                <span className="font-medium">{config.deliveryDays} dias úteis</span>
-              </div>
-              <div className="border-t border-white/10 my-2" />
-              <div className="flex justify-between">
-                <span className="font-semibold">Total:</span>
-                <span className="font-bold text-lg text-primary">
-                  R$ {finalPrice.toFixed(2).replace('.', ',')}
-                </span>
+                <span className="font-medium">{config?.deliveryDays} dias úteis</span>
               </div>
             </div>
+
+            {pixConfig.pixKey ? (
+              <PixQRCode
+                pixKey={pixConfig.pixKey}
+                merchantName={pixConfig.merchantName || 'LOJA'}
+                merchantCity={pixConfig.merchantCity || 'BRASIL'}
+                amount={finalPrice}
+                txId={`V${Date.now().toString(36).toUpperCase()}`}
+              />
+            ) : (
+              <div className="text-center p-4 text-sm text-muted-foreground">
+                PIX não configurado pelo administrador.
+              </div>
+            )}
+
+            <p className="text-xs text-center text-muted-foreground">
+              Após o pagamento, o administrador confirmará manualmente e seu pedido será processado.
+            </p>
 
             <div className="flex gap-2">
               <Button 
@@ -757,9 +776,9 @@ const CustomsPage = () => {
               <Button 
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || !pixConfig.pixKey}
               >
-                {isProcessing ? 'Processando...' : 'Confirmar Pedido'}
+                Já Paguei - Continuar
               </Button>
             </div>
           </div>
@@ -854,14 +873,34 @@ const CustomsPage = () => {
 
       {/* Audio Order Dialog */}
       <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && setShowAudioOrderDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Pedir Áudio Personalizado</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              Pedir Áudio Personalizado
+            </DialogTitle>
             <DialogDescription>
               {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
+            {pixConfig.pixKey && audioFinalPrice > 0 && (
+              <PixQRCode
+                pixKey={pixConfig.pixKey}
+                merchantName={pixConfig.merchantName || 'LOJA'}
+                merchantCity={pixConfig.merchantCity || 'BRASIL'}
+                amount={audioFinalPrice}
+                txId={`A${Date.now().toString(36).toUpperCase()}`}
+              />
+            )}
+            {!pixConfig.pixKey && (
+              <div className="text-center p-4 text-sm text-muted-foreground">
+                PIX não configurado pelo administrador.
+              </div>
+            )}
+            <p className="text-xs text-center text-muted-foreground">
+              Após pagar, preencha seus dados abaixo e confirme.
+            </p>
             <Input
               placeholder="Seu nome *"
               value={audioFormData.name}
@@ -890,7 +929,7 @@ const CustomsPage = () => {
                 disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Processando...' : 'Confirmar Pedido'}
+                {isProcessing ? 'Processando...' : 'Já Paguei - Confirmar'}
               </Button>
             </div>
           </div>
