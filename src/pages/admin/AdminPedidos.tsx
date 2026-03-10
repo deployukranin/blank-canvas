@@ -126,8 +126,9 @@ const AdminPedidos: React.FC = () => {
         return <Badge className="bg-yellow-500/20 text-yellow-400">Pendente</Badge>;
       case 'processing':
         return <Badge className="bg-blue-500/20 text-blue-400">Processando</Badge>;
-      case 'completed':
       case 'paid':
+        return <Badge className="bg-emerald-500/20 text-emerald-400">Pago</Badge>;
+      case 'completed':
         return <Badge className="bg-green-500/20 text-green-400">Concluído</Badge>;
       case 'cancelled':
         return <Badge className="bg-red-500/20 text-red-400">Cancelado</Badge>;
