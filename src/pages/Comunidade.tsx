@@ -861,6 +861,7 @@ const ComunidadePage = () => {
           {videosTabEnabled && (
             <TabsContent value="videos" className="mt-0">
               <VideoGalleryPanel className="space-y-4" />
+              <AdPlaceholder format="horizontal" className="my-4" />
             </TabsContent>
           )}
 
