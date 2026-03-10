@@ -718,13 +718,16 @@ const CustomsPage = () => {
         message="Faça login para fazer pedidos personalizados"
       />
 
-      {/* Video Payment Dialog */}
+      {/* Video Payment Dialog with PIX QR Code */}
       <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && setShowPaymentDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Confirmar Compra</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              Pagamento via PIX
+            </DialogTitle>
             <DialogDescription>
-              Revise os detalhes do seu pedido
+              Escaneie o QR Code para pagar
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -739,16 +742,27 @@ const CustomsPage = () => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Entrega:</span>
-                <span className="font-medium">{config.deliveryDays} dias úteis</span>
-              </div>
-              <div className="border-t border-white/10 my-2" />
-              <div className="flex justify-between">
-                <span className="font-semibold">Total:</span>
-                <span className="font-bold text-lg text-primary">
-                  R$ {finalPrice.toFixed(2).replace('.', ',')}
-                </span>
+                <span className="font-medium">{config?.deliveryDays} dias úteis</span>
               </div>
             </div>
+
+            {pixConfig.pixKey ? (
+              <PixQRCode
+                pixKey={pixConfig.pixKey}
+                merchantName={pixConfig.merchantName || 'LOJA'}
+                merchantCity={pixConfig.merchantCity || 'BRASIL'}
+                amount={finalPrice}
+                txId={`V${Date.now().toString(36).toUpperCase()}`}
+              />
+            ) : (
+              <div className="text-center p-4 text-sm text-muted-foreground">
+                PIX não configurado pelo administrador.
+              </div>
+            )}
+
+            <p className="text-xs text-center text-muted-foreground">
+              Após o pagamento, o administrador confirmará manualmente e seu pedido será processado.
+            </p>
 
             <div className="flex gap-2">
               <Button 
@@ -762,9 +776,9 @@ const CustomsPage = () => {
               <Button 
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || !pixConfig.pixKey}
               >
-                {isProcessing ? 'Processando...' : 'Confirmar Pedido'}
+                Já Paguei - Continuar
               </Button>
             </div>
           </div>
