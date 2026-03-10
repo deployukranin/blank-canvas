@@ -40,6 +40,7 @@ import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminPixConfig from "./pages/admin/AdminPixConfig";
 
 // CEO Pages
 import CEODashboard from "./pages/ceo/CEODashboard";
