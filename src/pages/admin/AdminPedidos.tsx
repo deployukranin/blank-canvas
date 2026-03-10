@@ -160,8 +160,9 @@ const AdminPedidos: React.FC = () => {
 
   const orderStats = {
     pending: orders.filter(o => o.status === 'pending').length,
+    paid: orders.filter(o => o.status === 'paid').length,
     processing: orders.filter(o => o.status === 'processing').length,
-    completed: orders.filter(o => o.status === 'completed' || o.status === 'paid').length,
+    completed: orders.filter(o => o.status === 'completed').length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
