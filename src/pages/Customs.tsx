@@ -873,14 +873,34 @@ const CustomsPage = () => {
 
       {/* Audio Order Dialog */}
       <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && setShowAudioOrderDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Pedir Áudio Personalizado</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              Pedir Áudio Personalizado
+            </DialogTitle>
             <DialogDescription>
               {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
+            {pixConfig.pixKey && audioFinalPrice > 0 && (
+              <PixQRCode
+                pixKey={pixConfig.pixKey}
+                merchantName={pixConfig.merchantName || 'LOJA'}
+                merchantCity={pixConfig.merchantCity || 'BRASIL'}
+                amount={audioFinalPrice}
+                txId={`A${Date.now().toString(36).toUpperCase()}`}
+              />
+            )}
+            {!pixConfig.pixKey && (
+              <div className="text-center p-4 text-sm text-muted-foreground">
+                PIX não configurado pelo administrador.
+              </div>
+            )}
+            <p className="text-xs text-center text-muted-foreground">
+              Após pagar, preencha seus dados abaixo e confirme.
+            </p>
             <Input
               placeholder="Seu nome *"
               value={audioFormData.name}
@@ -909,7 +929,7 @@ const CustomsPage = () => {
                 disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Processando...' : 'Confirmar Pedido'}
+                {isProcessing ? 'Processando...' : 'Já Paguei - Confirmar'}
               </Button>
             </div>
           </div>
