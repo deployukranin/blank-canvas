@@ -40,10 +40,13 @@ export function usePixConfig() {
   const saveConfig = async (newConfig: PixConfig) => {
     const { error } = await supabase
       .from('app_configurations')
-      .upsert({
-        config_key: 'pix_config',
-        config_value: newConfig as unknown as Record<string, unknown>,
-      }, { onConflict: 'config_key' });
+      .upsert(
+        {
+          config_key: 'pix_config',
+          config_value: newConfig as unknown as Record<string, unknown>,
+        } as any,
+        { onConflict: 'config_key' }
+      );
 
     if (error) throw error;
     setConfig(newConfig);
