@@ -26,6 +26,8 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { PixQRCode } from '@/components/payment/PixQRCode';
+import { usePixConfig } from '@/hooks/use-pix-config';
 import { 
   getVideoConfig, 
   calculatePrice,
