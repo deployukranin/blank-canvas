@@ -14,6 +14,7 @@ import { useVideoFavorites } from '@/hooks/use-video-favorites';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { mockFeedPosts } from '@/lib/mock-data';
+import { AdPlaceholder } from '@/components/ads/AdBanner';
 import heroImage from '@/assets/hero-asmr.jpg';
 
 const Index = () => {
@@ -116,6 +117,9 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Ad entre seções */}
+        <AdPlaceholder format="horizontal" className="my-2" />
+
         {/* Favoritos */}
         {youtubeEnabled && favoriteVideos.length > 0 && (
           <motion.div
@@ -164,6 +168,9 @@ const Index = () => {
             />
           </motion.div>
         )}
+
+        {/* Ad entre seções */}
+        <AdPlaceholder format="horizontal" className="my-2" />
 
         {/* Feed Preview */}
         <div>
