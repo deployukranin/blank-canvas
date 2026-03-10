@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -28,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useUserReputation } from '@/hooks/use-user-reputation';
+import { AdPlaceholder } from '@/components/ads/AdBanner';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { UserLevelBadge } from '@/components/reputation/UserLevelBadge';
 import { LeaderboardCard } from '@/components/reputation/LeaderboardCard';
@@ -860,12 +861,16 @@ const ComunidadePage = () => {
           {videosTabEnabled && (
             <TabsContent value="videos" className="mt-0">
               <VideoGalleryPanel className="space-y-4" />
+              <AdPlaceholder format="horizontal" className="my-4" />
             </TabsContent>
           )}
 
           <TabsContent value="avisos" className="space-y-4 mt-0">
             {mockFeedPosts.map((post, index) => (
-              <AvisoCard key={post.id} post={post} index={index} />
+              <React.Fragment key={post.id}>
+                <AvisoCard post={post} index={index} />
+                {index === 1 && <AdPlaceholder format="horizontal" className="my-4" />}
+              </React.Fragment>
             ))}
           </TabsContent>
           <TabsContent value="ideias" className="space-y-4 mt-0">
@@ -975,6 +980,8 @@ const ComunidadePage = () => {
                 </div>
               </GlassCard>
             )}
+
+            <AdPlaceholder format="horizontal" className="my-4" />
 
             {sortedIdeas.map((idea, index) => (
               <IdeiaCard

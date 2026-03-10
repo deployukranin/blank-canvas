@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
+import { AdPlaceholder } from '@/components/ads/AdBanner';
 import {
   Dialog,
   DialogContent,
@@ -144,6 +145,8 @@ const IdeiasPage = () => {
             </Button>
           </form>
         </GlassCard>
+
+        <AdPlaceholder format="horizontal" className="my-4" />
 
         {/* Loading State */}
         {isLoading && (
