@@ -702,35 +702,20 @@ const CustomsPage = () => {
         message="Faça login para fazer pedidos personalizados"
       />
 
-      {/* Video Payment Dialog with PIX QR Code */}
+      {/* Video Payment + Personalization Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && setShowPaymentDialog(false)}>
         <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <QrCode className="w-5 h-5 text-primary" />
-              Pagamento via PIX
+              Pedir Vídeo Personalizado
             </DialogTitle>
             <DialogDescription>
-              Escaneie o QR Code para pagar
+              {selectedCategory?.name} • {selectedDuration?.label} - R$ {finalPrice.toFixed(2).replace('.', ',')}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="glass rounded-lg p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Categoria:</span>
-                <span className="font-medium">{selectedCategory?.name}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Duração:</span>
-                <span className="font-medium">{selectedDuration?.label}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Entrega:</span>
-                <span className="font-medium">{config?.deliveryDays} dias úteis</span>
-              </div>
-            </div>
-
-            {pixConfig.pixKey ? (
+          <div className="space-y-3">
+            {pixConfig.pixKey && finalPrice > 0 ? (
               <PixQRCode
                 pixKey={pixConfig.pixKey}
                 merchantName={pixConfig.merchantName || 'LOJA'}
@@ -743,90 +728,46 @@ const CustomsPage = () => {
                 PIX não configurado pelo administrador.
               </div>
             )}
-
             <p className="text-xs text-center text-muted-foreground">
-              Após o pagamento, o administrador confirmará manualmente e seu pedido será processado.
+              Após pagar, preencha seus dados abaixo e confirme.
             </p>
-
+            <Input
+              placeholder="Seu nome *"
+              value={personalizationData.name}
+              onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))}
+              className="glass border-white/10"
+            />
+            <Input
+              placeholder="Triggers preferidos (ex: sussurro, tapping...)"
+              value={personalizationData.triggers}
+              onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))}
+              className="glass border-white/10"
+            />
+            <Textarea
+              placeholder="Roteiro / Ideias"
+              value={personalizationData.script}
+              onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))}
+              className="glass border-white/10 min-h-[80px]"
+            />
+            <Textarea
+              placeholder="Observações (opcional)"
+              value={personalizationData.observations}
+              onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))}
+              className="glass border-white/10"
+            />
             <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                className="flex-1" 
-                onClick={() => setShowPaymentDialog(false)}
-                disabled={isProcessing}
-              >
+              <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing}>
                 Cancelar
               </Button>
-              <Button 
+              <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handlePayment}
-                disabled={isProcessing || !pixConfig.pixKey}
+                onClick={handleVideoOrder}
+                disabled={isProcessing || !personalizationData.name.trim()}
               >
-                Já Paguei - Continuar
+                <Send className="w-4 h-4" />
+                {isProcessing ? 'Processando...' : 'Já Paguei - Confirmar'}
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Video Personalization Dialog */}
-      <Dialog open={showPersonalizationDialog} onOpenChange={() => !isProcessing && setShowPersonalizationDialog(false)}>
-        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Personalize seu Vídeo</DialogTitle>
-            <DialogDescription>
-              Preencha os detalhes para criar seu vídeo exclusivo
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Seu Nome *</label>
-              <Input
-                placeholder="Como devo te chamar no vídeo?"
-                value={personalizationData.name}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))}
-                className="glass border-white/10"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Triggers Preferidos</label>
-              <Input
-                placeholder="Ex: sussurro, tapping, mouth sounds..."
-                value={personalizationData.triggers}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))}
-                className="glass border-white/10"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Roteiro / Ideias</label>
-              <Textarea
-                placeholder="Descreva o que você gostaria no vídeo..."
-                value={personalizationData.script}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))}
-                className="glass border-white/10 min-h-[80px]"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Observações</label>
-              <Textarea
-                placeholder="Algo mais que eu deva saber?"
-                value={personalizationData.observations}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))}
-                className="glass border-white/10"
-              />
-            </div>
-
-            <Button 
-              className="w-full bg-gradient-to-r from-primary to-accent gap-2"
-              onClick={handleSubmitPersonalization}
-              disabled={isProcessing}
-            >
-              <Send className="w-4 h-4" />
-              {isProcessing ? 'Enviando...' : 'Enviar Pedido'}
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
