@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 
 const features = [
   {
