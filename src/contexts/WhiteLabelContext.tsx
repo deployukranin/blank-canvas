@@ -887,6 +887,7 @@ const defaultConfig: WhiteLabelConfig = {
       lastSentAt: undefined,
     },
   },
+  landingPage: defaultLandingPage,
 };
 
 interface WhiteLabelContextType {
