@@ -683,6 +683,12 @@ export interface WhiteLabelConfig {
       order?: number;
     }>;
     videoCategoryMap?: Record<string, string | undefined>;
+    storeChannels?: Array<{
+      id: string;
+      storeName: string;
+      channelId: string;
+      enabled: boolean;
+    }>;
   };
 
   // Icons
