@@ -89,7 +89,7 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className="w-64 bg-gradient-to-b from-amber-950/40 to-background border-r border-amber-600/20 fixed h-full flex flex-col">
-        <div className="p-6 flex-1 overflow-y-auto pb-32">
+        <div className="p-6 flex-1 pb-32">
           <Link to="/" className="flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Voltar ao App</span>
