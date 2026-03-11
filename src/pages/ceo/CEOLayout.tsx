@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  Sparkles, 
-  Link2, 
+  Store,
   ArrowLeft,
   Crown,
   LogOut,
@@ -21,9 +20,7 @@ interface CEOLayoutProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/ceo' },
-  { icon: Sparkles, label: 'Personalização', path: '/ceo/personalizacao' },
-  { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
+  { icon: LayoutDashboard, label: 'Minhas Lojas', path: '/ceo' },
 ];
 
 export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
@@ -75,10 +72,10 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
               <Crown className="w-6 h-6 text-amber-950" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-lg text-amber-100">Painel CEO</h1>
+              <h1 className="font-display font-bold text-lg text-amber-100">Meu Painel</h1>
               <p className="text-xs text-amber-400/70 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                White-Label
+                <Store className="w-3 h-3" />
+                Multi-Loja
               </p>
             </div>
           </div>
