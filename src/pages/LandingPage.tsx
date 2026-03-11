@@ -5,7 +5,7 @@ import {
   Headphones,
   ShoppingBag,
   Users,
-  Crown,
+  
   BarChart3,
   Palette,
   ChevronDown,
@@ -31,11 +31,6 @@ const features = [
     icon: Users,
     title: "Comunidade",
     description: "Seus fãs interagem, votam em ideias e participam de um espaço exclusivo.",
-  },
-  {
-    icon: Crown,
-    title: "Área VIP",
-    description: "Crie planos de assinatura com conteúdo exclusivo e receita recorrente.",
   },
   {
     icon: Headphones,
