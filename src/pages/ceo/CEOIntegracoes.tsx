@@ -307,12 +307,24 @@ const CEOIntegracoes = () => {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.03 }}
-                      className="rounded-xl border border-border bg-card/50 p-4"
+                      className={`rounded-xl border p-4 ${
+                        ch.validated === true ? 'border-emerald-500/30 bg-emerald-500/5' :
+                        ch.validated === false ? 'border-destructive/30 bg-destructive/5' :
+                        'border-border bg-card/50'
+                      }`}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
-                          <Youtube className="w-4 h-4 text-red-400" />
-                        </div>
+                        {ch.channelThumbnail ? (
+                          <img 
+                            src={ch.channelThumbnail} 
+                            alt={ch.channelTitle || ''} 
+                            className="w-8 h-8 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
+                            <Youtube className="w-4 h-4 text-red-400" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <Input
                             value={ch.creatorName}
@@ -323,6 +335,12 @@ const CEOIntegracoes = () => {
                             className="h-8 text-sm font-medium"
                           />
                         </div>
+                        {ch.validated === true && (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        )}
+                        {ch.validated === false && (
+                          <XCircle className="w-5 h-5 text-destructive shrink-0" />
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -333,20 +351,37 @@ const CEOIntegracoes = () => {
                         </Button>
                       </div>
 
-                      <div>
-                        <Input
-                          value={ch.channelId}
-                          onChange={(e) =>
-                            updateChannel(ch.id, { channelId: e.target.value })
-                          }
-                          placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"
-                          className="font-mono text-sm"
-                        />
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                          Channel ID do YouTube (começa com{' '}
-                          <code className="bg-muted px-1 rounded">UC</code>)
-                        </p>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Input
+                            value={ch.channelId}
+                            onChange={(e) =>
+                              updateChannel(ch.id, { channelId: e.target.value, validated: undefined })
+                            }
+                            placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 h-10"
+                          disabled={!ch.channelId.trim() || ch.validating}
+                          onClick={() => validateChannel(ch.id, ch.channelId)}
+                        >
+                          {ch.validating ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            'Validar'
+                          )}
+                        </Button>
                       </div>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {ch.channelTitle 
+                          ? `✓ ${ch.channelTitle}`
+                          : <>Channel ID do YouTube (começa com <code className="bg-muted px-1 rounded">UC</code>)</>
+                        }
+                      </p>
                     </motion.div>
                   ))}
                 </div>
