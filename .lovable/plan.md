@@ -1,80 +1,93 @@
 
 
-## Landing Page + Cadastro com Código de Convite
+# Plano: Corrigir Erro de CORS na Edge Function create-pix-charge
 
-### Visão geral
+## Problema Identificado
 
-Criar uma landing page pública atrativa para visitantes não logados e adicionar validação de código de convite no cadastro. A tabela `invite_codes` no banco armazenará os códigos válidos.
+A edge function `create-pix-charge` possui uma lista restrita de origens permitidas (CORS) que **ainda contém URLs placeholder**:
 
-### Mudanças
-
-#### 1. Migração de banco — tabela `invite_codes`
-```sql
-CREATE TABLE public.invite_codes (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  code text NOT NULL UNIQUE,
-  max_uses integer DEFAULT 1,
-  used_count integer DEFAULT 0,
-  is_active boolean DEFAULT true,
-  created_by uuid,
-  created_at timestamptz DEFAULT now(),
-  expires_at timestamptz
-);
-
-ALTER TABLE public.invite_codes ENABLE ROW LEVEL SECURITY;
-
--- Qualquer um pode verificar se código existe (necessário no signup)
-CREATE POLICY "Anyone can check invite codes" ON public.invite_codes
-  FOR SELECT TO public USING (true);
-
--- Admins/CEOs gerenciam códigos
-CREATE POLICY "Admins manage invite codes" ON public.invite_codes
-  FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'ceo'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'ceo'));
+```typescript
+const ALLOWED_ORIGINS = [
+  "https://seusite.lovable.app",         // Placeholder
+  "https://preview-seusite.lovable.app", // Placeholder  
+  "http://localhost:8080",
+];
 ```
 
-Função para validar e consumir código:
-```sql
-CREATE OR REPLACE FUNCTION public.use_invite_code(p_code text)
-RETURNS json LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE v_invite RECORD;
-BEGIN
-  SELECT * INTO v_invite FROM invite_codes
-  WHERE code = upper(trim(p_code)) AND is_active = true
-    AND (expires_at IS NULL OR expires_at > now())
-    AND used_count < max_uses;
-  IF NOT FOUND THEN
-    RETURN json_build_object('valid', false, 'error', 'Código inválido ou expirado');
-  END IF;
-  UPDATE invite_codes SET used_count = used_count + 1 WHERE id = v_invite.id;
-  RETURN json_build_object('valid', true);
-END; $$;
+A origem real do projeto (`4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com`) nao esta incluida, resultando em bloqueio CORS com status 403 e a mensagem "Forbidden Origin".
+
+## Solucao
+
+Atualizar a lista `ALLOWED_ORIGINS` na edge function para incluir as origens corretas do projeto Lovable.
+
+## Alteracoes Necessarias
+
+### 1. Atualizar `supabase/functions/create-pix-charge/index.ts`
+
+Substituir os placeholders pelas URLs reais:
+
+```text
+ANTES:
+const ALLOWED_ORIGINS = [
+  "https://seusite.lovable.app",
+  "https://preview-seusite.lovable.app",
+  "http://localhost:8080",
+];
+
+DEPOIS:
+const ALLOWED_ORIGINS = [
+  "https://4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com",
+  "https://id-preview--4c756ab8-43f8-4073-a220-22b13086195b.lovable.app",
+  "https://cozy-corner-seed.lovable.app",
+  "http://localhost:8080",
+  "http://localhost:5173",
+];
 ```
 
-#### 2. Nova página — `src/pages/LandingPage.tsx`
-- Hero section com imagem de fundo, título, subtítulo e CTA "Criar Conta"
-- Seções: recursos/features do app, depoimentos, FAQ
-- Botões "Entrar" e "Criar Conta" no header
-- Visível apenas para usuários **não logados** (rota `/`)
-- Usuários logados veem a `Index` atual
+URLs incluidas:
+- **lovableproject.com**: Preview de desenvolvimento
+- **id-preview--...lovable.app**: Preview alternativo
+- **cozy-corner-seed.lovable.app**: URL publicada (producao)
+- **localhost**: Desenvolvimento local
 
-#### 3. Atualizar `src/pages/Auth.tsx`
-- Adicionar campo "Código de Convite" na aba de cadastro (obrigatório)
-- Antes de chamar `signUp`, chamar `supabase.rpc('use_invite_code', { p_code })` para validar
-- Se inválido, mostrar erro e não prosseguir
-- Campo com ícone de ticket/key e placeholder "Digite seu código de convite"
+### 2. Deploy da Edge Function
 
-#### 4. Atualizar `src/App.tsx`
-- Rota `/` renderiza `LandingPage` quando não logado, `Index` quando logado (ou usar lógica dentro do componente)
+Apos a edicao, a edge function sera reimplantada automaticamente.
 
-#### 5. Admin — gerenciar códigos (futuro, opcional)
-- Pode ser adicionado depois em `/admin/convites`
+## Secao Tecnica
 
-### Fluxo do usuário
-1. Visitante acessa `/` → vê landing page
-2. Clica "Criar Conta" → vai para `/auth` aba signup
-3. Preenche email, senha e **código de convite**
-4. Código validado no banco → conta criada
-5. Código inválido → erro exibido, signup bloqueado
+### Por que "Failed to fetch"?
+
+1. O browser envia uma requisicao preflight OPTIONS
+2. A edge function verifica se a origem esta na lista ALLOWED_ORIGINS
+3. Como nao esta, retorna 403 Forbidden Origin
+4. O browser bloqueia a requisicao e reporta "Failed to fetch"
+5. O frontend mostra "Erro ao gerar cobranca"
+
+### Fluxo Corrigido
+
+```text
+Browser (lovableproject.com)
+       |
+       | POST /functions/v1/create-pix-charge
+       v
+Edge Function
+       |
+       | Origin: ...lovableproject.com
+       | -> Verifica ALLOWED_ORIGINS
+       | -> Origem valida!
+       v
+Processa pagamento PIX
+       |
+       v
+Retorna QR Code
+```
+
+## Validacao
+
+Apos a correcao:
+1. Acessar /customs
+2. Selecionar categoria e duracao
+3. Clicar em "Comprar"
+4. O modal de pagamento PIX deve abrir com o QR Code
 

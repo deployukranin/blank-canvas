@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff, Ticket } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -23,11 +24,14 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
+  
+  const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -85,11 +89,11 @@ const Auth = () => {
           navigate("/admin", { replace: true });
         } else {
           toast.success("Login realizado com sucesso!");
-          navigate("/", { replace: true });
+          navigate("/home", { replace: true });
         }
       } else {
         toast.success("Login realizado com sucesso!");
-        navigate("/", { replace: true });
+        navigate("/home", { replace: true });
       }
     } else {
       toast.error(result.error || "Erro ao fazer login");
@@ -115,12 +119,28 @@ const Auth = () => {
       return;
     }
 
+    if (!inviteCode.trim()) {
+      toast.error("Digite seu código de convite");
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Validate invite code first
+    const { data: codeResult, error: codeError } = await supabase.rpc("use_invite_code", { p_code: inviteCode.trim() });
+    
+    if (codeError || !(codeResult as any)?.valid) {
+      const errorMsg = (codeResult as any)?.error || "Código de convite inválido ou expirado";
+      toast.error(errorMsg);
+      setIsSubmitting(false);
+      return;
+    }
+
     const result = await signUp(signupEmail, signupPassword);
     
     if (result.success) {
       toast.success("Conta criada com sucesso! Você já está logado.");
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
     } else {
       toast.error(result.error || "Erro ao criar conta");
     }
@@ -165,7 +185,7 @@ const Auth = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar Conta</TabsTrigger>
@@ -279,6 +299,22 @@ const Auth = () => {
                       value={signupConfirmPassword}
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
                       className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-invite-code">Código de Convite</Label>
+                  <div className="relative">
+                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="signup-invite-code"
+                      type="text"
+                      placeholder="Digite seu código de convite"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                      className="pl-10 uppercase"
                       required
                     />
                   </div>

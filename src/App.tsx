@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute"; // <--- NOVO IMPORT
 
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Ideias from "./pages/Ideias";
 import Loja from "./pages/Loja";
 import Assinaturas from "./pages/Assinaturas";
@@ -59,7 +60,8 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/* Rotas Públicas */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/loja" element={<Loja />} />
               <Route path="/assinaturas" element={<Assinaturas />} />
