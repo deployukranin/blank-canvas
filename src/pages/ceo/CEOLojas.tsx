@@ -18,6 +18,7 @@ const CEOLojas = () => {
   const [deleteTarget, setDeleteTarget] = useState<StoreItem | null>(null);
   const [formName, setFormName] = useState('');
   const [formUrl, setFormUrl] = useState('');
+  const [formSlug, setFormSlug] = useState('');
 
   const openNew = () => {
     setFormName('');
