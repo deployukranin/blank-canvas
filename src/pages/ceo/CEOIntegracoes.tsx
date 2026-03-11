@@ -543,7 +543,7 @@ function QuotaCalculator({
   };
 
   return (
-    <div className="fixed bottom-6 left-[calc(16rem+1.5rem)] z-20">
+    <div>
       <motion.div
         layout
         className="rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden"
