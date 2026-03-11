@@ -209,7 +209,7 @@ const LandingPage = () => {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="text-[0.95rem] sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed"
           >
-            Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você{" "}
+            {lp.heroSubtitle || 'Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você'}{" "}
             <span className="text-foreground font-medium">criar conteúdo incrível.</span>
           </motion.p>
 
