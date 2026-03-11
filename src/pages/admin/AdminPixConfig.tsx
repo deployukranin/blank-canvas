@@ -405,7 +405,7 @@ const AdminPixConfig: React.FC = () => {
                   placeholder="Nome que aparecerá no PIX"
                   value={form.merchantName}
                   onChange={(e) => setForm(prev => ({ ...prev, merchantName: e.target.value }))}
-                  maxLength={25}
+                  maxLength={50}
                 />
               </div>
 
