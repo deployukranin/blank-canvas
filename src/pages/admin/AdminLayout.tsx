@@ -35,8 +35,8 @@ const menuItems = [
   { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
   { path: '/admin/pix', icon: QrCode, label: 'Configurar PIX' },
   
-  { path: '/admin/videos', icon: Video, label: 'Vídeos' },
-  { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
+  { path: '/admin/videos', icon: Eye, label: 'Previews' },
+  { path: '/admin/precos', icon: DollarSign, label: 'Preços' },
   { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
