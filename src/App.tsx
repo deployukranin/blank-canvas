@@ -95,11 +95,11 @@ const App = () => (
               <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
               <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
+              <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
+              <Route path="/admin/integracoes" element={<AdminRoute requiredRole="admin"><AdminIntegracoes /></AdminRoute>} />
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}
               <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
-              <Route path="/ceo/personalizacao" element={<AdminRoute requiredRole="ceo"><CEOPersonalizacao /></AdminRoute>} />
-              <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
