@@ -33,7 +33,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 
-import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
+
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
 import AdminYoutube from "./pages/admin/AdminYoutube";
