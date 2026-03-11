@@ -88,8 +88,8 @@ const CustomsPage = () => {
   // Payment proof state
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
-  const [audioPaymentProofFile, setAudioPaymentProofFile] = useState<File | null>(null);
-  const [audioPaymentProofPreview, setAudioPaymentProofPreview] = useState<string | null>(null);
+  const [showProofDialog, setShowProofDialog] = useState(false);
+  const [proofType, setProofType] = useState<'video' | 'audio'>('video');
   const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   // Current tab
@@ -124,7 +124,7 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePaymentProofSelect = (file: File, type: 'video' | 'audio') => {
+  const handlePaymentProofSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
       return;
@@ -134,13 +134,36 @@ const CustomsPage = () => {
       return;
     }
     const preview = URL.createObjectURL(file);
-    if (type === 'video') {
-      setPaymentProofFile(file);
-      setPaymentProofPreview(preview);
-    } else {
-      setAudioPaymentProofFile(file);
-      setAudioPaymentProofPreview(preview);
+    setPaymentProofFile(file);
+    setPaymentProofPreview(preview);
+  };
+
+  const handleOpenProofDialog = (type: 'video' | 'audio') => {
+    setProofType(type);
+    setPaymentProofFile(null);
+    setPaymentProofPreview(null);
+    setShowProofDialog(true);
+  };
+
+  const handleSubmitWithProof = async () => {
+    if (!paymentProofFile) {
+      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
+      return;
     }
+    setIsUploadingProof(true);
+    const proofUrl = await uploadPaymentProof(paymentProofFile);
+    if (!proofUrl) {
+      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
+      setIsUploadingProof(false);
+      return;
+    }
+    setShowProofDialog(false);
+    if (proofType === 'video') {
+      await submitVideoOrder(proofUrl);
+    } else {
+      await submitAudioOrder(proofUrl);
+    }
+    setIsUploadingProof(false);
   };
 
   const uploadPaymentProof = async (file: File): Promise<string | null> => {
@@ -157,28 +180,10 @@ const CustomsPage = () => {
     return publicUrl;
   };
 
-  const handleVideoOrder = async () => {
+  const submitVideoOrder = async (proofUrl: string) => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
-    if (!personalizationData.name.trim()) {
-      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome para personalização.', variant: 'destructive' });
-      return;
-    }
-
-    if (!paymentProofFile) {
-      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
-      return;
-    }
-
     setIsProcessing(true);
-
-    // Upload proof
-    const proofUrl = await uploadPaymentProof(paymentProofFile);
-    if (!proofUrl) {
-      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
-      setIsProcessing(false);
-      return;
-    }
 
     await onCustomOrder({
       type: 'video',
@@ -226,6 +231,14 @@ const CustomsPage = () => {
     setIsProcessing(false);
   };
 
+  const handleVideoConfirmPaid = () => {
+    if (!personalizationData.name.trim()) {
+      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome para personalização.', variant: 'destructive' });
+      return;
+    }
+    handleOpenProofDialog('video');
+  };
+
 
   const resetVideoOrder = () => {
     setSelectedCategory(null);
@@ -261,25 +274,10 @@ const CustomsPage = () => {
     setShowAudioOrderDialog(true);
   };
 
-  const handleAudioOrder = async () => {
-    if (!selectedAudioCategory || !selectedAudioDuration || !audioFormData.name.trim() || !audioFormData.preferences.trim()) {
-      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
-      return;
-    }
-
-    if (!audioPaymentProofFile) {
-      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
-      return;
-    }
+  const submitAudioOrder = async (proofUrl: string) => {
+    if (!selectedAudioCategory || !selectedAudioDuration) return;
 
     setIsProcessing(true);
-
-    const proofUrl = await uploadPaymentProof(audioPaymentProofFile);
-    if (!proofUrl) {
-      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
-      setIsProcessing(false);
-      return;
-    }
 
     await onCustomOrder({
       type: 'audio',
@@ -304,14 +302,20 @@ const CustomsPage = () => {
     setAudioOrderComplete(true);
   };
 
+  const handleAudioConfirmPaid = () => {
+    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
+      return;
+    }
+    handleOpenProofDialog('audio');
+  };
+
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
     setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
-    setAudioPaymentProofFile(null);
-    setAudioPaymentProofPreview(null);
   };
 
   const audioFinalPrice = selectedAudioDuration 
@@ -825,48 +829,17 @@ const CustomsPage = () => {
               onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))}
               className="glass border-white/10"
             />
-            {/* Payment Proof Upload */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Upload className="w-4 h-4 text-primary" />
-                Comprovante PIX *
-              </label>
-              {paymentProofPreview ? (
-                <div className="relative">
-                  <img src={paymentProofPreview} alt="Comprovante" className="w-full max-h-48 object-contain rounded-lg border border-border" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-1 right-1 h-7 text-xs"
-                    onClick={() => { setPaymentProofFile(null); setPaymentProofPreview(null); }}
-                  >
-                    Trocar
-                  </Button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0], 'video')}
-                  />
-                </label>
-              )}
-            </div>
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing}>
                 Cancelar
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleVideoOrder}
-                disabled={isProcessing || !personalizationData.name.trim() || !paymentProofFile}
+                onClick={handleVideoConfirmPaid}
+                disabled={isProcessing || !personalizationData.name.trim()}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Enviando...' : 'Já Paguei - Confirmar'}
+                Já Paguei - Confirmar
               </Button>
             </div>
           </div>
@@ -945,48 +918,17 @@ const CustomsPage = () => {
               onChange={e => setAudioFormData(prev => ({ ...prev, observations: e.target.value }))}
               className="glass border-white/10"
             />
-            {/* Payment Proof Upload */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Upload className="w-4 h-4 text-primary" />
-                Comprovante PIX *
-              </label>
-              {audioPaymentProofPreview ? (
-                <div className="relative">
-                  <img src={audioPaymentProofPreview} alt="Comprovante" className="w-full max-h-48 object-contain rounded-lg border border-border" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-1 right-1 h-7 text-xs"
-                    onClick={() => { setAudioPaymentProofFile(null); setAudioPaymentProofPreview(null); }}
-                  >
-                    Trocar
-                  </Button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0], 'audio')}
-                  />
-                </label>
-              )}
-            </div>
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowAudioOrderDialog(false)} disabled={isProcessing}>
                 Cancelar
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleAudioOrder}
-                disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim() || !audioPaymentProofFile}
+                onClick={handleAudioConfirmPaid}
+                disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Enviando...' : 'Já Paguei - Confirmar'}
+                Já Paguei - Confirmar
               </Button>
             </div>
           </div>
@@ -1005,6 +947,61 @@ const CustomsPage = () => {
             <Button onClick={resetAudioOrder} className="bg-gradient-to-r from-primary to-accent">
               Fechar
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Proof Dialog */}
+      <Dialog open={showProofDialog} onOpenChange={() => !isUploadingProof && setShowProofDialog(false)}>
+        <DialogContent className="glass mx-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" />
+              Enviar Comprovante PIX
+            </DialogTitle>
+            <DialogDescription>
+              Envie o print/screenshot do comprovante de pagamento para validação.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {paymentProofPreview ? (
+              <div className="relative">
+                <img src={paymentProofPreview} alt="Comprovante" className="w-full max-h-64 object-contain rounded-lg border border-border" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-1 right-1 h-7 text-xs"
+                  onClick={() => { setPaymentProofFile(null); setPaymentProofPreview(null); }}
+                >
+                  Trocar
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
+                <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
+                <span className="text-xs text-muted-foreground/60">Formatos: JPG, PNG (máx 5MB)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0])}
+                />
+              </label>
+            )}
+            <div className="flex gap-2">
+              <Button variant="ghost" className="flex-1" onClick={() => setShowProofDialog(false)} disabled={isUploadingProof}>
+                Voltar
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
+                onClick={handleSubmitWithProof}
+                disabled={isUploadingProof || !paymentProofFile}
+              >
+                <Send className="w-4 h-4" />
+                {isUploadingProof ? 'Enviando...' : 'Enviar Comprovante'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
