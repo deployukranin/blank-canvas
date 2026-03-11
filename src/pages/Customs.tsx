@@ -748,30 +748,6 @@ const CustomsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Video Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={resetVideoOrder}>
-        <DialogContent className="glass mx-4 text-center">
-          <div className="py-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-success" />
-            </div>
-            <h3 className="font-display text-lg font-bold mb-2">Pedido Confirmado! 🎬</h3>
-            <p className="text-muted-foreground text-sm mb-2">
-              Seu vídeo personalizado está sendo preparado
-            </p>
-            <p className="text-xs text-muted-foreground mb-4">
-              Prazo de entrega: {config?.deliveryDays} dias úteis
-            </p>
-            <Button 
-              onClick={resetVideoOrder}
-              className="bg-gradient-to-r from-primary to-accent"
-            >
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Audio Order Dialog */}
       <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && setShowAudioOrderDialog(false)}>
         <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
@@ -831,77 +807,6 @@ const CustomsPage = () => {
               >
                 <Send className="w-4 h-4" />
                 Já Paguei - Confirmar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Audio Success Dialog */}
-      <Dialog open={audioOrderComplete} onOpenChange={resetAudioOrder}>
-        <DialogContent className="glass mx-4 text-center">
-          <div className="py-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-success" />
-            </div>
-            <h3 className="font-display text-lg font-bold mb-2">Pedido Realizado! 🎧</h3>
-            <p className="text-muted-foreground text-sm mb-4">Prazo: 3 dias úteis</p>
-            <Button onClick={resetAudioOrder} className="bg-gradient-to-r from-primary to-accent">
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Proof Dialog */}
-      <Dialog open={showProofDialog} onOpenChange={() => !isUploadingProof && setShowProofDialog(false)}>
-        <DialogContent className="glass mx-4">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Upload className="w-5 h-5 text-primary" />
-              Enviar Comprovante PIX
-            </DialogTitle>
-            <DialogDescription>
-              Envie o print/screenshot do comprovante de pagamento para validação.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {paymentProofPreview ? (
-              <div className="relative">
-                <img src={paymentProofPreview} alt="Comprovante" className="w-full max-h-64 object-contain rounded-lg border border-border" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-1 right-1 h-7 text-xs"
-                  onClick={() => { setPaymentProofFile(null); setPaymentProofPreview(null); }}
-                >
-                  Trocar
-                </Button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
-                <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
-                <span className="text-xs text-muted-foreground/60">Formatos: JPG, PNG (máx 5MB)</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0])}
-                />
-              </label>
-            )}
-            <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowProofDialog(false)} disabled={isUploadingProof}>
-                Voltar
-              </Button>
-              <Button
-                className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleSubmitWithProof}
-                disabled={isUploadingProof || !paymentProofFile}
-              >
-                <Send className="w-4 h-4" />
-                {isUploadingProof ? 'Enviando...' : 'Enviar Comprovante'}
               </Button>
             </div>
           </div>
