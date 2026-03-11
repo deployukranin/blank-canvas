@@ -14,14 +14,8 @@ const AdminConfiguracoes: React.FC = () => {
   const { toast } = useToast();
   
   const [settings, setSettings] = useState({
-    emailNotifications: true,
     publicIdeas: true,
     requireApprovalForIdeas: false,
-    adsEnabled: false,
-    adsensePublisherId: '',
-    adSlotHome: '',
-    adSlotFeed: '',
-    adSlotGallery: '',
   });
 
   const handleSave = () => {
