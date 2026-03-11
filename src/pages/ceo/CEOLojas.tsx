@@ -40,22 +40,36 @@ const CEOLojas = () => {
 
   const handleCreate = () => {
     if (!formName.trim()) return;
-    const slug = formName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const slug = formSlug.trim() || generateSlug(formName);
     createStore.mutate({
       name: formName.trim(),
       url: formUrl.trim() || `${slug}.lovable.app`,
+      slug,
     });
     setNewOpen(false);
   };
 
   const handleEdit = () => {
     if (!editStore || !formName.trim()) return;
+    const slug = formSlug.trim() || generateSlug(formName);
     updateStore.mutate({
       id: editStore.id,
       name: formName.trim(),
       url: formUrl.trim() || editStore.url,
+      slug,
     });
     setEditStore(null);
+  };
+
+  const copyRegistrationLink = (store: StoreItem) => {
+    const slug = (store as any).slug;
+    if (!slug) {
+      toast.error('Esta loja não tem um slug definido. Edite a loja para adicionar.');
+      return;
+    }
+    const link = `${window.location.origin}/loja/${slug}/auth`;
+    navigator.clipboard.writeText(link);
+    toast.success('Link de cadastro copiado!');
   };
 
   const handleDelete = () => {

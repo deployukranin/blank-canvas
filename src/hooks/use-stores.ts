@@ -46,7 +46,7 @@ export function useStores() {
   });
 
   const updateStore = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; name?: string; url?: string; status?: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; url?: string; status?: string; slug?: string }) => {
       const { error } = await supabase
         .from('stores')
         .update(updates)
