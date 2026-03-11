@@ -29,32 +29,6 @@ const AdminConfiguracoes: React.FC = () => {
   return (
     <AdminLayout title="Configurações">
       <div className="space-y-6 max-w-2xl">
-        {/* Notifications */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <GlassCard className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Bell className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Notificações</h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Notificações por Email</Label>
-                  <p className="text-sm text-muted-foreground">Receber alertas de novos pedidos</p>
-                </div>
-                <Switch
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => setSettings({ ...settings, emailNotifications: checked })}
-                />
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-
         {/* Content Settings */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
