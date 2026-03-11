@@ -42,7 +42,7 @@ import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPixConfig from "./pages/admin/AdminPixConfig";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
-import AdminIntegracoes from "./pages/admin/AdminIntegracoes";
+import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 // CEO Pages
 import CEODashboard from "./pages/ceo/CEODashboard";
@@ -104,7 +104,7 @@ const App = () => (
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
               <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
               <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
-              <Route path="/admin/integracoes" element={<AdminRoute requiredRole="admin"><AdminIntegracoes /></AdminRoute>} />
+              
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}
               <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
@@ -116,6 +116,7 @@ const App = () => (
               <Route path="/ceo/alertas" element={<AdminRoute requiredRole="ceo"><CEOAlertas /></AdminRoute>} />
               <Route path="/ceo/configuracoes" element={<AdminRoute requiredRole="ceo"><CEOConfiguracoes /></AdminRoute>} />
               <Route path="/ceo/landing-page" element={<AdminRoute requiredRole="ceo"><CEOLandingPage /></AdminRoute>} />
+              <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
