@@ -48,6 +48,7 @@ const menuSections = [
     label: 'Sistema',
     items: [
       { icon: Globe, label: 'Landing Page', path: '/ceo/landing-page' },
+      { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
       { icon: Bell, label: 'Alertas', path: '/ceo/alertas' },
       { icon: Settings, label: 'Configurações', path: '/ceo/configuracoes' },
     ],
