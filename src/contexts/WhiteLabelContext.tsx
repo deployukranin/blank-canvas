@@ -689,6 +689,21 @@ export interface WhiteLabelConfig {
       channelId: string;
       enabled: boolean;
     }>;
+    /** Per-store integrations: storeId -> { channels, categories, videoCategoryMap } */
+    storeIntegrations?: Record<string, {
+      channels: Array<{
+        id: string;
+        creatorName: string;
+        channelId: string;
+      }>;
+      categories?: Array<{
+        id: string;
+        name: string;
+        icon?: string;
+        order?: number;
+      }>;
+      videoCategoryMap?: Record<string, string | undefined>;
+    }>;
   };
 
   // Icons
