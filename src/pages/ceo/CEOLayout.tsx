@@ -141,6 +141,9 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
               </div>
             ))}
           </nav>
+
+          {/* YouTube Quota Widget */}
+          <YouTubeQuotaWidget />
         </div>
 
         {/* User info at bottom */}
