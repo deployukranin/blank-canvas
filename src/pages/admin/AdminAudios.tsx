@@ -172,19 +172,16 @@ const AdminAudios = () => {
               />
             </div>
 
-            {/* Audio URL */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">URL do Áudio (MP3)</label>
-              <Input
-                placeholder="https://exemplo.com/audio-preview.mp3"
-                value={config.audioPreviewUrl}
-                onChange={e => setConfig({ ...config, audioPreviewUrl: e.target.value })}
-                disabled={!config.audioPreviewEnabled}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                URL de um arquivo MP3 para preview
-              </p>
-            </div>
+            <MediaUpload
+              currentUrl={config.audioPreviewUrl}
+              onUrlChange={(url) => setConfig({ ...config, audioPreviewUrl: url })}
+              accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/webm"
+              label="Arquivo de Áudio (MP3)"
+              placeholder="https://exemplo.com/audio-preview.mp3"
+              hint="Envie um arquivo MP3 ou insira uma URL"
+              disabled={!config.audioPreviewEnabled}
+              folder="audio-previews"
+            />
 
             {/* Audio Preview Player */}
             {config.audioPreviewEnabled && config.audioPreviewUrl && (
