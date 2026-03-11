@@ -255,8 +255,8 @@ const AdminVideos = () => {
                     disabled={!config.previewEnabled}
                     folder="image-previews"
                   />
-                )
-                
+                )}
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Título</label>
                   <Input
