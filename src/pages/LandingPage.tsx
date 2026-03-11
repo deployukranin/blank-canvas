@@ -164,6 +164,7 @@ const LandingPage = () => {
       </header>
 
       {/* Hero */}
+      {lp.heroVisible !== false && (
       <section ref={heroRef} className="relative min-h-[100svh] flex items-center justify-center pt-12 pb-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-background to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,hsl(var(--primary)/0.18),transparent)]" />
