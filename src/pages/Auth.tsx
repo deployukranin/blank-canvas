@@ -119,7 +119,23 @@ const Auth = () => {
       return;
     }
 
+    if (!inviteCode.trim()) {
+      toast.error("Digite seu código de convite");
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Validate invite code first
+    const { data: codeResult, error: codeError } = await supabase.rpc("use_invite_code", { p_code: inviteCode.trim() });
+    
+    if (codeError || !(codeResult as any)?.valid) {
+      const errorMsg = (codeResult as any)?.error || "Código de convite inválido ou expirado";
+      toast.error(errorMsg);
+      setIsSubmitting(false);
+      return;
+    }
+
     const result = await signUp(signupEmail, signupPassword);
     
     if (result.success) {
