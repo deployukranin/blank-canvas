@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const features = [
   {
@@ -125,7 +126,14 @@ const FloatingOrb = ({ className, delay = 0 }: { className: string; delay?: numb
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
   const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/home", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
