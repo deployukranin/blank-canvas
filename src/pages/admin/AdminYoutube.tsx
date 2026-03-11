@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Youtube, RefreshCw } from "lucide-react";
+import { Youtube } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
