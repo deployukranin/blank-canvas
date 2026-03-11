@@ -140,7 +140,7 @@ const Auth = () => {
     
     if (result.success) {
       toast.success("Conta criada com sucesso! Você já está logado.");
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
     } else {
       toast.error(result.error || "Erro ao criar conta");
     }
