@@ -64,7 +64,7 @@ const CustomsPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
+  
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
