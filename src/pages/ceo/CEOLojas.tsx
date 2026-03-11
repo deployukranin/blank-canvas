@@ -146,6 +146,9 @@ const CEOLojas = () => {
                             : <><Power className="w-4 h-4 mr-2" /> Ativar</>
                           }
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => copyRegistrationLink(store)}>
+                          <Link2 className="w-4 h-4 mr-2" /> Link de Cadastro
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(store)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Excluir
