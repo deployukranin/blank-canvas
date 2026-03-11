@@ -185,6 +185,11 @@ const AdminPixConfig: React.FC = () => {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
+    const validationError = validatePixKey(form.pixKey, form.pixKeyType);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
     setPendingForm({ ...form });
     setPassword('');
     setShowPasswordDialog(true);
