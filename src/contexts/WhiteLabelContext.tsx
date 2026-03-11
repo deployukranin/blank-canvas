@@ -810,6 +810,15 @@ export interface WhiteLabelConfig {
       videos?: string;
       ideas?: string;
     };
+    customBanners?: Array<{
+      id: string;
+      imageUrl: string;
+      linkUrl: string;
+      label: string;
+      /** Which pages to show this banner on */
+      pages: Array<'home' | 'gallery' | 'community' | 'videos' | 'ideas'>;
+      enabled: boolean;
+    }>;
   };
 
 }
