@@ -274,25 +274,10 @@ const CustomsPage = () => {
     setShowAudioOrderDialog(true);
   };
 
-  const handleAudioOrder = async () => {
-    if (!selectedAudioCategory || !selectedAudioDuration || !audioFormData.name.trim() || !audioFormData.preferences.trim()) {
-      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
-      return;
-    }
-
-    if (!audioPaymentProofFile) {
-      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
-      return;
-    }
+  const submitAudioOrder = async (proofUrl: string) => {
+    if (!selectedAudioCategory || !selectedAudioDuration) return;
 
     setIsProcessing(true);
-
-    const proofUrl = await uploadPaymentProof(audioPaymentProofFile);
-    if (!proofUrl) {
-      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
-      setIsProcessing(false);
-      return;
-    }
 
     await onCustomOrder({
       type: 'audio',
@@ -317,14 +302,20 @@ const CustomsPage = () => {
     setAudioOrderComplete(true);
   };
 
+  const handleAudioConfirmPaid = () => {
+    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
+      return;
+    }
+    handleOpenProofDialog('audio');
+  };
+
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
     setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
-    setAudioPaymentProofFile(null);
-    setAudioPaymentProofPreview(null);
   };
 
   const audioFinalPrice = selectedAudioDuration 
