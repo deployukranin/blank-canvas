@@ -493,8 +493,10 @@ const CEOIntegracoes = () => {
           </Button>
         </motion.div>
 
-        {/* Quota Calculator - Fixed bottom left */}
-        <QuotaCalculator storeIntegrations={storeIntegrations} />
+        {/* Quota Calculator - inline below save */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+          <QuotaCalculator storeIntegrations={storeIntegrations} />
+        </motion.div>
       </div>
     </CEOLayout>
   );
@@ -541,7 +543,7 @@ function QuotaCalculator({
   };
 
   return (
-    <div className="fixed bottom-6 left-[calc(16rem+1.5rem)] z-20">
+    <div>
       <motion.div
         layout
         className="rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-xl overflow-hidden"
