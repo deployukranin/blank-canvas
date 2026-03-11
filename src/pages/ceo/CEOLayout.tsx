@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  Sparkles, 
-  Link2, 
+  Store,
   ArrowLeft,
   Crown,
   LogOut,
@@ -21,9 +20,7 @@ interface CEOLayoutProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/ceo' },
-  { icon: Sparkles, label: 'Personalização', path: '/ceo/personalizacao' },
-  { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
+  { icon: LayoutDashboard, label: 'Minhas Lojas', path: '/ceo' },
 ];
 
 export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
