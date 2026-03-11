@@ -58,6 +58,81 @@ const PIX_TYPE_LABELS: Record<string, string> = {
   random: 'Chave Aleatória',
 };
 
+// Validation patterns
+const PIX_VALIDATORS: Record<string, { regex: RegExp; example: string; placeholder: string }> = {
+  cpf: {
+    regex: /^(\d{3}\.?\d{3}\.?\d{3}-?\d{2})$/,
+    example: '123.456.789-00',
+    placeholder: '123.456.789-00',
+  },
+  cnpj: {
+    regex: /^(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})$/,
+    example: '12.345.678/0001-99',
+    placeholder: '12.345.678/0001-99',
+  },
+  email: {
+    regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    example: 'usuario@dominio.com.br',
+    placeholder: 'usuario@dominio.com.br',
+  },
+  phone: {
+    regex: /^\+?\d{12,13}$/,
+    example: '+5511998765432',
+    placeholder: '+5511998765432',
+  },
+  random: {
+    regex: /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    placeholder: '123e4567-e89b-12d3-a456-426614174000',
+  },
+};
+
+function formatPixInput(value: string, type: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (type === 'cpf') {
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+  }
+  if (type === 'cnpj') {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+    if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+    if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12, 14)}`;
+  }
+  if (type === 'phone') {
+    if (!value.startsWith('+') && digits.length > 0) return `+${digits}`;
+    return `+${digits}`;
+  }
+  return value;
+}
+
+function getMaxLength(type: string): number | undefined {
+  if (type === 'cpf') return 14; // 123.456.789-00
+  if (type === 'cnpj') return 18; // 12.345.678/0001-99
+  if (type === 'phone') return 14; // +5511998765432
+  if (type === 'random') return 36; // UUID
+  return undefined;
+}
+
+function validatePixKey(key: string, type: string): string | null {
+  const validator = PIX_VALIDATORS[type];
+  if (!validator) return null;
+  // Normalize for validation
+  let normalized = key;
+  if (type === 'cpf' || type === 'cnpj') normalized = key.replace(/[\.\-\/]/g, '');
+  if (type === 'phone') normalized = key.replace(/[^+\d]/g, '');
+  // Check raw digits length
+  if (type === 'cpf' && normalized.length !== 11) return `CPF deve ter 11 dígitos. Ex: ${validator.example}`;
+  if (type === 'cnpj' && normalized.length !== 14) return `CNPJ deve ter 14 dígitos. Ex: ${validator.example}`;
+  if (type === 'phone' && !PIX_VALIDATORS.phone.regex.test(normalized)) return `Telefone inválido. Use: ${validator.example}`;
+  if (type === 'email' && !PIX_VALIDATORS.email.regex.test(key)) return `E-mail inválido. Ex: ${validator.example}`;
+  if (type === 'random' && !PIX_VALIDATORS.random.regex.test(key)) return `UUID inválido. Ex: ${validator.example}`;
+  return null;
+}
+
 function maskPixKey(key: string, type: string): string {
   if (type === 'cpf' && key.length >= 11) {
     return `${key.slice(0, 3)}.***.***-${key.slice(-2)}`;
@@ -108,6 +183,11 @@ const AdminPixConfig: React.FC = () => {
   const handleRequestSave = () => {
     if (!form.pixKey.trim() || !form.merchantName.trim() || !form.merchantState) {
       toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+    const validationError = validatePixKey(form.pixKey, form.pixKeyType);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
     setPendingForm({ ...form });
@@ -272,7 +352,7 @@ const AdminPixConfig: React.FC = () => {
                 <label className="text-sm font-medium mb-1 block">Tipo da Chave *</label>
                 <Select
                   value={form.pixKeyType}
-                  onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'] }))}
+                  onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'], pixKey: '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -290,10 +370,21 @@ const AdminPixConfig: React.FC = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Chave PIX *</label>
                 <Input
-                  placeholder="Digite sua chave PIX"
+                  placeholder={PIX_VALIDATORS[form.pixKeyType]?.placeholder || 'Digite sua chave PIX'}
                   value={form.pixKey}
-                  onChange={(e) => setForm(prev => ({ ...prev, pixKey: e.target.value }))}
+                  onChange={(e) => {
+                    const type = form.pixKeyType;
+                    const val = (type === 'cpf' || type === 'cnpj' || type === 'phone')
+                      ? formatPixInput(e.target.value, type)
+                      : e.target.value;
+                    setForm(prev => ({ ...prev, pixKey: val }));
+                  }}
+                  maxLength={getMaxLength(form.pixKeyType)}
+                  className="font-mono"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ex: {PIX_VALIDATORS[form.pixKeyType]?.example}
+                </p>
               </div>
 
               <div>
