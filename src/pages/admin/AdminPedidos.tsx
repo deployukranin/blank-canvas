@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, DollarSign } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, DollarSign, ImageIcon, ExternalLink } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
+  payment_proof_url: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
@@ -45,6 +46,10 @@ const AdminPedidos: React.FC = () => {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Payment proof dialog
+  const [showProofDialog, setShowProofDialog] = useState(false);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -271,6 +276,15 @@ const AdminPedidos: React.FC = () => {
                         📝 {order.observations || order.preferences}
                       </p>
                     )}
+                    {order.payment_proof_url && (
+                      <button
+                        onClick={() => { setProofUrl(order.payment_proof_url); setShowProofDialog(true); }}
+                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Ver comprovante PIX
+                      </button>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(order.created_at)}
                     </p>
@@ -423,6 +437,39 @@ const AdminPedidos: React.FC = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Proof Dialog */}
+      <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
+        <DialogContent className="glass max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-primary" />
+              Comprovante de Pagamento
+            </DialogTitle>
+            <DialogDescription>Imagem enviada pelo cliente</DialogDescription>
+          </DialogHeader>
+          {proofUrl && (
+            <div className="space-y-3 mt-2">
+              <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
+                <img
+                  src={proofUrl}
+                  alt="Comprovante PIX"
+                  className="w-full max-h-[60vh] object-contain"
+                />
+              </div>
+              <a
+                href={proofUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Abrir em nova aba
+              </a>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </AdminLayout>
