@@ -47,6 +47,13 @@ import AdminIntegracoes from "./pages/admin/AdminIntegracoes";
 
 // CEO Pages
 import CEODashboard from "./pages/ceo/CEODashboard";
+import CEOLojas from "./pages/ceo/CEOLojas";
+import CEOVendas from "./pages/ceo/CEOVendas";
+import CEOUsuarios from "./pages/ceo/CEOUsuarios";
+import CEOTrafego from "./pages/ceo/CEOTrafego";
+import CEOMetricas from "./pages/ceo/CEOMetricas";
+import CEOAlertas from "./pages/ceo/CEOAlertas";
+import CEOConfiguracoes from "./pages/ceo/CEOConfiguracoes";
 
 const queryClient = new QueryClient();
 
