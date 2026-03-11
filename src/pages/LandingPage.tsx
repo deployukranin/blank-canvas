@@ -5,7 +5,7 @@ import {
   Headphones,
   ShoppingBag,
   Users,
-  Crown,
+  
   BarChart3,
   Palette,
   ChevronDown,
