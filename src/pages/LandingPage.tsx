@@ -192,12 +192,15 @@ const LandingPage = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-[2.5rem] leading-[1.08] sm:text-5xl md:text-7xl font-extrabold mb-5 sm:mb-8 tracking-tight"
           >
-            Sua loja ASMR
-            <br />
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">
-              completa
-            </span>{" "}
-            em minutos
+            {(() => {
+              const title = lp.heroTitle || 'Sua loja ASMR completa em minutos';
+              const parts = title.split(/\n/);
+              return parts.length > 1 ? (
+                <>{parts[0]}<br /><span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">{parts[1]}</span></>
+              ) : (
+                <>{title.replace(/ em minutos$/, '')}<br /><span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">completa</span>{' '}em minutos</>
+              );
+            })()}
           </motion.h1>
 
           <motion.p
