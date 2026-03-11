@@ -25,7 +25,7 @@ const Index = () => {
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
   // Get quick actions from config, filter only enabled ones
-  const quickActions = config.quickActions.filter(action => action.enabled);
+  const quickActions = config.quickActions.filter(action => action.enabled && action.path !== '/loja');
 
   // YouTube videos
   const channelId = config.youtube?.channelId?.trim() || '';

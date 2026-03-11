@@ -646,7 +646,7 @@ export const availableRoutes = [
   { path: '/ideias', label: 'Ideias' },
   { path: '/vip', label: 'VIP' },
   { path: '/customs', label: "Custom's" },
-  { path: '/loja', label: 'Loja' },
+  
   { path: '/comunidade', label: 'Comunidade' },
   { path: '/assinaturas', label: 'Assinaturas' },
   { path: '/perfil', label: 'Perfil' },
