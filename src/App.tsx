@@ -42,11 +42,11 @@ import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPixConfig from "./pages/admin/AdminPixConfig";
+import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
+import AdminIntegracoes from "./pages/admin/AdminIntegracoes";
 
 // CEO Pages
 import CEODashboard from "./pages/ceo/CEODashboard";
-import CEOPersonalizacao from "./pages/ceo/CEOPersonalizacao";
-import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 const queryClient = new QueryClient();
 
