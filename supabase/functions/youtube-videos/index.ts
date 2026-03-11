@@ -240,6 +240,22 @@ async function updateCache(
   }
 }
 
+// Log API quota usage to database
+async function logQuotaUsage(
+  supabase: SupabaseClient,
+  channelId: string,
+  units: number,
+  endpoint: string
+): Promise<void> {
+  try {
+    await supabase
+      .from("youtube_api_usage")
+      .insert({ channel_id: channelId, units_used: units, endpoint });
+  } catch (err) {
+    console.log("[youtube-videos] Failed to log quota usage:", err);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
