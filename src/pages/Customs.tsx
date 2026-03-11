@@ -161,15 +161,24 @@ const CustomsPage = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
     if (!personalizationData.name.trim()) {
-      toast({
-        title: 'Nome obrigatório',
-        description: 'Por favor, informe seu nome para personalização.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome para personalização.', variant: 'destructive' });
+      return;
+    }
+
+    if (!paymentProofFile) {
+      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
       return;
     }
 
     setIsProcessing(true);
+
+    // Upload proof
+    const proofUrl = await uploadPaymentProof(paymentProofFile);
+    if (!proofUrl) {
+      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
+      setIsProcessing(false);
+      return;
+    }
 
     await onCustomOrder({
       type: 'video',
@@ -182,6 +191,7 @@ const CustomsPage = () => {
       triggers: personalizationData.triggers,
       script: personalizationData.script,
       observations: personalizationData.observations,
+      paymentProofUrl: proofUrl,
       status: 'pending',
     });
 
