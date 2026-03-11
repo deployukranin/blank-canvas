@@ -36,10 +36,11 @@ const CEOIntegracoes = () => {
   const selectedStore = availableStores.find((s) => s.id === selectedStoreId);
 
   // Auto-select first store when loaded
-  const firstStoreId = availableStores[0]?.id;
-  if (!selectedStoreId && firstStoreId) {
-    setSelectedStoreId(firstStoreId);
-  }
+  useEffect(() => {
+    if (!selectedStoreId && availableStores.length > 0) {
+      setSelectedStoreId(availableStores[0].id);
+    }
+  }, [availableStores, selectedStoreId]);
 
   // Per-store integrations from config
   const storeIntegrations = config.youtube?.storeIntegrations ?? {};
