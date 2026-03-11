@@ -26,6 +26,16 @@ interface StoreChannel {
   id: string;
   creatorName: string;
   channelId: string;
+  validated?: boolean;
+  channelTitle?: string;
+  channelThumbnail?: string;
+  validating?: boolean;
+}
+
+interface ChannelValidationResult {
+  valid: boolean;
+  error?: string;
+  channel?: { id: string; title: string; thumbnail: string };
 }
 
 const CEOIntegracoes = () => {
