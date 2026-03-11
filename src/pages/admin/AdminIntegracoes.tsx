@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Youtube, ShoppingBag, Tag, ExternalLink, Plus, Trash2, Package } from 'lucide-react';
+import { Save, Youtube } from 'lucide-react';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
