@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 
 declare global {
   interface Window {
@@ -10,7 +11,9 @@ declare global {
 export type AdFormat = 'horizontal' | 'rectangle' | 'vertical' | 'fluid';
 
 interface AdBannerProps {
-  adSlot: string;
+  adSlot?: string;
+  /** Which slot key to use from config (home, gallery, community, videos, ideas) */
+  slotKey?: 'home' | 'gallery' | 'community' | 'videos' | 'ideas';
   format?: AdFormat;
   className?: string;
   fullWidth?: boolean;
@@ -23,19 +26,28 @@ const formatStyles: Record<AdFormat, string> = {
   fluid: 'min-h-[100px]',
 };
 
-export const AdBanner = ({ adSlot, format = 'horizontal', className, fullWidth = true }: AdBannerProps) => {
+export const AdBanner = ({ adSlot, slotKey, format = 'horizontal', className, fullWidth = true }: AdBannerProps) => {
+  const { config } = useWhiteLabel();
   const adRef = useRef<HTMLDivElement>(null);
   const pushed = useRef(false);
 
+  const publisherId = config.adsense?.publisherId || '';
+  const resolvedSlot = adSlot || (slotKey ? config.adsense?.slots?.[slotKey] : '') || '';
+  const isEnabled = config.adsense?.enabled && publisherId && resolvedSlot;
+
   useEffect(() => {
-    if (pushed.current) return;
+    if (pushed.current || !isEnabled) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch {
       // AdSense not loaded yet
     }
-  }, []);
+  }, [isEnabled]);
+
+  if (!isEnabled) {
+    return <AdPlaceholder format={format} className={className} />;
+  }
 
   return (
     <div
@@ -51,8 +63,8 @@ export const AdBanner = ({ adSlot, format = 'horizontal', className, fullWidth =
       <ins
         className="adsbygoogle"
         style={{ display: 'block' }}
-        data-ad-client="" // Set via admin config or hardcode your ca-pub-xxx
-        data-ad-slot={adSlot}
+        data-ad-client={publisherId}
+        data-ad-slot={resolvedSlot}
         data-ad-format={format === 'fluid' ? 'fluid' : 'auto'}
         data-full-width-responsive={fullWidth ? 'true' : 'false'}
       />
