@@ -1259,6 +1259,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateCommunity,
         updateYouTube,
         updateShopify,
+        updateAdSense,
         updateToken,
         resetToDefaults,
         resetIconsToDefaults,
