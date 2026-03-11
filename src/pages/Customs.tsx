@@ -310,6 +310,8 @@ const CustomsPage = () => {
     setAudioFormData({ name: '', preferences: '', observations: '' });
     setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
+    setAudioPaymentProofFile(null);
+    setAudioPaymentProofPreview(null);
   };
 
   const audioFinalPrice = selectedAudioDuration 
