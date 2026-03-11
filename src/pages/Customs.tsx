@@ -267,7 +267,19 @@ const CustomsPage = () => {
       return;
     }
 
+    if (!audioPaymentProofFile) {
+      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
+      return;
+    }
+
     setIsProcessing(true);
+
+    const proofUrl = await uploadPaymentProof(audioPaymentProofFile);
+    if (!proofUrl) {
+      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
+      setIsProcessing(false);
+      return;
+    }
 
     await onCustomOrder({
       type: 'audio',
@@ -278,6 +290,7 @@ const CustomsPage = () => {
       name: audioFormData.name,
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
+      paymentProofUrl: proofUrl,
       status: 'pending',
     });
 
