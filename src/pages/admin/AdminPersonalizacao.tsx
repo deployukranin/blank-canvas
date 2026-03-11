@@ -1034,7 +1034,7 @@ const CEOPersonalizacao = () => {
               </p>
               
               <div className="space-y-4">
-                {navigationForm.sort((a, b) => a.order - b.order).map((tab, index) => {
+                {navigationForm.filter(tab => tab.path !== '/loja').sort((a, b) => a.order - b.order).map((tab, index) => {
                   const originalIndex = navigationForm.findIndex(t => t.id === tab.id);
                   const enabledCount = navigationForm.filter(t => t.enabled).length;
                   const isLastEnabled = tab.enabled && enabledCount <= 2;
