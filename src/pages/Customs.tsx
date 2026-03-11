@@ -124,7 +124,7 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePaymentProofSelect = (file: File, type: 'video' | 'audio') => {
+  const handlePaymentProofSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
       return;
@@ -134,13 +134,36 @@ const CustomsPage = () => {
       return;
     }
     const preview = URL.createObjectURL(file);
-    if (type === 'video') {
-      setPaymentProofFile(file);
-      setPaymentProofPreview(preview);
-    } else {
-      setAudioPaymentProofFile(file);
-      setAudioPaymentProofPreview(preview);
+    setPaymentProofFile(file);
+    setPaymentProofPreview(preview);
+  };
+
+  const handleOpenProofDialog = (type: 'video' | 'audio') => {
+    setProofType(type);
+    setPaymentProofFile(null);
+    setPaymentProofPreview(null);
+    setShowProofDialog(true);
+  };
+
+  const handleSubmitWithProof = async () => {
+    if (!paymentProofFile) {
+      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
+      return;
     }
+    setIsUploadingProof(true);
+    const proofUrl = await uploadPaymentProof(paymentProofFile);
+    if (!proofUrl) {
+      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
+      setIsUploadingProof(false);
+      return;
+    }
+    setShowProofDialog(false);
+    if (proofType === 'video') {
+      await submitVideoOrder(proofUrl);
+    } else {
+      await submitAudioOrder(proofUrl);
+    }
+    setIsUploadingProof(false);
   };
 
   const uploadPaymentProof = async (file: File): Promise<string | null> => {
