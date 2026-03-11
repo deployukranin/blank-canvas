@@ -25,8 +25,9 @@ export interface PixMultiConfig {
 }
 
 function migrateFromLegacy(raw: any): PixMultiConfig {
+  if (!raw) return { keys: [] };
   // Already multi-key format
-  if (raw?.keys && Array.isArray(raw.keys)) return raw as PixMultiConfig;
+  if (Array.isArray(raw?.keys)) return { keys: raw.keys };
   // Legacy single-key
   if (raw?.pixKey) {
     return {
