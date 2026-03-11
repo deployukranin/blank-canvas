@@ -104,7 +104,7 @@ const App = () => (
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
               <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
               <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
-              <Route path="/admin/integracoes" element={<AdminRoute requiredRole="admin"><AdminIntegracoes /></AdminRoute>} />
+              
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}
               <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
