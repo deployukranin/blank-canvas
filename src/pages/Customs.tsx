@@ -232,6 +232,8 @@ const CustomsPage = () => {
     setSelectedDuration(null);
     setShowSuccessDialog(false);
     setPersonalizationData({ name: '', triggers: '', script: '', observations: '' });
+    setPaymentProofFile(null);
+    setPaymentProofPreview(null);
   };
 
   // Audio handlers
