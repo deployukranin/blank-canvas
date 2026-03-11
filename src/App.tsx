@@ -107,6 +107,13 @@ const App = () => (
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}
               <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
+              <Route path="/ceo/lojas" element={<AdminRoute requiredRole="ceo"><CEOLojas /></AdminRoute>} />
+              <Route path="/ceo/vendas" element={<AdminRoute requiredRole="ceo"><CEOVendas /></AdminRoute>} />
+              <Route path="/ceo/usuarios" element={<AdminRoute requiredRole="ceo"><CEOUsuarios /></AdminRoute>} />
+              <Route path="/ceo/trafego" element={<AdminRoute requiredRole="ceo"><CEOTrafego /></AdminRoute>} />
+              <Route path="/ceo/metricas" element={<AdminRoute requiredRole="ceo"><CEOMetricas /></AdminRoute>} />
+              <Route path="/ceo/alertas" element={<AdminRoute requiredRole="ceo"><CEOAlertas /></AdminRoute>} />
+              <Route path="/ceo/configuracoes" element={<AdminRoute requiredRole="ceo"><CEOConfiguracoes /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
