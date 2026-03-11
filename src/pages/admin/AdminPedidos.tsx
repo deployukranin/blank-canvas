@@ -47,6 +47,10 @@ const AdminPedidos: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Payment proof dialog
+  const [showProofDialog, setShowProofDialog] = useState(false);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+
   useEffect(() => {
     fetchOrders();
   }, []);
