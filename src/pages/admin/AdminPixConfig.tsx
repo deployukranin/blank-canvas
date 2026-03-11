@@ -352,7 +352,7 @@ const AdminPixConfig: React.FC = () => {
                 <label className="text-sm font-medium mb-1 block">Tipo da Chave *</label>
                 <Select
                   value={form.pixKeyType}
-                  onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'] }))}
+                  onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'], pixKey: '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
