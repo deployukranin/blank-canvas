@@ -80,7 +80,7 @@ const App = () => (
               
               {/* Rotas Protegidas (Usuário Logado) */}
               <Route path="/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
-              <Route path="/vip" element={<ProtectedRoute><VIP /></ProtectedRoute>} />
+              
               <Route path="/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
               <Route path="/comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
               <Route path="/galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
