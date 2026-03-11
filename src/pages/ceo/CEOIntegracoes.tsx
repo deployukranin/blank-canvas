@@ -65,6 +65,19 @@ const CEOIntegracoes = () => {
     trendingLimit: config.youtube?.trendingLimit ?? 8,
   });
 
+  // AdSense config
+  const [adsenseDraft, setAdsenseDraft] = useState({
+    enabled: config.adsense?.enabled ?? false,
+    publisherId: config.adsense?.publisherId ?? '',
+    slots: {
+      home: config.adsense?.slots?.home ?? '',
+      gallery: config.adsense?.slots?.gallery ?? '',
+      community: config.adsense?.slots?.community ?? '',
+      videos: config.adsense?.slots?.videos ?? '',
+      ideas: config.adsense?.slots?.ideas ?? '',
+    },
+  });
+
   // When store selection changes, load that store's data
   const handleStoreChange = (storeId: string) => {
     // Save current store state first
