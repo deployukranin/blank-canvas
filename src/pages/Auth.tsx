@@ -93,7 +93,7 @@ const Auth = () => {
         }
       } else {
         toast.success("Login realizado com sucesso!");
-        navigate("/", { replace: true });
+        navigate("/home", { replace: true });
       }
     } else {
       toast.error(result.error || "Erro ao fazer login");
