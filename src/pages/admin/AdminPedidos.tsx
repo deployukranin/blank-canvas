@@ -30,6 +30,7 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
+  payment_proof_url: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
