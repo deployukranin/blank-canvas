@@ -5,9 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePixConfig, PixConfig } from '@/hooks/use-pix-config';
-import { QrCode, Save, Loader2 } from 'lucide-react';
+import { QrCode, Save, Loader2, CheckCircle2, Pencil, Trash2, Eye, EyeOff, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { PixQRCode } from '@/components/payment/PixQRCode';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
 
 const BRAZILIAN_STATES = [
   { uf: 'AC', name: 'Acre', capital: 'RIO BRANCO' },
@@ -39,11 +50,47 @@ const BRAZILIAN_STATES = [
   { uf: 'TO', name: 'Tocantins', capital: 'PALMAS' },
 ];
 
+const PIX_TYPE_LABELS: Record<string, string> = {
+  cpf: 'CPF',
+  cnpj: 'CNPJ',
+  email: 'E-mail',
+  phone: 'Telefone',
+  random: 'Chave Aleatória',
+};
+
+function maskPixKey(key: string, type: string): string {
+  if (type === 'cpf' && key.length >= 11) {
+    return `${key.slice(0, 3)}.***.***-${key.slice(-2)}`;
+  }
+  if (type === 'email' && key.includes('@')) {
+    const [user, domain] = key.split('@');
+    return `${user.slice(0, 2)}***@${domain}`;
+  }
+  if (type === 'phone' && key.length >= 8) {
+    return `${key.slice(0, 4)}****${key.slice(-2)}`;
+  }
+  if (key.length > 8) {
+    return `${key.slice(0, 4)}****${key.slice(-4)}`;
+  }
+  return '••••••••';
+}
+
 const AdminPixConfig: React.FC = () => {
   const { config, isLoading, saveConfig } = usePixConfig();
+
   const [form, setForm] = useState<PixConfig>(config);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showKeyFull, setShowKeyFull] = useState(false);
+
+  // Password confirmation
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [pendingForm, setPendingForm] = useState<PixConfig | null>(null);
+
+  const hasExistingKey = Boolean(config.pixKey);
 
   useEffect(() => {
     setForm(config);
@@ -58,20 +105,68 @@ const AdminPixConfig: React.FC = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleRequestSave = () => {
     if (!form.pixKey.trim() || !form.merchantName.trim() || !form.merchantState) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
-    setIsSaving(true);
+    setPendingForm({ ...form });
+    setPassword('');
+    setShowPasswordDialog(true);
+  };
+
+  const handleConfirmWithPassword = async () => {
+    if (!password.trim()) {
+      toast.error('Digite sua senha');
+      return;
+    }
+
+    setIsVerifying(true);
     try {
-      await saveConfig(form);
-      toast.success('Configuração PIX salva!');
+      // Re-authenticate with current session email
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        toast.error('Sessão inválida. Faça login novamente.');
+        return;
+      }
+
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password,
+      });
+
+      if (authError) {
+        toast.error('Senha incorreta. Tente novamente.');
+        return;
+      }
+
+      // Password verified — proceed to save
+      if (pendingForm) {
+        setIsSaving(true);
+        await saveConfig(pendingForm);
+        toast.success('Chave PIX salva com sucesso!');
+        setIsEditing(false);
+        setShowPasswordDialog(false);
+        setPendingForm(null);
+      }
     } catch {
-      toast.error('Erro ao salvar configuração');
+      toast.error('Erro ao verificar senha');
     } finally {
+      setIsVerifying(false);
       setIsSaving(false);
     }
+  };
+
+  const handleRemoveKey = () => {
+    setPendingForm({
+      pixKey: '',
+      pixKeyType: 'cpf',
+      merchantName: '',
+      merchantState: '',
+      merchantCity: '',
+    });
+    setPassword('');
+    setShowPasswordDialog(true);
   };
 
   if (isLoading) {
@@ -87,98 +182,215 @@ const AdminPixConfig: React.FC = () => {
   return (
     <AdminLayout title="Configuração PIX">
       <div className="space-y-6 max-w-2xl">
-        <GlassCard className="p-6 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <QrCode className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Chave PIX</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Configure sua chave PIX para receber pagamentos. O QR Code será gerado automaticamente para cada pedido.
-          </p>
 
-          <div className="space-y-4 mt-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Tipo da Chave *</label>
-              <Select
-                value={form.pixKeyType}
-                onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'] }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cpf">CPF</SelectItem>
-                  <SelectItem value="cnpj">CNPJ</SelectItem>
-                  <SelectItem value="email">E-mail</SelectItem>
-                  <SelectItem value="phone">Telefone</SelectItem>
-                  <SelectItem value="random">Chave Aleatória</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* Active PIX Card */}
+        {hasExistingKey && !isEditing && (
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                  <QrCode className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">Chave PIX</h2>
+                  <p className="text-sm text-muted-foreground">Pagamento via PIX configurado</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="gap-1.5 border-emerald-500/50 text-emerald-400 bg-emerald-500/10 px-3 py-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Ativo
+              </Badge>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-1 block">Chave PIX *</label>
-              <Input
-                placeholder="Digite sua chave PIX"
-                value={form.pixKey}
-                onChange={(e) => setForm(prev => ({ ...prev, pixKey: e.target.value }))}
-              />
+            <div className="rounded-xl border border-border bg-card/50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Tipo</p>
+                  <p className="text-sm font-medium">{PIX_TYPE_LABELS[config.pixKeyType] || config.pixKeyType}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Estado</p>
+                  <p className="text-sm font-medium">{config.merchantState}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Chave</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-mono font-medium">
+                    {showKeyFull ? config.pixKey : maskPixKey(config.pixKey, config.pixKeyType)}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setShowKeyFull(!showKeyFull)}
+                  >
+                    {showKeyFull ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Recebedor</p>
+                <p className="text-sm font-medium">{config.merchantName}</p>
+              </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-1 block">Nome do Recebedor *</label>
-              <Input
-                placeholder="Nome que aparecerá no PIX"
-                value={form.merchantName}
-                onChange={(e) => setForm(prev => ({ ...prev, merchantName: e.target.value }))}
-                maxLength={25}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Estado *</label>
-              <Select value={form.merchantState} onValueChange={handleStateChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione seu estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BRAZILIAN_STATES.map(s => (
-                    <SelectItem key={s.uf} value={s.uf}>
-                      {s.uf} — {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Salvar
-            </Button>
-            {form.pixKey && (
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsEditing(true)} className="gap-2">
+                <Pencil className="w-4 h-4" />
+                Editar
+              </Button>
               <Button variant="outline" onClick={() => setShowPreview(!showPreview)} className="gap-2">
                 <QrCode className="w-4 h-4" />
-                {showPreview ? 'Esconder Preview' : 'Preview QR Code'}
+                {showPreview ? 'Esconder QR' : 'Preview QR'}
               </Button>
-            )}
-          </div>
-        </GlassCard>
+              <Button variant="ghost" onClick={handleRemoveKey} className="gap-2 text-destructive hover:text-destructive">
+                <Trash2 className="w-4 h-4" />
+                Remover
+              </Button>
+            </div>
+          </GlassCard>
+        )}
 
-        {showPreview && form.pixKey && (
+        {/* Form — shown when no key or editing */}
+        {(!hasExistingKey || isEditing) && (
+          <GlassCard className="p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-semibold">
+                {hasExistingKey ? 'Editar Chave PIX' : 'Adicionar Chave PIX'}
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Configure sua chave PIX para receber pagamentos. Será solicitada sua senha para confirmar.
+            </p>
+
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Tipo da Chave *</label>
+                <Select
+                  value={form.pixKeyType}
+                  onValueChange={(v) => setForm(prev => ({ ...prev, pixKeyType: v as PixConfig['pixKeyType'] }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cpf">CPF</SelectItem>
+                    <SelectItem value="cnpj">CNPJ</SelectItem>
+                    <SelectItem value="email">E-mail</SelectItem>
+                    <SelectItem value="phone">Telefone</SelectItem>
+                    <SelectItem value="random">Chave Aleatória</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Chave PIX *</label>
+                <Input
+                  placeholder="Digite sua chave PIX"
+                  value={form.pixKey}
+                  onChange={(e) => setForm(prev => ({ ...prev, pixKey: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Nome do Recebedor *</label>
+                <Input
+                  placeholder="Nome que aparecerá no PIX"
+                  value={form.merchantName}
+                  onChange={(e) => setForm(prev => ({ ...prev, merchantName: e.target.value }))}
+                  maxLength={25}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Estado *</label>
+                <Select value={form.merchantState} onValueChange={handleStateChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione seu estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BRAZILIAN_STATES.map(s => (
+                      <SelectItem key={s.uf} value={s.uf}>
+                        {s.uf} — {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleRequestSave} disabled={isSaving} className="gap-2">
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Salvar Chave PIX
+              </Button>
+              {isEditing && (
+                <Button variant="outline" onClick={() => { setIsEditing(false); setForm(config); }}>
+                  Cancelar
+                </Button>
+              )}
+            </div>
+          </GlassCard>
+        )}
+
+        {/* QR Preview */}
+        {showPreview && config.pixKey && (
           <GlassCard className="p-6">
             <h3 className="text-sm font-semibold mb-4 text-center">Preview (R$ 10,00 de exemplo)</h3>
             <PixQRCode
-              pixKey={form.pixKey}
-              merchantName={form.merchantName || 'TESTE'}
-              merchantCity={form.merchantCity || 'SAO PAULO'}
+              pixKey={config.pixKey}
+              merchantName={config.merchantName || 'TESTE'}
+              merchantCity={config.merchantCity || 'SAO PAULO'}
               amount={10}
               txId="PREVIEW"
             />
           </GlassCard>
         )}
       </div>
+
+      {/* Password Confirmation Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-primary" />
+              Confirmar Senha
+            </DialogTitle>
+            <DialogDescription>
+              Para segurança, confirme sua senha antes de alterar a chave PIX.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="confirm-password">Senha da conta</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Digite sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleConfirmWithPassword()}
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isVerifying}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmWithPassword} disabled={isVerifying} className="gap-2">
+              {isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
