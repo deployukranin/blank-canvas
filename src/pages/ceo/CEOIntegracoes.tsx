@@ -509,7 +509,7 @@ const CEOIntegracoes = () => {
           </Button>
         </motion.div>
       </div>
-    </CEOLayout>
+    </AdminLayout>
   );
 };
 
