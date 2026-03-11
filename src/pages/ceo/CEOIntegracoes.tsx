@@ -20,13 +20,7 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
-
-// Mock stores — same source as CEOLojas
-const availableStores = [
-  { id: '1', name: 'ASMR Luna Store' },
-  { id: '2', name: 'Relaxing Vibes Shop' },
-  { id: '3', name: 'Whisper Dreams' },
-];
+import { useStores } from '@/hooks/use-stores';
 
 interface StoreChannel {
   id: string;
