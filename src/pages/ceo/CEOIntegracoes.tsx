@@ -77,6 +77,14 @@ const CEOIntegracoes = () => {
       videos: config.adsense?.slots?.videos ?? '',
       ideas: config.adsense?.slots?.ideas ?? '',
     },
+    customBanners: config.adsense?.customBanners ?? [] as Array<{
+      id: string;
+      imageUrl: string;
+      linkUrl: string;
+      label: string;
+      pages: Array<'home' | 'gallery' | 'community' | 'videos' | 'ideas'>;
+      enabled: boolean;
+    }>,
   });
 
   // When store selection changes, load that store's data
