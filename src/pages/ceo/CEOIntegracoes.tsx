@@ -138,6 +138,45 @@ const CEOIntegracoes = () => {
     setChannels((prev) => prev.filter((ch) => ch.id !== id));
   };
 
+  const validateChannel = useCallback(async (channelRowId: string, channelId: string) => {
+    if (!channelId.trim() || channelId.length < 10) return;
+    
+    setChannels(prev => prev.map(ch => 
+      ch.id === channelRowId ? { ...ch, validating: true, validated: undefined } : ch
+    ));
+
+    try {
+      const { data, error } = await (await import('@/integrations/supabase/client')).supabase
+        .functions.invoke('validate-youtube-channel', {
+          body: { channelId: channelId.trim() },
+        });
+      
+      const result = (error ? { valid: false, error: 'Erro de conexão' } : data) as ChannelValidationResult;
+      
+      setChannels(prev => prev.map(ch => 
+        ch.id === channelRowId ? {
+          ...ch,
+          validating: false,
+          validated: result.valid,
+          channelTitle: result.channel?.title,
+          channelThumbnail: result.channel?.thumbnail,
+          creatorName: result.channel?.title && !ch.creatorName ? result.channel.title : ch.creatorName,
+        } : ch
+      ));
+
+      if (result.valid) {
+        toast.success(`Canal "${result.channel?.title}" validado!`);
+      } else {
+        toast.error(result.error || 'Canal não encontrado');
+      }
+    } catch {
+      setChannels(prev => prev.map(ch => 
+        ch.id === channelRowId ? { ...ch, validating: false, validated: false } : ch
+      ));
+      toast.error('Erro ao validar canal');
+    }
+  }, []);
+
   const saveCurrentStoreState = () => {
     const updatedIntegrations = {
       ...storeIntegrations,
