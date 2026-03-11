@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
+import { supabase } from '@/integrations/supabase/client';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { PixQRCode } from '@/components/payment/PixQRCode';
 import { usePixConfig } from '@/hooks/use-pix-config';
