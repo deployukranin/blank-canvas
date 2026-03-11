@@ -1177,6 +1177,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, []);
 
+  const updateAdSense = useCallback((adsense: Partial<WhiteLabelConfig['adsense']>) => {
+    setConfig(prev => ({
+      ...prev,
+      adsense: { ...prev.adsense, ...adsense, slots: { ...prev.adsense.slots, ...adsense.slots } },
+    }));
+  }, []);
+
   const updateToken = useCallback(<K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,
     tokenValue: Partial<WhiteLabelConfig['tokens'][K]>
