@@ -30,6 +30,7 @@ export interface CustomOrderPayload {
   triggers?: string;
   script?: string;
   observations?: string;
+  paymentProofUrl?: string;
   status: 'pending' | 'in_production' | 'delivered';
 }
 

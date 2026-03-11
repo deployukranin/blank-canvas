@@ -82,6 +82,7 @@ export type Database = {
           observations: string | null
           openpix_charge_id: string | null
           paid_at: string | null
+          payment_proof_url: string | null
           payout_amount_cents: number | null
           payout_correlation_id: string | null
           payout_status: string | null
@@ -110,6 +111,7 @@ export type Database = {
           observations?: string | null
           openpix_charge_id?: string | null
           paid_at?: string | null
+          payment_proof_url?: string | null
           payout_amount_cents?: number | null
           payout_correlation_id?: string | null
           payout_status?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           observations?: string | null
           openpix_charge_id?: string | null
           paid_at?: string | null
+          payment_proof_url?: string | null
           payout_amount_cents?: number | null
           payout_correlation_id?: string | null
           payout_status?: string | null
