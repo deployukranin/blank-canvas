@@ -114,21 +114,63 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePayment = async () => {
+  const handleVideoOrder = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
-    if (!pixConfig.pixKey) {
+    if (!personalizationData.name.trim()) {
       toast({
-        title: 'Pagamento indisponível',
-        description: 'O PIX ainda não foi configurado pelo administrador.',
+        title: 'Nome obrigatório',
+        description: 'Por favor, informe seu nome para personalização.',
         variant: 'destructive',
       });
       return;
     }
 
-    // PIX QR code is shown in the dialog — proceed to personalization after user confirms
+    setIsProcessing(true);
+
+    await onCustomOrder({
+      type: 'video',
+      category: selectedCategory.id,
+      categoryName: selectedCategory.name,
+      duration: selectedDuration.minutes,
+      durationLabel: selectedDuration.label,
+      price: calculatePrice(selectedDuration, selectedCategory),
+      name: personalizationData.name,
+      triggers: personalizationData.triggers,
+      script: personalizationData.script,
+      observations: personalizationData.observations,
+      status: 'pending',
+    });
+
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + (config?.deliveryDays || 7));
+    
+    addOrder<VideoOrder>({
+      type: 'video',
+      category: selectedCategory.id,
+      categoryName: selectedCategory.name,
+      categoryIcon: selectedCategory.icon,
+      duration: selectedDuration.minutes,
+      durationLabel: selectedDuration.label,
+      price: calculatePrice(selectedDuration, selectedCategory),
+      status: 'pending',
+      estimatedDelivery: deliveryDate.toISOString().split('T')[0],
+      personalization: {
+        name: personalizationData.name,
+        triggers: personalizationData.triggers,
+        script: personalizationData.script,
+        observations: personalizationData.observations,
+      },
+    });
+
+    trackEvent('video_order_submitted', { 
+      category: selectedCategory.id,
+      duration: selectedDuration.id 
+    });
+
     setShowPaymentDialog(false);
-    setShowPersonalizationDialog(true);
+    setShowSuccessDialog(true);
+    setIsProcessing(false);
   };
 
   const handleSubmitPersonalization = async () => {
