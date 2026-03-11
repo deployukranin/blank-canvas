@@ -35,7 +35,7 @@ import AdminPedidos from "./pages/admin/AdminPedidos";
 
 
 import AdminVideos from "./pages/admin/AdminVideos";
-import AdminAudios from "./pages/admin/AdminAudios";
+import AdminPrecos from "./pages/admin/AdminPrecos";
 import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
