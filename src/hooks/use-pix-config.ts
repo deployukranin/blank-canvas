@@ -25,8 +25,9 @@ export interface PixMultiConfig {
 }
 
 function migrateFromLegacy(raw: any): PixMultiConfig {
+  if (!raw) return { keys: [] };
   // Already multi-key format
-  if (raw?.keys && Array.isArray(raw.keys)) return raw as PixMultiConfig;
+  if (Array.isArray(raw?.keys)) return { keys: raw.keys };
   // Legacy single-key
   if (raw?.pixKey) {
     return {
@@ -49,7 +50,7 @@ export function usePixConfig() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Derived: active key as legacy PixConfig (for checkout compatibility)
-  const activeKey = multiConfig.keys.find(k => k.isActive);
+  const activeKey = multiConfig.keys?.find(k => k.isActive);
   const config: PixConfig = activeKey
     ? { pixKey: activeKey.pixKey, pixKeyType: activeKey.pixKeyType, merchantName: activeKey.merchantName, merchantState: activeKey.merchantState, merchantCity: activeKey.merchantCity }
     : { pixKey: '', pixKeyType: 'cpf', merchantName: '', merchantState: '', merchantCity: '' };
