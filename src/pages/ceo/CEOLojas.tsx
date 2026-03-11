@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2 } from 'lucide-react';
+import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2, Copy, Link2 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useStores, type StoreItem } from '@/hooks/use-stores';
+import { toast } from 'sonner';
 
 const CEOLojas = () => {
   const { stores, isLoading, createStore, updateStore, deleteStore } = useStores();
