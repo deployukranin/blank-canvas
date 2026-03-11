@@ -734,6 +734,32 @@ export interface WhiteLabelConfig {
     }>;
   };
 
+  // Landing Page
+  landingPage: {
+    heroVisible: boolean;
+    heroTitle: string;
+    heroSubtitle: string;
+    heroBadgeText: string;
+    heroCtaText: string;
+    statsVisible: boolean;
+    featuresVisible: boolean;
+    featuresTitle: string;
+    featuresSubtitle: string;
+    stepsVisible: boolean;
+    stepsTitle: string;
+    stepsSubtitle: string;
+    freeHighlightVisible: boolean;
+    freeHighlightTitle: string;
+    freeHighlightDescription: string;
+    testimonialsVisible: boolean;
+    testimonialsTitle: string;
+    ctaVisible: boolean;
+    ctaTitle: string;
+    ctaDescription: string;
+    ctaButtonText: string;
+    footerName: string;
+  };
+
   // Integration Tokens
   tokens: {
     supabase: {
@@ -771,6 +797,31 @@ const defaultCommunityConfig = {
     { id: '2', title: 'Acesso Antecipado', description: 'Seja o primeiro a ver novos conteúdos', icon: 'bell' as const },
     { id: '3', title: 'Chat Exclusivo', description: 'Converse diretamente com a comunidade VIP', icon: 'message' as const },
   ],
+};
+
+const defaultLandingPage: WhiteLabelConfig['landingPage'] = {
+  heroVisible: true,
+  heroTitle: 'Sua loja ASMR completa em minutos',
+  heroSubtitle: 'Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você criar conteúdo incrível.',
+  heroBadgeText: '100% Grátis — Crie sua loja agora',
+  heroCtaText: 'Criar Minha Loja Grátis',
+  statsVisible: true,
+  featuresVisible: true,
+  featuresTitle: 'Tudo para monetizar seu conteúdo',
+  featuresSubtitle: 'Ferramentas feitas sob medida para criadores ASMR',
+  stepsVisible: true,
+  stepsTitle: 'Como funciona',
+  stepsSubtitle: '4 passos para ter sua loja no ar',
+  freeHighlightVisible: true,
+  freeHighlightTitle: 'Totalmente grátis',
+  freeHighlightDescription: 'Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.',
+  testimonialsVisible: true,
+  testimonialsTitle: 'Criadores que confiam',
+  ctaVisible: true,
+  ctaTitle: 'Pronto para criar sua loja ASMR?',
+  ctaDescription: 'Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.',
+  ctaButtonText: 'Criar Minha Loja Grátis',
+  footerName: 'ASMR Store',
 };
 
 const defaultConfig: WhiteLabelConfig = {
@@ -836,6 +887,7 @@ const defaultConfig: WhiteLabelConfig = {
       lastSentAt: undefined,
     },
   },
+  landingPage: defaultLandingPage,
 };
 
 interface WhiteLabelContextType {
@@ -947,6 +999,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         supabase: { ...defaults.tokens.supabase, ...parsed.tokens?.supabase },
         metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
       },
+      landingPage: { ...defaultLandingPage, ...parsed.landingPage },
     };
   };
 

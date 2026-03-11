@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 
 const features = [
   {
@@ -127,6 +128,8 @@ const FloatingOrb = ({ className, delay = 0 }: { className: string; delay?: numb
 const LandingPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
+  const { config } = useWhiteLabel();
+  const lp = config.landingPage;
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -147,7 +150,7 @@ const LandingPage = () => {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/20">
         <div className="max-w-6xl mx-auto px-4 h-12 sm:h-14 flex items-center justify-between">
           <span className="text-sm font-semibold tracking-tight text-foreground">
-            ASMR Store
+            {lp.footerName || 'ASMR Store'}
           </span>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Button variant="ghost" size="sm" className="text-xs h-8 px-3 text-muted-foreground" onClick={() => navigate("/auth")}>
@@ -161,6 +164,7 @@ const LandingPage = () => {
       </header>
 
       {/* Hero */}
+      {lp.heroVisible !== false && (
       <section ref={heroRef} className="relative min-h-[100svh] flex items-center justify-center pt-12 pb-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-background to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,hsl(var(--primary)/0.18),transparent)]" />
@@ -179,7 +183,7 @@ const LandingPage = () => {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-6 sm:mb-10 backdrop-blur-sm"
           >
             <Gift className="w-3.5 h-3.5" />
-            100% Grátis — Crie sua loja agora
+            {lp.heroBadgeText || '100% Grátis — Crie sua loja agora'}
           </motion.div>
 
           <motion.h1
@@ -188,12 +192,15 @@ const LandingPage = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-[2.5rem] leading-[1.08] sm:text-5xl md:text-7xl font-extrabold mb-5 sm:mb-8 tracking-tight"
           >
-            Sua loja ASMR
-            <br />
-            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">
-              completa
-            </span>{" "}
-            em minutos
+            {(() => {
+              const title = lp.heroTitle || 'Sua loja ASMR completa em minutos';
+              const parts = title.split(/\n/);
+              return parts.length > 1 ? (
+                <>{parts[0]}<br /><span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">{parts[1]}</span></>
+              ) : (
+                <>{title.replace(/ em minutos$/, '')}<br /><span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">completa</span>{' '}em minutos</>
+              );
+            })()}
           </motion.h1>
 
           <motion.p
@@ -202,7 +209,7 @@ const LandingPage = () => {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="text-[0.95rem] sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed"
           >
-            Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você{" "}
+            {lp.heroSubtitle || 'Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você'}{" "}
             <span className="text-foreground font-medium">criar conteúdo incrível.</span>
           </motion.p>
 
@@ -218,7 +225,7 @@ const LandingPage = () => {
               onClick={() => navigate("/auth?tab=signup")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Criar Minha Loja Grátis
+              {lp.heroCtaText || 'Criar Minha Loja Grátis'}
             </Button>
             <Button
               variant="outline"
@@ -243,8 +250,10 @@ const LandingPage = () => {
           </motion.div>
         </motion.div>
       </section>
+      )}
 
       {/* Stats */}
+      {lp.statsVisible !== false && (
       <section className="py-4 sm:py-6 px-4 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
         <div className="max-w-4xl mx-auto relative z-10">
@@ -269,8 +278,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Features */}
+      {lp.featuresVisible !== false && (
       <section id="features" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,hsl(var(--primary)/0.04),transparent)]" />
         <div className="max-w-6xl mx-auto relative z-10">
@@ -284,14 +295,10 @@ const LandingPage = () => {
               Recursos
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight px-2">
-              Tudo para{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                monetizar
-              </span>{" "}
-              seu conteúdo
+              {lp.featuresTitle || 'Tudo para monetizar seu conteúdo'}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-lg max-w-xl mx-auto">
-              Ferramentas feitas sob medida para criadores ASMR
+              {lp.featuresSubtitle || 'Ferramentas feitas sob medida para criadores ASMR'}
             </p>
           </motion.div>
 
@@ -318,8 +325,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* How it works */}
+      {lp.stepsVisible !== false && (
       <section id="how-it-works" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-card/20" />
         <div className="max-w-4xl mx-auto relative z-10">
@@ -333,10 +342,10 @@ const LandingPage = () => {
               Passo a passo
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Como <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">funciona</span>
+              {lp.stepsTitle || 'Como funciona'}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-lg">
-              4 passos para ter sua loja no ar
+              {lp.stepsSubtitle || '4 passos para ter sua loja no ar'}
             </p>
           </motion.div>
 
@@ -372,8 +381,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Free highlight */}
+      {lp.freeHighlightVisible !== false && (
       <section className="py-12 sm:py-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06),transparent_70%)]" />
         <motion.div
@@ -388,19 +399,18 @@ const LandingPage = () => {
               <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 tracking-tight">
-              Totalmente{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                grátis
-              </span>
+              {lp.freeHighlightTitle || 'Totalmente grátis'}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
-              Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.
+              {lp.freeHighlightDescription || 'Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.'}
             </p>
           </GlassCard>
         </motion.div>
       </section>
+      )}
 
       {/* Testimonials */}
+      {lp.testimonialsVisible !== false && (
       <section id="testimonials" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-card/20" />
         <div className="max-w-5xl mx-auto relative z-10">
@@ -414,14 +424,10 @@ const LandingPage = () => {
               Depoimentos
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Criadores que{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                confiam
-              </span>
+              {lp.testimonialsTitle || 'Criadores que confiam'}
             </h2>
           </motion.div>
 
-          {/* Mobile: horizontal scroll, Desktop: grid */}
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 scrollbar-hide">
             {testimonials.map((t, index) => (
               <motion.div
@@ -456,8 +462,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Final */}
+      {lp.ctaVisible !== false && (
       <section className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsl(var(--primary)/0.08),transparent_70%)]" />
         <motion.div
@@ -471,10 +479,10 @@ const LandingPage = () => {
 
             <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-4 sm:mb-6" />
             <h2 className="text-xl sm:text-2xl md:text-4xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Pronto para criar sua loja ASMR?
+              {lp.ctaTitle || 'Pronto para criar sua loja ASMR?'}
             </h2>
             <p className="text-muted-foreground mb-6 sm:mb-10 text-sm sm:text-base leading-relaxed">
-              Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.
+              {lp.ctaDescription || 'Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.'}
             </p>
             <Button
               size="lg"
@@ -482,18 +490,19 @@ const LandingPage = () => {
               onClick={() => navigate("/auth?tab=signup")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Criar Minha Loja Grátis
+              {lp.ctaButtonText || 'Criar Minha Loja Grátis'}
             </Button>
           </GlassCard>
         </motion.div>
       </section>
+      )}
 
       {/* Footer */}
       <footer className="py-8 sm:py-10 px-4 border-t border-border/20">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4">
-          <span className="text-xs sm:text-sm font-semibold text-foreground">ASMR Store</span>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{lp.footerName || 'ASMR Store'}</span>
           <p className="text-muted-foreground text-[0.65rem] sm:text-xs">
-            © {new Date().getFullYear()} ASMR Store. Todos os direitos reservados.
+            © {new Date().getFullYear()} {lp.footerName || 'ASMR Store'}. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4 sm:gap-6 text-[0.65rem] sm:text-xs text-muted-foreground">
             <a href="/termos" className="hover:text-foreground transition-colors">
