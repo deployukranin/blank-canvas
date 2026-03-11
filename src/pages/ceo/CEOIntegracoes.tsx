@@ -87,7 +87,7 @@ const CEOIntegracoes = () => {
   };
 
   return (
-    <CEOLayout title="Integrações Externas">
+    <AdminLayout title="Integrações Externas">
       <div className="space-y-8 max-w-4xl">
 
         {/* Loja Parceira */}
