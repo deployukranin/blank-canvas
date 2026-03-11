@@ -30,9 +30,16 @@ interface StoreChannel {
 
 const CEOIntegracoes = () => {
   const { config, updateYouTube, updateAdSense } = useWhiteLabel();
+  const { stores: availableStores, isLoading: storesLoading } = useStores();
 
-  const [selectedStoreId, setSelectedStoreId] = useState<string>(availableStores[0]?.id ?? '');
+  const [selectedStoreId, setSelectedStoreId] = useState<string>('');
   const selectedStore = availableStores.find((s) => s.id === selectedStoreId);
+
+  // Auto-select first store when loaded
+  const firstStoreId = availableStores[0]?.id;
+  if (!selectedStoreId && firstStoreId) {
+    setSelectedStoreId(firstStoreId);
+  }
 
   // Per-store integrations from config
   const storeIntegrations = config.youtube?.storeIntegrations ?? {};
