@@ -1039,6 +1039,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
       },
       landingPage: { ...defaultLandingPage, ...parsed.landingPage },
+      adsense: { ...defaults.adsense, ...parsed.adsense, slots: { ...defaults.adsense.slots, ...parsed.adsense?.slots } },
     };
   };
 
