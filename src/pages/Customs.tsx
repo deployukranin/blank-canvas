@@ -58,6 +58,7 @@ const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { config: pixConfig, isLoading: pixLoading } = usePixConfig();
+  const navigate = useNavigate();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
@@ -65,8 +66,6 @@ const CustomsPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
     name: '',
@@ -79,16 +78,8 @@ const CustomsPage = () => {
   const [selectedAudioCategory, setSelectedAudioCategory] = useState<AudioCategory | null>(null);
   const [selectedAudioDuration, setSelectedAudioDuration] = useState<AudioDuration | null>(null);
   const [audioFormData, setAudioFormData] = useState({ name: '', preferences: '', observations: '' });
-  const [audioOrderComplete, setAudioOrderComplete] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAudioOrderDialog, setShowAudioOrderDialog] = useState(false);
-
-  // Payment proof state
-  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
-  const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
-  const [showProofDialog, setShowProofDialog] = useState(false);
-  const [proofType, setProofType] = useState<'video' | 'audio'>('video');
-  const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
