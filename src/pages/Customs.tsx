@@ -85,6 +85,13 @@ const CustomsPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAudioOrderDialog, setShowAudioOrderDialog] = useState(false);
 
+  // Payment proof state
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
+  const [audioPaymentProofFile, setAudioPaymentProofFile] = useState<File | null>(null);
+  const [audioPaymentProofPreview, setAudioPaymentProofPreview] = useState<string | null>(null);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
 
