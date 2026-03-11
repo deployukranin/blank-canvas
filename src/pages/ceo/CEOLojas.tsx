@@ -173,7 +173,12 @@ const CEOLojas = () => {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Nome da loja</Label>
-              <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Ex: ASMR Dreams" />
+              <Input value={formName} onChange={e => { setFormName(e.target.value); if (!formSlug) setFormSlug(generateSlug(e.target.value)); }} placeholder="Ex: ASMR Dreams" />
+            </div>
+            <div className="space-y-2">
+              <Label>Slug (identificador único)</Label>
+              <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="asmr-dreams" />
+              <p className="text-xs text-muted-foreground">Usado no link de cadastro: /loja/{formSlug || 'slug'}/auth</p>
             </div>
             <div className="space-y-2">
               <Label>URL (opcional)</Label>
