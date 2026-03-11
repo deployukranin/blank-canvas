@@ -36,7 +36,7 @@ import { ReputationCard } from '@/components/reputation/ReputationCard';
 import { PushNotificationToggle } from '@/components/notifications/PushNotificationToggle';
 import { UserHandle } from '@/components/profile/UserHandle';
 import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
-import { VIPAreaContent } from '@/components/vip/VIPAreaContent';
+
 const getPostTypeConfig = (type: FeedPost['type']) => {
   switch (type) {
     case 'announcement':
