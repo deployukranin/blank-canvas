@@ -34,7 +34,7 @@ interface StoreChannel {
 }
 
 const CEOIntegracoes = () => {
-  const { config, updateYouTube } = useWhiteLabel();
+  const { config, updateYouTube, updateAdSense } = useWhiteLabel();
 
   const [selectedStoreId, setSelectedStoreId] = useState<string>(availableStores[0]?.id ?? '');
   const selectedStore = availableStores.find((s) => s.id === selectedStoreId);
