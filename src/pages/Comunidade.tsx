@@ -36,7 +36,7 @@ import { ReputationCard } from '@/components/reputation/ReputationCard';
 import { PushNotificationToggle } from '@/components/notifications/PushNotificationToggle';
 import { UserHandle } from '@/components/profile/UserHandle';
 import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
-import { VIPAreaContent } from '@/components/vip/VIPAreaContent';
+
 const getPostTypeConfig = (type: FeedPost['type']) => {
   switch (type) {
     case 'announcement':
@@ -228,12 +228,6 @@ const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
             <h4 className="font-semibold text-sm mb-1">{post.title}</h4>
             <p className="text-muted-foreground text-xs leading-relaxed">{post.content}</p>
 
-            {post.type === 'exclusive' && (
-              <div className="mt-3 p-3 rounded-lg bg-vip/5 border border-vip/20 text-center">
-                <Lock className="w-4 h-4 mx-auto mb-1 text-vip" />
-                <p className="text-xs text-vip">Conteúdo exclusivo VIP</p>
-              </div>
-            )}
           </div>
         </div>
       </GlassCard>
@@ -850,12 +844,6 @@ const ComunidadePage = () => {
               <Lightbulb className="w-4 h-4" />
               {config.community.ideiasTabLabel}
             </TabsTrigger>
-            {config.community.vipTabEnabled && (
-              <TabsTrigger value="vip" className="flex-1 gap-2">
-                <Crown className="w-4 h-4" />
-                {config.community.vipTabLabel || 'Área VIP'}
-              </TabsTrigger>
-            )}
           </TabsList>
 
           {videosTabEnabled && (
@@ -1007,11 +995,6 @@ const ComunidadePage = () => {
             )}
           </TabsContent>
 
-          {config.community.vipTabEnabled && (
-            <TabsContent value="vip" className="space-y-4 mt-0">
-              <VIPAreaContent />
-            </TabsContent>
-          )}
         </Tabs>
       </div>
 

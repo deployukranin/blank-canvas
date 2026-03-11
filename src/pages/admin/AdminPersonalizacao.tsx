@@ -1034,7 +1034,7 @@ const CEOPersonalizacao = () => {
               </p>
               
               <div className="space-y-4">
-                {navigationForm.filter(tab => tab.path !== '/loja').sort((a, b) => a.order - b.order).map((tab, index) => {
+                {navigationForm.filter(tab => tab.path !== '/loja' && tab.path !== '/vip').sort((a, b) => a.order - b.order).map((tab, index) => {
                   const originalIndex = navigationForm.findIndex(t => t.id === tab.id);
                   const enabledCount = navigationForm.filter(t => t.enabled).length;
                   const isLastEnabled = tab.enabled && enabledCount <= 2;
@@ -1090,7 +1090,7 @@ const CEOPersonalizacao = () => {
                 <div className="bg-background rounded-xl p-3 border border-border">
                   <div className="flex items-center justify-around">
                     {navigationForm
-                      .filter(tab => tab.enabled && tab.path !== '/loja')
+                      .filter(tab => tab.enabled && tab.path !== '/loja' && tab.path !== '/vip')
                       .sort((a, b) => a.order - b.order)
                       .map((tab) => (
                         <div

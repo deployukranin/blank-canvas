@@ -14,7 +14,6 @@ import Ideias from "./pages/Ideias";
 
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
-import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
 import GaleriaVideos from "./pages/GaleriaVideos";
@@ -34,7 +33,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 
-import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
+
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
 import AdminYoutube from "./pages/admin/AdminYoutube";
@@ -81,7 +80,7 @@ const App = () => (
               
               {/* Rotas Protegidas (Usuário Logado) */}
               <Route path="/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
-              <Route path="/vip" element={<ProtectedRoute><VIP /></ProtectedRoute>} />
+              
               <Route path="/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
               <Route path="/comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
               <Route path="/galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
@@ -96,7 +95,7 @@ const App = () => (
               <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
               <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
               
-              <Route path="/admin/vip-precos" element={<AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute>} />
+              
               <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
               <Route path="/admin/audios" element={<AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute>} />
               <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />
