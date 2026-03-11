@@ -1,54 +1,149 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Headphones, Heart, Star, Shield, Zap, ChevronDown } from "lucide-react";
+import {
+  Sparkles,
+  Headphones,
+  ShoppingBag,
+  Users,
+  Crown,
+  BarChart3,
+  Palette,
+  ChevronDown,
+  Check,
+  Star,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 const features = [
   {
+    icon: ShoppingBag,
+    title: "Loja Própria",
+    description:
+      "Venda áudios, vídeos e pedidos personalizados ASMR com pagamento via Pix integrado.",
+  },
+  {
+    icon: Users,
+    title: "Comunidade Integrada",
+    description:
+      "Seus fãs interagem, votam em ideias de conteúdo e participam de um espaço exclusivo.",
+  },
+  {
+    icon: Crown,
+    title: "Área VIP & Assinaturas",
+    description:
+      "Crie planos de assinatura com conteúdo exclusivo e monetize sua base de fãs recorrentemente.",
+  },
+  {
     icon: Headphones,
-    title: "Conteúdo Exclusivo",
-    description: "Acesse vídeos ASMR exclusivos, áudios relaxantes e conteúdo premium feito especialmente para você.",
+    title: "Galeria de Conteúdo",
+    description:
+      "Organize vídeos e áudios por categorias, com player integrado e histórico de visualização.",
   },
   {
-    icon: Heart,
-    title: "Comunidade",
-    description: "Participe de uma comunidade acolhedora, vote em ideias de vídeos e conecte-se com outros fãs.",
+    icon: Palette,
+    title: "Marca Personalizada",
+    description:
+      "Personalize cores, logo e identidade visual da sua loja para refletir sua marca ASMR.",
   },
   {
-    icon: Star,
-    title: "Área VIP",
-    description: "Desbloqueie conteúdo especial, bastidores e interações exclusivas com assinatura VIP.",
-  },
-  {
-    icon: Shield,
-    title: "Pedidos Personalizados",
-    description: "Solicite áudios e vídeos ASMR personalizados com seus triggers favoritos.",
-  },
-  {
-    icon: Zap,
-    title: "Notificações em Tempo Real",
-    description: "Fique por dentro de novos conteúdos, respostas da comunidade e promoções exclusivas.",
-  },
-  {
-    icon: Sparkles,
-    title: "Experiência Imersiva",
-    description: "Interface pensada para relaxamento com tema escuro, animações suaves e design glassmorphism.",
+    icon: BarChart3,
+    title: "Painel Administrativo",
+    description:
+      "Gerencie pedidos, conteúdo, usuários e métricas da sua loja em um dashboard completo.",
   },
 ];
 
-const faqs = [
+const steps = [
   {
-    q: "Como consigo um código de convite?",
-    a: "Os códigos de convite são distribuídos pela criadora de conteúdo em suas redes sociais, lives e para membros VIP.",
+    number: "01",
+    title: "Crie sua conta",
+    description: "Cadastre-se com seu código de convite e configure seu perfil de criador.",
   },
   {
-    q: "Preciso pagar para participar?",
-    a: "O acesso básico é gratuito! Temos também planos VIP com conteúdo exclusivo e benefícios extras.",
+    number: "02",
+    title: "Personalize sua loja",
+    description: "Escolha cores, logo e configure suas categorias de conteúdo ASMR.",
   },
   {
-    q: "O que posso fazer na plataforma?",
-    a: "Assistir vídeos, ouvir áudios ASMR, participar da comunidade, votar em ideias, fazer pedidos personalizados e muito mais.",
+    number: "03",
+    title: "Adicione conteúdo",
+    description: "Publique vídeos, áudios e defina preços para pedidos personalizados.",
+  },
+  {
+    number: "04",
+    title: "Comece a faturar",
+    description: "Compartilhe o link da sua loja e receba pagamentos via Pix automaticamente.",
+  },
+];
+
+const plans = [
+  {
+    name: "Starter",
+    price: "Grátis",
+    period: "",
+    description: "Para começar a testar a plataforma",
+    features: [
+      "Loja básica",
+      "Até 10 conteúdos",
+      "Comunidade integrada",
+      "Pagamento via Pix",
+    ],
+    highlighted: false,
+    cta: "Começar Grátis",
+  },
+  {
+    name: "Pro",
+    price: "R$ 49",
+    period: "/mês",
+    description: "Para criadores que querem crescer",
+    features: [
+      "Conteúdo ilimitado",
+      "Área VIP & Assinaturas",
+      "Marca personalizada",
+      "Analytics avançados",
+      "Suporte prioritário",
+    ],
+    highlighted: true,
+    cta: "Assinar Pro",
+  },
+  {
+    name: "Business",
+    price: "R$ 99",
+    period: "/mês",
+    description: "Para criadores profissionais",
+    features: [
+      "Tudo do Pro",
+      "Domínio customizado",
+      "Múltiplos admins",
+      "API de integração",
+      "Onboarding dedicado",
+    ],
+    highlighted: false,
+    cta: "Falar com Vendas",
+  },
+];
+
+const testimonials = [
+  {
+    name: "Luna ASMR",
+    role: "Criadora de conteúdo",
+    text: "Finalmente uma plataforma feita para criadores ASMR! Consegui montar minha loja em minutos e já estou recebendo pedidos personalizados.",
+    stars: 5,
+  },
+  {
+    name: "Carlos Whispers",
+    role: "ASMRtist",
+    text: "O sistema de assinaturas VIP mudou meu jogo. Tenho uma receita recorrente estável e meus fãs adoram o conteúdo exclusivo.",
+    stars: 5,
+  },
+  {
+    name: "Sofia Tingles",
+    role: "Criadora & Streamer",
+    text: "A comunidade integrada é incrível. Meus fãs votam nas ideias de vídeo e eu sei exatamente o que eles querem assistir.",
+    stars: 5,
   },
 ];
 
@@ -63,15 +158,20 @@ const LandingPage = () => {
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              ASMR Universe
+              ASMR Store
             </span>
           </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Recursos</a>
+            <a href="#how-it-works" className="hover:text-foreground transition-colors">Como Funciona</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Planos</a>
+          </nav>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
               Entrar
             </Button>
             <Button size="sm" onClick={() => navigate("/auth?tab=signup")}>
-              Criar Conta
+              Criar Minha Loja
             </Button>
           </div>
         </div>
@@ -86,7 +186,7 @@ const LandingPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative z-10 text-center px-4 max-w-3xl mx-auto"
+          className="relative z-10 text-center px-4 max-w-4xl mx-auto"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -94,19 +194,20 @@ const LandingPage = () => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-8"
           >
-            <Sparkles className="w-4 h-4" />
-            Acesso exclusivo por convite
+            <Zap className="w-4 h-4" />
+            A plataforma #1 para criadores ASMR
           </motion.div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
-            Seu refúgio de{" "}
+            Sua loja ASMR{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              relaxamento
-            </span>
+              completa
+            </span>{" "}
+            em minutos
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Uma plataforma exclusiva de conteúdo ASMR com comunidade, vídeos personalizados e experiências imersivas para acalmar sua mente.
+            Loja, comunidade, assinaturas VIP, pedidos personalizados e pagamento via Pix — tudo em um só lugar para você focar no que importa: criar conteúdo incrível.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -116,15 +217,18 @@ const LandingPage = () => {
               onClick={() => navigate("/auth?tab=signup")}
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              Criar Conta
+              Criar Minha Loja Grátis
             </Button>
             <Button
               variant="outline"
               size="lg"
               className="text-base px-8 py-6"
-              onClick={() => navigate("/auth")}
+              onClick={() => {
+                document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
-              Já tenho conta
+              Ver Recursos
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
 
@@ -140,7 +244,7 @@ const LandingPage = () => {
       </section>
 
       {/* Features */}
-      <section className="py-24 px-4">
+      <section id="features" className="py-24 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -150,10 +254,10 @@ const LandingPage = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Tudo que você precisa para{" "}
-              <span className="text-primary">relaxar</span>
+              <span className="text-primary">monetizar</span> seu conteúdo
             </h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Uma experiência completa pensada para seu bem-estar
+              Ferramentas profissionais feitas sob medida para criadores ASMR
             </p>
           </motion.div>
 
@@ -169,7 +273,9 @@ const LandingPage = () => {
                 <GlassCard className="p-6 h-full hover:border-primary/30 transition-colors">
                   <feature.icon className="w-10 h-10 text-primary mb-4" />
                   <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
                 </GlassCard>
               </motion.div>
             ))}
@@ -177,9 +283,9 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-24 px-4 bg-card/30">
-        <div className="max-w-3xl mx-auto">
+      {/* How it works */}
+      <section id="how-it-works" className="py-24 px-4 bg-card/30">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -187,22 +293,145 @@ const LandingPage = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Perguntas Frequentes
+              Como <span className="text-primary">funciona</span>
             </h2>
+            <p className="text-muted-foreground text-lg">
+              4 passos simples para ter sua loja ASMR no ar
+            </p>
           </motion.div>
 
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {steps.map((step, index) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
+                key={step.number}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+              >
+                <GlassCard className="p-6 flex gap-5 items-start">
+                  <span className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent shrink-0">
+                    {step.number}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-1">{step.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 px-4">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Planos para cada <span className="text-primary">fase</span> do seu crescimento
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Comece grátis e escale conforme seu público cresce
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <GlassCard className="p-6">
-                  <h3 className="font-semibold mb-2">{faq.q}</h3>
-                  <p className="text-muted-foreground text-sm">{faq.a}</p>
+                <GlassCard
+                  className={`p-6 h-full flex flex-col ${
+                    plan.highlighted
+                      ? "border-primary/40 ring-1 ring-primary/20 relative"
+                      : ""
+                  }`}
+                >
+                  {plan.highlighted && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-semibold rounded-full bg-primary text-primary-foreground">
+                      Mais popular
+                    </span>
+                  )}
+                  <h3 className="text-lg font-bold mb-1">{plan.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
+                  <div className="mb-6">
+                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">{plan.period}</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((feat) => (
+                      <li key={feat} className="flex items-center gap-2 text-sm">
+                        <Check className="w-4 h-4 text-primary shrink-0" />
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className={`w-full ${
+                      plan.highlighted
+                        ? "bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                        : ""
+                    }`}
+                    variant={plan.highlighted ? "default" : "outline"}
+                    onClick={() => navigate("/auth?tab=signup")}
+                  >
+                    {plan.cta}
+                  </Button>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24 px-4 bg-card/30">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Criadores que <span className="text-primary">confiam</span> na plataforma
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonials.map((t, index) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <GlassCard className="p-6 h-full flex flex-col">
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: t.stars }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
+                    "{t.text}"
+                  </p>
+                  <div>
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
                 </GlassCard>
               </motion.div>
             ))}
@@ -221,17 +450,17 @@ const LandingPage = () => {
           <GlassCard className="p-10 border-primary/20">
             <Sparkles className="w-12 h-12 text-primary mx-auto mb-6" />
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Pronto para relaxar?
+              Pronto para criar sua loja ASMR?
             </h2>
             <p className="text-muted-foreground mb-8">
-              Use seu código de convite e entre para a comunidade mais acolhedora da internet.
+              Junte-se a dezenas de criadores que já monetizam seu conteúdo ASMR com nossa plataforma.
             </p>
             <Button
               size="lg"
               className="text-base px-8 py-6 bg-gradient-to-r from-primary to-accent hover:opacity-90"
               onClick={() => navigate("/auth?tab=signup")}
             >
-              Começar Agora
+              Criar Minha Loja Grátis
             </Button>
           </GlassCard>
         </motion.div>
@@ -239,10 +468,14 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border/50 text-center text-muted-foreground text-sm">
-        <p>© {new Date().getFullYear()} ASMR Universe. Todos os direitos reservados.</p>
+        <p>© {new Date().getFullYear()} ASMR Store. Todos os direitos reservados.</p>
         <div className="flex items-center justify-center gap-4 mt-2">
-          <a href="/termos" className="hover:text-primary transition-colors">Termos de Uso</a>
-          <a href="/privacidade" className="hover:text-primary transition-colors">Privacidade</a>
+          <a href="/termos" className="hover:text-primary transition-colors">
+            Termos de Uso
+          </a>
+          <a href="/privacidade" className="hover:text-primary transition-colors">
+            Privacidade
+          </a>
         </div>
       </footer>
     </div>
