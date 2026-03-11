@@ -304,6 +304,22 @@ const Auth = () => {
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="signup-invite-code">Código de Convite</Label>
+                  <div className="relative">
+                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="signup-invite-code"
+                      type="text"
+                      placeholder="Digite seu código de convite"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                      className="pl-10 uppercase"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full"
