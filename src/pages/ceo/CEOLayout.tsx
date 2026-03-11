@@ -72,10 +72,10 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
               <Crown className="w-6 h-6 text-amber-950" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-lg text-amber-100">Painel CEO</h1>
+              <h1 className="font-display font-bold text-lg text-amber-100">Meu Painel</h1>
               <p className="text-xs text-amber-400/70 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                White-Label
+                <Store className="w-3 h-3" />
+                Multi-Loja
               </p>
             </div>
           </div>

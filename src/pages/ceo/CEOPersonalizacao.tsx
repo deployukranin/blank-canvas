@@ -1319,7 +1319,7 @@ const CEOPersonalizacao = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </CEOLayout>
+    </AdminLayout>
   );
 };
 
