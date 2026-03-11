@@ -6,6 +6,7 @@ export interface StoreItem {
   id: string;
   name: string;
   url: string;
+  slug: string | null;
   status: 'active' | 'inactive';
   created_by: string | null;
   created_at: string;
