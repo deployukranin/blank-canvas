@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2 } from 'lucide-react';
+import { MediaUpload } from '@/components/admin/MediaUpload';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -233,33 +234,29 @@ const AdminVideos = () => {
 
               <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                 {config.previewType === 'video' ? (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">URL do Vídeo (YouTube Embed)</label>
-                    <Input
-                      placeholder="https://www.youtube.com/embed/..."
-                      value={config.previewVideoUrl}
-                      onChange={e => setConfig({ ...config, previewVideoUrl: e.target.value })}
-                      disabled={!config.previewEnabled}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
-                    </p>
-                  </div>
+                  <MediaUpload
+                    currentUrl={config.previewVideoUrl}
+                    onUrlChange={(url) => setConfig({ ...config, previewVideoUrl: url })}
+                    accept="video/mp4,video/webm,video/quicktime"
+                    label="Vídeo de Preview"
+                    placeholder="https://www.youtube.com/embed/..."
+                    hint="Envie um vídeo ou use uma URL do YouTube (formato embed)"
+                    disabled={!config.previewEnabled}
+                    folder="video-previews"
+                  />
                 ) : (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">URL da Imagem</label>
-                    <Input
-                      placeholder="https://exemplo.com/imagem.jpg"
-                      value={config.previewImageUrl}
-                      onChange={e => setConfig({ ...config, previewImageUrl: e.target.value })}
-                      disabled={!config.previewEnabled}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Insira a URL de uma imagem (JPG, PNG, WebP)
-                    </p>
-                  </div>
+                  <MediaUpload
+                    currentUrl={config.previewImageUrl}
+                    onUrlChange={(url) => setConfig({ ...config, previewImageUrl: url })}
+                    accept="image/jpeg,image/png,image/webp"
+                    label="Imagem de Preview"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    hint="Envie uma imagem (JPG, PNG, WebP) ou insira uma URL"
+                    disabled={!config.previewEnabled}
+                    folder="image-previews"
+                  />
                 )}
-                
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Título</label>
                   <Input
