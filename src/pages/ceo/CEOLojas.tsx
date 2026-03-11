@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff } from 'lucide-react';
+import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -8,28 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
-
-interface StoreItem {
-  id: string;
-  name: string;
-  url: string;
-  status: 'active' | 'inactive';
-  users: number;
-  orders: number;
-}
-
-const initialStores: StoreItem[] = [
-  { id: '1', name: 'ASMR Luna Store', url: 'luna-asmr.lovable.app', status: 'active', users: 342, orders: 87 },
-  { id: '2', name: 'Relaxing Vibes Shop', url: 'relaxing-vibes.lovable.app', status: 'active', users: 218, orders: 54 },
-  { id: '3', name: 'Whisper Dreams', url: 'whisper-dreams.lovable.app', status: 'inactive', users: 64, orders: 12 },
-];
+import { useStores, type StoreItem } from '@/hooks/use-stores';
 
 const CEOLojas = () => {
-  const [stores, setStores] = useState<StoreItem[]>(initialStores);
+  const { stores, isLoading, createStore, updateStore, deleteStore } = useStores();
   const [newOpen, setNewOpen] = useState(false);
   const [editStore, setEditStore] = useState<StoreItem | null>(null);
-  const [deleteStore, setDeleteStore] = useState<StoreItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<StoreItem | null>(null);
   const [formName, setFormName] = useState('');
   const [formUrl, setFormUrl] = useState('');
 
@@ -46,38 +31,36 @@ const CEOLojas = () => {
   };
 
   const handleCreate = () => {
-    if (!formName.trim()) { toast.error('Nome é obrigatório'); return; }
+    if (!formName.trim()) return;
     const slug = formName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    const newStore: StoreItem = {
-      id: crypto.randomUUID(),
+    createStore.mutate({
       name: formName.trim(),
       url: formUrl.trim() || `${slug}.lovable.app`,
-      status: 'active',
-      users: 0,
-      orders: 0,
-    };
-    setStores(prev => [...prev, newStore]);
+    });
     setNewOpen(false);
-    toast.success('Loja criada com sucesso!');
   };
 
   const handleEdit = () => {
     if (!editStore || !formName.trim()) return;
-    setStores(prev => prev.map(s => s.id === editStore.id ? { ...s, name: formName.trim(), url: formUrl.trim() || s.url } : s));
+    updateStore.mutate({
+      id: editStore.id,
+      name: formName.trim(),
+      url: formUrl.trim() || editStore.url,
+    });
     setEditStore(null);
-    toast.success('Loja atualizada!');
   };
 
   const handleDelete = () => {
-    if (!deleteStore) return;
-    setStores(prev => prev.filter(s => s.id !== deleteStore.id));
-    setDeleteStore(null);
-    toast.success('Loja removida!');
+    if (!deleteTarget) return;
+    deleteStore.mutate(deleteTarget.id);
+    setDeleteTarget(null);
   };
 
-  const toggleStatus = (id: string) => {
-    setStores(prev => prev.map(s => s.id === id ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s));
-    toast.success('Status atualizado!');
+  const toggleStatus = (store: StoreItem) => {
+    updateStore.mutate({
+      id: store.id,
+      status: store.status === 'active' ? 'inactive' : 'active',
+    });
   };
 
   return (
@@ -90,59 +73,69 @@ const CEOLojas = () => {
           </Button>
         </div>
 
-        <div className="space-y-3">
-          {stores.map((store, i) => (
-            <motion.div key={store.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <GlassCard className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                    <Store className="w-5 h-5 text-amber-400" />
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : stores.length === 0 ? (
+          <GlassCard className="text-center py-12">
+            <Store className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Nenhuma loja criada ainda</p>
+            <Button className="mt-4 gap-2" onClick={openNew}>
+              <Plus className="w-4 h-4" /> Criar Primeira Loja
+            </Button>
+          </GlassCard>
+        ) : (
+          <div className="space-y-3">
+            {stores.map((store, i) => (
+              <motion.div key={store.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                <GlassCard className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                      <Store className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{store.name}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <ExternalLink className="w-3 h-3" /> {store.url}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold">{store.name}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <ExternalLink className="w-3 h-3" /> {store.url}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-sm font-medium">{store.users} usuários</p>
-                    <p className="text-xs text-muted-foreground">{store.orders} pedidos</p>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                    store.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {store.status === 'active' ? 'Ativa' : 'Inativa'}
-                  </span>
+                  <div className="flex items-center gap-6">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      store.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {store.status === 'active' ? 'Ativa' : 'Inativa'}
+                    </span>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEdit(store)}>
-                        <Pencil className="w-4 h-4 mr-2" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toggleStatus(store.id)}>
-                        {store.status === 'active'
-                          ? <><PowerOff className="w-4 h-4 mr-2" /> Desativar</>
-                          : <><Power className="w-4 h-4 mr-2" /> Ativar</>
-                        }
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteStore(store)}>
-                        <Trash2 className="w-4 h-4 mr-2" /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEdit(store)}>
+                          <Pencil className="w-4 h-4 mr-2" /> Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toggleStatus(store)}>
+                          {store.status === 'active'
+                            ? <><PowerOff className="w-4 h-4 mr-2" /> Desativar</>
+                            : <><Power className="w-4 h-4 mr-2" /> Ativar</>
+                          }
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(store)}>
+                          <Trash2 className="w-4 h-4 mr-2" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Dialog Nova Loja */}
@@ -164,7 +157,10 @@ const CEOLojas = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewOpen(false)}>Cancelar</Button>
-            <Button onClick={handleCreate}>Criar Loja</Button>
+            <Button onClick={handleCreate} disabled={createStore.isPending}>
+              {createStore.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Criar Loja
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -188,23 +184,23 @@ const CEOLojas = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditStore(null)}>Cancelar</Button>
-            <Button onClick={handleEdit}>Salvar</Button>
+            <Button onClick={handleEdit} disabled={updateStore.isPending}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Dialog Confirmar Exclusão */}
-      <Dialog open={!!deleteStore} onOpenChange={o => !o && setDeleteStore(null)}>
+      <Dialog open={!!deleteTarget} onOpenChange={o => !o && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Excluir Loja</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir <strong>{deleteStore?.name}</strong>? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir <strong>{deleteTarget?.name}</strong>? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteStore(null)}>Cancelar</Button>
-            <Button variant="destructive" onClick={handleDelete}>Excluir</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteStore.isPending}>Excluir</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
