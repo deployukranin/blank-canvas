@@ -228,12 +228,6 @@ const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
             <h4 className="font-semibold text-sm mb-1">{post.title}</h4>
             <p className="text-muted-foreground text-xs leading-relaxed">{post.content}</p>
 
-            {post.type === 'exclusive' && (
-              <div className="mt-3 p-3 rounded-lg bg-vip/5 border border-vip/20 text-center">
-                <Lock className="w-4 h-4 mx-auto mb-1 text-vip" />
-                <p className="text-xs text-vip">Conteúdo exclusivo VIP</p>
-              </div>
-            )}
           </div>
         </div>
       </GlassCard>
