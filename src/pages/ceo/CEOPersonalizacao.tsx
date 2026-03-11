@@ -472,7 +472,7 @@ const CEOPersonalizacao = () => {
   ];
 
   return (
-    <CEOLayout title="Personalização">
+    <AdminLayout title="Personalização">
       <div className="space-y-6 max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between">
