@@ -128,6 +128,8 @@ const FloatingOrb = ({ className, delay = 0 }: { className: string; delay?: numb
 const LandingPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
+  const { config } = useWhiteLabel();
+  const lp = config.landingPage;
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
