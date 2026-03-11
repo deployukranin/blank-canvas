@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2 } from 'lucide-react';
+import { MediaUpload } from '@/components/admin/MediaUpload';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
