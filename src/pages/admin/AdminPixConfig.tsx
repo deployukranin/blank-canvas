@@ -370,10 +370,21 @@ const AdminPixConfig: React.FC = () => {
               <div>
                 <label className="text-sm font-medium mb-1 block">Chave PIX *</label>
                 <Input
-                  placeholder="Digite sua chave PIX"
+                  placeholder={PIX_VALIDATORS[form.pixKeyType]?.placeholder || 'Digite sua chave PIX'}
                   value={form.pixKey}
-                  onChange={(e) => setForm(prev => ({ ...prev, pixKey: e.target.value }))}
+                  onChange={(e) => {
+                    const type = form.pixKeyType;
+                    const val = (type === 'cpf' || type === 'cnpj' || type === 'phone')
+                      ? formatPixInput(e.target.value, type)
+                      : e.target.value;
+                    setForm(prev => ({ ...prev, pixKey: val }));
+                  }}
+                  maxLength={getMaxLength(form.pixKeyType)}
+                  className="font-mono"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ex: {PIX_VALIDATORS[form.pixKeyType]?.example}
+                </p>
               </div>
 
               <div>
