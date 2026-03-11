@@ -108,25 +108,34 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
             </div>
           </div>
 
-          <nav className="space-y-2">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30'
-                      : 'text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-
+          <nav className="space-y-5">
+            {menuSections.map((section, sIdx) => (
+              <div key={section.label}>
+                {sIdx > 0 && <Separator className="mb-4 bg-amber-600/15" />}
+                <p className="text-[10px] uppercase tracking-widest text-amber-500/50 font-semibold mb-2 px-4">
+                  {section.label}
+                </p>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${
+                          isActive
+                            ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30'
+                            : 'text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="font-medium">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
 
