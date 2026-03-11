@@ -23,13 +23,19 @@ const CEOLojas = () => {
   const openNew = () => {
     setFormName('');
     setFormUrl('');
+    setFormSlug('');
     setNewOpen(true);
   };
 
   const openEdit = (store: StoreItem) => {
     setFormName(store.name);
     setFormUrl(store.url);
+    setFormSlug((store as any).slug || '');
     setEditStore(store);
+  };
+
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   };
 
   const handleCreate = () => {
