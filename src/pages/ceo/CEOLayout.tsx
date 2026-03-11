@@ -99,14 +99,6 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
               );
             })}
 
-            {/* Admin Panel Link */}
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10"
-            >
-              <Shield className="w-5 h-5" />
-              <span className="font-medium">Painel Admin</span>
-            </Link>
           </nav>
         </div>
 
