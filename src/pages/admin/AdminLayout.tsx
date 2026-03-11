@@ -37,7 +37,7 @@ const menuItems = [
   { path: '/admin/ideias', icon: Lightbulb, label: 'Ideias' },
   { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
   { path: '/admin/pix', icon: QrCode, label: 'Configurar PIX' },
-  { path: '/admin/vip-precos', icon: Crown, label: 'Preços VIP' },
+  
   { path: '/admin/videos', icon: Video, label: 'Vídeos' },
   { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
   { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
