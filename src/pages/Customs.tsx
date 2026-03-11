@@ -124,6 +124,39 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
+  const handlePaymentProofSelect = (file: File, type: 'video' | 'audio') => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Imagem muito grande (máx 5MB)', variant: 'destructive' });
+      return;
+    }
+    const preview = URL.createObjectURL(file);
+    if (type === 'video') {
+      setPaymentProofFile(file);
+      setPaymentProofPreview(preview);
+    } else {
+      setAudioPaymentProofFile(file);
+      setAudioPaymentProofPreview(preview);
+    }
+  };
+
+  const uploadPaymentProof = async (file: File): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const ext = file.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('payment-proofs').upload(fileName, file);
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
+    return publicUrl;
+  };
+
   const handleVideoOrder = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
