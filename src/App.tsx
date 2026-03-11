@@ -26,6 +26,7 @@ import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import StoreAuth from "./pages/StoreAuth";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
