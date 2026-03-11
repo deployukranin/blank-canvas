@@ -1090,7 +1090,7 @@ const CEOPersonalizacao = () => {
                 <div className="bg-background rounded-xl p-3 border border-border">
                   <div className="flex items-center justify-around">
                     {navigationForm
-                      .filter(tab => tab.enabled)
+                      .filter(tab => tab.enabled && tab.path !== '/loja')
                       .sort((a, b) => a.order - b.order)
                       .map((tab) => (
                         <div
