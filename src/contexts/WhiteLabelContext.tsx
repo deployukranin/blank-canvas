@@ -579,7 +579,7 @@ export const defaultQuickActions: QuickActionItem[] = [
     label: 'Loja',
     path: '/loja',
     color: 'from-green-500 to-emerald-500',
-    enabled: true,
+    enabled: false,
   },
   {
     icon: { type: 'lucide', value: 'Users' },
