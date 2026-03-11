@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 
@@ -33,19 +33,65 @@ export const AdBanner = ({ adSlot, slotKey, format = 'horizontal', className, fu
 
   const publisherId = config.adsense?.publisherId || '';
   const resolvedSlot = adSlot || (slotKey ? config.adsense?.slots?.[slotKey] : '') || '';
-  const isEnabled = config.adsense?.enabled && publisherId && resolvedSlot;
+  const isAdSenseEnabled = config.adsense?.enabled && publisherId && resolvedSlot;
+
+  // Find custom banners for this slotKey
+  const customBanner = useMemo(() => {
+    if (!slotKey) return null;
+    const banners = config.adsense?.customBanners?.filter(
+      (b) => b.enabled && b.imageUrl && b.pages.includes(slotKey)
+    );
+    if (!banners || banners.length === 0) return null;
+    // Pick a random banner for variety
+    return banners[Math.floor(Math.random() * banners.length)];
+  }, [slotKey, config.adsense?.customBanners]);
 
   useEffect(() => {
-    if (pushed.current || !isEnabled) return;
+    if (pushed.current || !isAdSenseEnabled || customBanner) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch {
       // AdSense not loaded yet
     }
-  }, [isEnabled]);
+  }, [isAdSenseEnabled, customBanner]);
 
-  if (!isEnabled) {
+  // Show custom banner if available (takes priority over AdSense)
+  if (customBanner) {
+    const content = (
+      <img
+        src={customBanner.imageUrl}
+        alt={customBanner.label || 'Anúncio'}
+        className="w-full h-auto object-cover rounded-xl"
+        loading="lazy"
+      />
+    );
+
+    return (
+      <div
+        className={cn(
+          'overflow-hidden rounded-xl',
+          fullWidth && 'w-full',
+          className
+        )}
+      >
+        {customBanner.linkUrl ? (
+          <a
+            href={customBanner.linkUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className="block"
+          >
+            {content}
+          </a>
+        ) : (
+          content
+        )}
+      </div>
+    );
+  }
+
+  if (!isAdSenseEnabled) {
     return <AdPlaceholder format={format} className={className} />;
   }
 

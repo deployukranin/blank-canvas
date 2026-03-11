@@ -599,11 +599,230 @@ const CEOIntegracoes = () => {
           </GlassCard>
         </motion.div>
 
+        {/* Custom Banners */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <GlassCard>
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                  <ImagePlus className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-lg">Banners Personalizados</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione seus próprios anúncios com imagem e link
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  setAdsenseDraft((prev) => ({
+                    ...prev,
+                    customBanners: [
+                      ...prev.customBanners,
+                      {
+                        id: crypto.randomUUID(),
+                        imageUrl: '',
+                        linkUrl: '',
+                        label: '',
+                        pages: ['home'] as Array<'home' | 'gallery' | 'community' | 'videos' | 'ideas'>,
+                        enabled: true,
+                      },
+                    ],
+                  }));
+                }}
+                size="sm"
+                className="gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar
+              </Button>
+            </div>
+
+            {adsenseDraft.customBanners.length === 0 ? (
+              <div className="text-center py-8">
+                <ImagePlus className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm">
+                  Nenhum banner personalizado cadastrado
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Banners personalizados substituem os anúncios do AdSense quando configurados
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {adsenseDraft.customBanners.map((banner, idx) => (
+                  <motion.div
+                    key={banner.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    className="rounded-xl border border-border bg-card/50 p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => {
+                            setAdsenseDraft((prev) => ({
+                              ...prev,
+                              customBanners: prev.customBanners.map((b) =>
+                                b.id === banner.id ? { ...b, enabled: !b.enabled } : b
+                              ),
+                            }));
+                          }}
+                        >
+                          {banner.enabled ? (
+                            <Eye className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                        <span className="text-sm font-medium">
+                          Banner {idx + 1}
+                          {!banner.enabled && (
+                            <span className="text-xs text-muted-foreground ml-2">(desativado)</span>
+                          )}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setAdsenseDraft((prev) => ({
+                            ...prev,
+                            customBanners: prev.customBanners.filter((b) => b.id !== banner.id),
+                          }));
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Rótulo (opcional)</Label>
+                      <Input
+                        value={banner.label}
+                        onChange={(e) => {
+                          setAdsenseDraft((prev) => ({
+                            ...prev,
+                            customBanners: prev.customBanners.map((b) =>
+                              b.id === banner.id ? { ...b, label: e.target.value } : b
+                            ),
+                          }));
+                        }}
+                        placeholder="Ex: Promoção de Verão"
+                        className="h-9 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <ImagePlus className="w-3 h-3" />
+                        URL da Imagem
+                      </Label>
+                      <Input
+                        value={banner.imageUrl}
+                        onChange={(e) => {
+                          setAdsenseDraft((prev) => ({
+                            ...prev,
+                            customBanners: prev.customBanners.map((b) =>
+                              b.id === banner.id ? { ...b, imageUrl: e.target.value } : b
+                            ),
+                          }));
+                        }}
+                        placeholder="https://exemplo.com/banner.jpg"
+                        className="font-mono text-sm h-9"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <ExternalLink className="w-3 h-3" />
+                        Link de Destino
+                      </Label>
+                      <Input
+                        value={banner.linkUrl}
+                        onChange={(e) => {
+                          setAdsenseDraft((prev) => ({
+                            ...prev,
+                            customBanners: prev.customBanners.map((b) =>
+                              b.id === banner.id ? { ...b, linkUrl: e.target.value } : b
+                            ),
+                          }));
+                        }}
+                        placeholder="https://exemplo.com/promo"
+                        className="font-mono text-sm h-9"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Exibir nas páginas:</Label>
+                      <div className="flex flex-wrap gap-3">
+                        {([
+                          { key: 'home' as const, label: '🏠 Home' },
+                          { key: 'gallery' as const, label: '🎬 Galeria' },
+                          { key: 'community' as const, label: '👥 Comunidade' },
+                          { key: 'videos' as const, label: '📺 Vídeos' },
+                          { key: 'ideas' as const, label: '💡 Ideias' },
+                        ]).map((page) => (
+                          <label key={page.key} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                            <Checkbox
+                              checked={banner.pages.includes(page.key)}
+                              onCheckedChange={(checked) => {
+                                setAdsenseDraft((prev) => ({
+                                  ...prev,
+                                  customBanners: prev.customBanners.map((b) =>
+                                    b.id === banner.id
+                                      ? {
+                                          ...b,
+                                          pages: checked
+                                            ? [...b.pages, page.key]
+                                            : b.pages.filter((p) => p !== page.key),
+                                        }
+                                      : b
+                                  ),
+                                }));
+                              }}
+                            />
+                            {page.label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Preview */}
+                    {banner.imageUrl && (
+                      <div className="mt-2 rounded-lg overflow-hidden border border-border/40 bg-muted/20">
+                        <img
+                          src={banner.imageUrl}
+                          alt={banner.label || 'Banner preview'}
+                          className="w-full h-auto max-h-[120px] object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
+
         {/* Save */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.35 }}
           className="flex justify-end"
         >
           <Button
