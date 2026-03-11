@@ -183,7 +183,7 @@ const LandingPage = () => {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-6 sm:mb-10 backdrop-blur-sm"
           >
             <Gift className="w-3.5 h-3.5" />
-            100% Grátis — Crie sua loja agora
+            {lp.heroBadgeText || '100% Grátis — Crie sua loja agora'}
           </motion.div>
 
           <motion.h1
