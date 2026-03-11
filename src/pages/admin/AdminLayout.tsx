@@ -13,14 +13,11 @@ import {
   X,
   ArrowLeft,
   Shield,
-  
-  
-  Video,
-  Headphones,
+  Eye,
+  DollarSign,
   Youtube,
   QrCode,
   Palette,
-  
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
