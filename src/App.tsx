@@ -14,7 +14,6 @@ import Ideias from "./pages/Ideias";
 
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
-import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
 import GaleriaVideos from "./pages/GaleriaVideos";
