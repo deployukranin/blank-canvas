@@ -13,7 +13,9 @@ import {
   Video,
   Headphones,
   Pause,
-  QrCode
+  QrCode,
+  Upload,
+  ImageIcon
 } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
