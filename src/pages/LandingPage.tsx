@@ -278,8 +278,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Features */}
+      {lp.featuresVisible !== false && (
       <section id="features" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,hsl(var(--primary)/0.04),transparent)]" />
         <div className="max-w-6xl mx-auto relative z-10">
@@ -293,14 +295,10 @@ const LandingPage = () => {
               Recursos
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight px-2">
-              Tudo para{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                monetizar
-              </span>{" "}
-              seu conteúdo
+              {lp.featuresTitle || 'Tudo para monetizar seu conteúdo'}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-lg max-w-xl mx-auto">
-              Ferramentas feitas sob medida para criadores ASMR
+              {lp.featuresSubtitle || 'Ferramentas feitas sob medida para criadores ASMR'}
             </p>
           </motion.div>
 
@@ -327,8 +325,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* How it works */}
+      {lp.stepsVisible !== false && (
       <section id="how-it-works" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-card/20" />
         <div className="max-w-4xl mx-auto relative z-10">
@@ -342,10 +342,10 @@ const LandingPage = () => {
               Passo a passo
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Como <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">funciona</span>
+              {lp.stepsTitle || 'Como funciona'}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-lg">
-              4 passos para ter sua loja no ar
+              {lp.stepsSubtitle || '4 passos para ter sua loja no ar'}
             </p>
           </motion.div>
 
@@ -381,8 +381,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Free highlight */}
+      {lp.freeHighlightVisible !== false && (
       <section className="py-12 sm:py-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06),transparent_70%)]" />
         <motion.div
@@ -397,19 +399,18 @@ const LandingPage = () => {
               <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 tracking-tight">
-              Totalmente{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                grátis
-              </span>
+              {lp.freeHighlightTitle || 'Totalmente grátis'}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
-              Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.
+              {lp.freeHighlightDescription || 'Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.'}
             </p>
           </GlassCard>
         </motion.div>
       </section>
+      )}
 
       {/* Testimonials */}
+      {lp.testimonialsVisible !== false && (
       <section id="testimonials" className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-card/20" />
         <div className="max-w-5xl mx-auto relative z-10">
@@ -423,14 +424,10 @@ const LandingPage = () => {
               Depoimentos
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Criadores que{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                confiam
-              </span>
+              {lp.testimonialsTitle || 'Criadores que confiam'}
             </h2>
           </motion.div>
 
-          {/* Mobile: horizontal scroll, Desktop: grid */}
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 scrollbar-hide">
             {testimonials.map((t, index) => (
               <motion.div
@@ -465,8 +462,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Final */}
+      {lp.ctaVisible !== false && (
       <section className="py-16 sm:py-28 px-4 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsl(var(--primary)/0.08),transparent_70%)]" />
         <motion.div
@@ -480,10 +479,10 @@ const LandingPage = () => {
 
             <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-4 sm:mb-6" />
             <h2 className="text-xl sm:text-2xl md:text-4xl font-bold mb-3 sm:mb-5 tracking-tight">
-              Pronto para criar sua loja ASMR?
+              {lp.ctaTitle || 'Pronto para criar sua loja ASMR?'}
             </h2>
             <p className="text-muted-foreground mb-6 sm:mb-10 text-sm sm:text-base leading-relaxed">
-              Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.
+              {lp.ctaDescription || 'Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.'}
             </p>
             <Button
               size="lg"
@@ -491,18 +490,19 @@ const LandingPage = () => {
               onClick={() => navigate("/auth?tab=signup")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Criar Minha Loja Grátis
+              {lp.ctaButtonText || 'Criar Minha Loja Grátis'}
             </Button>
           </GlassCard>
         </motion.div>
       </section>
+      )}
 
       {/* Footer */}
       <footer className="py-8 sm:py-10 px-4 border-t border-border/20">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4">
-          <span className="text-xs sm:text-sm font-semibold text-foreground">ASMR Store</span>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{lp.footerName || 'ASMR Store'}</span>
           <p className="text-muted-foreground text-[0.65rem] sm:text-xs">
-            © {new Date().getFullYear()} ASMR Store. Todos os direitos reservados.
+            © {new Date().getFullYear()} {lp.footerName || 'ASMR Store'}. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4 sm:gap-6 text-[0.65rem] sm:text-xs text-muted-foreground">
             <a href="/termos" className="hover:text-foreground transition-colors">
