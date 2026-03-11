@@ -33,11 +33,6 @@ const features = [
     description: "Seus fãs interagem, votam em ideias e participam de um espaço exclusivo.",
   },
   {
-    icon: Crown,
-    title: "Área VIP",
-    description: "Crie planos de assinatura com conteúdo exclusivo e receita recorrente.",
-  },
-  {
     icon: Headphones,
     title: "Galeria de Conteúdo",
     description: "Organize vídeos e áudios por categorias com player integrado.",
