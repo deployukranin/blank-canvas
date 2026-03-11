@@ -540,7 +540,7 @@ const defaultIcons: IconConfig = {
 export const defaultNavigationTabs: NavTabConfig[] = [
   { id: 'home', label: 'Início', path: '/', icon: { type: 'lucide', value: 'Home' }, enabled: true, order: 0 },
   { id: 'customs', label: "Custom's", path: '/customs', icon: { type: 'lucide', value: 'Video' }, enabled: true, order: 1 },
-  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: true, order: 2 },
+  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: false, order: 2 },
   { id: 'comunidade', label: 'Comunidade', path: '/comunidade', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
   { id: 'perfil', label: 'Perfil', path: '/perfil', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
 ];
