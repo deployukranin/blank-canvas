@@ -35,7 +35,7 @@ import AdminPedidos from "./pages/admin/AdminPedidos";
 
 
 import AdminVideos from "./pages/admin/AdminVideos";
-import AdminAudios from "./pages/admin/AdminAudios";
+import AdminPrecos from "./pages/admin/AdminPrecos";
 import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
@@ -97,7 +97,7 @@ const App = () => (
               
               
               <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
-              <Route path="/admin/audios" element={<AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute>} />
+              <Route path="/admin/precos" element={<AdminRoute requiredRole="admin"><AdminPrecos /></AdminRoute>} />
               <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />
               <Route path="/admin/usuarios" element={<AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute>} />
               <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
