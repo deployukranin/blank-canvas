@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
+import { YouTubeQuotaWidget } from '@/components/ceo/YouTubeQuotaWidget';
 
 interface CEOLayoutProps {
   children: ReactNode;
