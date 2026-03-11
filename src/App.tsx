@@ -11,7 +11,7 @@ import { AdminRoute } from "@/components/auth/AdminRoute"; // <--- NOVO IMPORT
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import Ideias from "./pages/Ideias";
-import Loja from "./pages/Loja";
+
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
 import VIP from "./pages/VIP";
