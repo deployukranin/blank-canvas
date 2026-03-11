@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Youtube, Store, Plus, Trash2, Users, Megaphone, ImagePlus, ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { Save, Youtube, Store, Plus, Trash2, Users, Megaphone, ImagePlus, ExternalLink, Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -20,25 +20,37 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { toast } from 'sonner';
 import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { YouTubeCategoryManager } from '@/components/video/YouTubeCategoryManager';
-
-// Mock stores — same source as CEOLojas
-const availableStores = [
-  { id: '1', name: 'ASMR Luna Store' },
-  { id: '2', name: 'Relaxing Vibes Shop' },
-  { id: '3', name: 'Whisper Dreams' },
-];
+import { useStores } from '@/hooks/use-stores';
 
 interface StoreChannel {
   id: string;
   creatorName: string;
   channelId: string;
+  validated?: boolean;
+  channelTitle?: string;
+  channelThumbnail?: string;
+  validating?: boolean;
+}
+
+interface ChannelValidationResult {
+  valid: boolean;
+  error?: string;
+  channel?: { id: string; title: string; thumbnail: string };
 }
 
 const CEOIntegracoes = () => {
   const { config, updateYouTube, updateAdSense } = useWhiteLabel();
+  const { stores: availableStores, isLoading: storesLoading } = useStores();
 
-  const [selectedStoreId, setSelectedStoreId] = useState<string>(availableStores[0]?.id ?? '');
+  const [selectedStoreId, setSelectedStoreId] = useState<string>('');
   const selectedStore = availableStores.find((s) => s.id === selectedStoreId);
+
+  // Auto-select first store when loaded
+  useEffect(() => {
+    if (!selectedStoreId && availableStores.length > 0) {
+      setSelectedStoreId(availableStores[0].id);
+    }
+  }, [availableStores, selectedStoreId]);
 
   // Per-store integrations from config
   const storeIntegrations = config.youtube?.storeIntegrations ?? {};
@@ -125,6 +137,45 @@ const CEOIntegracoes = () => {
   const removeChannel = (id: string) => {
     setChannels((prev) => prev.filter((ch) => ch.id !== id));
   };
+
+  const validateChannel = useCallback(async (channelRowId: string, channelId: string) => {
+    if (!channelId.trim() || channelId.length < 10) return;
+    
+    setChannels(prev => prev.map(ch => 
+      ch.id === channelRowId ? { ...ch, validating: true, validated: undefined } : ch
+    ));
+
+    try {
+      const { data, error } = await (await import('@/integrations/supabase/client')).supabase
+        .functions.invoke('validate-youtube-channel', {
+          body: { channelId: channelId.trim() },
+        });
+      
+      const result = (error ? { valid: false, error: 'Erro de conexão' } : data) as ChannelValidationResult;
+      
+      setChannels(prev => prev.map(ch => 
+        ch.id === channelRowId ? {
+          ...ch,
+          validating: false,
+          validated: result.valid,
+          channelTitle: result.channel?.title,
+          channelThumbnail: result.channel?.thumbnail,
+          creatorName: result.channel?.title && !ch.creatorName ? result.channel.title : ch.creatorName,
+        } : ch
+      ));
+
+      if (result.valid) {
+        toast.success(`Canal "${result.channel?.title}" validado!`);
+      } else {
+        toast.error(result.error || 'Canal não encontrado');
+      }
+    } catch {
+      setChannels(prev => prev.map(ch => 
+        ch.id === channelRowId ? { ...ch, validating: false, validated: false } : ch
+      ));
+      toast.error('Erro ao validar canal');
+    }
+  }, []);
 
   const saveCurrentStoreState = () => {
     const updatedIntegrations = {
@@ -256,12 +307,24 @@ const CEOIntegracoes = () => {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.03 }}
-                      className="rounded-xl border border-border bg-card/50 p-4"
+                      className={`rounded-xl border p-4 ${
+                        ch.validated === true ? 'border-emerald-500/30 bg-emerald-500/5' :
+                        ch.validated === false ? 'border-destructive/30 bg-destructive/5' :
+                        'border-border bg-card/50'
+                      }`}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
-                          <Youtube className="w-4 h-4 text-red-400" />
-                        </div>
+                        {ch.channelThumbnail ? (
+                          <img 
+                            src={ch.channelThumbnail} 
+                            alt={ch.channelTitle || ''} 
+                            className="w-8 h-8 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
+                            <Youtube className="w-4 h-4 text-red-400" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <Input
                             value={ch.creatorName}
@@ -272,6 +335,12 @@ const CEOIntegracoes = () => {
                             className="h-8 text-sm font-medium"
                           />
                         </div>
+                        {ch.validated === true && (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        )}
+                        {ch.validated === false && (
+                          <XCircle className="w-5 h-5 text-destructive shrink-0" />
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -282,20 +351,37 @@ const CEOIntegracoes = () => {
                         </Button>
                       </div>
 
-                      <div>
-                        <Input
-                          value={ch.channelId}
-                          onChange={(e) =>
-                            updateChannel(ch.id, { channelId: e.target.value })
-                          }
-                          placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"
-                          className="font-mono text-sm"
-                        />
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                          Channel ID do YouTube (começa com{' '}
-                          <code className="bg-muted px-1 rounded">UC</code>)
-                        </p>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Input
+                            value={ch.channelId}
+                            onChange={(e) =>
+                              updateChannel(ch.id, { channelId: e.target.value, validated: undefined })
+                            }
+                            placeholder="UCxxxxxxxxxxxxxxxxxxxxxx"
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 h-10"
+                          disabled={!ch.channelId.trim() || ch.validating}
+                          onClick={() => validateChannel(ch.id, ch.channelId)}
+                        >
+                          {ch.validating ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            'Validar'
+                          )}
+                        </Button>
                       </div>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {ch.channelTitle 
+                          ? `✓ ${ch.channelTitle}`
+                          : <>Channel ID do YouTube (começa com <code className="bg-muted px-1 rounded">UC</code>)</>
+                        }
+                      </p>
                     </motion.div>
                   ))}
                 </div>

@@ -248,6 +248,36 @@ export type Database = {
         }
         Relationships: []
       }
+      stores: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+          url?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -490,6 +520,30 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      youtube_api_usage: {
+        Row: {
+          channel_id: string
+          created_at: string
+          endpoint: string
+          id: string
+          units_used: number
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          units_used?: number
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          units_used?: number
         }
         Relationships: []
       }
