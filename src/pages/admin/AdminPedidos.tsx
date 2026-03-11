@@ -276,6 +276,15 @@ const AdminPedidos: React.FC = () => {
                         📝 {order.observations || order.preferences}
                       </p>
                     )}
+                    {order.payment_proof_url && (
+                      <button
+                        onClick={() => { setProofUrl(order.payment_proof_url); setShowProofDialog(true); }}
+                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Ver comprovante PIX
+                      </button>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(order.created_at)}
                     </p>
