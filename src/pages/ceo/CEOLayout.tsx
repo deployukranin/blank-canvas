@@ -7,10 +7,16 @@ import {
   ArrowLeft,
   Crown,
   LogOut,
-  Shield,
-  Loader2
+  Loader2,
+  TrendingUp,
+  Users,
+  DollarSign,
+  BarChart3,
+  Settings,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
 
@@ -19,8 +25,30 @@ interface CEOLayoutProps {
   title: string;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: 'Minhas Lojas', path: '/ceo' },
+const menuSections = [
+  {
+    label: 'Geral',
+    items: [
+      { icon: LayoutDashboard, label: 'Visão Geral', path: '/ceo' },
+      { icon: Store, label: 'Minhas Lojas', path: '/ceo/lojas' },
+    ],
+  },
+  {
+    label: 'Análises',
+    items: [
+      { icon: DollarSign, label: 'Vendas', path: '/ceo/vendas' },
+      { icon: Users, label: 'Usuários', path: '/ceo/usuarios' },
+      { icon: BarChart3, label: 'Tráfego', path: '/ceo/trafego' },
+      { icon: TrendingUp, label: 'Métricas', path: '/ceo/metricas' },
+    ],
+  },
+  {
+    label: 'Sistema',
+    items: [
+      { icon: Bell, label: 'Alertas', path: '/ceo/alertas' },
+      { icon: Settings, label: 'Configurações', path: '/ceo/configuracoes' },
+    ],
+  },
 ];
 
 export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
