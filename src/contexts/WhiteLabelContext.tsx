@@ -734,6 +734,32 @@ export interface WhiteLabelConfig {
     }>;
   };
 
+  // Landing Page
+  landingPage: {
+    heroVisible: boolean;
+    heroTitle: string;
+    heroSubtitle: string;
+    heroBadgeText: string;
+    heroCtaText: string;
+    statsVisible: boolean;
+    featuresVisible: boolean;
+    featuresTitle: string;
+    featuresSubtitle: string;
+    stepsVisible: boolean;
+    stepsTitle: string;
+    stepsSubtitle: string;
+    freeHighlightVisible: boolean;
+    freeHighlightTitle: string;
+    freeHighlightDescription: string;
+    testimonialsVisible: boolean;
+    testimonialsTitle: string;
+    ctaVisible: boolean;
+    ctaTitle: string;
+    ctaDescription: string;
+    ctaButtonText: string;
+    footerName: string;
+  };
+
   // Integration Tokens
   tokens: {
     supabase: {
