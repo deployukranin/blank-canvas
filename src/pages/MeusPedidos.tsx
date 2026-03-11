@@ -160,6 +160,26 @@ const MeusPedidosPage = () => {
 
     const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
 
+    // Update payment_proof_url in the database
+    // Match by user_id and amount to find the corresponding DB order
+    const localOrder = getOrders().find(o => o.id === proofOrderId);
+    if (localOrder) {
+      const amountCents = Math.round(localOrder.price * 100);
+      const { error: dbError } = await supabase
+        .from('custom_orders')
+        .update({ payment_proof_url: publicUrl })
+        .eq('user_id', user.id)
+        .eq('amount_cents', amountCents)
+        .eq('status', 'pending')
+        .is('payment_proof_url', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (dbError) {
+        console.error('DB update error:', dbError);
+      }
+    }
+
     // Update local order with proof URL
     const allOrders = getOrders();
     const idx = allOrders.findIndex(o => o.id === proofOrderId);
