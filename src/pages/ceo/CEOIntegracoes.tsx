@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Youtube, Store, Plus, Trash2, Users } from 'lucide-react';
+import { Save, Youtube, Store, Plus, Trash2, Users, Megaphone } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ interface StoreChannel {
 }
 
 const CEOIntegracoes = () => {
-  const { config, updateYouTube } = useWhiteLabel();
+  const { config, updateYouTube, updateAdSense } = useWhiteLabel();
 
   const [selectedStoreId, setSelectedStoreId] = useState<string>(availableStores[0]?.id ?? '');
   const selectedStore = availableStores.find((s) => s.id === selectedStoreId);
@@ -63,6 +63,19 @@ const CEOIntegracoes = () => {
     trendingEnabled: config.youtube?.trendingEnabled ?? true,
     trendingDays: config.youtube?.trendingDays ?? 7,
     trendingLimit: config.youtube?.trendingLimit ?? 8,
+  });
+
+  // AdSense config
+  const [adsenseDraft, setAdsenseDraft] = useState({
+    enabled: config.adsense?.enabled ?? false,
+    publisherId: config.adsense?.publisherId ?? '',
+    slots: {
+      home: config.adsense?.slots?.home ?? '',
+      gallery: config.adsense?.slots?.gallery ?? '',
+      community: config.adsense?.slots?.community ?? '',
+      videos: config.adsense?.slots?.videos ?? '',
+      ideas: config.adsense?.slots?.ideas ?? '',
+    },
   });
 
   // When store selection changes, load that store's data
@@ -136,6 +149,7 @@ const CEOIntegracoes = () => {
       videoCategoryMap,
       storeIntegrations: updatedIntegrations as any,
     });
+    updateAdSense(adsenseDraft);
     toast.success('Integrações salvas!');
   };
 
@@ -476,6 +490,105 @@ const CEOIntegracoes = () => {
             />
           </motion.div>
         )}
+
+        {/* Google AdSense */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <GlassCard>
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center">
+                  <Megaphone className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-lg">Google AdSense</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monetize sua plataforma com anúncios do Google
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={adsenseDraft.enabled}
+                onCheckedChange={(checked) =>
+                  setAdsenseDraft((prev) => ({ ...prev, enabled: checked }))
+                }
+              />
+            </div>
+
+            {adsenseDraft.enabled && (
+              <div className="space-y-5 pt-4 border-t border-border">
+                {/* Publisher ID */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Publisher ID</Label>
+                  <Input
+                    value={adsenseDraft.publisherId}
+                    onChange={(e) =>
+                      setAdsenseDraft((prev) => ({ ...prev, publisherId: e.target.value }))
+                    }
+                    placeholder="ca-pub-xxxxxxxxxxxxxxxx"
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Encontre em{' '}
+                    <code className="bg-muted px-1 rounded">AdSense → Conta → Informações da conta</code>
+                  </p>
+                </div>
+
+                {/* Ad Slots */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Slots de Anúncio</Label>
+                  <p className="text-xs text-muted-foreground -mt-1">
+                    Configure os IDs dos blocos de anúncio para cada seção do app.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {([
+                      { key: 'home' as const, label: 'Página Inicial', emoji: '🏠' },
+                      { key: 'gallery' as const, label: 'Galeria de Vídeos', emoji: '🎬' },
+                      { key: 'community' as const, label: 'Comunidade', emoji: '👥' },
+                      { key: 'videos' as const, label: 'Vídeos', emoji: '📺' },
+                      { key: 'ideas' as const, label: 'Ideias', emoji: '💡' },
+                    ]).map((slot) => (
+                      <div key={slot.key} className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                          <span>{slot.emoji}</span>
+                          {slot.label}
+                        </Label>
+                        <Input
+                          value={adsenseDraft.slots[slot.key] || ''}
+                          onChange={(e) =>
+                            setAdsenseDraft((prev) => ({
+                              ...prev,
+                              slots: { ...prev.slots, [slot.key]: e.target.value },
+                            }))
+                          }
+                          placeholder="1234567890"
+                          className="font-mono text-sm h-9"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 rounded-xl bg-blue-500/10 border border-blue-500/20 p-3">
+                  <Megaphone className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-blue-300/80 space-y-1">
+                    <p className="font-medium text-blue-300">Como configurar:</p>
+                    <ol className="list-decimal list-inside space-y-0.5">
+                      <li>Acesse <span className="font-mono">adsense.google.com</span></li>
+                      <li>Crie blocos de anúncio em <strong>Anúncios → Por bloco de anúncios</strong></li>
+                      <li>Copie o <strong>data-ad-slot</strong> de cada bloco</li>
+                      <li>Cole nos campos acima correspondentes</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
 
         {/* Save */}
         <motion.div
