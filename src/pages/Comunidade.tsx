@@ -850,12 +850,6 @@ const ComunidadePage = () => {
               <Lightbulb className="w-4 h-4" />
               {config.community.ideiasTabLabel}
             </TabsTrigger>
-            {config.community.vipTabEnabled && (
-              <TabsTrigger value="vip" className="flex-1 gap-2">
-                <Crown className="w-4 h-4" />
-                {config.community.vipTabLabel || 'Área VIP'}
-              </TabsTrigger>
-            )}
           </TabsList>
 
           {videosTabEnabled && (

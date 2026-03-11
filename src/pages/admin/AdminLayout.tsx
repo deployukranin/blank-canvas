@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   Shield,
   CreditCard,
-  Crown,
+  
   Video,
   Headphones,
   Youtube,
