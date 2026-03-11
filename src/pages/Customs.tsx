@@ -113,81 +113,12 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePaymentProofSelect = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Imagem muito grande (máx 5MB)', variant: 'destructive' });
-      return;
-    }
-    const preview = URL.createObjectURL(file);
-    setPaymentProofFile(file);
-    setPaymentProofPreview(preview);
-  };
-
-  const handleOpenProofDialog = (type: 'video' | 'audio') => {
-    setProofType(type);
-    setPaymentProofFile(null);
-    setPaymentProofPreview(null);
-    setShowProofDialog(true);
-  };
-
-  const handleSubmitWithProof = async () => {
-    if (!paymentProofFile) {
-      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
-      return;
-    }
-    setIsUploadingProof(true);
-    const proofUrl = await uploadPaymentProof(paymentProofFile);
-    if (!proofUrl) {
-      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
-      setIsUploadingProof(false);
-      return;
-    }
-    setShowProofDialog(false);
-    if (proofType === 'video') {
-      await submitVideoOrder(proofUrl);
-    } else {
-      await submitAudioOrder(proofUrl);
-    }
-    setIsUploadingProof(false);
-  };
-
-  const uploadPaymentProof = async (file: File): Promise<string | null> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const ext = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('payment-proofs').upload(fileName, file);
-    if (error) {
-      console.error('Upload error:', error);
-      return null;
-    }
-    const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
-    return publicUrl;
-  };
-
-  const submitVideoOrder = async (proofUrl: string) => {
+  const handleVideoConfirmPaid = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
-
-    setIsProcessing(true);
-
-    await onCustomOrder({
-      type: 'video',
-      category: selectedCategory.id,
-      categoryName: selectedCategory.name,
-      duration: selectedDuration.minutes,
-      durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
-      name: personalizationData.name,
-      triggers: personalizationData.triggers,
-      script: personalizationData.script,
-      observations: personalizationData.observations,
-      paymentProofUrl: proofUrl,
-      status: 'pending',
-    });
+    if (!personalizationData.name.trim()) {
+      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome.', variant: 'destructive' });
+      return;
+    }
 
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + (config?.deliveryDays || 7));
@@ -216,26 +147,14 @@ const CustomsPage = () => {
     });
 
     setShowPaymentDialog(false);
-    setShowSuccessDialog(true);
-    setIsProcessing(false);
+    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
+    navigate('/meus-pedidos');
   };
-
-  const handleVideoConfirmPaid = () => {
-    if (!personalizationData.name.trim()) {
-      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome para personalização.', variant: 'destructive' });
-      return;
-    }
-    handleOpenProofDialog('video');
-  };
-
 
   const resetVideoOrder = () => {
     setSelectedCategory(null);
     setSelectedDuration(null);
-    setShowSuccessDialog(false);
     setPersonalizationData({ name: '', triggers: '', script: '', observations: '' });
-    setPaymentProofFile(null);
-    setPaymentProofPreview(null);
   };
 
   // Audio handlers
@@ -263,22 +182,25 @@ const CustomsPage = () => {
     setShowAudioOrderDialog(true);
   };
 
-  const submitAudioOrder = async (proofUrl: string) => {
+  const handleAudioConfirmPaid = () => {
     if (!selectedAudioCategory || !selectedAudioDuration) return;
+    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
+      return;
+    }
 
-    setIsProcessing(true);
-
-    await onCustomOrder({
+    addOrder<AudioOrder>({
       type: 'audio',
       category: selectedAudioCategory.id,
       categoryName: selectedAudioCategory.name,
-      duration: selectedAudioDuration.minutes,
-      durationLabel: selectedAudioDuration.label,
-      name: audioFormData.name,
-      preferences: audioFormData.preferences,
-      observations: audioFormData.observations,
-      paymentProofUrl: proofUrl,
+      price: calculateAudioPrice(selectedAudioDuration),
       status: 'pending',
+      estimatedDelivery: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+      personalization: {
+        name: audioFormData.name,
+        preferences: audioFormData.preferences,
+        observations: audioFormData.observations,
+      },
     });
 
     trackEvent('custom_audio_order', { 
@@ -286,24 +208,15 @@ const CustomsPage = () => {
       duration: selectedAudioDuration.id,
     });
 
-    setIsProcessing(false);
     setShowAudioOrderDialog(false);
-    setAudioOrderComplete(true);
-  };
-
-  const handleAudioConfirmPaid = () => {
-    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
-      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
-      return;
-    }
-    handleOpenProofDialog('audio');
+    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
+    navigate('/meus-pedidos');
   };
 
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
-    setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
   };
 
