@@ -14,7 +14,8 @@ import {
   BarChart3,
   Settings,
   Bell,
-  Globe
+  Globe,
+  Link2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
