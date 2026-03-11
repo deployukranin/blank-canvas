@@ -863,10 +863,10 @@ const CustomsPage = () => {
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handleVideoOrder}
-                disabled={isProcessing || !personalizationData.name.trim()}
+                disabled={isProcessing || !personalizationData.name.trim() || !paymentProofFile}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Processando...' : 'Já Paguei - Confirmar'}
+                {isProcessing ? 'Enviando...' : 'Já Paguei - Confirmar'}
               </Button>
             </div>
           </div>
