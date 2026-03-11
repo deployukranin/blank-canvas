@@ -83,7 +83,7 @@ const AdminYoutube = () => {
   return (
     <AdminLayout title="YouTube">
       <div className="space-y-6">
-        {/* Video Stats */}
+        {/* Channel Info */}
         <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -91,58 +91,31 @@ const AdminYoutube = () => {
                 <Youtube className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-lg">Vídeos do Canal</h3>
+                <h3 className="font-display font-semibold text-lg">Categorias de Vídeos</h3>
                 <p className="text-sm text-muted-foreground">
                   {isLoading
                     ? "Carregando vídeos..."
                     : error
                     ? "Erro ao carregar vídeos"
-                    : `${videos.length} vídeos encontrados`}
+                    : `${videos.length} vídeos disponíveis para categorizar`}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              {videos.length > 0 && (
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{videos.length}</p>
-                  <p className="text-xs text-muted-foreground">vídeos</p>
-                </div>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-                Atualizar
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              Atualizar
+            </Button>
           </div>
 
           {error && (
             <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               Erro ao carregar vídeos. Verifique se o ID do canal está correto no Painel CEO.
-            </div>
-          )}
-
-          {/* Recent videos preview */}
-          {videos.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-sm font-medium mb-3">Vídeos recentes:</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {videos.slice(0, 5).map((video) => (
-                  <div key={video.video_id} className="space-y-1">
-                    <img
-                      src={video.thumbnail_url}
-                      alt={video.video_title}
-                      className="w-full aspect-video rounded-md object-cover"
-                    />
-                    <p className="text-xs line-clamp-2">{video.video_title}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </GlassCard>
