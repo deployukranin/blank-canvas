@@ -6,7 +6,7 @@ import {
   Sun, Moon, Video, Crown, Bell, Lightbulb, Navigation
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { CEOLayout } from './CEOLayout';
+import AdminLayout from '@/pages/admin/AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
