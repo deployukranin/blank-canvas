@@ -13,10 +13,9 @@ import {
   Video,
   Headphones,
   Pause,
-  QrCode,
-  Upload,
-  ImageIcon
+  QrCode
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -26,8 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
-import { addOrder, VideoOrder } from '@/lib/order-store';
-import { supabase } from '@/integrations/supabase/client';
+import { addOrder, VideoOrder, AudioOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { PixQRCode } from '@/components/payment/PixQRCode';
 import { usePixConfig } from '@/hooks/use-pix-config';
@@ -60,6 +58,7 @@ const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { config: pixConfig, isLoading: pixLoading } = usePixConfig();
+  const navigate = useNavigate();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
@@ -67,8 +66,6 @@ const CustomsPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
     name: '',
@@ -81,16 +78,8 @@ const CustomsPage = () => {
   const [selectedAudioCategory, setSelectedAudioCategory] = useState<AudioCategory | null>(null);
   const [selectedAudioDuration, setSelectedAudioDuration] = useState<AudioDuration | null>(null);
   const [audioFormData, setAudioFormData] = useState({ name: '', preferences: '', observations: '' });
-  const [audioOrderComplete, setAudioOrderComplete] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAudioOrderDialog, setShowAudioOrderDialog] = useState(false);
-
-  // Payment proof state
-  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
-  const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
-  const [showProofDialog, setShowProofDialog] = useState(false);
-  const [proofType, setProofType] = useState<'video' | 'audio'>('video');
-  const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
@@ -124,81 +113,12 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePaymentProofSelect = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Imagem muito grande (máx 5MB)', variant: 'destructive' });
-      return;
-    }
-    const preview = URL.createObjectURL(file);
-    setPaymentProofFile(file);
-    setPaymentProofPreview(preview);
-  };
-
-  const handleOpenProofDialog = (type: 'video' | 'audio') => {
-    setProofType(type);
-    setPaymentProofFile(null);
-    setPaymentProofPreview(null);
-    setShowProofDialog(true);
-  };
-
-  const handleSubmitWithProof = async () => {
-    if (!paymentProofFile) {
-      toast({ title: 'Comprovante obrigatório', description: 'Envie o print do comprovante PIX.', variant: 'destructive' });
-      return;
-    }
-    setIsUploadingProof(true);
-    const proofUrl = await uploadPaymentProof(paymentProofFile);
-    if (!proofUrl) {
-      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
-      setIsUploadingProof(false);
-      return;
-    }
-    setShowProofDialog(false);
-    if (proofType === 'video') {
-      await submitVideoOrder(proofUrl);
-    } else {
-      await submitAudioOrder(proofUrl);
-    }
-    setIsUploadingProof(false);
-  };
-
-  const uploadPaymentProof = async (file: File): Promise<string | null> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const ext = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('payment-proofs').upload(fileName, file);
-    if (error) {
-      console.error('Upload error:', error);
-      return null;
-    }
-    const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
-    return publicUrl;
-  };
-
-  const submitVideoOrder = async (proofUrl: string) => {
+  const handleVideoConfirmPaid = () => {
     if (!selectedCategory || !selectedDuration || !config) return;
-
-    setIsProcessing(true);
-
-    await onCustomOrder({
-      type: 'video',
-      category: selectedCategory.id,
-      categoryName: selectedCategory.name,
-      duration: selectedDuration.minutes,
-      durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
-      name: personalizationData.name,
-      triggers: personalizationData.triggers,
-      script: personalizationData.script,
-      observations: personalizationData.observations,
-      paymentProofUrl: proofUrl,
-      status: 'pending',
-    });
+    if (!personalizationData.name.trim()) {
+      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome.', variant: 'destructive' });
+      return;
+    }
 
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + (config?.deliveryDays || 7));
@@ -227,26 +147,14 @@ const CustomsPage = () => {
     });
 
     setShowPaymentDialog(false);
-    setShowSuccessDialog(true);
-    setIsProcessing(false);
+    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
+    navigate('/meus-pedidos');
   };
-
-  const handleVideoConfirmPaid = () => {
-    if (!personalizationData.name.trim()) {
-      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome para personalização.', variant: 'destructive' });
-      return;
-    }
-    handleOpenProofDialog('video');
-  };
-
 
   const resetVideoOrder = () => {
     setSelectedCategory(null);
     setSelectedDuration(null);
-    setShowSuccessDialog(false);
     setPersonalizationData({ name: '', triggers: '', script: '', observations: '' });
-    setPaymentProofFile(null);
-    setPaymentProofPreview(null);
   };
 
   // Audio handlers
@@ -274,22 +182,25 @@ const CustomsPage = () => {
     setShowAudioOrderDialog(true);
   };
 
-  const submitAudioOrder = async (proofUrl: string) => {
+  const handleAudioConfirmPaid = () => {
     if (!selectedAudioCategory || !selectedAudioDuration) return;
+    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
+      return;
+    }
 
-    setIsProcessing(true);
-
-    await onCustomOrder({
+    addOrder<AudioOrder>({
       type: 'audio',
       category: selectedAudioCategory.id,
       categoryName: selectedAudioCategory.name,
-      duration: selectedAudioDuration.minutes,
-      durationLabel: selectedAudioDuration.label,
-      name: audioFormData.name,
-      preferences: audioFormData.preferences,
-      observations: audioFormData.observations,
-      paymentProofUrl: proofUrl,
+      price: calculateAudioPrice(selectedAudioDuration),
       status: 'pending',
+      estimatedDelivery: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+      personalization: {
+        name: audioFormData.name,
+        preferences: audioFormData.preferences,
+        observations: audioFormData.observations,
+      },
     });
 
     trackEvent('custom_audio_order', { 
@@ -297,24 +208,15 @@ const CustomsPage = () => {
       duration: selectedAudioDuration.id,
     });
 
-    setIsProcessing(false);
     setShowAudioOrderDialog(false);
-    setAudioOrderComplete(true);
-  };
-
-  const handleAudioConfirmPaid = () => {
-    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
-      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
-      return;
-    }
-    handleOpenProofDialog('audio');
+    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
+    navigate('/meus-pedidos');
   };
 
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
-    setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
   };
 
@@ -846,30 +748,6 @@ const CustomsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Video Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={resetVideoOrder}>
-        <DialogContent className="glass mx-4 text-center">
-          <div className="py-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-success" />
-            </div>
-            <h3 className="font-display text-lg font-bold mb-2">Pedido Confirmado! 🎬</h3>
-            <p className="text-muted-foreground text-sm mb-2">
-              Seu vídeo personalizado está sendo preparado
-            </p>
-            <p className="text-xs text-muted-foreground mb-4">
-              Prazo de entrega: {config?.deliveryDays} dias úteis
-            </p>
-            <Button 
-              onClick={resetVideoOrder}
-              className="bg-gradient-to-r from-primary to-accent"
-            >
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Audio Order Dialog */}
       <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && setShowAudioOrderDialog(false)}>
         <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
@@ -929,77 +807,6 @@ const CustomsPage = () => {
               >
                 <Send className="w-4 h-4" />
                 Já Paguei - Confirmar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Audio Success Dialog */}
-      <Dialog open={audioOrderComplete} onOpenChange={resetAudioOrder}>
-        <DialogContent className="glass mx-4 text-center">
-          <div className="py-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-success" />
-            </div>
-            <h3 className="font-display text-lg font-bold mb-2">Pedido Realizado! 🎧</h3>
-            <p className="text-muted-foreground text-sm mb-4">Prazo: 3 dias úteis</p>
-            <Button onClick={resetAudioOrder} className="bg-gradient-to-r from-primary to-accent">
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Proof Dialog */}
-      <Dialog open={showProofDialog} onOpenChange={() => !isUploadingProof && setShowProofDialog(false)}>
-        <DialogContent className="glass mx-4">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Upload className="w-5 h-5 text-primary" />
-              Enviar Comprovante PIX
-            </DialogTitle>
-            <DialogDescription>
-              Envie o print/screenshot do comprovante de pagamento para validação.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {paymentProofPreview ? (
-              <div className="relative">
-                <img src={paymentProofPreview} alt="Comprovante" className="w-full max-h-64 object-contain rounded-lg border border-border" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-1 right-1 h-7 text-xs"
-                  onClick={() => { setPaymentProofFile(null); setPaymentProofPreview(null); }}
-                >
-                  Trocar
-                </Button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
-                <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
-                <span className="text-xs text-muted-foreground/60">Formatos: JPG, PNG (máx 5MB)</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0])}
-                />
-              </label>
-            )}
-            <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowProofDialog(false)} disabled={isUploadingProof}>
-                Voltar
-              </Button>
-              <Button
-                className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleSubmitWithProof}
-                disabled={isUploadingProof || !paymentProofFile}
-              >
-                <Send className="w-4 h-4" />
-                {isUploadingProof ? 'Enviando...' : 'Enviar Comprovante'}
               </Button>
             </div>
           </div>
