@@ -150,7 +150,7 @@ const LandingPage = () => {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/20">
         <div className="max-w-6xl mx-auto px-4 h-12 sm:h-14 flex items-center justify-between">
           <span className="text-sm font-semibold tracking-tight text-foreground">
-            ASMR Store
+            {lp.footerName || 'ASMR Store'}
           </span>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Button variant="ghost" size="sm" className="text-xs h-8 px-3 text-muted-foreground" onClick={() => navigate("/auth")}>
