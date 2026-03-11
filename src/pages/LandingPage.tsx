@@ -126,7 +126,14 @@ const FloatingOrb = ({ className, delay = 0 }: { className: string; delay?: numb
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
   const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/home", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
