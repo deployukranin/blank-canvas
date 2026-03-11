@@ -208,6 +208,11 @@ const CEOLojas = () => {
               <Input value={formName} onChange={e => setFormName(e.target.value)} />
             </div>
             <div className="space-y-2">
+              <Label>Slug</Label>
+              <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} />
+              <p className="text-xs text-muted-foreground">Link: /loja/{formSlug || 'slug'}/auth</p>
+            </div>
+            <div className="space-y-2">
               <Label>URL</Label>
               <Input value={formUrl} onChange={e => setFormUrl(e.target.value)} />
             </div>
