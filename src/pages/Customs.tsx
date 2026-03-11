@@ -88,8 +88,8 @@ const CustomsPage = () => {
   // Payment proof state
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
-  const [audioPaymentProofFile, setAudioPaymentProofFile] = useState<File | null>(null);
-  const [audioPaymentProofPreview, setAudioPaymentProofPreview] = useState<string | null>(null);
+  const [showProofDialog, setShowProofDialog] = useState(false);
+  const [proofType, setProofType] = useState<'video' | 'audio'>('video');
   const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   // Current tab
