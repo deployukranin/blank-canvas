@@ -50,7 +50,7 @@ export function usePixConfig() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Derived: active key as legacy PixConfig (for checkout compatibility)
-  const activeKey = multiConfig.keys.find(k => k.isActive);
+  const activeKey = multiConfig.keys?.find(k => k.isActive);
   const config: PixConfig = activeKey
     ? { pixKey: activeKey.pixKey, pixKeyType: activeKey.pixKeyType, merchantName: activeKey.merchantName, merchantState: activeKey.merchantState, merchantCity: activeKey.merchantCity }
     : { pixKey: '', pixKeyType: 'cpf', merchantName: '', merchantState: '', merchantCity: '' };
