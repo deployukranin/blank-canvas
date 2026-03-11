@@ -13,10 +13,9 @@ import {
   Video,
   Headphones,
   Pause,
-  QrCode,
-  Upload,
-  ImageIcon
+  QrCode
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -26,8 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
-import { addOrder, VideoOrder } from '@/lib/order-store';
-import { supabase } from '@/integrations/supabase/client';
+import { addOrder, VideoOrder, AudioOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { PixQRCode } from '@/components/payment/PixQRCode';
 import { usePixConfig } from '@/hooks/use-pix-config';
