@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2 } from 'lucide-react';
+import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2, Copy, Link2 } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useStores, type StoreItem } from '@/hooks/use-stores';
+import { toast } from 'sonner';
 
 const CEOLojas = () => {
   const { stores, isLoading, createStore, updateStore, deleteStore } = useStores();
@@ -17,37 +18,58 @@ const CEOLojas = () => {
   const [deleteTarget, setDeleteTarget] = useState<StoreItem | null>(null);
   const [formName, setFormName] = useState('');
   const [formUrl, setFormUrl] = useState('');
+  const [formSlug, setFormSlug] = useState('');
 
   const openNew = () => {
     setFormName('');
     setFormUrl('');
+    setFormSlug('');
     setNewOpen(true);
   };
 
   const openEdit = (store: StoreItem) => {
     setFormName(store.name);
     setFormUrl(store.url);
+    setFormSlug((store as any).slug || '');
     setEditStore(store);
+  };
+
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   };
 
   const handleCreate = () => {
     if (!formName.trim()) return;
-    const slug = formName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const slug = formSlug.trim() || generateSlug(formName);
     createStore.mutate({
       name: formName.trim(),
       url: formUrl.trim() || `${slug}.lovable.app`,
+      slug,
     });
     setNewOpen(false);
   };
 
   const handleEdit = () => {
     if (!editStore || !formName.trim()) return;
+    const slug = formSlug.trim() || generateSlug(formName);
     updateStore.mutate({
       id: editStore.id,
       name: formName.trim(),
       url: formUrl.trim() || editStore.url,
+      slug,
     });
     setEditStore(null);
+  };
+
+  const copyRegistrationLink = (store: StoreItem) => {
+    const slug = (store as any).slug;
+    if (!slug) {
+      toast.error('Esta loja não tem um slug definido. Edite a loja para adicionar.');
+      return;
+    }
+    const link = `${window.location.origin}/loja/${slug}/auth`;
+    navigator.clipboard.writeText(link);
+    toast.success('Link de cadastro copiado!');
   };
 
   const handleDelete = () => {
@@ -124,6 +146,9 @@ const CEOLojas = () => {
                             : <><Power className="w-4 h-4 mr-2" /> Ativar</>
                           }
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => copyRegistrationLink(store)}>
+                          <Link2 className="w-4 h-4 mr-2" /> Link de Cadastro
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(store)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Excluir
@@ -148,7 +173,12 @@ const CEOLojas = () => {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Nome da loja</Label>
-              <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Ex: ASMR Dreams" />
+              <Input value={formName} onChange={e => { setFormName(e.target.value); if (!formSlug) setFormSlug(generateSlug(e.target.value)); }} placeholder="Ex: ASMR Dreams" />
+            </div>
+            <div className="space-y-2">
+              <Label>Slug (identificador único)</Label>
+              <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="asmr-dreams" />
+              <p className="text-xs text-muted-foreground">Usado no link de cadastro: /loja/{formSlug || 'slug'}/auth</p>
             </div>
             <div className="space-y-2">
               <Label>URL (opcional)</Label>
@@ -176,6 +206,11 @@ const CEOLojas = () => {
             <div className="space-y-2">
               <Label>Nome da loja</Label>
               <Input value={formName} onChange={e => setFormName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Slug</Label>
+              <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} />
+              <p className="text-xs text-muted-foreground">Link: /loja/{formSlug || 'slug'}/auth</p>
             </div>
             <div className="space-y-2">
               <Label>URL</Label>

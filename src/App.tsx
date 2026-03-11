@@ -26,6 +26,7 @@ import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import StoreAuth from "./pages/StoreAuth";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/loja/:slug/auth" element={<StoreAuth />} />
               
               <Route path="/assinaturas" element={<Assinaturas />} />
               <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />

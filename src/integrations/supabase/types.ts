@@ -251,12 +251,42 @@ export type Database = {
         }
         Relationships: []
       }
+      store_users: {
+        Row: {
+          created_at: string
+          id: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_users_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
           created_at: string
           created_by: string | null
           id: string
           name: string
+          slug: string | null
           status: string
           updated_at: string
           url: string
@@ -266,6 +296,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name: string
+          slug?: string | null
           status?: string
           updated_at?: string
           url?: string
@@ -275,6 +306,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+          slug?: string | null
           status?: string
           updated_at?: string
           url?: string

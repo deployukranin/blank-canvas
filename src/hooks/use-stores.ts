@@ -6,6 +6,7 @@ export interface StoreItem {
   id: string;
   name: string;
   url: string;
+  slug: string | null;
   status: 'active' | 'inactive';
   created_by: string | null;
   created_at: string;
@@ -28,10 +29,10 @@ export function useStores() {
   });
 
   const createStore = useMutation({
-    mutationFn: async (store: { name: string; url: string }) => {
+    mutationFn: async (store: { name: string; url: string; slug?: string }) => {
       const { data, error } = await supabase
         .from('stores')
-        .insert({ name: store.name, url: store.url })
+        .insert({ name: store.name, url: store.url, slug: store.slug || null } as any)
         .select()
         .single();
       if (error) throw error;
@@ -45,7 +46,7 @@ export function useStores() {
   });
 
   const updateStore = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; name?: string; url?: string; status?: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; url?: string; status?: string; slug?: string }) => {
       const { error } = await supabase
         .from('stores')
         .update(updates)
