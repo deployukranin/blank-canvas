@@ -945,6 +945,37 @@ const CustomsPage = () => {
               onChange={e => setAudioFormData(prev => ({ ...prev, observations: e.target.value }))}
               className="glass border-white/10"
             />
+            {/* Payment Proof Upload */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Upload className="w-4 h-4 text-primary" />
+                Comprovante PIX *
+              </label>
+              {audioPaymentProofPreview ? (
+                <div className="relative">
+                  <img src={audioPaymentProofPreview} alt="Comprovante" className="w-full max-h-48 object-contain rounded-lg border border-border" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-1 right-1 h-7 text-xs"
+                    onClick={() => { setAudioPaymentProofFile(null); setAudioPaymentProofPreview(null); }}
+                  >
+                    Trocar
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors">
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground text-center">Toque para enviar o print do comprovante</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handlePaymentProofSelect(e.target.files[0], 'audio')}
+                  />
+                </label>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowAudioOrderDialog(false)} disabled={isProcessing}>
                 Cancelar
@@ -952,10 +983,10 @@ const CustomsPage = () => {
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
                 onClick={handleAudioOrder}
-                disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
+                disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim() || !audioPaymentProofFile}
               >
                 <Send className="w-4 h-4" />
-                {isProcessing ? 'Processando...' : 'Já Paguei - Confirmar'}
+                {isProcessing ? 'Enviando...' : 'Já Paguei - Confirmar'}
               </Button>
             </div>
           </div>
