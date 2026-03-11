@@ -29,10 +29,10 @@ export function useStores() {
   });
 
   const createStore = useMutation({
-    mutationFn: async (store: { name: string; url: string }) => {
+    mutationFn: async (store: { name: string; url: string; slug?: string }) => {
       const { data, error } = await supabase
         .from('stores')
-        .insert({ name: store.name, url: store.url })
+        .insert({ name: store.name, url: store.url, slug: store.slug || null } as any)
         .select()
         .single();
       if (error) throw error;
