@@ -33,8 +33,10 @@ export interface PixPayload {
 }
 
 export function generatePixBRCode(data: PixPayload): string {
+  // Strip formatting from PIX key (dots, dashes, slashes)
+  const rawKey = data.pixKey.replace(/[\.\-\/\s]/g, '');
   const gui = tlv('00', 'br.gov.bcb.pix');
-  const key = tlv('01', data.pixKey);
+  const key = tlv('01', rawKey);
   const merchantAccountInfo = tlv('26', gui + key);
 
   const payloadFormatIndicator = tlv('00', '01');
@@ -42,7 +44,7 @@ export function generatePixBRCode(data: PixPayload): string {
   const currency = tlv('53', '986');
   const amount = tlv('54', data.amount.toFixed(2));
   const country = tlv('58', 'BR');
-  const merchantName = tlv('59', data.merchantName.substring(0, 25));
+  const merchantName = tlv('59', data.merchantName.substring(0, 50));
   const merchantCity = tlv('60', data.merchantCity.substring(0, 15));
   
   const txId = tlv('05', (data.txId || '***').substring(0, 25));
