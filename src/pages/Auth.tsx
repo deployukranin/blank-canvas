@@ -89,7 +89,7 @@ const Auth = () => {
           navigate("/admin", { replace: true });
         } else {
           toast.success("Login realizado com sucesso!");
-          navigate("/", { replace: true });
+          navigate("/home", { replace: true });
         }
       } else {
         toast.success("Login realizado com sucesso!");
