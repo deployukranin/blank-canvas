@@ -1294,6 +1294,7 @@ export const useWhiteLabel = () => {
       updateCommunity: noop,
       updateYouTube: noop,
       updateShopify: noop,
+      updateAdSense: noop,
       updateToken: noop as any,
       resetToDefaults: noop,
       resetIconsToDefaults: noop,
