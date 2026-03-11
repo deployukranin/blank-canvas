@@ -54,6 +54,7 @@ import CEOTrafego from "./pages/ceo/CEOTrafego";
 import CEOMetricas from "./pages/ceo/CEOMetricas";
 import CEOAlertas from "./pages/ceo/CEOAlertas";
 import CEOConfiguracoes from "./pages/ceo/CEOConfiguracoes";
+import CEOLandingPage from "./pages/ceo/CEOLandingPage";
 
 const queryClient = new QueryClient();
 
