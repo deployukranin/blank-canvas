@@ -999,6 +999,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         supabase: { ...defaults.tokens.supabase, ...parsed.tokens?.supabase },
         metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
       },
+      landingPage: { ...defaultLandingPage, ...parsed.landingPage },
     };
   };
 
