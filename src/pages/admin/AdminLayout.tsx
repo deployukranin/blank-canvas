@@ -13,7 +13,7 @@ import {
   X,
   ArrowLeft,
   Shield,
-  CreditCard,
+  
   
   Video,
   Headphones,
