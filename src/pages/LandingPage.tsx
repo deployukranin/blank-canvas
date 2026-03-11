@@ -250,8 +250,10 @@ const LandingPage = () => {
           </motion.div>
         </motion.div>
       </section>
+      )}
 
       {/* Stats */}
+      {lp.statsVisible !== false && (
       <section className="py-4 sm:py-6 px-4 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
         <div className="max-w-4xl mx-auto relative z-10">
