@@ -11,20 +11,27 @@ import {
   ChevronRight,
   Bell,
   Sparkles,
-  Download
+  Download,
+  Upload,
+  ImageIcon,
+  Send,
+  AlertCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/use-notifications';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   getOrders, 
   Order, 
   getStatusLabel, 
   getStatusColor,
-  OrderStatus 
+  OrderStatus,
+  saveOrders
 } from '@/lib/order-store';
 import {
   Dialog,
@@ -46,17 +53,24 @@ const statusIcons: Record<OrderStatus, React.ReactNode> = {
 const MeusPedidosPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const { permission, isSupported, requestPermission } = useNotifications();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'delivered'>('all');
 
+  // Proof upload state
+  const [showProofDialog, setShowProofDialog] = useState(false);
+  const [proofOrderId, setProofOrderId] = useState<string | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     setOrders(getOrders());
   }, []);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/perfil');
@@ -87,7 +101,6 @@ const MeusPedidosPage = () => {
     });
   };
 
-  // Check if order has video/audio URL to play
   const hasMediaUrl = (order: Order): boolean => {
     if (order.type === 'video' && 'videoUrl' in order && order.videoUrl) return true;
     if (order.type === 'audio' && 'audioUrl' in order && order.audioUrl) return true;
@@ -98,6 +111,82 @@ const MeusPedidosPage = () => {
     if (order.type === 'video' && 'videoUrl' in order) return order.videoUrl;
     if (order.type === 'audio' && 'audioUrl' in order) return order.audioUrl;
     return undefined;
+  };
+
+  // Proof upload handlers
+  const handleOpenProof = (orderId: string) => {
+    setProofOrderId(orderId);
+    setProofFile(null);
+    setProofPreview(null);
+    setShowProofDialog(true);
+    setShowDetailsDialog(false);
+  };
+
+  const handleProofFileSelect = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Apenas imagens são aceitas', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Imagem muito grande (máx 5MB)', variant: 'destructive' });
+      return;
+    }
+    setProofFile(file);
+    setProofPreview(URL.createObjectURL(file));
+  };
+
+  const handleSubmitProof = async () => {
+    if (!proofFile || !proofOrderId) return;
+
+    setIsUploading(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({ title: 'Erro de autenticação', variant: 'destructive' });
+      setIsUploading(false);
+      return;
+    }
+
+    const ext = proofFile.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('payment-proofs').upload(fileName, proofFile);
+    
+    if (error) {
+      console.error('Upload error:', error);
+      toast({ title: 'Erro ao enviar comprovante', description: 'Tente novamente.', variant: 'destructive' });
+      setIsUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
+
+    // Update local order with proof URL
+    const allOrders = getOrders();
+    const idx = allOrders.findIndex(o => o.id === proofOrderId);
+    if (idx !== -1) {
+      allOrders[idx] = {
+        ...allOrders[idx],
+        paymentProofUrl: publicUrl,
+        updatedAt: new Date().toISOString(),
+      } as Order;
+      saveOrders(allOrders);
+      setOrders([...allOrders]);
+    }
+
+    setIsUploading(false);
+    setShowProofDialog(false);
+    toast({ 
+      title: 'Comprovante enviado! ✅', 
+      description: 'Aguarde a validação do pagamento pelo administrador.' 
+    });
+  };
+
+  const orderNeedsProof = (order: Order): boolean => {
+    return order.status === 'pending' && !order.paymentProofUrl;
+  };
+
+  const orderHasProof = (order: Order): boolean => {
+    return !!order.paymentProofUrl;
   };
 
   return (
@@ -128,7 +217,7 @@ const MeusPedidosPage = () => {
                 <div className="flex-1">
                   <h4 className="font-medium text-sm mb-1">Ative as notificações</h4>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Receba um aviso quando seu vídeo personalizado estiver pronto!
+                    Receba um aviso quando seu pedido estiver pronto!
                   </p>
                   <Button 
                     size="sm" 
@@ -183,28 +272,28 @@ const MeusPedidosPage = () => {
                     hover
                     onClick={() => handleViewDetails(order)}
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-3">
                       {/* Icon */}
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
                         order.type === 'video' 
                           ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20' 
                           : 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20'
                       }`}>
                         {order.type === 'video' ? (
-                          <Video className="w-6 h-6 text-purple-400" />
+                          <Video className="w-5 h-5 text-purple-400" />
                         ) : (
-                          <Music className="w-6 h-6 text-blue-400" />
+                          <Music className="w-5 h-5 text-blue-400" />
                         )}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">
+                          <span className="text-lg">
                             {order.type === 'video' && 'categoryIcon' in order ? order.categoryIcon : '🎬'}
                           </span>
                           <h4 className="font-semibold text-sm truncate">
-                            {order.type === 'video' ? (order as any).categoryName : 'Áudio Personalizado'}
+                            {order.type === 'video' ? (order as any).categoryName : (order as any).categoryName || 'Áudio Personalizado'}
                           </h4>
                         </div>
                         <p className="text-xs text-muted-foreground mb-2">
@@ -214,24 +303,38 @@ const MeusPedidosPage = () => {
                           }
                           {formatDate(order.createdAt)}
                         </p>
-                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {statusIcons[order.status]}
-                          {getStatusLabel(order.status)}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {statusIcons[order.status]}
+                            {getStatusLabel(order.status)}
+                          </div>
+                          {orderNeedsProof(order) && (
+                            <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-amber-500 bg-amber-500/10">
+                              <AlertCircle className="w-3 h-3" />
+                              Enviar comprovante
+                            </div>
+                          )}
+                          {orderHasProof(order) && order.status === 'pending' && (
+                            <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-blue-500 bg-blue-500/10">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Aguardando validação
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       {/* Price & Arrow */}
                       <div className="text-right flex-shrink-0">
-                        <p className="font-bold text-primary mb-1">
+                        <p className="font-bold text-primary text-sm mb-1">
                           R$ {order.price.toFixed(2).replace('.', ',')}
                         </p>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground ml-auto" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
                       </div>
                     </div>
 
                     {/* Progress Bar for active orders */}
-                    {order.status !== 'delivered' && (
-                      <div className="mt-4">
+                    {order.status !== 'delivered' && order.status !== 'pending' && (
+                      <div className="mt-3">
                         <div className="flex justify-between text-xs text-muted-foreground mb-1">
                           <span>Progresso</span>
                           <span>{getProgressPercentage(order.status)}%</span>
@@ -245,6 +348,18 @@ const MeusPedidosPage = () => {
                           />
                         </div>
                       </div>
+                    )}
+
+                    {/* Proof upload CTA for pending orders */}
+                    {orderNeedsProof(order) && (
+                      <Button
+                        size="sm"
+                        className="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white gap-2 h-9"
+                        onClick={(e) => { e.stopPropagation(); handleOpenProof(order.id); }}
+                      >
+                        <Upload className="w-4 h-4" />
+                        Enviar Comprovante PIX
+                      </Button>
                     )}
                   </GlassCard>
                 </motion.div>
@@ -266,7 +381,7 @@ const MeusPedidosPage = () => {
                     ? 'Nenhum pedido em andamento.'
                     : 'Nenhum pedido entregue ainda.'}
                 </p>
-                <Link to="/videos">
+                <Link to="/customs">
                   <Button className="bg-gradient-to-r from-primary to-accent">
                     Fazer Primeiro Pedido
                   </Button>
@@ -297,7 +412,7 @@ const MeusPedidosPage = () => {
               </DialogHeader>
 
               <div className="space-y-4 mt-4">
-                {/* Video/Audio Player - Show when ready or delivered with URL */}
+                {/* Video/Audio Player */}
                 {(selectedOrder.status === 'ready' || selectedOrder.status === 'delivered') && hasMediaUrl(selectedOrder) && (
                   <div className="rounded-lg overflow-hidden">
                     {selectedOrder.type === 'video' ? (
@@ -336,6 +451,24 @@ const MeusPedidosPage = () => {
                     {getStatusLabel(selectedOrder.status)}
                   </div>
                 </div>
+
+                {/* Proof Status */}
+                {selectedOrder.status === 'pending' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Comprovante</span>
+                    {orderHasProof(selectedOrder) ? (
+                      <span className="text-xs font-medium text-blue-500 bg-blue-500/10 px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Enviado - Aguardando
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Não enviado
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Order Info */}
                 <GlassCard className="p-4 space-y-3">
@@ -392,7 +525,7 @@ const MeusPedidosPage = () => {
                           <p className="mt-1 text-muted-foreground/80">{(selectedOrder as any).personalization.script}</p>
                         </div>
                       )}
-                      {selectedOrder.type === 'video' && (selectedOrder as any).personalization?.observations && (
+                      {(selectedOrder as any).personalization?.observations && (
                         <div>
                           <span className="text-muted-foreground">Observações:</span>
                           <p className="mt-1 text-muted-foreground/80">{(selectedOrder as any).personalization.observations}</p>
@@ -408,7 +541,29 @@ const MeusPedidosPage = () => {
                   </GlassCard>
                 )}
 
-                {/* Download Button for Ready/Delivered with media */}
+                {/* Proof upload button for pending without proof */}
+                {orderNeedsProof(selectedOrder) && (
+                  <Button
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white gap-2"
+                    onClick={() => handleOpenProof(selectedOrder.id)}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Enviar Comprovante PIX
+                  </Button>
+                )}
+
+                {/* Proof sent badge */}
+                {orderHasProof(selectedOrder) && selectedOrder.status === 'pending' && (
+                  <GlassCard className="p-4 text-center bg-blue-500/5 border-blue-500/20">
+                    <CheckCircle2 className="w-8 h-8 mx-auto text-blue-500 mb-2" />
+                    <p className="text-sm font-medium">Comprovante enviado!</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Aguarde a validação do administrador.
+                    </p>
+                  </GlassCard>
+                )}
+
+                {/* Download Button */}
                 {(selectedOrder.status === 'ready' || selectedOrder.status === 'delivered') && hasMediaUrl(selectedOrder) && (
                   <a 
                     href={getMediaUrl(selectedOrder)} 
@@ -422,7 +577,7 @@ const MeusPedidosPage = () => {
                   </a>
                 )}
 
-                {/* Message when ready but no media yet */}
+                {/* Ready but no media */}
                 {(selectedOrder.status === 'ready' || selectedOrder.status === 'delivered') && !hasMediaUrl(selectedOrder) && (
                   <GlassCard className="p-4 text-center bg-primary/5 border-primary/20">
                     <Sparkles className="w-8 h-8 mx-auto text-primary mb-2" />
@@ -437,11 +592,78 @@ const MeusPedidosPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Payment Proof Upload Dialog */}
+      <Dialog open={showProofDialog} onOpenChange={() => !isUploading && setShowProofDialog(false)}>
+        <DialogContent className="glass mx-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" />
+              Enviar Comprovante PIX
+            </DialogTitle>
+            <DialogDescription>
+              Envie o print/screenshot do comprovante de pagamento para validação do administrador.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {proofPreview ? (
+              <div className="relative">
+                <img 
+                  src={proofPreview} 
+                  alt="Comprovante" 
+                  className="w-full max-h-64 object-contain rounded-lg border border-border" 
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 h-7 text-xs bg-background/80 backdrop-blur-sm"
+                  onClick={() => { setProofFile(null); setProofPreview(null); }}
+                >
+                  Trocar
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center gap-3 p-8 rounded-xl border-2 border-dashed border-muted-foreground/30 cursor-pointer hover:border-primary/50 active:border-primary/70 transition-colors">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ImageIcon className="w-7 h-7 text-primary" />
+                </div>
+                <div className="text-center">
+                  <span className="text-sm font-medium block mb-1">Toque para selecionar</span>
+                  <span className="text-xs text-muted-foreground">JPG, PNG (máx 5MB)</span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleProofFileSelect(e.target.files[0])}
+                />
+              </label>
+            )}
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                className="flex-1" 
+                onClick={() => setShowProofDialog(false)} 
+                disabled={isUploading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
+                onClick={handleSubmitProof}
+                disabled={isUploading || !proofFile}
+              >
+                <Send className="w-4 h-4" />
+                {isUploading ? 'Enviando...' : 'Enviar'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MobileLayout>
   );
 };
 
-// Helper function to calculate progress percentage
 const getProgressPercentage = (status: OrderStatus): number => {
   const percentages: Record<OrderStatus, number> = {
     pending: 10,
