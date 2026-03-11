@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Youtube, Store, Plus, Trash2, ChevronDown, Users } from 'lucide-react';
+import { Save, Youtube, Store, Plus, Trash2, ChevronDown, Users, Gauge, Info } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
