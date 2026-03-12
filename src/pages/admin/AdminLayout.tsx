@@ -41,7 +41,7 @@ const menuItems = [
   { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
-  { path: '/admin/personalizacao', icon: Palette, label: 'Personalização' },
+  
   { path: '/admin/loja-visual', icon: Store, label: 'Visual da Loja' },
   
   { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
