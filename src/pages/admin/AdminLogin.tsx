@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useStoreAdmin } from "@/hooks/use-store-admin";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -19,48 +20,58 @@ const AdminLogin = () => {
   const { toast } = useToast();
   const { session, isLoading: authLoading, signOut } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
+  const { hasStore, isLoading: storeLoading } = useStoreAdmin();
 
   useEffect(() => {
-    // Se já existe sessão, redireciona quando as roles estiverem prontas.
     if (authLoading) return;
     if (!session) return;
-    if (rolesLoading) return;
+    if (rolesLoading || storeLoading) return;
 
     const userRoles = roles.map((r) => r.role);
 
+    // CEO → painel CEO
     if (userRoles.includes("ceo")) {
       navigate("/ceo", { replace: true });
       return;
     }
 
-    if (userRoles.includes("admin")) {
+    // Admin com loja vinculada → painel admin
+    if (userRoles.includes("admin") && hasStore) {
       navigate("/admin", { replace: true });
       return;
     }
 
-    // Sessão existe mas sem role adequada => encerra sessão
+    // Admin sem loja → erro
+    if (userRoles.includes("admin") && !hasStore) {
+      signOut();
+      toast({
+        variant: "destructive",
+        title: "Sem loja vinculada",
+        description: "Sua conta não está vinculada a nenhuma loja. Solicite acesso ao CEO.",
+      });
+      return;
+    }
+
+    // Sessão existe mas sem role adequada
     signOut();
     toast({
       variant: "destructive",
       title: "Acesso Negado",
       description: "Sua conta não possui permissão administrativa.",
     });
-  }, [authLoading, navigate, roles, rolesLoading, session, signOut, toast]);
+  }, [authLoading, navigate, roles, rolesLoading, session, signOut, toast, hasStore, storeLoading]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Login
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw new Error("Email ou senha incorretos.");
-      // O redirecionamento acontece no useEffect quando session/roles atualizarem.
-
     } catch (error: any) {
       console.error(error);
       toast({
@@ -73,8 +84,7 @@ const AdminLogin = () => {
     }
   };
 
-  // Loading enquanto AuthContext e/ou roles ainda não estabilizaram
-  if (authLoading || (session && rolesLoading)) {
+  if (authLoading || (session && (rolesLoading || storeLoading))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-2">
