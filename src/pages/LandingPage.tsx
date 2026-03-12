@@ -225,7 +225,7 @@ const LandingPage = () => {
               onClick={() => navigate("/auth")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              {lp.heroCtaText || 'Acessar Painel'}
+              {lp.heroCtaText || 'Criar Minha Loja Grátis'}
             </Button>
             <Button
               variant="outline"
