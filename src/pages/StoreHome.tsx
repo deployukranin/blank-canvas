@@ -193,7 +193,7 @@ const StoreHome = () => {
             <h1 className="font-display font-bold text-lg truncate">{displayName}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/loja/${slug}/perfil`)}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(`${basePath}/perfil`)}>
               <User className="w-5 h-5" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
