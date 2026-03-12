@@ -153,7 +153,23 @@ const StoreAuth = () => {
       return;
     }
 
+    if (!inviteCode.trim()) {
+      toast.error("Digite o código de convite");
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Validate invite code first
+    const { data: codeResult, error: codeError } = await supabase.rpc("use_invite_code", {
+      p_code: inviteCode.trim(),
+    });
+
+    if (codeError || !(codeResult as any)?.valid) {
+      toast.error((codeResult as any)?.error || "Código de convite inválido ou expirado");
+      setIsSubmitting(false);
+      return;
+    }
 
     const result = await signUp(signupEmail, signupPassword);
 
