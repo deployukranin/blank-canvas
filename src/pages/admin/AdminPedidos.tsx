@@ -498,7 +498,11 @@ const AdminPedidos: React.FC = () => {
             </DialogTitle>
             <DialogDescription>Imagem enviada pelo cliente</DialogDescription>
           </DialogHeader>
-          {proofUrl && (
+          {isProofLoading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Carregando comprovante...
+            </div>
+          ) : proofUrl ? (
             <div className="space-y-3 mt-2">
               <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
                 <img
@@ -516,6 +520,10 @@ const AdminPedidos: React.FC = () => {
                 <ExternalLink className="w-3.5 h-3.5" />
                 Abrir em nova aba
               </a>
+            </div>
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Comprovante indisponível.
             </div>
           )}
         </DialogContent>
