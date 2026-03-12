@@ -97,6 +97,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <Shield className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-bold gradient-text">Admin Panel</h2>
           </div>
+          {storeName && (
+            <div className="flex items-center gap-2 mt-2 px-1">
+              <Store className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground truncate">{storeName}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-2">
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
               <Shield className="w-4 h-4 text-primary" />
