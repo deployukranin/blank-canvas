@@ -18,11 +18,13 @@ import {
   Youtube,
   QrCode,
   Palette,
+  Store,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useStoreAdminContext } from '@/contexts/StoreAdminContext';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
