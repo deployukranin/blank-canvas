@@ -72,8 +72,6 @@ export const Header = () => {
                       <span className="hidden sm:block text-sm font-medium">
                         {displayName}
                       </span>
-                      {user?.isVIP && <span>👑</span>}
-                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass w-48">
                     <DropdownMenuItem className="flex items-center gap-2">
