@@ -94,19 +94,19 @@ const App = () => (
               {/* 🛡️ Rotas ADMIN (Blindadas) */}
               <Route path="/admin/login" element={<AdminLogin />} />
               
-              <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
-              <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
-              <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
+              <Route path="/admin" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminDashboard /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminIdeias /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminPedidos /></StoreAdminProvider></AdminRoute>} />
               
               
-              <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
-              <Route path="/admin/precos" element={<AdminRoute requiredRole="admin"><AdminPrecos /></AdminRoute>} />
-              <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />
-              <Route path="/admin/usuarios" element={<AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute>} />
-              <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
-              <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
-              <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
-              <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
+              <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminVideos /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/precos" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminPrecos /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminYoutube /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/usuarios" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminUsuarios /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminConteudo /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminConfiguracoes /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminPixConfig /></StoreAdminProvider></AdminRoute>} />
+              <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><StoreAdminProvider><AdminPersonalizacao /></StoreAdminProvider></AdminRoute>} />
               
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}
