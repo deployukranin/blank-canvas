@@ -169,10 +169,10 @@ const StoreHome = () => {
   }
 
   const quickLinks = [
-    { icon: Play, label: "Vídeos", path: `/loja/${slug}/videos`, color: "from-purple-500 to-pink-500" },
-    { icon: MessageSquare, label: "Comunidade", path: `/loja/${slug}/comunidade`, color: "from-blue-500 to-cyan-500" },
-    { icon: Lightbulb, label: "Ideias", path: `/loja/${slug}/ideias`, color: "from-amber-500 to-orange-500" },
-    { icon: Heart, label: "Favoritos", path: `/loja/${slug}/favoritos`, color: "from-red-500 to-pink-500" },
+    { icon: Play, label: "Vídeos", path: `${basePath}/videos`, color: "from-purple-500 to-pink-500" },
+    { icon: MessageSquare, label: "Comunidade", path: `${basePath}/comunidade`, color: "from-blue-500 to-cyan-500" },
+    { icon: Lightbulb, label: "Ideias", path: `${basePath}/ideias`, color: "from-amber-500 to-orange-500" },
+    { icon: Heart, label: "Favoritos", path: `${basePath}/favoritos`, color: "from-red-500 to-pink-500" },
   ];
 
   const banners = storeConfig.bannerImages?.length ? storeConfig.bannerImages : [];
