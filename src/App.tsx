@@ -17,6 +17,7 @@ import ProdutoAssinatura from "./pages/ProdutoAssinatura";
 import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
 import GaleriaVideos from "./pages/GaleriaVideos";
+import StoreHome from "./pages/StoreHome";
 import Perfil from "./pages/Perfil";
 import Notificacoes from "./pages/Notificacoes";
 
