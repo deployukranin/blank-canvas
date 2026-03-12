@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles,
   Headphones,
@@ -133,9 +134,41 @@ const LandingPage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      navigate("/home", { replace: true });
-    }
+    const redirectByRole = async () => {
+      if (isLoading || !isAuthenticated) return;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      const userRoles = roles?.map((r) => r.role) || [];
+
+      if (userRoles.includes("ceo")) {
+        navigate("/ceo", { replace: true });
+      } else if (userRoles.includes("admin")) {
+        navigate("/admin", { replace: true });
+      } else {
+        // Regular user - find their store
+        const { data: membership } = await supabase
+          .from("store_users")
+          .select("store_id, stores(slug)")
+          .eq("user_id", user.id)
+          .limit(1)
+          .single();
+
+        if (membership?.stores && typeof membership.stores === 'object' && 'slug' in membership.stores) {
+          const slug = (membership.stores as { slug: string }).slug;
+          navigate(`/loja/${slug}`, { replace: true });
+        }
+        // If no store, stay on landing page
+      }
+    };
+
+    redirectByRole();
   }, [isAuthenticated, isLoading, navigate]);
   const { scrollYProgress } = useScroll({
     target: heroRef,
