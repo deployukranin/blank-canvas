@@ -799,28 +799,6 @@ export interface WhiteLabelConfig {
     };
   };
 
-  // Google AdSense
-  adsense: {
-    enabled: boolean;
-    publisherId: string; // ca-pub-xxxxx
-    slots: {
-      home?: string;
-      gallery?: string;
-      community?: string;
-      videos?: string;
-      ideas?: string;
-    };
-    customBanners?: Array<{
-      id: string;
-      imageUrl: string;
-      linkUrl: string;
-      label: string;
-      /** Which pages to show this banner on */
-      pages: Array<'home' | 'gallery' | 'community' | 'videos' | 'ideas'>;
-      enabled: boolean;
-    }>;
-  };
-
 }
 
 const defaultCommunityConfig = {
@@ -931,11 +909,6 @@ const defaultConfig: WhiteLabelConfig = {
     },
   },
   landingPage: defaultLandingPage,
-  adsense: {
-    enabled: false,
-    publisherId: '',
-    slots: {},
-  },
 };
 
 interface WhiteLabelContextType {
@@ -945,7 +918,7 @@ interface WhiteLabelContextType {
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
   updateQuickActions: (quickActions: QuickActionItem[]) => void;
-  updateAdSense: (adsense: Partial<WhiteLabelConfig['adsense']>) => void;
+  
   updateNavigationTabs: (tabs: NavTabConfig[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
   updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
@@ -1049,7 +1022,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
       },
       landingPage: { ...defaultLandingPage, ...parsed.landingPage },
-      adsense: { ...defaults.adsense, ...parsed.adsense, slots: { ...defaults.adsense.slots, ...parsed.adsense?.slots } },
     };
   };
 
@@ -1186,17 +1158,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   }, []);
 
-  const updateAdSense = useCallback((adsense: Partial<WhiteLabelConfig['adsense']>) => {
-    setConfig(prev => ({
-      ...prev,
-      adsense: {
-        ...prev.adsense,
-        ...adsense,
-        slots: { ...prev.adsense.slots, ...adsense.slots },
-        customBanners: adsense.customBanners ?? prev.adsense.customBanners,
-      },
-    }));
-  }, []);
 
   const updateToken = useCallback(<K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,
@@ -1273,7 +1234,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateCommunity,
         updateYouTube,
         updateShopify,
-        updateAdSense,
         updateToken,
         resetToDefaults,
         resetIconsToDefaults,
@@ -1308,7 +1268,6 @@ export const useWhiteLabel = () => {
       updateCommunity: noop,
       updateYouTube: noop,
       updateShopify: noop,
-      updateAdSense: noop,
       updateToken: noop as any,
       resetToDefaults: noop,
       resetIconsToDefaults: noop,

@@ -28,7 +28,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useUserReputation } from '@/hooks/use-user-reputation';
-import { AdPlaceholder } from '@/components/ads/AdBanner';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { UserLevelBadge } from '@/components/reputation/UserLevelBadge';
 import { LeaderboardCard } from '@/components/reputation/LeaderboardCard';
@@ -849,7 +848,6 @@ const ComunidadePage = () => {
           {videosTabEnabled && (
             <TabsContent value="videos" className="mt-0">
               <VideoGalleryPanel className="space-y-4" />
-              <AdPlaceholder format="horizontal" className="my-4" />
             </TabsContent>
           )}
 
@@ -857,7 +855,6 @@ const ComunidadePage = () => {
             {mockFeedPosts.map((post, index) => (
               <React.Fragment key={post.id}>
                 <AvisoCard post={post} index={index} />
-                {index === 1 && <AdPlaceholder format="horizontal" className="my-4" />}
               </React.Fragment>
             ))}
           </TabsContent>
@@ -968,8 +965,6 @@ const ComunidadePage = () => {
                 </div>
               </GlassCard>
             )}
-
-            <AdPlaceholder format="horizontal" className="my-4" />
 
             {sortedIdeas.map((idea, index) => (
               <IdeiaCard
