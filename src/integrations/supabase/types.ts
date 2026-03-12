@@ -344,34 +344,46 @@ export type Database = {
       }
       stores: {
         Row: {
+          avatar_url: string | null
+          banner_url: string | null
           created_at: string
           created_by: string | null
+          description: string | null
           id: string
           name: string
           slug: string | null
           status: string
           updated_at: string
           url: string
+          username: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
           name: string
           slug?: string | null
           status?: string
           updated_at?: string
           url?: string
+          username?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
           name?: string
           slug?: string | null
           status?: string
           updated_at?: string
           url?: string
+          username?: string | null
         }
         Relationships: []
       }
