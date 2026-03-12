@@ -154,10 +154,7 @@ const LandingPage = () => {
           </span>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Button variant="ghost" size="sm" className="text-xs h-8 px-3 text-muted-foreground" onClick={() => navigate("/auth")}>
-              Entrar
-            </Button>
-            <Button size="sm" className="text-xs h-8 px-3 sm:px-4" onClick={() => navigate("/auth?tab=signup")}>
-              Criar Loja
+              Painel Admin
             </Button>
           </div>
         </div>
@@ -222,10 +219,10 @@ const LandingPage = () => {
             <Button
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base px-8 py-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-xl shadow-primary/25"
-              onClick={() => navigate("/auth?tab=signup")}
+              onClick={() => navigate("/auth")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              {lp.heroCtaText || 'Criar Minha Loja Grátis'}
+              {lp.heroCtaText || 'Acessar Painel'}
             </Button>
             <Button
               variant="outline"
