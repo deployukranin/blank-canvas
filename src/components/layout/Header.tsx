@@ -16,6 +16,8 @@ import {
 const navItems = [
   { path: '/', label: 'Início' },
   { path: '/ideias', label: 'Ideias' },
+  { path: '/loja', label: 'Loja' },
+  { path: '/vip', label: 'VIP', isVIP: true },
   { path: '/customs', label: "Custom's" },
   { path: '/comunidade', label: 'Comunidade' },
 ];
@@ -53,8 +55,9 @@ export const Header = () => {
                     location.pathname === item.path
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                  }`}
+                  } ${item.isVIP ? 'text-vip' : ''}`}
                 >
+                  {item.isVIP && <span className="mr-1">👑</span>}
                   {item.label}
                 </Link>
               ))}
@@ -72,6 +75,7 @@ export const Header = () => {
                       <span className="hidden sm:block text-sm font-medium">
                         {displayName}
                       </span>
+                      {user?.isVIP && <span>👑</span>}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass w-48">
@@ -135,8 +139,9 @@ export const Header = () => {
                     location.pathname === item.path
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                  }`}
+                  } ${item.isVIP ? 'text-vip' : ''}`}
                 >
+                  {item.isVIP && <span className="mr-1">👑</span>}
                   {item.label}
                 </Link>
               ))}

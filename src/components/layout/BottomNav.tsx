@@ -9,7 +9,7 @@ export const BottomNav = () => {
 
   // Use navigation tabs from config, filtered by enabled and sorted by order
   const navItems = config.navigationTabs
-    .filter(tab => tab.enabled && tab.path !== '/loja' && tab.path !== '/vip' && tab.path !== '/assinaturas')
+    .filter(tab => tab.enabled && tab.path !== '/loja' && tab.path !== '/vip')
     .sort((a, b) => a.order - b.order);
 
   return (

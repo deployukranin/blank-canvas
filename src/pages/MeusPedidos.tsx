@@ -158,43 +158,15 @@ const MeusPedidosPage = () => {
       return;
     }
 
-    const proofStoragePath = fileName;
+    const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
 
-    // Update payment_proof_url in the database (latest pending order without proof)
-    let proofLinkedToBackend = false;
-    const { data: pendingOrder, error: findOrderError } = await supabase
-      .from('custom_orders')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .is('payment_proof_url', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (findOrderError) {
-      console.error('Error finding pending order:', findOrderError);
-    } else if (pendingOrder?.id) {
-      const { error: dbError } = await supabase
-        .from('custom_orders')
-        .update({ payment_proof_url: proofStoragePath })
-        .eq('id', pendingOrder.id)
-        .eq('user_id', user.id);
-
-      if (dbError) {
-        console.error('DB update error:', dbError);
-      } else {
-        proofLinkedToBackend = true;
-      }
-    }
-
-    // Update local order with proof reference
+    // Update local order with proof URL
     const allOrders = getOrders();
     const idx = allOrders.findIndex(o => o.id === proofOrderId);
     if (idx !== -1) {
       allOrders[idx] = {
         ...allOrders[idx],
-        paymentProofUrl: proofStoragePath,
+        paymentProofUrl: publicUrl,
         updatedAt: new Date().toISOString(),
       } as Order;
       saveOrders(allOrders);
@@ -203,19 +175,10 @@ const MeusPedidosPage = () => {
 
     setIsUploading(false);
     setShowProofDialog(false);
-
-    if (proofLinkedToBackend) {
-      toast({ 
-        title: 'Comprovante enviado! ✅', 
-        description: 'Aguarde a validação do pagamento pelo administrador.' 
-      });
-    } else {
-      toast({
-        title: 'Comprovante enviado, mas sem vínculo no pedido',
-        description: 'Tente novamente em instantes para concluir a validação.',
-        variant: 'destructive',
-      });
-    }
+    toast({ 
+      title: 'Comprovante enviado! ✅', 
+      description: 'Aguarde a validação do pagamento pelo administrador.' 
+    });
   };
 
   const orderNeedsProof = (order: Order): boolean => {

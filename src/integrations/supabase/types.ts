@@ -47,7 +47,6 @@ export type Database = {
           config_value: Json
           created_at: string
           id: string
-          store_id: string | null
           updated_at: string
         }
         Insert: {
@@ -55,7 +54,6 @@ export type Database = {
           config_value: Json
           created_at?: string
           id?: string
-          store_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -63,18 +61,9 @@ export type Database = {
           config_value?: Json
           created_at?: string
           id?: string
-          store_id?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "app_configurations_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       custom_orders: {
         Row: {
@@ -103,7 +92,6 @@ export type Database = {
           qr_code_image: string | null
           script: string | null
           status: string
-          store_id: string | null
           triggers: string | null
           user_id: string | null
         }
@@ -133,7 +121,6 @@ export type Database = {
           qr_code_image?: string | null
           script?: string | null
           status?: string
-          store_id?: string | null
           triggers?: string | null
           user_id?: string | null
         }
@@ -163,19 +150,10 @@ export type Database = {
           qr_code_image?: string | null
           script?: string | null
           status?: string
-          store_id?: string | null
           triggers?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "custom_orders_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_codes: {
         Row: {
@@ -186,7 +164,6 @@ export type Database = {
           id: string
           is_active: boolean | null
           max_uses: number | null
-          store_id: string | null
           used_count: number | null
         }
         Insert: {
@@ -197,7 +174,6 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
-          store_id?: string | null
           used_count?: number | null
         }
         Update: {
@@ -208,18 +184,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
-          store_id?: string | null
           used_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_codes_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -283,35 +250,6 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
-      }
-      store_admins: {
-        Row: {
-          created_at: string
-          id: string
-          store_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          store_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          store_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "store_admins_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       store_users: {
         Row: {
@@ -401,7 +339,6 @@ export type Database = {
           created_at: string
           id: string
           message: string
-          store_id: string | null
           user_id: string
           video_id: string
         }
@@ -409,7 +346,6 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
-          store_id?: string | null
           user_id: string
           video_id: string
         }
@@ -417,19 +353,10 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
-          store_id?: string | null
           user_id?: string
           video_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "video_chat_messages_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       video_idea_votes: {
         Row: {
@@ -466,7 +393,6 @@ export type Database = {
           description: string
           id: string
           status: string
-          store_id: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -477,7 +403,6 @@ export type Database = {
           description: string
           id?: string
           status?: string
-          store_id?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -488,21 +413,12 @@ export type Database = {
           description?: string
           id?: string
           status?: string
-          store_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null
           votes?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "video_ideas_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       video_reactions: {
         Row: {

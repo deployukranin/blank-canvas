@@ -50,7 +50,6 @@ const AdminPedidos: React.FC = () => {
   // Payment proof dialog
   const [showProofDialog, setShowProofDialog] = useState(false);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
-  const [isProofLoading, setIsProofLoading] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -123,53 +122,6 @@ const AdminPedidos: React.FC = () => {
       setShowUploadDialog(false);
       setSelectedOrderForUpload(null);
       setUploadedVideoUrl('');
-    }
-  };
-
-  const resolveProofDisplayUrl = async (storedProofUrl: string) => {
-    const publicPrefix = '/storage/v1/object/public/payment-proofs/';
-
-    if (/^https?:\/\//i.test(storedProofUrl)) {
-      if (!storedProofUrl.includes(publicPrefix)) {
-        return storedProofUrl;
-      }
-
-      const encodedPath = storedProofUrl.split(publicPrefix)[1] || '';
-      const decodedPath = decodeURIComponent(encodedPath.split('?')[0] || '');
-      if (!decodedPath) return storedProofUrl;
-
-      const { data, error } = await supabase.storage
-        .from('payment-proofs')
-        .createSignedUrl(decodedPath, 60 * 60);
-
-      if (error) throw error;
-      return data.signedUrl;
-    }
-
-    const { data, error } = await supabase.storage
-      .from('payment-proofs')
-      .createSignedUrl(storedProofUrl, 60 * 60);
-
-    if (error) throw error;
-    return data.signedUrl;
-  };
-
-  const handleOpenProof = async (storedProofUrl: string | null) => {
-    if (!storedProofUrl) return;
-
-    setShowProofDialog(true);
-    setIsProofLoading(true);
-    setProofUrl(null);
-
-    try {
-      const resolvedUrl = await resolveProofDisplayUrl(storedProofUrl);
-      setProofUrl(resolvedUrl);
-    } catch (error) {
-      console.error('Error loading payment proof:', error);
-      toast.error('Não foi possível abrir o comprovante');
-      setShowProofDialog(false);
-    } finally {
-      setIsProofLoading(false);
     }
   };
 
@@ -314,12 +266,6 @@ const AdminPedidos: React.FC = () => {
                       <span className="font-mono text-sm text-muted-foreground">{order.correlation_id.slice(0, 8)}...</span>
                       {getTypeBadge(order.product_type)}
                       {getStatusBadge(order.status)}
-                      {order.payment_proof_url && (
-                        <Badge className="bg-primary/20 text-primary gap-1">
-                          <ImageIcon className="w-3 h-3" />
-                          Comprovante enviado
-                        </Badge>
-                      )}
                     </div>
                     <h3 className="font-semibold">{order.category_name || order.category}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -332,7 +278,7 @@ const AdminPedidos: React.FC = () => {
                     )}
                     {order.payment_proof_url && (
                       <button
-                        onClick={() => void handleOpenProof(order.payment_proof_url)}
+                        onClick={() => { setProofUrl(order.payment_proof_url); setShowProofDialog(true); }}
                         className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                       >
                         <ImageIcon className="w-3.5 h-3.5" />
@@ -352,17 +298,6 @@ const AdminPedidos: React.FC = () => {
                     <div className="flex gap-2 flex-wrap">
                       {order.status === 'pending' && (
                         <>
-                          {order.payment_proof_url && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1"
-                              onClick={() => void handleOpenProof(order.payment_proof_url)}
-                            >
-                              <ImageIcon className="w-4 h-4" />
-                              Ver Comprovante
-                            </Button>
-                          )}
                           <Button
                             size="sm"
                             className="gap-1"
@@ -383,25 +318,12 @@ const AdminPedidos: React.FC = () => {
                         </>
                       )}
                       {order.status === 'paid' && (
-                        <>
-                          {order.payment_proof_url && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1"
-                              onClick={() => void handleOpenProof(order.payment_proof_url)}
-                            >
-                              <ImageIcon className="w-4 h-4" />
-                              Ver Comprovante
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            onClick={() => handleStatusChange(order.id, 'processing')}
-                          >
-                            Iniciar Produção
-                          </Button>
-                        </>
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(order.id, 'processing')}
+                        >
+                          Iniciar Produção
+                        </Button>
                       )}
                       {order.status === 'processing' && (
                         <Button
@@ -528,11 +450,7 @@ const AdminPedidos: React.FC = () => {
             </DialogTitle>
             <DialogDescription>Imagem enviada pelo cliente</DialogDescription>
           </DialogHeader>
-          {isProofLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Carregando comprovante...
-            </div>
-          ) : proofUrl ? (
+          {proofUrl && (
             <div className="space-y-3 mt-2">
               <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
                 <img
@@ -550,10 +468,6 @@ const AdminPedidos: React.FC = () => {
                 <ExternalLink className="w-3.5 h-3.5" />
                 Abrir em nova aba
               </a>
-            </div>
-          ) : (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Comprovante indisponível.
             </div>
           )}
         </DialogContent>
