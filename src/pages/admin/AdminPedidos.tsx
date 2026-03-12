@@ -352,6 +352,17 @@ const AdminPedidos: React.FC = () => {
                     <div className="flex gap-2 flex-wrap">
                       {order.status === 'pending' && (
                         <>
+                          {order.payment_proof_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => void handleOpenProof(order.payment_proof_url)}
+                            >
+                              <ImageIcon className="w-4 h-4" />
+                              Ver Comprovante
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             className="gap-1"
