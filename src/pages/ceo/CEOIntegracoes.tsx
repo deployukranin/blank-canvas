@@ -189,7 +189,7 @@ const CEOIntegracoes = () => {
       videoCategoryMap,
       storeIntegrations: updatedIntegrations as any,
     });
-    updateAdSense(adsenseDraft);
+    
     toast.success('Integrações salvas!');
   };
 
