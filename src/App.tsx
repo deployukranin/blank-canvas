@@ -108,7 +108,7 @@ const App = () => (
               <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
               <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
-              <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
+              
               <Route path="/admin/loja-visual" element={<AdminRoute requiredRole="admin"><AdminLojaPersonalizacao /></AdminRoute>} />
               
 
