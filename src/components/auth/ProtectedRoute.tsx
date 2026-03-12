@@ -13,7 +13,14 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate("/auth", { replace: true });
+      // Redirect to store auth if we're in a store context, otherwise global
+      const currentPath = window.location.pathname;
+      const storeMatch = currentPath.match(/^\/loja\/([^/]+)/);
+      if (storeMatch) {
+        navigate(`/loja/${storeMatch[1]}/auth`, { replace: true });
+      } else {
+        navigate("/auth", { replace: true });
+      }
     }
   }, [isAuthenticated, isLoading, navigate]);
 
