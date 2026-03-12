@@ -52,6 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const navigate = useNavigate();
   const { user, logout, session, isLoading: authLoading } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
+  const { storeName, isLoading: storeLoading } = useStoreAdminContext();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const isStaff = roles.some((r) => r.role === 'admin' || r.role === 'ceo');
