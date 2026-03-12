@@ -18,7 +18,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { AdPlaceholder } from '@/components/ads/AdBanner';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, onPurchase, trackEvent } from '@/lib/integrations';
 import { addOrder, VideoOrder } from '@/lib/order-store';
