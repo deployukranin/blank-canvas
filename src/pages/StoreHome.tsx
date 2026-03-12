@@ -8,6 +8,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreConfig } from "@/hooks/use-store-config";
+import { useSubdomain } from "@/contexts/SubdomainContext";
 
 interface StoreInfo {
   id: string;
@@ -17,7 +18,8 @@ interface StoreInfo {
 
 const StoreHome = () => {
   const navigate = useNavigate();
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  const { store: subdomainStore, isMainDomain } = useSubdomain();
   const { user, isAuthenticated, isLoading: authLoading, signOut } = useAuth();
 
   const [store, setStore] = useState<StoreInfo | null>(null);
@@ -25,10 +27,23 @@ const StoreHome = () => {
   const [storeNotFound, setStoreNotFound] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
 
+  // Determine effective slug: subdomain store takes priority
+  const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
+  // Whether we're in subdomain mode (paths are relative to /)
+  const isSubdomainMode = !isMainDomain && !!subdomainStore;
+  const basePath = isSubdomainMode ? "" : `/loja/${effectiveSlug}`;
+
   // Load store
   useEffect(() => {
+    // If subdomain already resolved the store, use it
+    if (subdomainStore) {
+      setStore({ id: subdomainStore.id, name: subdomainStore.name, slug: subdomainStore.username || subdomainStore.slug || "" });
+      setStoreLoading(false);
+      return;
+    }
+
     const loadStore = async () => {
-      if (!slug) {
+      if (!effectiveSlug) {
         setStoreNotFound(true);
         setStoreLoading(false);
         return;
@@ -37,7 +52,7 @@ const StoreHome = () => {
       const { data, error } = await supabase
         .from("stores")
         .select("id, name, slug")
-        .eq("slug", slug)
+        .eq("slug", effectiveSlug)
         .eq("status", "active")
         .single();
 
@@ -50,7 +65,7 @@ const StoreHome = () => {
     };
 
     loadStore();
-  }, [slug]);
+  }, [effectiveSlug, subdomainStore]);
 
   // Store visual config
   const { config: storeConfig, isLoading: configLoading } = useStoreConfig(store?.id);
@@ -101,7 +116,7 @@ const StoreHome = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate(`/loja/${slug}/auth`, { replace: true });
+    navigate(`${basePath}/auth`, { replace: true });
   };
 
   if (storeLoading || authLoading || configLoading) {
@@ -145,7 +160,7 @@ const StoreHome = () => {
               ? "Faça login ou crie sua conta para acessar esta loja."
               : "Você não possui acesso a esta loja. Crie uma conta vinculada."}
           </p>
-          <Button onClick={() => navigate(`/loja/${slug}/auth`)} className="w-full">
+          <Button onClick={() => navigate(`${basePath}/auth`)} className="w-full">
             {!isAuthenticated ? "Entrar / Criar Conta" : "Criar conta nesta loja"}
           </Button>
         </GlassCard>
@@ -154,10 +169,10 @@ const StoreHome = () => {
   }
 
   const quickLinks = [
-    { icon: Play, label: "Vídeos", path: `/loja/${slug}/videos`, color: "from-purple-500 to-pink-500" },
-    { icon: MessageSquare, label: "Comunidade", path: `/loja/${slug}/comunidade`, color: "from-blue-500 to-cyan-500" },
-    { icon: Lightbulb, label: "Ideias", path: `/loja/${slug}/ideias`, color: "from-amber-500 to-orange-500" },
-    { icon: Heart, label: "Favoritos", path: `/loja/${slug}/favoritos`, color: "from-red-500 to-pink-500" },
+    { icon: Play, label: "Vídeos", path: `${basePath}/videos`, color: "from-purple-500 to-pink-500" },
+    { icon: MessageSquare, label: "Comunidade", path: `${basePath}/comunidade`, color: "from-blue-500 to-cyan-500" },
+    { icon: Lightbulb, label: "Ideias", path: `${basePath}/ideias`, color: "from-amber-500 to-orange-500" },
+    { icon: Heart, label: "Favoritos", path: `${basePath}/favoritos`, color: "from-red-500 to-pink-500" },
   ];
 
   const banners = storeConfig.bannerImages?.length ? storeConfig.bannerImages : [];
@@ -178,7 +193,7 @@ const StoreHome = () => {
             <h1 className="font-display font-bold text-lg truncate">{displayName}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/loja/${slug}/perfil`)}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(`${basePath}/perfil`)}>
               <User className="w-5 h-5" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
