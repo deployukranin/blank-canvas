@@ -50,6 +50,7 @@ const AdminPedidos: React.FC = () => {
   // Payment proof dialog
   const [showProofDialog, setShowProofDialog] = useState(false);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [isProofLoading, setIsProofLoading] = useState(false);
 
   useEffect(() => {
     fetchOrders();
