@@ -197,7 +197,7 @@ const StoreAuth = () => {
       }
 
       toast.success(`Conta criada na ${store.name}! Bem-vindo!`);
-      navigate(`/loja/${slug}`, { replace: true });
+      navigate(basePath || "/", { replace: true });
     } else {
       toast.error(result.error || "Erro ao criar conta");
     }
