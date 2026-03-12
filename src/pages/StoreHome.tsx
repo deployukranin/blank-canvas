@@ -160,7 +160,7 @@ const StoreHome = () => {
               ? "Faça login ou crie sua conta para acessar esta loja."
               : "Você não possui acesso a esta loja. Crie uma conta vinculada."}
           </p>
-          <Button onClick={() => navigate(`/loja/${slug}/auth`)} className="w-full">
+          <Button onClick={() => navigate(`${basePath}/auth`)} className="w-full">
             {!isAuthenticated ? "Entrar / Criar Conta" : "Criar conta nesta loja"}
           </Button>
         </GlassCard>
