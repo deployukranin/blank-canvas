@@ -137,7 +137,7 @@ const StoreAuth = () => {
         }
 
         toast.success(`Bem-vindo à ${store.name}!`);
-        navigate(`/loja/${slug}`, { replace: true });
+        navigate(basePath || "/", { replace: true });
       }
     } else {
       toast.error(result.error || "Erro ao fazer login");
