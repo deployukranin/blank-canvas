@@ -17,6 +17,7 @@ import ProdutoAssinatura from "./pages/ProdutoAssinatura";
 import Customs from "./pages/Customs";
 import Comunidade from "./pages/Comunidade";
 import GaleriaVideos from "./pages/GaleriaVideos";
+import StoreHome from "./pages/StoreHome";
 import Perfil from "./pages/Perfil";
 import Notificacoes from "./pages/Notificacoes";
 
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/loja/:slug/auth" element={<StoreAuth />} />
+              <Route path="/loja/:slug" element={<StoreHome />} />
               
               <Route path="/assinaturas" element={<Assinaturas />} />
               <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
