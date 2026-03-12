@@ -10,6 +10,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubdomain } from "@/contexts/SubdomainContext";
 
 interface StoreInfo {
   id: string;
@@ -19,8 +20,12 @@ interface StoreInfo {
 
 const StoreAuth = () => {
   const navigate = useNavigate();
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  const { store: subdomainStore, isMainDomain } = useSubdomain();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
+
+  const isSubdomainMode = !isMainDomain && !!subdomainStore;
+  const basePath = isSubdomainMode ? "" : `/loja/${urlSlug}`;
 
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
@@ -36,10 +41,18 @@ const StoreAuth = () => {
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
 
+  const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
+
   // Load store by slug
   useEffect(() => {
+    if (subdomainStore) {
+      setStore({ id: subdomainStore.id, name: subdomainStore.name, slug: subdomainStore.username || subdomainStore.slug || "" });
+      setStoreLoading(false);
+      return;
+    }
+
     const loadStore = async () => {
-      if (!slug) {
+      if (!effectiveSlug) {
         setStoreNotFound(true);
         setStoreLoading(false);
         return;
@@ -48,7 +61,7 @@ const StoreAuth = () => {
       const { data, error } = await supabase
         .from("stores")
         .select("id, name, slug")
-        .eq("slug", slug)
+        .eq("slug", effectiveSlug)
         .eq("status", "active")
         .single();
 
@@ -61,7 +74,7 @@ const StoreAuth = () => {
     };
 
     loadStore();
-  }, [slug]);
+  }, [effectiveSlug, subdomainStore]);
 
   // After auth, link user to store
   const linkUserToStore = async (userId: string, storeId: string) => {
