@@ -116,7 +116,7 @@ const StoreHome = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate(`/loja/${slug}/auth`, { replace: true });
+    navigate(`${basePath}/auth`, { replace: true });
   };
 
   if (storeLoading || authLoading || configLoading) {
