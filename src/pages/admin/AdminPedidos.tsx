@@ -326,7 +326,7 @@ const AdminPedidos: React.FC = () => {
                     )}
                     {order.payment_proof_url && (
                       <button
-                        onClick={() => { setProofUrl(order.payment_proof_url); setShowProofDialog(true); }}
+                        onClick={() => void handleOpenProof(order.payment_proof_url)}
                         className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                       >
                         <ImageIcon className="w-3.5 h-3.5" />
