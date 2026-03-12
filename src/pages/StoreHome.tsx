@@ -8,6 +8,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreConfig } from "@/hooks/use-store-config";
+import { useSubdomain } from "@/contexts/SubdomainContext";
 
 interface StoreInfo {
   id: string;
@@ -17,7 +18,8 @@ interface StoreInfo {
 
 const StoreHome = () => {
   const navigate = useNavigate();
-  const { slug } = useParams<{ slug: string }>();
+  const { slug: urlSlug } = useParams<{ slug: string }>();
+  const { store: subdomainStore, isMainDomain } = useSubdomain();
   const { user, isAuthenticated, isLoading: authLoading, signOut } = useAuth();
 
   const [store, setStore] = useState<StoreInfo | null>(null);
@@ -25,10 +27,23 @@ const StoreHome = () => {
   const [storeNotFound, setStoreNotFound] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
 
+  // Determine effective slug: subdomain store takes priority
+  const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
+  // Whether we're in subdomain mode (paths are relative to /)
+  const isSubdomainMode = !isMainDomain && !!subdomainStore;
+  const basePath = isSubdomainMode ? "" : `/loja/${effectiveSlug}`;
+
   // Load store
   useEffect(() => {
+    // If subdomain already resolved the store, use it
+    if (subdomainStore) {
+      setStore({ id: subdomainStore.id, name: subdomainStore.name, slug: subdomainStore.username || subdomainStore.slug || "" });
+      setStoreLoading(false);
+      return;
+    }
+
     const loadStore = async () => {
-      if (!slug) {
+      if (!effectiveSlug) {
         setStoreNotFound(true);
         setStoreLoading(false);
         return;
@@ -37,7 +52,7 @@ const StoreHome = () => {
       const { data, error } = await supabase
         .from("stores")
         .select("id, name, slug")
-        .eq("slug", slug)
+        .eq("slug", effectiveSlug)
         .eq("status", "active")
         .single();
 
@@ -50,7 +65,7 @@ const StoreHome = () => {
     };
 
     loadStore();
-  }, [slug]);
+  }, [effectiveSlug, subdomainStore]);
 
   // Store visual config
   const { config: storeConfig, isLoading: configLoading } = useStoreConfig(store?.id);
