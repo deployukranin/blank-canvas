@@ -44,6 +44,7 @@ import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPixConfig from "./pages/admin/AdminPixConfig";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
+import AdminLojaPersonalizacao from "./pages/admin/AdminLojaPersonalizacao";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 // CEO Pages
