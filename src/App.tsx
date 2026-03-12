@@ -44,6 +44,7 @@ import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPixConfig from "./pages/admin/AdminPixConfig";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
+import AdminLojaPersonalizacao from "./pages/admin/AdminLojaPersonalizacao";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 // CEO Pages
@@ -108,6 +109,7 @@ const App = () => (
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
               <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
               <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
+              <Route path="/admin/loja-visual" element={<AdminRoute requiredRole="admin"><AdminLojaPersonalizacao /></AdminRoute>} />
               
 
               {/* 🛡️ Rotas CEO (Nível Máximo) */}

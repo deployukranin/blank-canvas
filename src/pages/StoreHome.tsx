@@ -5,7 +5,9 @@ import { Loader2, Store, Heart, LogOut, User, MessageSquare, Lightbulb, Play } f
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
+import { useStoreConfig } from "@/hooks/use-store-config";
 
 interface StoreInfo {
   id: string;
@@ -50,6 +52,30 @@ const StoreHome = () => {
     loadStore();
   }, [slug]);
 
+  // Store visual config
+  const { config: storeConfig, isLoading: configLoading } = useStoreConfig(store?.id);
+
+  const displayName = storeConfig.storeName || store?.name || "Loja";
+  const description = storeConfig.storeDescription || "Explore o conteúdo exclusivo.";
+
+  // Apply store colors as CSS variables
+  useEffect(() => {
+    if (!storeConfig.colors) return;
+    const root = document.documentElement;
+    root.style.setProperty("--primary", storeConfig.colors.primary);
+    root.style.setProperty("--accent", storeConfig.colors.accent);
+    root.style.setProperty("--background", storeConfig.colors.background);
+    root.style.setProperty("--ring", storeConfig.colors.primary);
+
+    return () => {
+      // Reset to defaults when leaving
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--accent");
+      root.style.removeProperty("--background");
+      root.style.removeProperty("--ring");
+    };
+  }, [storeConfig.colors]);
+
   // Check membership
   useEffect(() => {
     const checkMembership = async () => {
@@ -78,7 +104,7 @@ const StoreHome = () => {
     navigate(`/loja/${slug}/auth`, { replace: true });
   };
 
-  if (storeLoading || authLoading) {
+  if (storeLoading || authLoading || configLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -103,13 +129,17 @@ const StoreHome = () => {
     );
   }
 
-  // Not authenticated or not a member → redirect to store auth
+  // Not authenticated or not a member
   if (!isAuthenticated || !isMember) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <GlassCard className="p-8 text-center max-w-sm w-full">
-          <Store className="w-12 h-12 text-primary mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-foreground mb-2">{store?.name}</h1>
+          {storeConfig.logoUrl ? (
+            <img src={storeConfig.logoUrl} alt={displayName} className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
+          ) : (
+            <Store className="w-12 h-12 text-primary mx-auto mb-4" />
+          )}
+          <h1 className="text-xl font-bold text-foreground mb-2">{displayName}</h1>
           <p className="text-muted-foreground text-sm mb-6">
             {!isAuthenticated
               ? "Faça login ou crie sua conta para acessar esta loja."
@@ -130,16 +160,22 @@ const StoreHome = () => {
     { icon: Heart, label: "Favoritos", path: `/loja/${slug}/favoritos`, color: "from-red-500 to-pink-500" },
   ];
 
+  const banners = storeConfig.bannerImages?.length ? storeConfig.bannerImages : [];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
         <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Store className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <h1 className="font-display font-bold text-lg truncate">{store?.name}</h1>
+            {storeConfig.logoUrl ? (
+              <img src={storeConfig.logoUrl} alt={displayName} className="w-9 h-9 rounded-xl object-cover" />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Store className="w-5 h-5 text-primary-foreground" />
+              </div>
+            )}
+            <h1 className="font-display font-bold text-lg truncate">{displayName}</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => navigate(`/loja/${slug}/perfil`)}>
@@ -153,18 +189,47 @@ const StoreHome = () => {
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        {/* Banner Carousel */}
+        {banners.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl overflow-hidden"
+          >
+            <Carousel opts={{ loop: true }} className="w-full">
+              <CarouselContent>
+                {banners.map((src, idx) => (
+                  <CarouselItem key={`${src}-${idx}`}>
+                    <img
+                      src={src}
+                      alt={`Banner ${idx + 1}`}
+                      className="w-full h-48 object-cover"
+                      loading={idx === 0 ? "eager" : "lazy"}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {banners.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
+                  <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
+                </>
+              )}
+            </Carousel>
+          </motion.div>
+        )}
+
         {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
         >
           <GlassCard className="p-6">
             <h2 className="font-display text-xl font-bold mb-1">
               Olá, {user?.username}! 💜
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Bem-vindo à {store?.name}. Explore o conteúdo exclusivo.
-            </p>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </GlassCard>
         </motion.div>
 
@@ -177,7 +242,7 @@ const StoreHome = () => {
                 key={item.label}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: 0.15 + index * 0.05 }}
               >
                 <Link to={item.path}>
                   <GlassCard className="p-4 text-center" hover>
@@ -192,15 +257,15 @@ const StoreHome = () => {
           </div>
         </div>
 
-        {/* Info */}
+        {/* Footer info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
         >
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground text-center">
-              Logado como {user?.email} • Loja: {store?.name}
+              Logado como {user?.email} • {displayName}
             </p>
           </GlassCard>
         </motion.div>
