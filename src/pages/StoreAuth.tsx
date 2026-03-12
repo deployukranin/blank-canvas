@@ -34,6 +34,7 @@ const StoreAuth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
 
   // Load store by slug
   useEffect(() => {
