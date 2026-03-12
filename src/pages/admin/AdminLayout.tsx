@@ -18,11 +18,13 @@ import {
   Youtube,
   QrCode,
   Palette,
+  Store,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useStoreAdminContext } from '@/contexts/StoreAdminContext';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -50,6 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const navigate = useNavigate();
   const { user, logout, session, isLoading: authLoading } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
+  const { storeName, isLoading: storeLoading } = useStoreAdminContext();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const isStaff = roles.some((r) => r.role === 'admin' || r.role === 'ceo');
@@ -60,7 +63,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   };
 
   // Evita pisca/loop: só decide depois que auth/roles estiverem estáveis
-  if (authLoading || (session && rolesLoading)) return null;
+  if (authLoading || (session && (rolesLoading || storeLoading))) return null;
   if (!session || !isStaff) return <Navigate to="/admin/login" replace />;
 
   return (
@@ -94,6 +97,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <Shield className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-bold gradient-text">Admin Panel</h2>
           </div>
+          {storeName && (
+            <div className="flex items-center gap-2 mt-2 px-1">
+              <Store className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground truncate">{storeName}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-2">
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
               <Shield className="w-4 h-4 text-primary" />

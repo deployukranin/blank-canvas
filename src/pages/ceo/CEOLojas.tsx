@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2, Copy, Link2 } from 'lucide-react';
+import { Store, Plus, ExternalLink, MoreVertical, Pencil, Trash2, Power, PowerOff, Loader2, Link2, UserCog } from 'lucide-react';
 import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,16 +9,119 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useStores, type StoreItem } from '@/hooks/use-stores';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CEOLojas = () => {
   const { stores, isLoading, createStore, updateStore, deleteStore } = useStores();
+  const queryClient = useQueryClient();
   const [newOpen, setNewOpen] = useState(false);
   const [editStore, setEditStore] = useState<StoreItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<StoreItem | null>(null);
+  const [adminTarget, setAdminTarget] = useState<StoreItem | null>(null);
+  const [adminEmail, setAdminEmail] = useState('');
   const [formName, setFormName] = useState('');
   const [formUrl, setFormUrl] = useState('');
   const [formSlug, setFormSlug] = useState('');
+
+  // Fetch store admins for the selected store
+  const { data: storeAdmins = [], isLoading: adminsLoading } = useQuery({
+    queryKey: ['store-admins', adminTarget?.id],
+    queryFn: async () => {
+      if (!adminTarget) return [];
+      const { data, error } = await supabase
+        .from('store_admins')
+        .select('*, profiles(display_name, handle)')
+        .eq('store_id', adminTarget.id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!adminTarget,
+  });
+
+  const addAdmin = useMutation({
+    mutationFn: async ({ storeId, email }: { storeId: string; email: string }) => {
+      // Find user by email in profiles or auth - we need to look up via a different approach
+      // Since we can't query auth.users, we look for profile with matching email
+      // Actually, let's use a simpler approach: search by the user's auth email
+      const { data: profiles, error: profileErr } = await supabase
+        .from('profiles')
+        .select('user_id, display_name')
+        .limit(100);
+
+      if (profileErr) throw profileErr;
+
+      // We need to find the user by email - check auth
+      // Since profiles don't have email, we'll need the user to provide the user_id
+      // For now let's try to sign in check - actually, let's just use the edge function approach
+      // Simpler: the CEO provides the email, we look it up
+      
+      // Alternative: search in admin_credentials or try a direct approach
+      // Let's use a pragmatic approach - the CEO enters the user UUID or email
+      // For email, we can't query auth.users from client. Let's accept user_id directly.
+      
+      // Check if input looks like UUID
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(email);
+      
+      let userId = email;
+      
+      if (!isUuid) {
+        // Try to find by handle
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('handle', email.replace('@', ''))
+          .maybeSingle();
+        
+        if (profile) {
+          userId = profile.user_id;
+        } else {
+          throw new Error('Usuário não encontrado. Use o handle ou ID do usuário.');
+        }
+      }
+
+      // Ensure user has admin role
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (!existingRole) {
+        await supabase.from('user_roles').insert({ user_id: userId, role: 'admin' } as any);
+      }
+
+      // Create store_admin assignment
+      const { error } = await supabase
+        .from('store_admins')
+        .insert({ store_id: storeId, user_id: userId } as any);
+
+      if (error) {
+        if (error.code === '23505') throw new Error('Este usuário já é admin desta loja.');
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-admins', adminTarget?.id] });
+      toast.success('Admin vinculado à loja!');
+      setAdminEmail('');
+    },
+    onError: (e: any) => toast.error(e.message || 'Erro ao vincular admin'),
+  });
+
+  const removeAdmin = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('store_admins').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-admins', adminTarget?.id] });
+      toast.success('Admin removido da loja!');
+    },
+    onError: () => toast.error('Erro ao remover admin'),
+  });
 
   const openNew = () => {
     setFormName('');
@@ -149,6 +252,9 @@ const CEOLojas = () => {
                         <DropdownMenuItem onClick={() => copyRegistrationLink(store)}>
                           <Link2 className="w-4 h-4 mr-2" /> Link de Cadastro
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setAdminTarget(store)}>
+                          <UserCog className="w-4 h-4 mr-2" /> Gerenciar Admin
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(store)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Excluir
@@ -220,6 +326,67 @@ const CEOLojas = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditStore(null)}>Cancelar</Button>
             <Button onClick={handleEdit} disabled={updateStore.isPending}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Gerenciar Admin */}
+      <Dialog open={!!adminTarget} onOpenChange={o => !o && setAdminTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Gerenciar Admin — {adminTarget?.name}</DialogTitle>
+            <DialogDescription>Vincule ou remova admins desta loja.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex gap-2">
+              <Input
+                value={adminEmail}
+                onChange={e => setAdminEmail(e.target.value)}
+                placeholder="Handle do usuário (ex: joao) ou UUID"
+                className="flex-1"
+              />
+              <Button
+                size="sm"
+                disabled={!adminEmail.trim() || addAdmin.isPending}
+                onClick={() => adminTarget && addAdmin.mutate({ storeId: adminTarget.id, email: adminEmail.trim() })}
+              >
+                {addAdmin.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Vincular'}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Admins vinculados</Label>
+              {adminsLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : storeAdmins.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Nenhum admin vinculado</p>
+              ) : (
+                storeAdmins.map((sa: any) => (
+                  <div key={sa.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {sa.profiles?.display_name || sa.profiles?.handle || sa.user_id.slice(0, 8) + '...'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">ID: {sa.user_id.slice(0, 12)}...</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => removeAdmin.mutate(sa.id)}
+                      disabled={removeAdmin.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAdminTarget(null)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

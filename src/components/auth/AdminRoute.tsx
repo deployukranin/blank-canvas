@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useStoreAdmin } from "@/hooks/use-store-admin";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface AdminRouteProps {
 export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps) => {
   const { session, isLoading: authLoading } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
+  const { hasStore, isLoading: storeLoading } = useStoreAdmin();
   const { toast } = useToast();
   const hasShownToast = useRef(false);
 
@@ -25,27 +27,38 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
       return userRoles.includes("ceo");
     }
 
-    return userRoles.some((r) => r === "admin" || r === "ceo");
-  }, [requiredRole, session, userRoles]);
+    // Admin precisa ter role admin/ceo E estar vinculado a uma loja
+    const isStaff = userRoles.some((r) => r === "admin" || r === "ceo");
+    if (!isStaff) return false;
+
+    // CEOs têm acesso a tudo, admins precisam de loja vinculada
+    if (userRoles.includes("ceo")) return true;
+    return hasStore;
+  }, [requiredRole, session, userRoles, hasStore]);
+
+  const isStillLoading = authLoading || (session && (rolesLoading || storeLoading));
 
   useEffect(() => {
-    // Evita spam de toast durante re-renders/carregamento
     if (hasShownToast.current) return;
-    if (authLoading) return;
+    if (isStillLoading) return;
     if (!session) return;
-    if (rolesLoading) return;
     if (isAuthorized) return;
 
     hasShownToast.current = true;
+
+    const isStaff = userRoles.some((r) => r === "admin" || r === "ceo");
+    const message = !isStaff
+      ? `Você precisa de permissão de ${requiredRole.toUpperCase()} para acessar esta área.`
+      : "Sua conta não está vinculada a nenhuma loja. Solicite acesso ao CEO.";
+
     toast({
       variant: "destructive",
       title: "Acesso Negado",
-      description: `Você precisa de permissão de ${requiredRole.toUpperCase()} para acessar esta área.`,
+      description: message,
     });
-  }, [authLoading, isAuthorized, requiredRole, rolesLoading, session, toast]);
+  }, [isStillLoading, isAuthorized, requiredRole, session, toast, userRoles]);
 
-  // 1) Espera o AuthContext terminar (evita redirect antes da sessão estar pronta)
-  if (authLoading) {
+  if (isStillLoading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-2">
@@ -56,21 +69,8 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
     );
   }
 
-  // 2) Sem sessão => login
   if (!session) {
     return <Navigate to="/admin/login" replace />;
-  }
-
-  // 3) Sessão ok, mas roles ainda carregando
-  if (rolesLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Verificando permissões...</p>
-        </div>
-      </div>
-    );
   }
 
   if (!isAuthorized) return <Navigate to="/admin/login" replace />;
