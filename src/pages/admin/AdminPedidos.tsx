@@ -314,6 +314,12 @@ const AdminPedidos: React.FC = () => {
                       <span className="font-mono text-sm text-muted-foreground">{order.correlation_id.slice(0, 8)}...</span>
                       {getTypeBadge(order.product_type)}
                       {getStatusBadge(order.status)}
+                      {order.payment_proof_url && (
+                        <Badge className="bg-primary/20 text-primary gap-1">
+                          <ImageIcon className="w-3 h-3" />
+                          Comprovante enviado
+                        </Badge>
+                      )}
                     </div>
                     <h3 className="font-semibold">{order.category_name || order.category}</h3>
                     <p className="text-sm text-muted-foreground">
