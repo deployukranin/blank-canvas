@@ -145,8 +145,6 @@ const IdeiasPage = () => {
           </form>
         </GlassCard>
 
-        <AdPlaceholder format="horizontal" className="my-4" />
-
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-8">

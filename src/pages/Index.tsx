@@ -165,9 +165,6 @@ const Index = () => {
           </motion.div>
         )}
 
-        {/* Ad entre seções */}
-        <AdPlaceholder format="horizontal" className="my-2" />
-
         {/* Feed Preview */}
         <div>
           <div className="flex items-center justify-between mb-3">
