@@ -313,6 +313,23 @@ const StoreAuth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="store-invite-code">Código de Convite</Label>
+                  <div className="relative">
+                    <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="store-invite-code"
+                      type="text"
+                      placeholder="Digite seu código"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                      className="pl-10 uppercase tracking-wider"
+                      maxLength={20}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="store-signup-email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
