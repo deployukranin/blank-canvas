@@ -909,11 +909,6 @@ const defaultConfig: WhiteLabelConfig = {
     },
   },
   landingPage: defaultLandingPage,
-  adsense: {
-    enabled: false,
-    publisherId: '',
-    slots: {},
-  },
 };
 
 interface WhiteLabelContextType {
