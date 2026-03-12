@@ -918,7 +918,7 @@ interface WhiteLabelContextType {
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
   updateQuickActions: (quickActions: QuickActionItem[]) => void;
-  updateAdSense: (adsense: Partial<WhiteLabelConfig['adsense']>) => void;
+  
   updateNavigationTabs: (tabs: NavTabConfig[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
   updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
