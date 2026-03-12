@@ -799,28 +799,6 @@ export interface WhiteLabelConfig {
     };
   };
 
-  // Google AdSense
-  adsense: {
-    enabled: boolean;
-    publisherId: string; // ca-pub-xxxxx
-    slots: {
-      home?: string;
-      gallery?: string;
-      community?: string;
-      videos?: string;
-      ideas?: string;
-    };
-    customBanners?: Array<{
-      id: string;
-      imageUrl: string;
-      linkUrl: string;
-      label: string;
-      /** Which pages to show this banner on */
-      pages: Array<'home' | 'gallery' | 'community' | 'videos' | 'ideas'>;
-      enabled: boolean;
-    }>;
-  };
-
 }
 
 const defaultCommunityConfig = {
