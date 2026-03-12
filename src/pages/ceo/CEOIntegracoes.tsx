@@ -39,7 +39,7 @@ interface ChannelValidationResult {
 }
 
 const CEOIntegracoes = () => {
-  const { config, updateYouTube, updateAdSense } = useWhiteLabel();
+  const { config, updateYouTube } = useWhiteLabel();
   const { stores: availableStores, isLoading: storesLoading } = useStores();
 
   const [selectedStoreId, setSelectedStoreId] = useState<string>('');
