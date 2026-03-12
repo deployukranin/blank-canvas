@@ -126,6 +126,53 @@ const AdminPedidos: React.FC = () => {
     }
   };
 
+  const resolveProofDisplayUrl = async (storedProofUrl: string) => {
+    const publicPrefix = '/storage/v1/object/public/payment-proofs/';
+
+    if (/^https?:\/\//i.test(storedProofUrl)) {
+      if (!storedProofUrl.includes(publicPrefix)) {
+        return storedProofUrl;
+      }
+
+      const encodedPath = storedProofUrl.split(publicPrefix)[1] || '';
+      const decodedPath = decodeURIComponent(encodedPath.split('?')[0] || '');
+      if (!decodedPath) return storedProofUrl;
+
+      const { data, error } = await supabase.storage
+        .from('payment-proofs')
+        .createSignedUrl(decodedPath, 60 * 60);
+
+      if (error) throw error;
+      return data.signedUrl;
+    }
+
+    const { data, error } = await supabase.storage
+      .from('payment-proofs')
+      .createSignedUrl(storedProofUrl, 60 * 60);
+
+    if (error) throw error;
+    return data.signedUrl;
+  };
+
+  const handleOpenProof = async (storedProofUrl: string | null) => {
+    if (!storedProofUrl) return;
+
+    setShowProofDialog(true);
+    setIsProofLoading(true);
+    setProofUrl(null);
+
+    try {
+      const resolvedUrl = await resolveProofDisplayUrl(storedProofUrl);
+      setProofUrl(resolvedUrl);
+    } catch (error) {
+      console.error('Error loading payment proof:', error);
+      toast.error('Não foi possível abrir o comprovante');
+      setShowProofDialog(false);
+    } finally {
+      setIsProofLoading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
