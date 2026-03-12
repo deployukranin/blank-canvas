@@ -74,6 +74,7 @@ const App = () => (
               <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/loja/:slug/auth" element={<StoreAuth />} />
+              <Route path="/loja/:slug" element={<StoreHome />} />
               
               <Route path="/assinaturas" element={<Assinaturas />} />
               <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
