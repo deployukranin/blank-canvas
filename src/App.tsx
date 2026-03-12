@@ -8,7 +8,7 @@ import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute"; // <--- NOVO IMPORT
 
-import Index from "./pages/Index";
+
 import LandingPage from "./pages/LandingPage";
 import Ideias from "./pages/Ideias";
 
