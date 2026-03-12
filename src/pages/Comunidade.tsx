@@ -855,7 +855,6 @@ const ComunidadePage = () => {
             {mockFeedPosts.map((post, index) => (
               <React.Fragment key={post.id}>
                 <AvisoCard post={post} index={index} />
-                {index === 1 && <AdPlaceholder format="horizontal" className="my-4" />}
               </React.Fragment>
             ))}
           </TabsContent>
