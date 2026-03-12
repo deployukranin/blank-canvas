@@ -63,7 +63,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   };
 
   // Evita pisca/loop: só decide depois que auth/roles estiverem estáveis
-  if (authLoading || (session && rolesLoading)) return null;
+  if (authLoading || (session && (rolesLoading || storeLoading))) return null;
   if (!session || !isStaff) return <Navigate to="/admin/login" replace />;
 
   return (
