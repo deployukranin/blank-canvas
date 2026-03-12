@@ -72,7 +72,7 @@ const App = () => (
             <Routes>
               {/* Rotas Públicas */}
               <Route path="/" element={<LandingPage />} />
-              <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              
               <Route path="/auth" element={<Auth />} />
               <Route path="/loja/:slug/auth" element={<StoreAuth />} />
               <Route path="/loja/:slug" element={<StoreHome />} />
