@@ -53,9 +53,8 @@ export const Header = () => {
                     location.pathname === item.path
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                  } ${item.isVIP ? 'text-vip' : ''}`}
+                  }`}
                 >
-                  {item.isVIP && <span className="mr-1">👑</span>}
                   {item.label}
                 </Link>
               ))}
