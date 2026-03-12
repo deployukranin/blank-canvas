@@ -255,7 +255,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base px-8 py-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-xl shadow-primary/25"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/auth?tab=signup")}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               {lp.heroCtaText || 'Criar Minha Loja Grátis'}
