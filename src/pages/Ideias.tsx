@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
-import { AdPlaceholder } from '@/components/ads/AdBanner';
 import {
   Dialog,
   DialogContent,
