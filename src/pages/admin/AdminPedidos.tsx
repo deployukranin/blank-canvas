@@ -372,12 +372,25 @@ const AdminPedidos: React.FC = () => {
                         </>
                       )}
                       {order.status === 'paid' && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleStatusChange(order.id, 'processing')}
-                        >
-                          Iniciar Produção
-                        </Button>
+                        <>
+                          {order.payment_proof_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => void handleOpenProof(order.payment_proof_url)}
+                            >
+                              <ImageIcon className="w-4 h-4" />
+                              Ver Comprovante
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => handleStatusChange(order.id, 'processing')}
+                          >
+                            Iniciar Produção
+                          </Button>
+                        </>
                       )}
                       {order.status === 'processing' && (
                         <Button
