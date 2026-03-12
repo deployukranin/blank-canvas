@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminRoute } from "@/components/auth/AdminRoute"; // <--- NOVO IMPORT
+import { AdminRoute } from "@/components/auth/AdminRoute";
+import { StoreAdminProvider } from "@/contexts/StoreAdminContext";
 
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
