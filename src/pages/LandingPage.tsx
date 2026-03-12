@@ -154,10 +154,7 @@ const LandingPage = () => {
           </span>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Button variant="ghost" size="sm" className="text-xs h-8 px-3 text-muted-foreground" onClick={() => navigate("/auth")}>
-              Entrar
-            </Button>
-            <Button size="sm" className="text-xs h-8 px-3 sm:px-4" onClick={() => navigate("/auth?tab=signup")}>
-              Criar Loja
+              Painel Admin
             </Button>
           </div>
         </div>
