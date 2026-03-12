@@ -116,9 +116,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Ad entre seções */}
-        <AdPlaceholder format="horizontal" className="my-2" />
-
         {/* Favoritos */}
         {youtubeEnabled && favoriteVideos.length > 0 && (
           <motion.div
