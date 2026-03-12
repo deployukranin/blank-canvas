@@ -28,7 +28,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useUserReputation } from '@/hooks/use-user-reputation';
-import { AdPlaceholder } from '@/components/ads/AdBanner';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { UserLevelBadge } from '@/components/reputation/UserLevelBadge';
 import { LeaderboardCard } from '@/components/reputation/LeaderboardCard';
