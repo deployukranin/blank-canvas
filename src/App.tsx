@@ -69,7 +69,7 @@ const AppRouter = () => {
   return (
     <Routes>
       {/* Rotas Públicas */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<Auth />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/loja/:slug/auth" element={<StoreAuth />} />
       <Route path="/loja/:slug" element={<StoreHome />} />
