@@ -71,7 +71,7 @@ const Auth = () => {
 
       if (membership?.stores && typeof membership.stores === 'object' && 'slug' in membership.stores) {
         const slug = (membership.stores as { slug: string }).slug;
-        navigate(`/loja/${slug}`, { replace: true });
+        navigate(`/${slug}`, { replace: true });
       } else {
         toast.error("Nenhuma loja encontrada para sua conta.");
         await supabase.auth.signOut();
@@ -311,7 +311,7 @@ const Auth = () => {
                   </div>
                   {storeName.trim().length >= 3 && (
                     <p className="text-xs text-muted-foreground">
-                      URL: /loja/<span className="text-primary font-medium">{generateSlug(storeName.trim())}</span>
+                      URL: /<span className="text-primary font-medium">{generateSlug(storeName.trim())}</span>
                     </p>
                   )}
                 </div>

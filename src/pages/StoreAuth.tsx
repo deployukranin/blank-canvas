@@ -25,7 +25,7 @@ const StoreAuth = () => {
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
 
   const isSubdomainMode = !isMainDomain && !!subdomainStore;
-  const basePath = isSubdomainMode ? "" : `/loja/${urlSlug}`;
+  const basePath = isSubdomainMode ? "" : `/${urlSlug}`;
 
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);

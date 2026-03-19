@@ -162,7 +162,7 @@ const LandingPage = () => {
 
         if (membership?.stores && typeof membership.stores === 'object' && 'slug' in membership.stores) {
           const slug = (membership.stores as { slug: string }).slug;
-          navigate(`/loja/${slug}`, { replace: true });
+          navigate(`/${slug}`, { replace: true });
         }
         // If no store, stay on landing page
       }

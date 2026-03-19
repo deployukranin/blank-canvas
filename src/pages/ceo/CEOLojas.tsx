@@ -67,7 +67,7 @@ const CEOLojas = () => {
       toast.error('Esta loja não tem um slug definido. Edite a loja para adicionar.');
       return;
     }
-    const link = `${window.location.origin}/loja/${slug}/auth`;
+    const link = `${window.location.origin}/${slug}/auth`;
     navigator.clipboard.writeText(link);
     toast.success('Link de cadastro copiado!');
   };
@@ -178,7 +178,7 @@ const CEOLojas = () => {
             <div className="space-y-2">
               <Label>Slug (identificador único)</Label>
               <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="asmr-dreams" />
-              <p className="text-xs text-muted-foreground">Usado no link de cadastro: /loja/{formSlug || 'slug'}/auth</p>
+              <p className="text-xs text-muted-foreground">Usado no link de cadastro: /{formSlug || 'slug'}/auth</p>
             </div>
             <div className="space-y-2">
               <Label>URL (opcional)</Label>
@@ -210,7 +210,7 @@ const CEOLojas = () => {
             <div className="space-y-2">
               <Label>Slug</Label>
               <Input value={formSlug} onChange={e => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} />
-              <p className="text-xs text-muted-foreground">Link: /loja/{formSlug || 'slug'}/auth</p>
+              <p className="text-xs text-muted-foreground">Link: /{formSlug || 'slug'}/auth</p>
             </div>
             <div className="space-y-2">
               <Label>URL</Label>
