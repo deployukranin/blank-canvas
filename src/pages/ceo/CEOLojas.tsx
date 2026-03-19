@@ -67,7 +67,7 @@ const CEOLojas = () => {
       toast.error('Esta loja não tem um slug definido. Edite a loja para adicionar.');
       return;
     }
-    const link = `${window.location.origin}/loja/${slug}/auth`;
+    const link = `${window.location.origin}/${slug}/auth`;
     navigator.clipboard.writeText(link);
     toast.success('Link de cadastro copiado!');
   };
