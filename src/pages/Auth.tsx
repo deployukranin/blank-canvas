@@ -30,9 +30,16 @@ const Auth = () => {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      // Redirect will be handled after role check
+      // Auto-redirect authenticated users
+      const autoRedirect = async () => {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          await redirectByRole(currentUser.id);
+        }
+      };
+      autoRedirect();
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading]);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
