@@ -144,15 +144,7 @@ const StoreHome = () => {
     );
   }
 
-  // Not authenticated or not a member — redirect to auth
-  if (!isAuthenticated || !isMember) {
-    navigate(`${basePath}/auth`, { replace: true });
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const isGuest = !isAuthenticated || !isMember;
 
   const quickLinks = [
     { icon: Play, label: "Vídeos", path: `${basePath}/videos`, color: "from-purple-500 to-pink-500" },
