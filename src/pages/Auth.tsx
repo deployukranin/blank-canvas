@@ -311,7 +311,7 @@ const Auth = () => {
                   </div>
                   {storeName.trim().length >= 3 && (
                     <p className="text-xs text-muted-foreground">
-                      URL: /loja/<span className="text-primary font-medium">{generateSlug(storeName.trim())}</span>
+                      URL: /<span className="text-primary font-medium">{generateSlug(storeName.trim())}</span>
                     </p>
                   )}
                 </div>
