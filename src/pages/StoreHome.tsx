@@ -266,7 +266,7 @@ const StoreHome = () => {
         >
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground text-center">
-              Logado como {user?.email} • {displayName}
+              {isGuest ? displayName : `Logado como ${user?.email} • ${displayName}`}
             </p>
           </GlassCard>
         </motion.div>
