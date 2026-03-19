@@ -71,7 +71,7 @@ const Auth = () => {
 
       if (membership?.stores && typeof membership.stores === 'object' && 'slug' in membership.stores) {
         const slug = (membership.stores as { slug: string }).slug;
-        navigate(`/loja/${slug}`, { replace: true });
+        navigate(`/${slug}`, { replace: true });
       } else {
         toast.error("Nenhuma loja encontrada para sua conta.");
         await supabase.auth.signOut();

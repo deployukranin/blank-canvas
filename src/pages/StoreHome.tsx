@@ -31,7 +31,7 @@ const StoreHome = () => {
   const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
   // Whether we're in subdomain mode (paths are relative to /)
   const isSubdomainMode = !isMainDomain && !!subdomainStore;
-  const basePath = isSubdomainMode ? "" : `/loja/${effectiveSlug}`;
+  const basePath = isSubdomainMode ? "" : `/${effectiveSlug}`;
 
   // Load store
   useEffect(() => {

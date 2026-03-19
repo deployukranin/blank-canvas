@@ -71,8 +71,8 @@ const AppRouter = () => {
       {/* Rotas Públicas */}
       <Route path="/" element={<Auth />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/loja/:slug/auth" element={<StoreAuth />} />
-      <Route path="/loja/:slug" element={<StoreHome />} />
+      <Route path="/:slug/auth" element={<StoreAuth />} />
+      <Route path="/:slug" element={<StoreHome />} />
 
       <Route path="/assinaturas" element={<Assinaturas />} />
       <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
