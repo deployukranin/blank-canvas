@@ -144,15 +144,7 @@ const StoreHome = () => {
     );
   }
 
-  // Not authenticated or not a member — redirect to auth
-  if (!isAuthenticated || !isMember) {
-    navigate(`${basePath}/auth`, { replace: true });
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const isGuest = !isAuthenticated || !isMember;
 
   const quickLinks = [
     { icon: Play, label: "Vídeos", path: `${basePath}/videos`, color: "from-purple-500 to-pink-500" },
@@ -179,12 +171,20 @@ const StoreHome = () => {
             <h1 className="font-display font-bold text-lg truncate">{displayName}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`${basePath}/perfil`)}>
-              <User className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="w-5 h-5" />
-            </Button>
+            {isGuest ? (
+              <Button variant="outline" size="sm" onClick={() => navigate(`${basePath}/auth`)}>
+                Entrar
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="icon" onClick={() => navigate(`${basePath}/perfil`)}>
+                  <User className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleLogout}>
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -228,7 +228,7 @@ const StoreHome = () => {
         >
           <GlassCard className="p-6">
             <h2 className="font-display text-xl font-bold mb-1">
-              Olá, {user?.username}! 💜
+              {isGuest ? `Bem-vindo! 💜` : `Olá, ${user?.username}! 💜`}
             </h2>
             <p className="text-sm text-muted-foreground">{description}</p>
           </GlassCard>
@@ -266,7 +266,7 @@ const StoreHome = () => {
         >
           <GlassCard className="p-4">
             <p className="text-xs text-muted-foreground text-center">
-              Logado como {user?.email} • {displayName}
+              {isGuest ? displayName : `Logado como ${user?.email} • ${displayName}`}
             </p>
           </GlassCard>
         </motion.div>
