@@ -144,26 +144,12 @@ const StoreHome = () => {
     );
   }
 
-  // Not authenticated or not a member
+  // Not authenticated or not a member — redirect to auth
   if (!isAuthenticated || !isMember) {
+    navigate(`${basePath}/auth`, { replace: true });
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <GlassCard className="p-8 text-center max-w-sm w-full">
-          {storeConfig.logoUrl ? (
-            <img src={storeConfig.logoUrl} alt={displayName} className="w-16 h-16 mx-auto mb-4 rounded-2xl object-cover" />
-          ) : (
-            <Store className="w-12 h-12 text-primary mx-auto mb-4" />
-          )}
-          <h1 className="text-xl font-bold text-foreground mb-2">{displayName}</h1>
-          <p className="text-muted-foreground text-sm mb-6">
-            {!isAuthenticated
-              ? "Faça login ou crie sua conta para acessar esta loja."
-              : "Você não possui acesso a esta loja. Crie uma conta vinculada."}
-          </p>
-          <Button onClick={() => navigate(`${basePath}/auth`)} className="w-full">
-            {!isAuthenticated ? "Entrar / Criar Conta" : "Criar conta nesta loja"}
-          </Button>
-        </GlassCard>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
