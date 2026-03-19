@@ -228,7 +228,7 @@ const StoreHome = () => {
         >
           <GlassCard className="p-6">
             <h2 className="font-display text-xl font-bold mb-1">
-              Olá, {user?.username}! 💜
+              {isGuest ? `Bem-vindo! 💜` : `Olá, ${user?.username}! 💜`}
             </h2>
             <p className="text-sm text-muted-foreground">{description}</p>
           </GlassCard>
