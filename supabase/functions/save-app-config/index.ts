@@ -32,14 +32,17 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
-    if (userError || !user) {
-      console.error("Invalid token or user not found:", userError?.message);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      console.error("Invalid token:", claimsError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Token inválido ou expirado" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const user = { id: claimsData.claims.sub as string };
 
     // 3. Check user role from user_roles table (admin or ceo required)
     const { data: roles, error: rolesError } = await userClient
