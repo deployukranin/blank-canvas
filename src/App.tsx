@@ -71,8 +71,6 @@ const AppRouter = () => {
       {/* Rotas Públicas */}
       <Route path="/" element={<Auth />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/:slug/auth" element={<StoreAuth />} />
-      <Route path="/:slug" element={<StoreHome />} />
 
       <Route path="/assinaturas" element={<Assinaturas />} />
       <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
@@ -114,6 +112,10 @@ const AppRouter = () => {
       <Route path="/ceo/configuracoes" element={<AdminRoute requiredRole="ceo"><CEOConfiguracoes /></AdminRoute>} />
       <Route path="/ceo/landing-page" element={<AdminRoute requiredRole="ceo"><CEOLandingPage /></AdminRoute>} />
       <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
+
+      {/* 🏪 Rotas dinâmicas de loja (catch-all por slug) */}
+      <Route path="/:slug/auth" element={<StoreAuth />} />
+      <Route path="/:slug" element={<StoreHome />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
