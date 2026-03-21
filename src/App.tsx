@@ -45,6 +45,7 @@ import AdminLojaPersonalizacao from "./pages/admin/AdminLojaPersonalizacao";
 import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 // CEO Pages
+import CEORouteLayout from "./pages/ceo/CEORouteLayout";
 import CEODashboard from "./pages/ceo/CEODashboard";
 import CEOLojas from "./pages/ceo/CEOLojas";
 import CEOVendas from "./pages/ceo/CEOVendas";
