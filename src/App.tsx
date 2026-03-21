@@ -72,7 +72,7 @@ const AppRouter = () => {
   return (
     <Routes>
       {/* Rotas Públicas */}
-      <Route path="/" element={<Auth />} />
+      <Route path="/" element={<HomeRedirect />} />
       <Route path="/auth" element={<Auth />} />
 
       <Route path="/assinaturas" element={<Assinaturas />} />
