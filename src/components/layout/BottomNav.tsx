@@ -70,10 +70,13 @@ export const BottomNav = () => {
     }
   }, [slug, user?.id, isMainDomain, subdomainStore, location.pathname]);
 
-  // Resolve path: replace "/" with store home
+  // Resolve path: prefix all paths with store slug when on main domain
   const resolvePath = (path: string) => {
-    if (path === '/' && isMainDomain && storeSlug) {
-      return `/${storeSlug}`;
+    if (isMainDomain && storeSlug) {
+      if (path === '/') {
+        return `/${storeSlug}`;
+      }
+      return `/${storeSlug}${path}`;
     }
     return path;
   };
@@ -89,8 +92,7 @@ export const BottomNav = () => {
         <div className="flex items-center justify-around">
           {navItems.map((item) => {
             const resolvedPath = resolvePath(item.path);
-            const isActive = location.pathname === resolvedPath || 
-              (item.path === '/' && storeSlug && location.pathname === `/${storeSlug}`);
+            const isActive = location.pathname === resolvedPath;
 
             return (
               <Link
