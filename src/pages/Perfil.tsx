@@ -33,8 +33,12 @@ const PerfilPage = () => {
   const { unreadCount } = useCommunityNotifications();
   const { profile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
+  const { basePath } = useStore();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
+
+  // Prefix paths with store basePath when inside a store
+  const resolvePath = (path: string) => basePath ? `${basePath}${path}` : path;
 
   if (!isAuthenticated) {
     return (
