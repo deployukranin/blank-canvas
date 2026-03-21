@@ -91,7 +91,7 @@ const AppRouter = () => {
       <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
 
       {/* 🛡️ Rotas ADMIN */}
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
       <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
       <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
