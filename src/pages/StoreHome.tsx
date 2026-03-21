@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Store, Heart, MessageSquare, Lightbulb, Play } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,86 +7,17 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
-import { useStoreConfig } from "@/hooks/use-store-config";
-import { useSubdomain } from "@/contexts/SubdomainContext";
+import { useStore } from "@/contexts/StoreContext";
 import { MobileLayout } from "@/components/layout/MobileLayout";
-
-interface StoreInfo {
-  id: string;
-  name: string;
-  slug: string;
-}
 
 const StoreHome = () => {
   const navigate = useNavigate();
-  const { slug: urlSlug } = useParams<{ slug: string }>();
-  const { store: subdomainStore, isMainDomain } = useSubdomain();
+  const { store, storeConfig, isLoading, notFound, basePath } = useStore();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-
-  const [store, setStore] = useState<StoreInfo | null>(null);
-  const [storeLoading, setStoreLoading] = useState(true);
-  const [storeNotFound, setStoreNotFound] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
-
-  const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
-  const isSubdomainMode = !isMainDomain && !!subdomainStore;
-  const basePath = isSubdomainMode ? "" : `/${effectiveSlug}`;
-
-  // Load store
-  useEffect(() => {
-    if (subdomainStore) {
-      setStore({ id: subdomainStore.id, name: subdomainStore.name, slug: subdomainStore.username || subdomainStore.slug || "" });
-      setStoreLoading(false);
-      return;
-    }
-
-    const loadStore = async () => {
-      if (!effectiveSlug) {
-        setStoreNotFound(true);
-        setStoreLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("stores")
-        .select("id, name, slug")
-        .eq("slug", effectiveSlug)
-        .eq("status", "active")
-        .single();
-
-      if (error || !data) {
-        setStoreNotFound(true);
-      } else {
-        setStore(data as StoreInfo);
-      }
-      setStoreLoading(false);
-    };
-
-    loadStore();
-  }, [effectiveSlug, subdomainStore]);
-
-  // Store visual config
-  const { config: storeConfig, isLoading: configLoading } = useStoreConfig(store?.id);
 
   const displayName = storeConfig.storeName || store?.name || "Loja";
   const description = storeConfig.storeDescription || "Explore o conteúdo exclusivo.";
-
-  // Apply store colors as CSS variables
-  useEffect(() => {
-    if (!storeConfig.colors) return;
-    const root = document.documentElement;
-    root.style.setProperty("--primary", storeConfig.colors.primary);
-    root.style.setProperty("--accent", storeConfig.colors.accent);
-    root.style.setProperty("--background", storeConfig.colors.background);
-    root.style.setProperty("--ring", storeConfig.colors.primary);
-
-    return () => {
-      root.style.removeProperty("--primary");
-      root.style.removeProperty("--accent");
-      root.style.removeProperty("--background");
-      root.style.removeProperty("--ring");
-    };
-  }, [storeConfig.colors]);
 
   // Check membership
   useEffect(() => {
@@ -111,7 +42,7 @@ const StoreHome = () => {
     }
   }, [store, user, authLoading]);
 
-  if (storeLoading || authLoading || configLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -119,7 +50,7 @@ const StoreHome = () => {
     );
   }
 
-  if (storeNotFound) {
+  if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <GlassCard className="p-8 text-center max-w-sm w-full">
@@ -139,7 +70,7 @@ const StoreHome = () => {
   const isGuest = !isAuthenticated || !isMember;
 
   const quickLinks = [
-    { icon: Play, label: "Vídeos", path: `${basePath}/videos`, color: "from-purple-500 to-pink-500" },
+    { icon: Play, label: "Vídeos", path: `${basePath}/galeria`, color: "from-purple-500 to-pink-500" },
     { icon: MessageSquare, label: "Comunidade", path: `${basePath}/comunidade`, color: "from-blue-500 to-cyan-500" },
     { icon: Lightbulb, label: "Ideias", path: `${basePath}/ideias`, color: "from-amber-500 to-orange-500" },
     { icon: Heart, label: "Favoritos", path: `${basePath}/favoritos`, color: "from-red-500 to-pink-500" },

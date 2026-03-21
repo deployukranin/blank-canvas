@@ -11,6 +11,7 @@ import { getPendingOrdersCount } from '@/lib/order-store';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useProfile } from '@/hooks/use-profile';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useStore } from '@/contexts/StoreContext';
 
 const quickAccessItems = [
   { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -32,8 +33,12 @@ const PerfilPage = () => {
   const { unreadCount } = useCommunityNotifications();
   const { profile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
+  const { basePath } = useStore();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
+
+  // Prefix paths with store basePath when inside a store
+  const resolvePath = (path: string) => basePath ? `${basePath}${path}` : path;
 
   if (!isAuthenticated) {
     return (
@@ -143,7 +148,7 @@ const PerfilPage = () => {
               : 0;
             
             return (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={resolvePath(item.path)}>
                 <GlassCard className="p-4" hover>
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
@@ -175,7 +180,7 @@ const PerfilPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 + 0.15 }}
             >
-              <Link to={item.path}>
+              <Link to={resolvePath(item.path)}>
                 <GlassCard className="p-4" hover>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">

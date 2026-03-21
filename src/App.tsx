@@ -9,6 +9,7 @@ import { SubdomainProvider, useSubdomain } from "@/contexts/SubdomainContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import StoreRoutes from "@/components/routing/StoreRoutes";
+import StoreLayout from "@/components/layout/StoreLayout";
 
 import LandingPage from "./pages/LandingPage";
 import Ideias from "./pages/Ideias";
@@ -114,15 +115,17 @@ const AppRouter = () => {
       <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
 
       {/* 🏪 Rotas dinâmicas de loja (catch-all por slug) */}
-      <Route path="/:slug/auth" element={<StoreAuth />} />
-      <Route path="/:slug/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
-      <Route path="/:slug/comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
-      <Route path="/:slug/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-      <Route path="/:slug/galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
-      <Route path="/:slug/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
-      <Route path="/:slug/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
-      <Route path="/:slug/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
-      <Route path="/:slug" element={<StoreHome />} />
+      <Route path="/:slug" element={<StoreLayout />}>
+        <Route index element={<StoreHome />} />
+        <Route path="auth" element={<StoreAuth />} />
+        <Route path="customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
+        <Route path="comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
+        <Route path="perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+        <Route path="galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
+        <Route path="ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
+        <Route path="notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+        <Route path="meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
+      </Route>
 
       <Route path="*" element={<NotFound />} />
     </Routes>
