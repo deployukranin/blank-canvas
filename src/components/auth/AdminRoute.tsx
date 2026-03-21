@@ -73,7 +73,7 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
     );
   }
 
-  if (!isAuthorized) return <Navigate to="/admin/login" replace />;
+  if (!isAuthorized) return <Navigate to="/auth" replace />;
 
   return <>{children}</>;
 };
