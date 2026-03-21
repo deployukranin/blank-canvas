@@ -31,7 +31,7 @@ import Auth from "./pages/Auth";
 import StoreAuth from "./pages/StoreAuth";
 
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin";
+// AdminLogin removed — auth is handled via /auth
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
