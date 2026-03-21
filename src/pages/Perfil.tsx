@@ -180,7 +180,7 @@ const PerfilPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 + 0.15 }}
             >
-              <Link to={item.path}>
+              <Link to={resolvePath(item.path)}>
                 <GlassCard className="p-4" hover>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
