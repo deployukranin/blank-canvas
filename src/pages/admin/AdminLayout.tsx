@@ -173,7 +173,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/')}
+            onClick={handleBackToApp}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Voltar ao App</span>
