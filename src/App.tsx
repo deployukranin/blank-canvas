@@ -9,6 +9,7 @@ import { SubdomainProvider, useSubdomain } from "@/contexts/SubdomainContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import StoreRoutes from "@/components/routing/StoreRoutes";
+import StoreLayout from "@/components/layout/StoreLayout";
 
 import LandingPage from "./pages/LandingPage";
 import Ideias from "./pages/Ideias";
