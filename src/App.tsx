@@ -12,6 +12,7 @@ import StoreRoutes from "@/components/routing/StoreRoutes";
 import StoreLayout from "@/components/layout/StoreLayout";
 
 import LandingPage from "./pages/LandingPage";
+import HomeRedirect from "./pages/HomeRedirect";
 import Ideias from "./pages/Ideias";
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
