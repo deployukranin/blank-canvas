@@ -120,7 +120,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={handleBackToApp}
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
