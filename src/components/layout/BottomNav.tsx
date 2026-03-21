@@ -92,8 +92,7 @@ export const BottomNav = () => {
         <div className="flex items-center justify-around">
           {navItems.map((item) => {
             const resolvedPath = resolvePath(item.path);
-            const isActive = location.pathname === resolvedPath || 
-              (item.path === '/' && storeSlug && location.pathname === `/${storeSlug}`);
+            const isActive = location.pathname === resolvedPath;
 
             return (
               <Link
