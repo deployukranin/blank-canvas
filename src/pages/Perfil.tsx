@@ -148,7 +148,7 @@ const PerfilPage = () => {
               : 0;
             
             return (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={resolvePath(item.path)}>
                 <GlassCard className="p-4" hover>
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
