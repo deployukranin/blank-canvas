@@ -115,6 +115,13 @@ const AppRouter = () => {
 
       {/* 🏪 Rotas dinâmicas de loja (catch-all por slug) */}
       <Route path="/:slug/auth" element={<StoreAuth />} />
+      <Route path="/:slug/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
+      <Route path="/:slug/comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
+      <Route path="/:slug/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+      <Route path="/:slug/galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
+      <Route path="/:slug/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
+      <Route path="/:slug/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+      <Route path="/:slug/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
       <Route path="/:slug" element={<StoreHome />} />
 
       <Route path="*" element={<NotFound />} />
