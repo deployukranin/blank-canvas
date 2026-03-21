@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Store, Heart, LogOut, User, MessageSquare, Lightbulb, Play } from "lucide-react";
+import { Loader2, Store, Heart, MessageSquare, Lightbulb, Play } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -9,6 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { useSubdomain } from "@/contexts/SubdomainContext";
+import { MobileLayout } from "@/components/layout/MobileLayout";
 
 interface StoreInfo {
   id: string;
@@ -20,22 +21,19 @@ const StoreHome = () => {
   const navigate = useNavigate();
   const { slug: urlSlug } = useParams<{ slug: string }>();
   const { store: subdomainStore, isMainDomain } = useSubdomain();
-  const { user, isAuthenticated, isLoading: authLoading, signOut } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
   const [storeNotFound, setStoreNotFound] = useState(false);
   const [isMember, setIsMember] = useState<boolean | null>(null);
 
-  // Determine effective slug: subdomain store takes priority
   const effectiveSlug = subdomainStore?.username || subdomainStore?.slug || urlSlug;
-  // Whether we're in subdomain mode (paths are relative to /)
   const isSubdomainMode = !isMainDomain && !!subdomainStore;
   const basePath = isSubdomainMode ? "" : `/${effectiveSlug}`;
 
   // Load store
   useEffect(() => {
-    // If subdomain already resolved the store, use it
     if (subdomainStore) {
       setStore({ id: subdomainStore.id, name: subdomainStore.name, slug: subdomainStore.username || subdomainStore.slug || "" });
       setStoreLoading(false);
@@ -83,7 +81,6 @@ const StoreHome = () => {
     root.style.setProperty("--ring", storeConfig.colors.primary);
 
     return () => {
-      // Reset to defaults when leaving
       root.style.removeProperty("--primary");
       root.style.removeProperty("--accent");
       root.style.removeProperty("--background");
@@ -114,11 +111,6 @@ const StoreHome = () => {
     }
   }, [store, user, authLoading]);
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate(`${basePath}/auth`, { replace: true });
-  };
-
   if (storeLoading || authLoading || configLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -136,7 +128,7 @@ const StoreHome = () => {
           <p className="text-muted-foreground text-sm mb-6">
             O link que você acessou não corresponde a nenhuma loja ativa.
           </p>
-          <Button variant="outline" onClick={() => navigate("/")}>
+          <Button variant="outline" onClick={() => navigate("/auth")}>
             Voltar ao início
           </Button>
         </GlassCard>
@@ -156,40 +148,8 @@ const StoreHome = () => {
   const banners = storeConfig.bannerImages?.length ? storeConfig.bannerImages : [];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
-        <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            {storeConfig.logoUrl ? (
-              <img src={storeConfig.logoUrl} alt={displayName} className="w-9 h-9 rounded-xl object-cover" />
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Store className="w-5 h-5 text-primary-foreground" />
-              </div>
-            )}
-            <h1 className="font-display font-bold text-lg truncate">{displayName}</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {isGuest ? (
-              <Button variant="outline" size="sm" onClick={() => navigate(`${basePath}/auth`)}>
-                Entrar
-              </Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="icon" onClick={() => navigate(`${basePath}/perfil`)}>
-                  <User className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handleLogout}>
-                  <LogOut className="w-5 h-5" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+    <MobileLayout title={displayName}>
+      <div className="px-4 py-6 space-y-6">
         {/* Banner Carousel */}
         {banners.length > 0 && (
           <motion.div
@@ -271,7 +231,7 @@ const StoreHome = () => {
           </GlassCard>
         </motion.div>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 
