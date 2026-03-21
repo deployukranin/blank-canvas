@@ -53,8 +53,48 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { user, logout, session, isLoading: authLoading } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [storeSlug, setStoreSlug] = React.useState<string | null>(null);
 
   const isStaff = roles.some((r) => r.role === 'admin' || r.role === 'ceo');
+
+  // Fetch the admin's store slug for "Voltar ao App"
+  React.useEffect(() => {
+    if (!session?.user?.id) return;
+    const fetchStore = async () => {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: adminStore } = await supabase
+        .from('store_admins')
+        .select('stores(slug)')
+        .eq('user_id', session.user.id)
+        .limit(1)
+        .single();
+      
+      if (adminStore?.stores && typeof adminStore.stores === 'object' && 'slug' in adminStore.stores) {
+        setStoreSlug((adminStore.stores as { slug: string }).slug);
+        return;
+      }
+
+      const { data: userStore } = await supabase
+        .from('store_users')
+        .select('stores(slug)')
+        .eq('user_id', session.user.id)
+        .limit(1)
+        .single();
+      
+      if (userStore?.stores && typeof userStore.stores === 'object' && 'slug' in userStore.stores) {
+        setStoreSlug((userStore.stores as { slug: string }).slug);
+      }
+    };
+    fetchStore();
+  }, [session?.user?.id]);
+
+  const handleBackToApp = () => {
+    if (storeSlug) {
+      navigate(`/${storeSlug}`);
+    } else {
+      navigate('/auth');
+    }
+  };
 
   const handleLogout = () => {
     logout();
