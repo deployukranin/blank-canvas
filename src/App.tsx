@@ -103,17 +103,19 @@ const AppRouter = () => {
       <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
       <Route path="/admin/loja-visual" element={<AdminRoute requiredRole="admin"><AdminLojaPersonalizacao /></AdminRoute>} />
 
-      {/* 🛡️ Rotas CEO */}
-      <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
-      <Route path="/ceo/lojas" element={<AdminRoute requiredRole="ceo"><CEOLojas /></AdminRoute>} />
-      <Route path="/ceo/vendas" element={<AdminRoute requiredRole="ceo"><CEOVendas /></AdminRoute>} />
-      <Route path="/ceo/usuarios" element={<AdminRoute requiredRole="ceo"><CEOUsuarios /></AdminRoute>} />
-      <Route path="/ceo/trafego" element={<AdminRoute requiredRole="ceo"><CEOTrafego /></AdminRoute>} />
-      <Route path="/ceo/metricas" element={<AdminRoute requiredRole="ceo"><CEOMetricas /></AdminRoute>} />
-      <Route path="/ceo/alertas" element={<AdminRoute requiredRole="ceo"><CEOAlertas /></AdminRoute>} />
-      <Route path="/ceo/configuracoes" element={<AdminRoute requiredRole="ceo"><CEOConfiguracoes /></AdminRoute>} />
-      <Route path="/ceo/landing-page" element={<AdminRoute requiredRole="ceo"><CEOLandingPage /></AdminRoute>} />
-      <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
+      {/* 🛡️ Rotas CEO — auth centralizada no CEORouteLayout */}
+      <Route path="/ceo" element={<CEORouteLayout />}>
+        <Route index element={<CEODashboard />} />
+        <Route path="lojas" element={<CEOLojas />} />
+        <Route path="vendas" element={<CEOVendas />} />
+        <Route path="usuarios" element={<CEOUsuarios />} />
+        <Route path="trafego" element={<CEOTrafego />} />
+        <Route path="metricas" element={<CEOMetricas />} />
+        <Route path="alertas" element={<CEOAlertas />} />
+        <Route path="configuracoes" element={<CEOConfiguracoes />} />
+        <Route path="landing-page" element={<CEOLandingPage />} />
+        <Route path="integracoes" element={<CEOIntegracoes />} />
+      </Route>
 
       {/* 🏪 Rotas dinâmicas de loja (catch-all por slug) */}
       <Route path="/:slug" element={<StoreLayout />}>
