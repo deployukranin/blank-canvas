@@ -12,6 +12,7 @@ import StoreRoutes from "@/components/routing/StoreRoutes";
 import StoreLayout from "@/components/layout/StoreLayout";
 
 import LandingPage from "./pages/LandingPage";
+import HomeRedirect from "./pages/HomeRedirect";
 import Ideias from "./pages/Ideias";
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
@@ -30,7 +31,7 @@ import Auth from "./pages/Auth";
 import StoreAuth from "./pages/StoreAuth";
 
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin";
+// AdminLogin removed — auth is handled via /auth
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
@@ -71,7 +72,7 @@ const AppRouter = () => {
   return (
     <Routes>
       {/* Rotas Públicas */}
-      <Route path="/" element={<Auth />} />
+      <Route path="/" element={<HomeRedirect />} />
       <Route path="/auth" element={<Auth />} />
 
       <Route path="/assinaturas" element={<Assinaturas />} />
@@ -90,7 +91,7 @@ const AppRouter = () => {
       <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
 
       {/* 🛡️ Rotas ADMIN */}
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
       <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
       <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
