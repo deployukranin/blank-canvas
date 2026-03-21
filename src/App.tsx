@@ -90,19 +90,20 @@ const AppRouter = () => {
       <Route path="/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
       <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
 
-      {/* 🛡️ Rotas ADMIN */}
-      <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
-      <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
-      <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
-      <Route path="/admin/precos" element={<AdminRoute requiredRole="admin"><AdminPrecos /></AdminRoute>} />
-      <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />
-      <Route path="/admin/usuarios" element={<AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute>} />
-      <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
-      <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
-      <Route path="/admin/pix" element={<AdminRoute requiredRole="admin"><AdminPixConfig /></AdminRoute>} />
-      <Route path="/admin/loja-visual" element={<AdminRoute requiredRole="admin"><AdminLojaPersonalizacao /></AdminRoute>} />
+      {/* 🛡️ Rotas ADMIN — auth centralizada no AdminRouteLayout */}
+      <Route path="/admin" element={<AdminRouteLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="ideias" element={<AdminIdeias />} />
+        <Route path="pedidos" element={<AdminPedidos />} />
+        <Route path="videos" element={<AdminVideos />} />
+        <Route path="precos" element={<AdminPrecos />} />
+        <Route path="youtube" element={<AdminYoutube />} />
+        <Route path="usuarios" element={<AdminUsuarios />} />
+        <Route path="conteudo" element={<AdminConteudo />} />
+        <Route path="configuracoes" element={<AdminConfiguracoes />} />
+        <Route path="pix" element={<AdminPixConfig />} />
+        <Route path="loja-visual" element={<AdminLojaPersonalizacao />} />
+      </Route>
 
       {/* 🛡️ Rotas CEO — auth centralizada no CEORouteLayout */}
       <Route path="/ceo" element={<CEORouteLayout />}>
