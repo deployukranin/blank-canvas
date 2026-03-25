@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
 
 interface HeroBannerProps {
   images: string[];
@@ -50,6 +50,15 @@ export function HeroBanner({
           <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
         </div>
       ))}
+
+      {/* Login button top-right */}
+      <button
+        className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full bg-background/30 backdrop-blur-sm px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-background/50 transition-colors"
+        aria-label="Login ou Cadastro"
+      >
+        <User className="h-4 w-4" />
+        <span>Entrar</span>
+      </button>
 
       {/* Text overlay */}
       <div className="absolute bottom-16 left-0 right-0 z-10 px-6 md:px-16">
