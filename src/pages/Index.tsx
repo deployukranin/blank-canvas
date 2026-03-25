@@ -15,6 +15,7 @@ import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
+import bannerStudio from '@/assets/banner-studio.jpg';
 
 const Index = () => {
   const { user } = useAuth();
