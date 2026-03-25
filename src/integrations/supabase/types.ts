@@ -802,7 +802,14 @@ export type Database = {
       use_invite_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "ceo"
+      app_role:
+        | "admin"
+        | "moderator"
+        | "user"
+        | "ceo"
+        | "super_admin"
+        | "creator"
+        | "client"
       video_reaction_type: "relaxante" | "dormi" | "arrepios" | "favorito"
     }
     CompositeTypes: {
@@ -931,7 +938,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "ceo"],
+      app_role: [
+        "admin",
+        "moderator",
+        "user",
+        "ceo",
+        "super_admin",
+        "creator",
+        "client",
+      ],
       video_reaction_type: ["relaxante", "dormi", "arrepios", "favorito"],
     },
   },
