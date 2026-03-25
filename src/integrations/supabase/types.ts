@@ -47,6 +47,7 @@ export type Database = {
           config_value: Json
           created_at: string
           id: string
+          store_id: string | null
           updated_at: string
         }
         Insert: {
@@ -54,6 +55,7 @@ export type Database = {
           config_value: Json
           created_at?: string
           id?: string
+          store_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -61,9 +63,18 @@ export type Database = {
           config_value?: Json
           created_at?: string
           id?: string
+          store_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_configurations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_orders: {
         Row: {
@@ -82,6 +93,7 @@ export type Database = {
           observations: string | null
           openpix_charge_id: string | null
           paid_at: string | null
+          payment_proof_url: string | null
           payout_amount_cents: number | null
           payout_correlation_id: string | null
           payout_status: string | null
@@ -91,6 +103,7 @@ export type Database = {
           qr_code_image: string | null
           script: string | null
           status: string
+          store_id: string | null
           triggers: string | null
           user_id: string | null
         }
@@ -110,6 +123,7 @@ export type Database = {
           observations?: string | null
           openpix_charge_id?: string | null
           paid_at?: string | null
+          payment_proof_url?: string | null
           payout_amount_cents?: number | null
           payout_correlation_id?: string | null
           payout_status?: string | null
@@ -119,6 +133,7 @@ export type Database = {
           qr_code_image?: string | null
           script?: string | null
           status?: string
+          store_id?: string | null
           triggers?: string | null
           user_id?: string | null
         }
@@ -138,6 +153,7 @@ export type Database = {
           observations?: string | null
           openpix_charge_id?: string | null
           paid_at?: string | null
+          payment_proof_url?: string | null
           payout_amount_cents?: number | null
           payout_correlation_id?: string | null
           payout_status?: string | null
@@ -147,10 +163,63 @@ export type Database = {
           qr_code_image?: string | null
           script?: string | null
           status?: string
+          store_id?: string | null
           triggers?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "custom_orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          store_id: string | null
+          used_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          store_id?: string | null
+          used_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          store_id?: string | null
+          used_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_codes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -215,6 +284,109 @@ export type Database = {
         }
         Relationships: []
       }
+      store_admins: {
+        Row: {
+          created_at: string
+          id: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_admins_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_users: {
+        Row: {
+          created_at: string
+          id: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_users_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          slug: string | null
+          status: string
+          updated_at: string
+          url: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          slug?: string | null
+          status?: string
+          updated_at?: string
+          url?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string | null
+          status?: string
+          updated_at?: string
+          url?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -241,6 +413,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          store_id: string | null
           user_id: string
           video_id: string
         }
@@ -248,6 +421,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          store_id?: string | null
           user_id: string
           video_id: string
         }
@@ -255,10 +429,19 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          store_id?: string | null
           user_id?: string
           video_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "video_chat_messages_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_idea_votes: {
         Row: {
@@ -295,6 +478,7 @@ export type Database = {
           description: string
           id: string
           status: string
+          store_id: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -305,6 +489,7 @@ export type Database = {
           description: string
           id?: string
           status?: string
+          store_id?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -315,12 +500,21 @@ export type Database = {
           description?: string
           id?: string
           status?: string
+          store_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null
           votes?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "video_ideas_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_reactions: {
         Row: {
@@ -460,6 +654,30 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_api_usage: {
+        Row: {
+          channel_id: string
+          created_at: string
+          endpoint: string
+          id: string
+          units_used: number
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          units_used?: number
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          units_used?: number
+        }
+        Relationships: []
+      }
       youtube_cache_metadata: {
         Row: {
           channel_id: string
@@ -581,6 +799,7 @@ export type Database = {
       is_vip: { Args: { check_user_id: string }; Returns: boolean }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
+      use_invite_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "ceo"

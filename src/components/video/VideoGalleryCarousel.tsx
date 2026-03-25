@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 
+import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { VideoCard } from "@/components/video/VideoCard";
 import type { YouTubeVideoItem } from "@/hooks/use-youtube-videos";
@@ -47,6 +48,9 @@ export function VideoGalleryCarousel({
         align: "start",
         dragFree: true,
       }}
+      plugins={[
+        Autoplay({ delay: 4000, stopOnInteraction: true }),
+      ]}
       className="relative"
     >
       <CarouselContent>
