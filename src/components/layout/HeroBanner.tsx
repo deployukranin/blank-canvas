@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HeroBannerProps {
@@ -26,44 +25,46 @@ export function HeroBanner({
     setCurrent((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  // Auto-play
   useEffect(() => {
     if (total <= 1) return;
-    const timer = setInterval(next, autoPlayInterval);
-    return () => clearInterval(timer);
+    const interval = setInterval(next, autoPlayInterval);
+    return () => clearInterval(interval);
   }, [next, autoPlayInterval, total]);
 
   return (
-    <div className="relative w-full h-[55vh] min-h-[300px] overflow-hidden rounded-2xl">
-      {/* Slides with fade */}
-      <AnimatePresence mode="wait">
-        <motion.img
-          key={`${images[current]}-${current}`}
-          src={images[current]}
-          alt={`Banner ${current + 1}`}
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
-          loading={current === 0 ? "eager" : "lazy"}
-        />
-      </AnimatePresence>
+    <div className="relative w-full overflow-hidden" style={{ height: "65vh", minHeight: 380 }}>
+      {/* All slides rendered, opacity toggled for smooth fade */}
+      {images.map((src, i) => (
+        <div
+          key={`${src}-${i}`}
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+          style={{ opacity: i === current ? 1 : 0 }}
+        >
+          <img
+            src={src}
+            alt={`Banner ${i + 1}`}
+            className="h-full w-full object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
+        </div>
+      ))}
 
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent pointer-events-none" />
-
-      {/* Text */}
-      <div className="absolute bottom-16 left-6 right-6 z-10 pointer-events-none">
-        {greeting && (
-          <h2 className="font-display text-xl md:text-2xl font-bold mb-1 text-foreground">
-            {greeting}
-          </h2>
-        )}
-        {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        )}
+      {/* Text overlay */}
+      <div className="absolute bottom-16 left-0 right-0 z-10 px-6 md:px-16">
+        <div className="max-w-2xl">
+          {greeting && (
+            <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl leading-tight mb-2 transition-all duration-500">
+              {greeting}
+            </h2>
+          )}
+          {subtitle && (
+            <p className="text-base text-muted-foreground md:text-lg">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Navigation buttons */}
@@ -71,33 +72,31 @@ export function HeroBanner({
         <>
           <button
             onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-background/30 backdrop-blur-sm flex items-center justify-center text-foreground/80 hover:bg-background/50 transition-colors"
+            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-background/30 backdrop-blur-sm text-foreground/80 hover:bg-background/50 transition-colors"
             aria-label="Anterior"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-background/30 backdrop-blur-sm flex items-center justify-center text-foreground/80 hover:bg-background/50 transition-colors"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-background/30 backdrop-blur-sm text-foreground/80 hover:bg-background/50 transition-colors"
             aria-label="Próximo"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </>
       )}
 
       {/* Dot indicators */}
       {total > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
-          {images.map((_, idx) => (
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+          {images.map((_, i) => (
             <button
-              key={idx}
-              onClick={() => setCurrent(idx)}
-              aria-label={`Ir para slide ${idx + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                idx === current
-                  ? "w-6 h-2 bg-primary"
-                  : "w-2 h-2 bg-foreground/30 hover:bg-foreground/50"
+              key={i}
+              onClick={() => setCurrent(i)}
+              aria-label={`Ir para slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === current ? "w-8 bg-primary" : "w-1.5 bg-foreground/30"
               }`}
             />
           ))}
