@@ -36,20 +36,19 @@ const Auth = () => {
     return emailRegex.test(email);
   };
 
-  const checkUserRoles = async (userId: string): Promise<{ isAdmin: boolean; isCEO: boolean }> => {
+  const checkUserRoles = async (userId: string): Promise<{ isAdmin: boolean }> => {
     const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
 
     if (error || !data) {
-      return { isAdmin: false, isCEO: false };
+      return { isAdmin: false };
     }
 
     const roles = data.map((r) => r.role);
     return {
-      isAdmin: roles.includes("admin"),
-      isCEO: roles.includes("ceo"),
+      isAdmin: roles.includes("admin") || roles.includes("ceo"),
     };
   };
 
@@ -75,12 +74,9 @@ const Auth = () => {
       // Get current user and check roles
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { isAdmin, isCEO } = await checkUserRoles(user.id);
+        const { isAdmin } = await checkUserRoles(user.id);
         
-        if (isCEO) {
-          toast.success("👑 Bem-vindo, CEO!");
-          navigate("/ceo", { replace: true });
-        } else if (isAdmin) {
+        if (isAdmin) {
           toast.success("🛡️ Bem-vindo, Admin!");
           navigate("/admin", { replace: true });
         } else {

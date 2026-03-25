@@ -10,7 +10,7 @@ export interface User {
   avatar?: string;
   isVIP: boolean;
   isAdmin: boolean;
-  isCEO: boolean;
+  isCEO: boolean; // kept for backward compat
   createdAt: string;
 }
 
