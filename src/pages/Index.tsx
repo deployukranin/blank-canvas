@@ -59,7 +59,7 @@ const Index = () => {
       >
         <HeroBanner
           images={[bannerStudio]}
-          greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
+          greeting={user ? `Olá, ${displayName}! 🤍` : 'Bem-vindo! 🤍'}
           subtitle="Relaxe com ASMR de qualidade"
         />
       </motion.div>
