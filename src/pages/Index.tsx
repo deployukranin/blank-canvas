@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { HeroBanner } from '@/components/layout/HeroBanner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
