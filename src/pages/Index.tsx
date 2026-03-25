@@ -58,7 +58,10 @@ const Index = () => {
         animate={{ opacity: 1 }}
       >
         <HeroBanner
-          images={(config.bannerImages?.length ? config.bannerImages : [bannerStudio]).filter(Boolean)}
+          images={(() => {
+            const configured = (config.bannerImages?.length ? config.bannerImages : config.bannerImage ? [config.bannerImage] : []).filter(Boolean);
+            return configured.length > 0 ? configured : [bannerStudio];
+          })()}
           greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
           subtitle="Relaxe com ASMR de qualidade"
         />
