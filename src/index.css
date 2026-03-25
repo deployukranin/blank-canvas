@@ -90,8 +90,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
-    background-image: var(--gradient-mesh);
-    background-attachment: fixed;
     min-height: 100vh;
     min-height: 100dvh;
     overscroll-behavior: none;
