@@ -240,22 +240,6 @@ async function updateCache(
   }
 }
 
-// Log API quota usage to database
-async function logQuotaUsage(
-  supabase: SupabaseClient,
-  channelId: string,
-  units: number,
-  endpoint: string
-): Promise<void> {
-  try {
-    await supabase
-      .from("youtube_api_usage")
-      .insert({ channel_id: channelId, units_used: units, endpoint });
-  } catch (err) {
-    console.log("[youtube-videos] Failed to log quota usage:", err);
-  }
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -313,11 +297,8 @@ Deno.serve(async (req) => {
 
     // Step 1: Get uploads playlist ID (1 quota unit)
     const uploadsPlaylistId = await getUploadsPlaylistId(channelId, apiKey);
-    let totalQuotaUsed = 1; // channels.list = 1 unit
     
     if (!uploadsPlaylistId) {
-      // Log quota usage even on failure
-      await logQuotaUsage(supabase, channelId, totalQuotaUsed, "channels");
       // Try returning stale cache on error
       const { videos: staleVideos } = await getCachedVideos(supabase, channelId);
       if (staleVideos.length > 0) {
@@ -328,15 +309,12 @@ Deno.serve(async (req) => {
 
     // Step 2: Fetch videos from playlist (1 quota unit per page, max 3 pages = 3 units)
     const { videos, error } = await fetchPlaylistVideos(uploadsPlaylistId, apiKey, 3);
-    totalQuotaUsed += 3; // max 3 pages
 
     if (error) {
       // Check if it's a quota error
       const errorDetails = error as { error?: { errors?: Array<{ reason?: string }> } };
       const isQuotaError = errorDetails?.error?.errors?.some(e => e.reason === "quotaExceeded");
       
-      await logQuotaUsage(supabase, channelId, totalQuotaUsed, "playlistItems");
-
       if (isQuotaError) {
         console.log("[youtube-videos] Quota exceeded, trying stale cache");
         const { videos: staleVideos } = await getCachedVideos(supabase, channelId);
@@ -347,9 +325,6 @@ Deno.serve(async (req) => {
       
       return json({ error: "YouTube API error", details: error }, 502);
     }
-
-    // Log quota usage
-    await logQuotaUsage(supabase, channelId, totalQuotaUsed, "playlistItems");
 
     // Sort newest first
     videos.sort(
@@ -362,7 +337,7 @@ Deno.serve(async (req) => {
       console.log("[youtube-videos] Background cache update failed:", err);
     });
 
-    console.log(`[youtube-videos] Returning ${videos.length} fresh videos (used ~${totalQuotaUsed} quota units)`);
+    console.log(`[youtube-videos] Returning ${videos.length} fresh videos (used ~4 quota units)`);
 
     return json({ videos, fromCache: false });
   } catch (e) {

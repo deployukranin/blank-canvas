@@ -540,7 +540,7 @@ const defaultIcons: IconConfig = {
 export const defaultNavigationTabs: NavTabConfig[] = [
   { id: 'home', label: 'Início', path: '/', icon: { type: 'lucide', value: 'Home' }, enabled: true, order: 0 },
   { id: 'customs', label: "Custom's", path: '/customs', icon: { type: 'lucide', value: 'Video' }, enabled: true, order: 1 },
-  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: false, order: 2 },
+  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: true, order: 2 },
   { id: 'comunidade', label: 'Comunidade', path: '/comunidade', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
   { id: 'perfil', label: 'Perfil', path: '/perfil', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
 ];
@@ -579,7 +579,7 @@ export const defaultQuickActions: QuickActionItem[] = [
     label: 'Loja',
     path: '/loja',
     color: 'from-green-500 to-emerald-500',
-    enabled: false,
+    enabled: true,
   },
   {
     icon: { type: 'lucide', value: 'Users' },
@@ -646,7 +646,7 @@ export const availableRoutes = [
   { path: '/ideias', label: 'Ideias' },
   { path: '/vip', label: 'VIP' },
   { path: '/customs', label: "Custom's" },
-  
+  { path: '/loja', label: 'Loja' },
   { path: '/comunidade', label: 'Comunidade' },
   { path: '/assinaturas', label: 'Assinaturas' },
   { path: '/perfil', label: 'Perfil' },
@@ -683,27 +683,6 @@ export interface WhiteLabelConfig {
       order?: number;
     }>;
     videoCategoryMap?: Record<string, string | undefined>;
-    storeChannels?: Array<{
-      id: string;
-      storeName: string;
-      channelId: string;
-      enabled: boolean;
-    }>;
-    /** Per-store integrations: storeId -> { channels, categories, videoCategoryMap } */
-    storeIntegrations?: Record<string, {
-      channels: Array<{
-        id: string;
-        creatorName: string;
-        channelId: string;
-      }>;
-      categories?: Array<{
-        id: string;
-        name: string;
-        icon?: string;
-        order?: number;
-      }>;
-      videoCategoryMap?: Record<string, string | undefined>;
-    }>;
   };
 
   // Icons
@@ -755,32 +734,6 @@ export interface WhiteLabelConfig {
     }>;
   };
 
-  // Landing Page
-  landingPage: {
-    heroVisible: boolean;
-    heroTitle: string;
-    heroSubtitle: string;
-    heroBadgeText: string;
-    heroCtaText: string;
-    statsVisible: boolean;
-    featuresVisible: boolean;
-    featuresTitle: string;
-    featuresSubtitle: string;
-    stepsVisible: boolean;
-    stepsTitle: string;
-    stepsSubtitle: string;
-    freeHighlightVisible: boolean;
-    freeHighlightTitle: string;
-    freeHighlightDescription: string;
-    testimonialsVisible: boolean;
-    testimonialsTitle: string;
-    ctaVisible: boolean;
-    ctaTitle: string;
-    ctaDescription: string;
-    ctaButtonText: string;
-    footerName: string;
-  };
-
   // Integration Tokens
   tokens: {
     supabase: {
@@ -818,31 +771,6 @@ const defaultCommunityConfig = {
     { id: '2', title: 'Acesso Antecipado', description: 'Seja o primeiro a ver novos conteúdos', icon: 'bell' as const },
     { id: '3', title: 'Chat Exclusivo', description: 'Converse diretamente com a comunidade VIP', icon: 'message' as const },
   ],
-};
-
-const defaultLandingPage: WhiteLabelConfig['landingPage'] = {
-  heroVisible: true,
-  heroTitle: 'Sua loja ASMR completa em minutos',
-  heroSubtitle: 'Loja, comunidade, assinaturas VIP e pagamento via Pix — tudo em um só lugar para você criar conteúdo incrível.',
-  heroBadgeText: '100% Grátis — Crie sua loja agora',
-  heroCtaText: 'Criar Minha Loja Grátis',
-  statsVisible: true,
-  featuresVisible: true,
-  featuresTitle: 'Tudo para monetizar seu conteúdo',
-  featuresSubtitle: 'Ferramentas feitas sob medida para criadores ASMR',
-  stepsVisible: true,
-  stepsTitle: 'Como funciona',
-  stepsSubtitle: '4 passos para ter sua loja no ar',
-  freeHighlightVisible: true,
-  freeHighlightTitle: 'Totalmente grátis',
-  freeHighlightDescription: 'Sem mensalidades, sem taxas ocultas. A plataforma é mantida por anúncios discretos que não atrapalham seus fãs.',
-  testimonialsVisible: true,
-  testimonialsTitle: 'Criadores que confiam',
-  ctaVisible: true,
-  ctaTitle: 'Pronto para criar sua loja ASMR?',
-  ctaDescription: 'Junte-se a criadores que já monetizam seu conteúdo — 100% grátis.',
-  ctaButtonText: 'Criar Minha Loja Grátis',
-  footerName: 'ASMR Store',
 };
 
 const defaultConfig: WhiteLabelConfig = {
@@ -908,7 +836,6 @@ const defaultConfig: WhiteLabelConfig = {
       lastSentAt: undefined,
     },
   },
-  landingPage: defaultLandingPage,
 };
 
 interface WhiteLabelContextType {
@@ -918,7 +845,6 @@ interface WhiteLabelContextType {
   updateColors: (colors: Partial<WhiteLabelConfig['colors']>) => void;
   updateIcons: (icons: Partial<IconConfig>) => void;
   updateQuickActions: (quickActions: QuickActionItem[]) => void;
-  
   updateNavigationTabs: (tabs: NavTabConfig[]) => void;
   updateCommunity: (community: Partial<WhiteLabelConfig['community']>) => void;
   updateYouTube: (youtube: Partial<WhiteLabelConfig['youtube']>) => void;
@@ -1021,7 +947,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         supabase: { ...defaults.tokens.supabase, ...parsed.tokens?.supabase },
         metricsExport: { ...defaults.tokens.metricsExport, ...parsed.tokens?.metricsExport },
       },
-      landingPage: { ...defaultLandingPage, ...parsed.landingPage },
     };
   };
 
@@ -1157,7 +1082,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       shopify: { ...prev.shopify, ...shopify },
     }));
   }, []);
-
 
   const updateToken = useCallback(<K extends keyof WhiteLabelConfig['tokens']>(
     tokenKey: K,

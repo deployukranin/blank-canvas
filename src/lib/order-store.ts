@@ -20,7 +20,6 @@ export interface VideoOrder {
   estimatedDelivery?: string;
   deliveredAt?: string;
   videoUrl?: string;
-  paymentProofUrl?: string;
   personalization: {
     name: string;
     triggers?: string;
@@ -33,7 +32,6 @@ export interface AudioOrder {
   id: string;
   type: 'audio';
   category: string;
-  categoryName?: string;
   price: number;
   status: OrderStatus;
   createdAt: string;
@@ -41,11 +39,9 @@ export interface AudioOrder {
   estimatedDelivery?: string;
   deliveredAt?: string;
   audioUrl?: string;
-  paymentProofUrl?: string;
   personalization: {
     name: string;
     preferences?: string;
-    observations?: string;
   };
 }
 

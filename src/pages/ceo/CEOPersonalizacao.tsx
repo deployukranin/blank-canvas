@@ -6,7 +6,7 @@ import {
   Sun, Moon, Video, Crown, Bell, Lightbulb, Navigation
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import AdminLayout from '@/pages/admin/AdminLayout';
+import { CEOLayout } from './CEOLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -472,7 +472,7 @@ const CEOPersonalizacao = () => {
   ];
 
   return (
-    <AdminLayout title="Personalização">
+    <CEOLayout title="Personalização">
       <div className="space-y-6 max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1034,7 +1034,7 @@ const CEOPersonalizacao = () => {
               </p>
               
               <div className="space-y-4">
-                {navigationForm.filter(tab => tab.path !== '/loja' && tab.path !== '/vip').sort((a, b) => a.order - b.order).map((tab, index) => {
+                {navigationForm.sort((a, b) => a.order - b.order).map((tab, index) => {
                   const originalIndex = navigationForm.findIndex(t => t.id === tab.id);
                   const enabledCount = navigationForm.filter(t => t.enabled).length;
                   const isLastEnabled = tab.enabled && enabledCount <= 2;
@@ -1090,7 +1090,7 @@ const CEOPersonalizacao = () => {
                 <div className="bg-background rounded-xl p-3 border border-border">
                   <div className="flex items-center justify-around">
                     {navigationForm
-                      .filter(tab => tab.enabled && tab.path !== '/loja' && tab.path !== '/vip')
+                      .filter(tab => tab.enabled)
                       .sort((a, b) => a.order - b.order)
                       .map((tab) => (
                         <div
@@ -1319,7 +1319,7 @@ const CEOPersonalizacao = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </CEOLayout>
   );
 };
 

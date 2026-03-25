@@ -58,7 +58,7 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
 
   // 2) Sem sessão => login
   if (!session) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   // 3) Sessão ok, mas roles ainda carregando
@@ -73,7 +73,7 @@ export const AdminRoute = ({ children, requiredRole = 'admin' }: AdminRouteProps
     );
   }
 
-  if (!isAuthorized) return <Navigate to="/auth" replace />;
+  if (!isAuthorized) return <Navigate to="/admin/login" replace />;
 
   return <>{children}</>;
 };

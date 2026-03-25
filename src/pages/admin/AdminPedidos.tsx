@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, DollarSign, ImageIcon, ExternalLink } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,6 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
-  payment_proof_url: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
@@ -46,10 +45,6 @@ const AdminPedidos: React.FC = () => {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Payment proof dialog
-  const [showProofDialog, setShowProofDialog] = useState(false);
-  const [proofUrl, setProofUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -131,9 +126,8 @@ const AdminPedidos: React.FC = () => {
         return <Badge className="bg-yellow-500/20 text-yellow-400">Pendente</Badge>;
       case 'processing':
         return <Badge className="bg-blue-500/20 text-blue-400">Processando</Badge>;
-      case 'paid':
-        return <Badge className="bg-emerald-500/20 text-emerald-400">Pago</Badge>;
       case 'completed':
+      case 'paid':
         return <Badge className="bg-green-500/20 text-green-400">Concluído</Badge>;
       case 'cancelled':
         return <Badge className="bg-red-500/20 text-red-400">Cancelado</Badge>;
@@ -165,9 +159,8 @@ const AdminPedidos: React.FC = () => {
 
   const orderStats = {
     pending: orders.filter(o => o.status === 'pending').length,
-    paid: orders.filter(o => o.status === 'paid').length,
     processing: orders.filter(o => o.status === 'processing').length,
-    completed: orders.filter(o => o.status === 'completed').length,
+    completed: orders.filter(o => o.status === 'completed' || o.status === 'paid').length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
@@ -185,16 +178,11 @@ const AdminPedidos: React.FC = () => {
     <AdminLayout title="Gerenciar Pedidos">
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <GlassCard className="p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.pending}</p>
-            <p className="text-xs text-muted-foreground">Aguardando Pgto</p>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <DollarSign className="w-6 h-6 mx-auto text-emerald-400 mb-2" />
-            <p className="text-xl font-bold">{orderStats.paid}</p>
-            <p className="text-xs text-muted-foreground">Pagos</p>
+            <p className="text-xs text-muted-foreground">Pendentes</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
             <Package className="w-6 h-6 mx-auto text-blue-400 mb-2" />
@@ -276,15 +264,6 @@ const AdminPedidos: React.FC = () => {
                         📝 {order.observations || order.preferences}
                       </p>
                     )}
-                    {order.payment_proof_url && (
-                      <button
-                        onClick={() => { setProofUrl(order.payment_proof_url); setShowProofDialog(true); }}
-                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                      >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        Ver comprovante PIX
-                      </button>
-                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(order.created_at)}
                     </p>
@@ -300,12 +279,9 @@ const AdminPedidos: React.FC = () => {
                         <>
                           <Button
                             size="sm"
-                            className="gap-1"
-                            variant="outline"
-                            onClick={() => handleStatusChange(order.id, 'paid')}
+                            onClick={() => handleStatusChange(order.id, 'processing')}
                           >
-                            <DollarSign className="w-4 h-4" />
-                            Confirmar Pagamento
+                            Iniciar
                           </Button>
                           <Button
                             size="sm"
@@ -316,14 +292,6 @@ const AdminPedidos: React.FC = () => {
                             Cancelar
                           </Button>
                         </>
-                      )}
-                      {order.status === 'paid' && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleStatusChange(order.id, 'processing')}
-                        >
-                          Iniciar Produção
-                        </Button>
                       )}
                       {order.status === 'processing' && (
                         <Button
@@ -437,39 +405,6 @@ const AdminPedidos: React.FC = () => {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Proof Dialog */}
-      <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
-        <DialogContent className="glass max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-primary" />
-              Comprovante de Pagamento
-            </DialogTitle>
-            <DialogDescription>Imagem enviada pelo cliente</DialogDescription>
-          </DialogHeader>
-          {proofUrl && (
-            <div className="space-y-3 mt-2">
-              <div className="rounded-lg overflow-hidden border border-border bg-muted/30">
-                <img
-                  src={proofUrl}
-                  alt="Comprovante PIX"
-                  className="w-full max-h-[60vh] object-contain"
-                />
-              </div>
-              <a
-                href={proofUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Abrir em nova aba
-              </a>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </AdminLayout>

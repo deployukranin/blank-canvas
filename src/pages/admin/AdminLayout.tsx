@@ -13,12 +13,11 @@ import {
   X,
   ArrowLeft,
   Shield,
-  Eye,
-  DollarSign,
-  Youtube,
-  QrCode,
-  Palette,
-  Store,
+  CreditCard,
+  Crown,
+  Video,
+  Headphones,
+  Youtube
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,16 +33,13 @@ const menuItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/ideias', icon: Lightbulb, label: 'Ideias' },
   { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
-  { path: '/admin/pix', icon: QrCode, label: 'Configurar PIX' },
-  
-  { path: '/admin/videos', icon: Eye, label: 'Previews' },
-  { path: '/admin/precos', icon: DollarSign, label: 'Preços' },
+  { path: '/admin/pagamentos-pix', icon: CreditCard, label: 'Pagamentos PIX' },
+  { path: '/admin/vip-precos', icon: Crown, label: 'Preços VIP' },
+  { path: '/admin/videos', icon: Video, label: 'Vídeos' },
+  { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
   { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
   { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
   { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
-  
-  { path: '/admin/loja-visual', icon: Store, label: 'Visual da Loja' },
-  
   { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
 ];
 
@@ -53,48 +49,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { user, logout, session, isLoading: authLoading } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [storeSlug, setStoreSlug] = React.useState<string | null>(null);
 
   const isStaff = roles.some((r) => r.role === 'admin' || r.role === 'ceo');
-
-  // Fetch the admin's store slug for "Voltar ao App"
-  React.useEffect(() => {
-    if (!session?.user?.id) return;
-    const fetchStore = async () => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: adminStore } = await supabase
-        .from('store_admins')
-        .select('stores(slug)')
-        .eq('user_id', session.user.id)
-        .limit(1)
-        .single();
-      
-      if (adminStore?.stores && typeof adminStore.stores === 'object' && 'slug' in adminStore.stores) {
-        setStoreSlug((adminStore.stores as { slug: string }).slug);
-        return;
-      }
-
-      const { data: userStore } = await supabase
-        .from('store_users')
-        .select('stores(slug)')
-        .eq('user_id', session.user.id)
-        .limit(1)
-        .single();
-      
-      if (userStore?.stores && typeof userStore.stores === 'object' && 'slug' in userStore.stores) {
-        setStoreSlug((userStore.stores as { slug: string }).slug);
-      }
-    };
-    fetchStore();
-  }, [session?.user?.id]);
-
-  const handleBackToApp = () => {
-    if (storeSlug) {
-      navigate(`/${storeSlug}`);
-    } else {
-      navigate('/auth');
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -120,7 +76,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleBackToApp}
+          onClick={() => navigate('/')}
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -173,7 +129,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-            onClick={handleBackToApp}
+            onClick={() => navigate('/')}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Voltar ao App</span>
@@ -205,7 +161,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleBackToApp}
+              onClick={() => navigate('/')}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" />

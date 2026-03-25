@@ -12,10 +12,8 @@ import {
   Info,
   Video,
   Headphones,
-  Pause,
-  QrCode
+  Pause
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -25,10 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
-import { addOrder, VideoOrder, AudioOrder } from '@/lib/order-store';
+import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
-import { PixQRCode } from '@/components/payment/PixQRCode';
-import { usePixConfig } from '@/hooks/use-pix-config';
 import { 
   getVideoConfig, 
   calculatePrice,
@@ -53,12 +49,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePixPayment } from '@/hooks/use-pix-payment';
+import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
-  const { config: pixConfig, isLoading: pixLoading } = usePixConfig();
-  const navigate = useNavigate();
+  const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
   const [config, setConfig] = useState<VideoConfig | null>(null);
@@ -66,6 +63,9 @@ const CustomsPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
     name: '',
@@ -78,8 +78,11 @@ const CustomsPage = () => {
   const [selectedAudioCategory, setSelectedAudioCategory] = useState<AudioCategory | null>(null);
   const [selectedAudioDuration, setSelectedAudioDuration] = useState<AudioDuration | null>(null);
   const [audioFormData, setAudioFormData] = useState({ name: '', preferences: '', observations: '' });
+  const [audioOrderComplete, setAudioOrderComplete] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAudioOrderDialog, setShowAudioOrderDialog] = useState(false);
+  const [showAudioPixModal, setShowAudioPixModal] = useState(false);
+  const [audioChargeData, setAudioChargeData] = useState<typeof chargeData>(null);
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
@@ -113,12 +116,78 @@ const CustomsPage = () => {
     setShowPaymentDialog(true);
   };
 
-  const handleVideoConfirmPaid = () => {
+  const handlePayment = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
+
+    setIsProcessing(true);
+    const finalPrice = calculatePrice(selectedDuration, selectedCategory);
+
+    // Create PIX charge
+    const result = await createCharge({
+      amount: finalPrice,
+      productType: 'video',
+      category: selectedCategory.id,
+      categoryName: selectedCategory.name,
+      durationMinutes: selectedDuration.minutes,
+      durationLabel: selectedDuration.label,
+      customerName: personalizationData.name || 'Cliente',
+    });
+
+    setIsProcessing(false);
+
+    if (result.success) {
+      setShowPaymentDialog(false);
+      setShowPixModal(true);
+      trackEvent('video_pix_charge_created', { 
+        category: selectedCategory.id,
+        duration: selectedDuration.id,
+        price: finalPrice
+      });
+    } else {
+      toast({
+        title: 'Erro ao gerar cobrança',
+        description: result.error || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePixPaymentConfirmed = () => {
+    setShowPixModal(false);
+    setShowPersonalizationDialog(true);
+    trackEvent('video_payment_completed', { 
+      category: selectedCategory?.id,
+      duration: selectedDuration?.id,
+    });
+  };
+
+  const handleSubmitPersonalization = async () => {
+    if (!selectedCategory || !selectedDuration || !config) return;
+
     if (!personalizationData.name.trim()) {
-      toast({ title: 'Nome obrigatório', description: 'Por favor, informe seu nome.', variant: 'destructive' });
+      toast({
+        title: 'Nome obrigatório',
+        description: 'Por favor, informe seu nome para personalização.',
+        variant: 'destructive',
+      });
       return;
     }
+
+    setIsProcessing(true);
+
+    await onCustomOrder({
+      type: 'video',
+      category: selectedCategory.id,
+      categoryName: selectedCategory.name,
+      duration: selectedDuration.minutes,
+      durationLabel: selectedDuration.label,
+      price: calculatePrice(selectedDuration, selectedCategory),
+      name: personalizationData.name,
+      triggers: personalizationData.triggers,
+      script: personalizationData.script,
+      observations: personalizationData.observations,
+      status: 'pending',
+    });
 
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + (config?.deliveryDays || 7));
@@ -146,15 +215,18 @@ const CustomsPage = () => {
       duration: selectedDuration.id 
     });
 
-    setShowPaymentDialog(false);
-    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
-    navigate('/meus-pedidos');
+    setShowPersonalizationDialog(false);
+    setShowSuccessDialog(true);
+    setIsProcessing(false);
   };
 
   const resetVideoOrder = () => {
     setSelectedCategory(null);
     setSelectedDuration(null);
+    setShowSuccessDialog(false);
+    setShowPixModal(false);
     setPersonalizationData({ name: '', triggers: '', script: '', observations: '' });
+    resetCharge();
   };
 
   // Audio handlers
@@ -182,42 +254,80 @@ const CustomsPage = () => {
     setShowAudioOrderDialog(true);
   };
 
-  const handleAudioConfirmPaid = () => {
-    if (!selectedAudioCategory || !selectedAudioDuration) return;
-    if (!audioFormData.name.trim() || !audioFormData.preferences.trim()) {
+  const handleAudioOrder = async () => {
+    if (!selectedAudioCategory || !selectedAudioDuration || !audioFormData.name.trim() || !audioFormData.preferences.trim()) {
       toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
       return;
     }
 
-    addOrder<AudioOrder>({
+    setIsProcessing(true);
+    const audioPrice = calculateAudioPrice(selectedAudioDuration);
+
+    // Create PIX charge for audio
+    const result = await createCharge({
+      amount: audioPrice,
+      productType: 'audio',
+      category: selectedAudioCategory.id,
+      categoryName: selectedAudioCategory.name,
+      durationMinutes: selectedAudioDuration.minutes,
+      durationLabel: selectedAudioDuration.label,
+      customerName: audioFormData.name,
+      preferences: audioFormData.preferences,
+      observations: audioFormData.observations,
+    });
+
+    setIsProcessing(false);
+
+    if (result.success) {
+      setAudioChargeData(result);
+      setShowAudioOrderDialog(false);
+      setShowAudioPixModal(true);
+      trackEvent('audio_pix_charge_created', { 
+        category: selectedAudioCategory.id,
+        duration: selectedAudioDuration.id,
+        price: audioPrice,
+      });
+    } else {
+      toast({
+        title: 'Erro ao gerar cobrança',
+        description: result.error || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleAudioPixPaymentConfirmed = async () => {
+    if (!selectedAudioCategory || !selectedAudioDuration) return;
+
+    setShowAudioPixModal(false);
+    
+    await onCustomOrder({
       type: 'audio',
       category: selectedAudioCategory.id,
       categoryName: selectedAudioCategory.name,
-      price: calculateAudioPrice(selectedAudioDuration),
+      duration: selectedAudioDuration.minutes,
+      durationLabel: selectedAudioDuration.label,
+      name: audioFormData.name,
+      preferences: audioFormData.preferences,
+      observations: audioFormData.observations,
       status: 'pending',
-      estimatedDelivery: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-      personalization: {
-        name: audioFormData.name,
-        preferences: audioFormData.preferences,
-        observations: audioFormData.observations,
-      },
     });
 
     trackEvent('custom_audio_order', { 
       category: selectedAudioCategory.id,
       duration: selectedAudioDuration.id,
     });
-
-    setShowAudioOrderDialog(false);
-    toast({ title: 'Pedido registrado!', description: 'Envie o comprovante de pagamento em Meus Pedidos.' });
-    navigate('/meus-pedidos');
+    setAudioOrderComplete(true);
   };
 
   const resetAudioOrder = () => {
     setSelectedAudioCategory(null);
     setSelectedAudioDuration(null);
     setAudioFormData({ name: '', preferences: '', observations: '' });
+    setAudioOrderComplete(false);
     setShowAudioOrderDialog(false);
+    setShowAudioPixModal(false);
+    setAudioChargeData(null);
   };
 
   const audioFinalPrice = selectedAudioDuration 
@@ -258,7 +368,7 @@ const CustomsPage = () => {
 
           {/* Videos Tab Content */}
           <TabsContent value="videos" className="mt-6 space-y-6">
-            {/* Preview Section */}
+            {/* Preview Section - Video or Image (only if enabled) */}
             {config.previewEnabled && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -444,7 +554,7 @@ const CustomsPage = () => {
 
           {/* Audios Tab Content */}
           <TabsContent value="audios" className="mt-6 space-y-4">
-            {/* Preview Player */}
+            {/* Preview Player - only show if enabled */}
             {config.audioPreviewEnabled && (
               <GlassCard className="p-4">
                 <div className="flex items-center gap-4">
@@ -678,106 +788,172 @@ const CustomsPage = () => {
         message="Faça login para fazer pedidos personalizados"
       />
 
-      {/* Video Payment + Personalization Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && setShowPaymentDialog(false)}>
-        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
+      {/* Video Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowPaymentDialog(false)}>
+        <DialogContent className="glass mx-4">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-primary" />
-              Pedir Vídeo Personalizado
-            </DialogTitle>
+            <DialogTitle>Confirmar Compra</DialogTitle>
             <DialogDescription>
-              {selectedCategory?.name} • {selectedDuration?.label} - R$ {finalPrice.toFixed(2).replace('.', ',')}
+              Revise os detalhes do seu pedido
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            {pixConfig.pixKey && finalPrice > 0 ? (
-              <PixQRCode
-                pixKey={pixConfig.pixKey}
-                merchantName={pixConfig.merchantName || 'LOJA'}
-                merchantCity={pixConfig.merchantCity || 'BRASIL'}
-                amount={finalPrice}
-                txId={`V${Date.now().toString(36).toUpperCase()}`}
-              />
-            ) : (
-              <div className="text-center p-4 text-sm text-muted-foreground">
-                PIX não configurado pelo administrador.
+          <div className="space-y-4">
+            <div className="glass rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Categoria:</span>
+                <span className="font-medium">{selectedCategory?.name}</span>
               </div>
-            )}
-            <p className="text-xs text-center text-muted-foreground">
-              Após pagar, preencha seus dados abaixo e confirme.
-            </p>
-            <Input
-              placeholder="Seu nome *"
-              value={personalizationData.name}
-              onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))}
-              className="glass border-white/10"
-            />
-            <Input
-              placeholder="Triggers preferidos (ex: sussurro, tapping...)"
-              value={personalizationData.triggers}
-              onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))}
-              className="glass border-white/10"
-            />
-            <Textarea
-              placeholder="Roteiro / Ideias"
-              value={personalizationData.script}
-              onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))}
-              className="glass border-white/10 min-h-[80px]"
-            />
-            <Textarea
-              placeholder="Observações (opcional)"
-              value={personalizationData.observations}
-              onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))}
-              className="glass border-white/10"
-            />
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Duração:</span>
+                <span className="font-medium">{selectedDuration?.label}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Entrega:</span>
+                <span className="font-medium">{config.deliveryDays} dias úteis</span>
+              </div>
+              <div className="border-t border-white/10 my-2" />
+              <div className="flex justify-between">
+                <span className="font-semibold">Total:</span>
+                <span className="font-bold text-lg text-primary">
+                  R$ {finalPrice.toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+            </div>
+
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing}>
+              <Button 
+                variant="ghost" 
+                className="flex-1" 
+                onClick={() => setShowPaymentDialog(false)}
+                disabled={isProcessing || isPixLoading}
+              >
                 Cancelar
               </Button>
-              <Button
+              <Button 
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleVideoConfirmPaid}
-                disabled={isProcessing || !personalizationData.name.trim()}
+                onClick={handlePayment}
+                disabled={isProcessing || isPixLoading}
               >
-                <Send className="w-4 h-4" />
-                Já Paguei - Confirmar
+                {isProcessing || isPixLoading ? 'Gerando PIX...' : 'Confirmar Pagamento'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Audio Order Dialog */}
-      <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && setShowAudioOrderDialog(false)}>
-        <DialogContent className="glass mx-4 max-h-[90vh] overflow-y-auto">
+      {/* PIX Payment Modal for Videos */}
+      {chargeData?.success && (
+        <PixPaymentModal
+          isOpen={showPixModal}
+          onClose={() => {
+            setShowPixModal(false);
+            resetCharge();
+          }}
+          onPaymentConfirmed={handlePixPaymentConfirmed}
+          qrCodeImage={chargeData.qrCodeImage!}
+          brCode={chargeData.brCode!}
+          correlationId={chargeData.correlationId!}
+          expiresAt={chargeData.expiresAt!}
+          amount={finalPrice}
+        />
+      )}
+
+      {/* Video Personalization Dialog */}
+      <Dialog open={showPersonalizationDialog} onOpenChange={() => !isProcessing && setShowPersonalizationDialog(false)}>
+        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-primary" />
-              Pedir Áudio Personalizado
-            </DialogTitle>
+            <DialogTitle>Personalize seu Vídeo</DialogTitle>
+            <DialogDescription>
+              Preencha os detalhes para criar seu vídeo exclusivo
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Seu Nome *</label>
+              <Input
+                placeholder="Como devo te chamar no vídeo?"
+                value={personalizationData.name}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))}
+                className="glass border-white/10"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Triggers Preferidos</label>
+              <Input
+                placeholder="Ex: sussurro, tapping, mouth sounds..."
+                value={personalizationData.triggers}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))}
+                className="glass border-white/10"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Roteiro / Ideias</label>
+              <Textarea
+                placeholder="Descreva o que você gostaria no vídeo..."
+                value={personalizationData.script}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))}
+                className="glass border-white/10 min-h-[80px]"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1 block">Observações</label>
+              <Textarea
+                placeholder="Algo mais que eu deva saber?"
+                value={personalizationData.observations}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))}
+                className="glass border-white/10"
+              />
+            </div>
+
+            <Button 
+              className="w-full bg-gradient-to-r from-primary to-accent gap-2"
+              onClick={handleSubmitPersonalization}
+              disabled={isProcessing}
+            >
+              <Send className="w-4 h-4" />
+              {isProcessing ? 'Enviando...' : 'Enviar Pedido'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={resetVideoOrder}>
+        <DialogContent className="glass mx-4 text-center">
+          <div className="py-6">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
+              <Check className="w-8 h-8 text-success" />
+            </div>
+            <h3 className="font-display text-lg font-bold mb-2">Pedido Confirmado! 🎬</h3>
+            <p className="text-muted-foreground text-sm mb-2">
+              Seu vídeo personalizado está sendo preparado
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Prazo de entrega: {config?.deliveryDays} dias úteis
+            </p>
+            <Button 
+              onClick={resetVideoOrder}
+              className="bg-gradient-to-r from-primary to-accent"
+            >
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audio Order Dialog */}
+      <Dialog open={showAudioOrderDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowAudioOrderDialog(false)}>
+        <DialogContent className="glass mx-4">
+          <DialogHeader>
+            <DialogTitle>Pedir Áudio Personalizado</DialogTitle>
             <DialogDescription>
               {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            {pixConfig.pixKey && audioFinalPrice > 0 && (
-              <PixQRCode
-                pixKey={pixConfig.pixKey}
-                merchantName={pixConfig.merchantName || 'LOJA'}
-                merchantCity={pixConfig.merchantCity || 'BRASIL'}
-                amount={audioFinalPrice}
-                txId={`A${Date.now().toString(36).toUpperCase()}`}
-              />
-            )}
-            {!pixConfig.pixKey && (
-              <div className="text-center p-4 text-sm text-muted-foreground">
-                PIX não configurado pelo administrador.
-              </div>
-            )}
-            <p className="text-xs text-center text-muted-foreground">
-              Após pagar, preencha seus dados abaixo e confirme.
-            </p>
             <Input
               placeholder="Seu nome *"
               value={audioFormData.name}
@@ -797,18 +973,51 @@ const CustomsPage = () => {
               className="glass border-white/10"
             />
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowAudioOrderDialog(false)} disabled={isProcessing}>
+              <Button variant="ghost" className="flex-1" onClick={() => setShowAudioOrderDialog(false)} disabled={isProcessing || isPixLoading}>
                 Cancelar
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-primary to-accent gap-2"
-                onClick={handleAudioConfirmPaid}
-                disabled={isProcessing || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
+                onClick={handleAudioOrder}
+                disabled={isProcessing || isPixLoading || !audioFormData.name.trim() || !audioFormData.preferences.trim()}
               >
                 <Send className="w-4 h-4" />
-                Já Paguei - Confirmar
+                {isProcessing || isPixLoading ? 'Gerando PIX...' : 'Pagar com PIX'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PIX Payment Modal for Audio */}
+      {audioChargeData?.success && selectedAudioDuration && (
+        <PixPaymentModal
+          isOpen={showAudioPixModal}
+          onClose={() => {
+            setShowAudioPixModal(false);
+            setAudioChargeData(null);
+          }}
+          onPaymentConfirmed={handleAudioPixPaymentConfirmed}
+          qrCodeImage={audioChargeData.qrCodeImage!}
+          brCode={audioChargeData.brCode!}
+          correlationId={audioChargeData.correlationId!}
+          expiresAt={audioChargeData.expiresAt!}
+          amount={audioFinalPrice}
+        />
+      )}
+
+      {/* Audio Success Dialog */}
+      <Dialog open={audioOrderComplete} onOpenChange={resetAudioOrder}>
+        <DialogContent className="glass mx-4 text-center">
+          <div className="py-6">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
+              <Check className="w-8 h-8 text-success" />
+            </div>
+            <h3 className="font-display text-lg font-bold mb-2">Pedido Realizado! 🎧</h3>
+            <p className="text-muted-foreground text-sm mb-4">Prazo: 3 dias úteis</p>
+            <Button onClick={resetAudioOrder} className="bg-gradient-to-r from-primary to-accent">
+              Fechar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

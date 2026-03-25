@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,15 +10,12 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  const { slug } = useParams<{ slug?: string }>();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Redirect to store auth if within a store, otherwise root auth
-      const authPath = slug ? `/${slug}/auth` : "/auth";
-      navigate(authPath, { replace: true });
+      navigate("/auth", { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate, slug]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading) {
     return (

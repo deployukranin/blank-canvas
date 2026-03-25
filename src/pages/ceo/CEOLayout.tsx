@@ -1,81 +1,47 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  Store,
+  Sparkles, 
+  Link2, 
   ArrowLeft,
   Crown,
   LogOut,
-  Loader2,
-  TrendingUp,
-  Users,
-  DollarSign,
-  BarChart3,
-  Settings,
-  Bell,
-  Globe,
-  Link2
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/use-user-role';
-import { YouTubeQuotaWidget } from '@/components/ceo/YouTubeQuotaWidget';
 
 interface CEOLayoutProps {
   children: ReactNode;
   title: string;
 }
 
-const menuSections = [
-  {
-    label: 'Geral',
-    items: [
-      { icon: LayoutDashboard, label: 'Visão Geral', path: '/ceo' },
-      { icon: Store, label: 'Minhas Lojas', path: '/ceo/lojas' },
-    ],
-  },
-  {
-    label: 'Análises',
-    items: [
-      { icon: DollarSign, label: 'Vendas', path: '/ceo/vendas' },
-      { icon: Users, label: 'Usuários', path: '/ceo/usuarios' },
-      { icon: BarChart3, label: 'Tráfego', path: '/ceo/trafego' },
-      { icon: TrendingUp, label: 'Métricas', path: '/ceo/metricas' },
-    ],
-  },
-  {
-    label: 'Sistema',
-    items: [
-      { icon: Globe, label: 'Landing Page', path: '/ceo/landing-page' },
-      { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
-      { icon: Bell, label: 'Alertas', path: '/ceo/alertas' },
-      { icon: Settings, label: 'Configurações', path: '/ceo/configuracoes' },
-    ],
-  },
+const menuItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/ceo' },
+  { icon: Sparkles, label: 'Personalização', path: '/ceo/personalizacao' },
+  { icon: Link2, label: 'Integrações', path: '/ceo/integracoes' },
 ];
 
 export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { isCEO, isLoading: rolesLoading } = useUserRole();
+
+  // Redirect if not CEO
+  useEffect(() => {
+    if (!user?.isCEO) {
+      navigate('/admin/login');
+    }
+  }, [user, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
 
-  if (rolesLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isCEO()) {
+  if (!user?.isCEO) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="glass rounded-2xl p-8 text-center max-w-md">
@@ -94,7 +60,7 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className="w-64 bg-gradient-to-b from-amber-950/40 to-background border-r border-amber-600/20 fixed h-full flex flex-col">
-        <div className="p-6 flex-1 pb-32">
+        <div className="p-6 flex-1 overflow-y-auto pb-32">
           <Link to="/" className="flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Voltar ao App</span>
@@ -105,49 +71,45 @@ export const CEOLayout = ({ children, title }: CEOLayoutProps) => {
               <Crown className="w-6 h-6 text-amber-950" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-lg text-amber-100">Meu Painel</h1>
+              <h1 className="font-display font-bold text-lg text-amber-100">Painel CEO</h1>
               <p className="text-xs text-amber-400/70 flex items-center gap-1">
-                <Store className="w-3 h-3" />
-                Multi-Loja
+                <Sparkles className="w-3 h-3" />
+                White-Label
               </p>
             </div>
           </div>
 
-          <nav className="space-y-5">
-            {menuSections.map((section, sIdx) => (
-              <div key={section.label}>
-                {sIdx > 0 && <Separator className="mb-4 bg-amber-600/15" />}
-                <p className="text-[10px] uppercase tracking-widest text-amber-500/50 font-semibold mb-2 px-4">
-                  {section.label}
-                </p>
-                <div className="space-y-1">
-                  {section.items.map((item) => {
-                    const isActive = location.pathname === item.path;
-                    return (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${
-                          isActive
-                            ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30'
-                            : 'text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span className="font-medium">{item.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
+          <nav className="space-y-2">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-300 border border-amber-500/30'
+                      : 'text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
 
-          {/* YouTube Quota Widget */}
-          <YouTubeQuotaWidget />
+            {/* Admin Panel Link */}
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-amber-100/70 hover:text-amber-100 hover:bg-amber-500/10"
+            >
+              <Shield className="w-5 h-5" />
+              <span className="font-medium">Painel Admin</span>
+            </Link>
+          </nav>
         </div>
 
-        {/* User info at bottom */}
+        {/* User info at bottom (no overlay) */}
         <div className="p-6 border-t border-amber-600/20 space-y-3 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
