@@ -48,6 +48,9 @@ export function VideoGalleryCarousel({
         align: "start",
         dragFree: true,
       }}
+      plugins={[
+        Autoplay({ delay: 4000, stopOnInteraction: true }),
+      ]}
       className="relative"
     >
       <CarouselContent>

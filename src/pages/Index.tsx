@@ -57,39 +57,12 @@ const Index = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative rounded-2xl overflow-hidden"
         >
-          <Carousel opts={{ loop: true }} className="w-full">
-            <CarouselContent>
-              {(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage]))
-                .filter(Boolean)
-                .map((src, idx) => (
-                  <CarouselItem key={`${src}-${idx}`}>
-                    <img
-                      src={src}
-                      alt={`Banner principal ${idx + 1}`}
-                      className="w-full h-48 object-cover"
-                      loading={idx === 0 ? 'eager' : 'lazy'}
-                    />
-                  </CarouselItem>
-                ))}
-            </CarouselContent>
-
-            {(config.bannerImages?.length ?? 0) > 1 && (
-              <>
-                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
-                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
-              </>
-            )}
-          </Carousel>
-
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-            <h2 className="font-display text-xl font-bold mb-1">
-              {user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
-            </h2>
-            <p className="text-sm text-muted-foreground">Relaxe com ASMR de qualidade</p>
-          </div>
+          <HeroBanner
+            images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage])).filter(Boolean)}
+            greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
+            subtitle="Relaxe com ASMR de qualidade"
+          />
         </motion.div>
 
         {/* Quick Actions */}
