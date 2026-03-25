@@ -15,6 +15,7 @@ import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { mockFeedPosts } from '@/lib/mock-data';
 import heroImage from '@/assets/hero-asmr.jpg';
+import bannerStudio from '@/assets/banner-studio.jpg';
 
 const Index = () => {
   const { user } = useAuth();
@@ -58,7 +59,7 @@ const Index = () => {
         animate={{ opacity: 1 }}
       >
         <HeroBanner
-          images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage])).filter(Boolean)}
+          images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage, bannerStudio] : [heroImage, bannerStudio])).filter(Boolean)}
           greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
           subtitle="Relaxe com ASMR de qualidade"
         />
