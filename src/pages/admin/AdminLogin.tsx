@@ -11,41 +11,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { session, isLoading: authLoading, signOut } = useAuth();
-  const { roles, isLoading: rolesLoading } = useUserRole();
 
   useEffect(() => {
-    // Se já existe sessão, redireciona quando as roles estiverem prontas.
-    if (authLoading) return;
-    if (!session) return;
-    if (rolesLoading) return;
-
-    const userRoles = roles.map((r) => r.role);
-
-    if (userRoles.includes("ceo")) {
-      navigate("/ceo", { replace: true });
-      return;
-    }
-
-    if (userRoles.includes("admin")) {
-      navigate("/admin", { replace: true });
-      return;
-    }
-
-    // Sessão existe mas sem role adequada => encerra sessão
-    signOut();
-    toast({
-      variant: "destructive",
-      title: "Acesso Negado",
-      description: "Sua conta não possui permissão administrativa.",
-    });
-  }, [authLoading, navigate, roles, rolesLoading, session, signOut, toast]);
+    navigate("/admin", { replace: true });
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
