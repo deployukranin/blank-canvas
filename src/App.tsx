@@ -41,10 +41,6 @@ import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 
-// CEO Pages
-import CEODashboard from "./pages/ceo/CEODashboard";
-import CEOPersonalizacao from "./pages/ceo/CEOPersonalizacao";
-import CEOIntegracoes from "./pages/ceo/CEOIntegracoes";
 
 const queryClient = new QueryClient();
 
@@ -92,10 +88,6 @@ const App = () => (
               <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
               <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
 
-              {/* 🛡️ Rotas CEO (Nível Máximo) */}
-              <Route path="/ceo" element={<AdminRoute requiredRole="ceo"><CEODashboard /></AdminRoute>} />
-              <Route path="/ceo/personalizacao" element={<AdminRoute requiredRole="ceo"><CEOPersonalizacao /></AdminRoute>} />
-              <Route path="/ceo/integracoes" element={<AdminRoute requiredRole="ceo"><CEOIntegracoes /></AdminRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
