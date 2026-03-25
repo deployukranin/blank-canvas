@@ -51,19 +51,19 @@ const Index = () => {
   );
 
   return (
-    <MobileLayout hideHeader>
+      {/* Hero Banner — full width, no padding */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <HeroBanner
+          images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage])).filter(Boolean)}
+          greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
+          subtitle="Relaxe com ASMR de qualidade"
+        />
+      </motion.div>
+
       <div className="px-4 py-6 space-y-6">
-        {/* Hero Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <HeroBanner
-            images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage])).filter(Boolean)}
-            greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
-            subtitle="Relaxe com ASMR de qualidade"
-          />
-        </motion.div>
 
         {/* Quick Actions */}
         <div>
