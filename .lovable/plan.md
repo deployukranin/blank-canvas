@@ -1,93 +1,54 @@
 
 
-# Plano: Corrigir Erro de CORS na Edge Function create-pix-charge
+# Plano: Aplicar Estilo de Banner do LANCY STUDIO + Auto-scroll Suave no Carrossel
 
-## Problema Identificado
+## O que muda
 
-A edge function `create-pix-charge` possui uma lista restrita de origens permitidas (CORS) que **ainda contém URLs placeholder**:
+### 1. Refatorar o Hero Banner da Index para o estilo LANCY STUDIO
 
-```typescript
-const ALLOWED_ORIGINS = [
-  "https://seusite.lovable.app",         // Placeholder
-  "https://preview-seusite.lovable.app", // Placeholder  
-  "http://localhost:8080",
-];
-```
+O banner atual e pequeno (h-48) e usa o componente Embla Carousel padrao. O LANCY STUDIO usa um banner fullwidth com altura generosa (65vh), navegacao com botoes transparentes com blur, indicadores de dot animados, e transicao por opacity (fade) com auto-play a cada 6 segundos.
 
-A origem real do projeto (`4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com`) nao esta incluida, resultando em bloqueio CORS com status 403 e a mensagem "Forbidden Origin".
+**Alteracoes em `src/pages/Index.tsx`:**
+- Substituir o bloco `{/* Hero Card */}` pelo novo componente `HeroBanner`
+- Remover imports de Carousel/CarouselContent/CarouselItem/CarouselPrevious/CarouselNext (do banner; manter se usado em outro lugar)
+- Manter o restante da pagina intacto
 
-## Solucao
+**Criar `src/components/layout/HeroBanner.tsx`:**
+- Banner com altura `h-[55vh] min-h-[300px]` (adaptado para mobile, menor que o LANCY que e desktop-first)
+- Transicao por fade (opacity) entre slides, nao swipe
+- Botoes prev/next transparentes com `bg-background/30 backdrop-blur-sm` sobre o banner
+- Indicadores dot na parte inferior: dot ativo = barra larga com cor primary, inativos = pontos pequenos
+- Gradiente overlay: `from-background via-background/60 to-transparent` de baixo para cima + gradiente lateral
+- Texto de boas-vindas posicionado no canto inferior esquerdo sobre o gradiente
+- Auto-play: troca de slide a cada 6 segundos
+- Usa as mesmas imagens dinamicas do config (`config.bannerImages` / `config.bannerImage` / fallback `heroImage`)
 
-Atualizar a lista `ALLOWED_ORIGINS` na edge function para incluir as origens corretas do projeto Lovable.
+### 2. Adicionar auto-scroll suave ao carrossel de videos
 
-## Alteracoes Necessarias
+O carrossel de videos (`VideoGalleryCarousel`) ja usa Embla Carousel. Vou adicionar o plugin `embla-carousel-autoplay` para que ele role sozinho suavemente.
 
-### 1. Atualizar `supabase/functions/create-pix-charge/index.ts`
+**Instalar:** `embla-carousel-autoplay` (dependencia npm)
 
-Substituir os placeholders pelas URLs reais:
-
-```text
-ANTES:
-const ALLOWED_ORIGINS = [
-  "https://seusite.lovable.app",
-  "https://preview-seusite.lovable.app",
-  "http://localhost:8080",
-];
-
-DEPOIS:
-const ALLOWED_ORIGINS = [
-  "https://4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com",
-  "https://id-preview--4c756ab8-43f8-4073-a220-22b13086195b.lovable.app",
-  "https://cozy-corner-seed.lovable.app",
-  "http://localhost:8080",
-  "http://localhost:5173",
-];
-```
-
-URLs incluidas:
-- **lovableproject.com**: Preview de desenvolvimento
-- **id-preview--...lovable.app**: Preview alternativo
-- **cozy-corner-seed.lovable.app**: URL publicada (producao)
-- **localhost**: Desenvolvimento local
-
-### 2. Deploy da Edge Function
-
-Apos a edicao, a edge function sera reimplantada automaticamente.
+**Alterar `src/components/video/VideoGalleryCarousel.tsx`:**
+- Importar e configurar o plugin Autoplay com `delay: 4000`, `stopOnInteraction: true`
+- Passar o plugin ao componente `<Carousel plugins={[autoplay]}>` 
 
 ## Secao Tecnica
 
-### Por que "Failed to fetch"?
-
-1. O browser envia uma requisicao preflight OPTIONS
-2. A edge function verifica se a origem esta na lista ALLOWED_ORIGINS
-3. Como nao esta, retorna 403 Forbidden Origin
-4. O browser bloqueia a requisicao e reporta "Failed to fetch"
-5. O frontend mostra "Erro ao gerar cobranca"
-
-### Fluxo Corrigido
-
+### Estrutura do HeroBanner
 ```text
-Browser (lovableproject.com)
-       |
-       | POST /functions/v1/create-pix-charge
-       v
-Edge Function
-       |
-       | Origin: ...lovableproject.com
-       | -> Verifica ALLOWED_ORIGINS
-       | -> Origem valida!
-       v
-Processa pagamento PIX
-       |
-       v
-Retorna QR Code
+<div relative overflow-hidden h-[55vh]>
+  {slides.map → <div absolute inset-0 opacity fade 700ms>}
+  <gradient overlays>
+  <text bottom-left>
+  <btn prev transparent blur left-4>
+  <btn next transparent blur right-4>
+  <dots bottom-center>
+</div>
 ```
 
-## Validacao
-
-Apos a correcao:
-1. Acessar /customs
-2. Selecionar categoria e duracao
-3. Clicar em "Comprar"
-4. O modal de pagamento PIX deve abrir com o QR Code
+### Arquivos alterados
+1. **Criar** `src/components/layout/HeroBanner.tsx` — novo componente de banner estilo LANCY
+2. **Editar** `src/pages/Index.tsx` — trocar bloco do banner pelo novo componente
+3. **Editar** `src/components/video/VideoGalleryCarousel.tsx` — adicionar plugin autoplay
 
