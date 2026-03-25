@@ -51,6 +51,7 @@ const Index = () => {
   );
 
   return (
+    <MobileLayout hideHeader>
       {/* Hero Banner — full width, no padding */}
       <motion.div
         initial={{ opacity: 0 }}
