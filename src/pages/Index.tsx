@@ -59,7 +59,7 @@ const Index = () => {
         animate={{ opacity: 1 }}
       >
         <HeroBanner
-          images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage] : [heroImage])).filter(Boolean)}
+          images={(config.bannerImages?.length ? config.bannerImages : (config.bannerImage ? [config.bannerImage, bannerStudio] : [heroImage, bannerStudio])).filter(Boolean)}
           greeting={user ? `Olá, ${displayName}! 💜` : 'Bem-vindo! 💜'}
           subtitle="Relaxe com ASMR de qualidade"
         />
