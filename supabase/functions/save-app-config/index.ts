@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     }
 
     // Validate config_key
-    const validKeys = ["video_config", "vip_config", "white_label_config", "global_default_categories"];
+    const validKeys = ["video_config", "vip_config", "white_label_config", "global_default_categories", "payment_config"];
     if (!validKeys.includes(config_key)) {
       return new Response(
         JSON.stringify({ success: false, error: "config_key inválido" }),
