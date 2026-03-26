@@ -1,11 +1,12 @@
 import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Save, Search, Tags, ChevronDown, ChevronUp, X, Wand2, Pencil, Check } from "lucide-react";
+import { Plus, Save, Search, Tags, ChevronDown, ChevronUp, X, Wand2, Pencil, Check, ClipboardPaste } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -95,6 +96,8 @@ export function YouTubeCategoryManager({
   const [keywordInputs, setKeywordInputs] = useState<Record<string, string>>({});
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [bulkPasteId, setBulkPasteId] = useState<string | null>(null);
+  const [bulkText, setBulkText] = useState("");
 
   const autoCategorizeEnabled = draft.autoCategorizeEnabled ?? false;
 
@@ -176,6 +179,27 @@ export function YouTubeCategoryManager({
       ),
     });
     setKeywordInputs((prev) => ({ ...prev, [categoryId]: "" }));
+  };
+
+  const addBulkKeywords = (categoryId: string) => {
+    const lines = bulkText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    if (!lines.length) return;
+    const existing = new Set(
+      (draft.categories.find((c) => c.id === categoryId)?.keywords || []).map((k) => k.toLowerCase())
+    );
+    const unique = lines.filter((l) => !existing.has(l.toLowerCase()));
+    if (!unique.length) { setBulkPasteId(null); setBulkText(""); return; }
+    onChange({
+      ...draft,
+      categories: draft.categories.map((c) =>
+        c.id === categoryId ? { ...c, keywords: [...(c.keywords || []), ...unique] } : c
+      ),
+    });
+    setBulkPasteId(null);
+    setBulkText("");
   };
 
   const removeKeyword = (categoryId: string, keyword: string) => {
@@ -354,7 +378,38 @@ export function YouTubeCategoryManager({
                               <Button type="button" variant="outline" size="sm" className="h-8" onClick={() => addKeyword(cat.id)} disabled={!(keywordInputs[cat.id] || "").trim()}>
                                 <Plus className="w-3 h-3" />
                               </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1"
+                                onClick={() => { setBulkPasteId(bulkPasteId === cat.id ? null : cat.id); setBulkText(""); }}
+                              >
+                                <ClipboardPaste className="w-3 h-3" />
+                                {t("admin.bulkPaste")}
+                              </Button>
                             </div>
+
+                            {bulkPasteId === cat.id && (
+                              <div className="space-y-2 pt-1">
+                                <Textarea
+                                  value={bulkText}
+                                  onChange={(e) => setBulkText(e.target.value)}
+                                  placeholder={t("admin.bulkPastePlaceholder")}
+                                  className="text-sm min-h-[120px] bg-background/50"
+                                  rows={6}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <Button type="button" size="sm" className="h-7 gap-1" onClick={() => addBulkKeywords(cat.id)} disabled={!bulkText.trim()}>
+                                    <Plus className="w-3 h-3" />
+                                    {t("admin.addAll")}
+                                  </Button>
+                                  <span className="text-xs text-muted-foreground">
+                                    {bulkText.split("\n").filter((l) => l.trim()).length} {t("admin.keywordsDetected")}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
