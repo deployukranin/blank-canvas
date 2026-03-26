@@ -107,7 +107,7 @@ const Index = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Link to={action.path}>
+                <Link to={isTenantScope ? `${basePath}${action.path}` : action.path}>
                   <div className="glass glass-hover rounded-xl p-4 text-center group">
                     <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
                       <DynamicIcon icon={action.icon} size={20} className="text-primary" />
