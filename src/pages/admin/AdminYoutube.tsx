@@ -11,14 +11,53 @@ import {
   type YouTubeCategorizationDraft,
 } from "@/components/video/YouTubeCategoryManager";
 
+const DEFAULT_CATEGORIES: YouTubeCategorizationDraft["categories"] = [
+  // 1. Mouth & Voice
+  { id: "mouth-voice", name: "Mouth & Voice", icon: "👄", order: 1, keywords: [
+    "sussurro", "whispering", "soft spoken", "fala suave", "mouth sounds", "sons de boca",
+    "tongue click", "cliques de língua", "inaudible", "inaudível", "eating", "mukbang",
+    "chewing", "crunching", "mastigação", "saliva", "ear to ear"
+  ]},
+  // 2. Tapping & Scratching
+  { id: "tapping-scratching", name: "Tapping & Scratching", icon: "🤏", order: 2, keywords: [
+    "tapping", "batidinha", "scratching", "arranhar", "crinkle", "amassar",
+    "brushing", "escovação", "page turning", "virar páginas", "typing", "teclado",
+    "keyboard", "wood tapping", "glass tapping", "paper"
+  ]},
+  // 3. Personal Attention & Roleplay
+  { id: "personal-attention", name: "Personal Attention", icon: "🧑‍⚕️", order: 3, keywords: [
+    "personal attention", "atenção pessoal", "roleplay", "encenação", "cranial nerve",
+    "nervos cranianos", "haircut", "corte de cabelo", "makeup", "maquiagem",
+    "ear cleaning", "limpando ouvido", "spa", "doctor", "medical", "skincare"
+  ]},
+  // 4. Video Styles
+  { id: "video-styles", name: "Video Styles", icon: "🎬", order: 4, keywords: [
+    "no talking", "sem fala", "fast and aggressive", "rápido e agressivo", "slow",
+    "lento", "gentle", "calmo", "sleep", "dormir", "sleep aid", "lofi",
+    "high quality", "4k", "binaural", "3dio"
+  ]},
+  // 5. Visual & Misc
+  { id: "visual-misc", name: "Visual & Misc", icon: "✨", order: 5, keywords: [
+    "hand movements", "movimentos de mão", "light trigger", "gatilhos de luz",
+    "flashlight", "lanterna", "liquid", "líquido", "water", "spray",
+    "foam", "espuma", "soap", "sabonete", "sticky", "pegajoso",
+    "tape", "velcro", "shaving cream"
+  ]},
+];
+
 const AdminYoutube = () => {
   const { toast } = useToast();
   const { config, updateYouTube } = useWhiteLabel();
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
 
+  const existingCategories = config.youtube?.categories;
+  const initialCategories = existingCategories && existingCategories.length > 0
+    ? existingCategories
+    : DEFAULT_CATEGORIES;
+
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
-    categories: config.youtube?.categories || [],
+    categories: initialCategories,
     videoCategoryMap: config.youtube?.videoCategoryMap || {},
     autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
