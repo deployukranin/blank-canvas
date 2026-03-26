@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
@@ -19,6 +20,9 @@ const AdminBanners: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { config, setConfig } = useWhiteLabel();
+
+  const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
+  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
 
   const [banners, setBanners] = useState<BannerConfig[]>(
     config.banners?.length ? config.banners : [
@@ -111,6 +115,8 @@ const AdminBanners: React.FC = () => {
     setConfig({
       ...config,
       banners,
+      heroGreeting,
+      heroSubtitle,
       bannerImages: bannerImages.length > 0 ? bannerImages : config.bannerImages,
       bannerImage: bannerImages[0] || config.bannerImage,
     });
