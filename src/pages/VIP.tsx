@@ -75,31 +75,26 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handle no store context
+  // Load VIP plans from store config or global
   useEffect(() => {
-    if (!storeId) {
-      setIsLoading(false);
-    }
-  }, [storeId]);
-
-  // Load VIP plans from store config
-  useEffect(() => {
-    if (!storeId) return;
     const loadPlans = async () => {
-      const { data } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'vip_config')
-        .eq('store_id', storeId)
-        .maybeSingle();
+      let plans: VipPlanConfig[] = [];
 
-      if (data?.config_value) {
-        const cfg = data.config_value as any;
-        const plans = cfg.plans || [];
-        setVipPlans(plans);
-        if (plans.length > 0) setSelectedPlan(plans[0]);
-      } else {
-        // Fallback: try global config
+      if (storeId) {
+        const { data } = await supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'vip_config')
+          .eq('store_id', storeId)
+          .maybeSingle();
+
+        if (data?.config_value) {
+          plans = (data.config_value as any).plans || [];
+        }
+      }
+
+      // Fallback: try global config
+      if (plans.length === 0) {
         const { data: globalData } = await supabase
           .from('app_configurations')
           .select('config_value')
@@ -108,19 +103,24 @@ const VIPPage = () => {
           .maybeSingle();
 
         if (globalData?.config_value) {
-          const cfg = globalData.config_value as any;
-          const plans = cfg.plans || [];
-          setVipPlans(plans);
-          if (plans.length > 0) setSelectedPlan(plans[0]);
+          plans = (globalData.config_value as any).plans || [];
         }
       }
+
+      // Final fallback: use defaults from vip-config
+      if (plans.length === 0) {
+        const { defaultVipConfig } = await import('@/lib/vip-config');
+        plans = defaultVipConfig.plans;
+      }
+
+      setVipPlans(plans);
+      if (plans.length > 0) setSelectedPlan(plans[0]);
     };
     loadPlans();
   }, [storeId]);
 
   // Check VIP status and load content
   useEffect(() => {
-    if (!storeId) return;
     const checkVIP = async () => {
       setIsLoading(true);
       if (!userId) {
@@ -129,25 +129,32 @@ const VIPPage = () => {
         return;
       }
 
-      const { data: sub } = await supabase
+      let subQuery = supabase
         .from('vip_subscriptions')
         .select('id, status, plan_type, expires_at, price_cents')
         .eq('user_id', userId)
-        .eq('store_id', storeId)
         .eq('status', 'active')
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
+        .gt('expires_at', new Date().toISOString());
+      
+      if (storeId) subQuery = subQuery.eq('store_id', storeId);
+      else subQuery = subQuery.is('store_id', null);
+
+      const { data: sub } = await subQuery.maybeSingle();
 
       if (sub) {
         setIsVIP(true);
         setSubscription(sub as VipSub);
 
         // Load exclusive content
-        const { data: contentData } = await supabase
+        let contentQuery = supabase
           .from('vip_content')
           .select('id, title, content, content_type, media_url, created_at')
-          .eq('store_id', storeId)
           .order('created_at', { ascending: false });
+        
+        if (storeId) contentQuery = contentQuery.eq('store_id', storeId);
+        else contentQuery = contentQuery.is('store_id', null);
+
+        const { data: contentData } = await contentQuery;
 
         setVipContent((contentData || []) as VipContentItem[]);
       } else {
