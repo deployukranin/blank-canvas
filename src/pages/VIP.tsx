@@ -129,25 +129,32 @@ const VIPPage = () => {
         return;
       }
 
-      const { data: sub } = await supabase
+      let subQuery = supabase
         .from('vip_subscriptions')
         .select('id, status, plan_type, expires_at, price_cents')
         .eq('user_id', userId)
-        .eq('store_id', storeId)
         .eq('status', 'active')
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
+        .gt('expires_at', new Date().toISOString());
+      
+      if (storeId) subQuery = subQuery.eq('store_id', storeId);
+      else subQuery = subQuery.is('store_id', null);
+
+      const { data: sub } = await subQuery.maybeSingle();
 
       if (sub) {
         setIsVIP(true);
         setSubscription(sub as VipSub);
 
         // Load exclusive content
-        const { data: contentData } = await supabase
+        let contentQuery = supabase
           .from('vip_content')
           .select('id, title, content, content_type, media_url, created_at')
-          .eq('store_id', storeId)
           .order('created_at', { ascending: false });
+        
+        if (storeId) contentQuery = contentQuery.eq('store_id', storeId);
+        else contentQuery = contentQuery.is('store_id', null);
+
+        const { data: contentData } = await contentQuery;
 
         setVipContent((contentData || []) as VipContentItem[]);
       } else {
