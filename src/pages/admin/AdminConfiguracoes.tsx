@@ -89,25 +89,20 @@ const AdminConfiguracoes: React.FC = () => {
               <Palette className="w-5 h-5 text-primary" />
               <h3 className="font-semibold">{t('admin.settings.colorTheme', 'Color Theme')}</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              {t('admin.settings.colorThemeDesc', 'Choose a color template for your platform. The black base is preserved.')}
+            <p className="text-sm text-muted-foreground mb-5">
+              {t('admin.settings.colorThemeDesc', 'Choose a color template for your platform.')}
             </p>
-            
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-              {colorTemplates.map((template) => {
+
+            {/* Dark Templates */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Dark</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-5">
+              {darkTemplates.map((template) => {
                 const isActive = activeTemplate.id === template.id;
                 return (
-                  <button
-                    key={template.id}
-                    onClick={() => handleSelectTemplate(template)}
-                    className={`
-                      relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200
-                      ${isActive
-                        ? 'border-primary bg-primary/10 scale-105'
-                        : 'border-border/50 hover:border-border hover:bg-card/50'
-                      }
-                    `}
-                  >
+                  <button key={template.id} onClick={() => handleSelectTemplate(template)}
+                    className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isActive ? 'border-primary bg-primary/10 scale-105' : 'border-border/50 hover:border-border hover:bg-card/50'
+                    }`}>
                     <div className={`w-10 h-10 rounded-full ${template.preview} shadow-lg`}>
                       {isActive && (
                         <div className="w-full h-full rounded-full flex items-center justify-center bg-black/30">
@@ -115,9 +110,32 @@ const AdminConfiguracoes: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs font-medium text-foreground/80">
-                      {template.label}
-                    </span>
+                    <span className="text-xs font-medium text-foreground/80">{template.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Light Templates */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Light</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {lightTemplates.map((template) => {
+                const isActive = activeTemplate.id === template.id;
+                return (
+                  <button key={template.id} onClick={() => handleSelectTemplate(template)}
+                    className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isActive ? 'border-primary bg-primary/10 scale-105' : 'border-border/50 hover:border-border hover:bg-card/50'
+                    }`}>
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center">
+                      <div className={`w-6 h-6 rounded-full ${template.preview}`}>
+                        {isActive && (
+                          <div className="w-full h-full rounded-full flex items-center justify-center bg-black/20">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-foreground/80">{template.label}</span>
                   </button>
                 );
               })}
