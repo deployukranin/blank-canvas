@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, Shield, CreditCard,
-  Crown, Video, Headphones, Youtube
+  Crown, Video, Headphones, Youtube, Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: '/admin/youtube', icon: Youtube, label: t('admin.youtube') },
     { path: '/admin/usuarios', icon: Users, label: t('admin.users') },
     { path: '/admin/conteudo', icon: FileText, label: t('admin.content') },
+    { path: '/admin/personalizacao', icon: Palette, label: t('admin.personalization', 'Personalização') },
     { path: '/admin/configuracoes', icon: Settings, label: t('admin.settings') },
   ];
 
