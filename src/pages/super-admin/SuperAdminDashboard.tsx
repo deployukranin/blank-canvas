@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Store, Users, DollarSign, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Store, Users, DollarSign, TrendingUp, Ban, CheckCircle, Crown, Clock } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 interface GlobalStats {
   totalTenants: number;
@@ -19,6 +22,9 @@ interface TenantRow {
   name: string;
   slug: string | null;
   status: string;
+  plan_type: string;
+  plan_expires_at: string | null;
+  suspended_at: string | null;
   created_at: string;
 }
 
@@ -32,48 +38,94 @@ const SuperAdminDashboard: React.FC = () => {
   });
   const [tenants, setTenants] = useState<TenantRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const { data: storesData, count: storesCount } = await supabase
+        .from('stores')
+        .select('id, name, slug, status, plan_type, plan_expires_at, suspended_at, created_at', { count: 'exact' });
+
+      const activeStores = storesData?.filter((s: any) => s.status === 'active') || [];
+
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      const { data: ordersData } = await supabase
+        .from('custom_orders')
+        .select('amount_cents, status');
+
+      const paidOrders = ordersData?.filter((o: any) => o.status === 'paid' || o.status === 'completed') || [];
+      const totalRevenue = paidOrders.reduce((sum: number, o: any) => sum + (o.amount_cents || 0), 0) / 100;
+
+      setStats({
+        totalTenants: storesCount || 0,
+        activeTenants: activeStores.length,
+        totalUsers: usersCount || 0,
+        totalRevenue,
+        newUsersToday: 0,
+      });
+
+      setTenants((storesData as TenantRow[]) || []);
+    } catch (error) {
+      console.error('Error fetching super admin stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch stores (tenants)
-        const { data: storesData, count: storesCount } = await supabase
-          .from('stores')
-          .select('id, name, slug, status, created_at', { count: 'exact' });
-
-        const activeStores = storesData?.filter((s) => s.status === 'active') || [];
-
-        // Fetch total users (profiles)
-        const { count: usersCount } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
-
-        // Fetch revenue from paid orders
-        const { data: ordersData } = await supabase
-          .from('custom_orders')
-          .select('amount_cents, status');
-
-        const paidOrders = ordersData?.filter((o) => o.status === 'paid' || o.status === 'completed') || [];
-        const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
-
-        setStats({
-          totalTenants: storesCount || 0,
-          activeTenants: activeStores.length,
-          totalUsers: usersCount || 0,
-          totalRevenue,
-          newUsersToday: 0,
-        });
-
-        setTenants(storesData || []);
-      } catch (error) {
-        console.error('Error fetching super admin stats:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  const manageStore = async (storeId: string, action: string, extra?: Record<string, unknown>) => {
+    setActionLoading(storeId);
+    try {
+      const { data, error } = await supabase.functions.invoke('super-admin-manage-store', {
+        body: { action, store_id: storeId, ...extra },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(
+        action === 'suspend' ? 'Plataforma suspensa' :
+        action === 'activate' ? 'Plataforma ativada' :
+        'Plano atualizado'
+      );
+      await fetchData();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao gerenciar plataforma');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const getPlanBadge = (planType: string) => {
+    switch (planType) {
+      case 'trial':
+        return <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 bg-yellow-500/10">Trial</Badge>;
+      case 'paid':
+        return <Badge variant="outline" className="border-green-500/50 text-green-400 bg-green-500/10">Pago</Badge>;
+      case 'expired':
+        return <Badge variant="outline" className="border-red-500/50 text-red-400 bg-red-500/10">Expirado</Badge>;
+      default:
+        return <Badge variant="secondary">{planType}</Badge>;
+    }
+  };
+
+  const isExpired = (expiresAt: string | null) => {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
+  };
+
+  const daysRemaining = (expiresAt: string | null) => {
+    if (!expiresAt) return null;
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return days;
+  };
 
   return (
     <SuperAdminLayout title="Dashboard Global">
@@ -136,7 +188,7 @@ const SuperAdminDashboard: React.FC = () => {
         <GlassCard className="p-6">
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <Store className="w-5 h-5 text-primary" />
-            Plataformas Cadastradas
+            Gestão de Plataformas
           </h3>
 
           {isLoading ? (
@@ -151,29 +203,105 @@ const SuperAdminDashboard: React.FC = () => {
                     <th className="pb-3 font-medium text-muted-foreground">Nome</th>
                     <th className="pb-3 font-medium text-muted-foreground">Slug</th>
                     <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Plano</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Expira em</th>
                     <th className="pb-3 font-medium text-muted-foreground">Criado em</th>
+                    <th className="pb-3 font-medium text-muted-foreground text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tenants.map((tenant) => (
-                    <motion.tr
-                      key={tenant.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="border-b border-border/50"
-                    >
-                      <td className="py-3 font-medium">{tenant.name}</td>
-                      <td className="py-3 text-muted-foreground">{tenant.slug || '—'}</td>
-                      <td className="py-3">
-                        <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
-                          {tenant.status === 'active' ? 'Ativa' : 'Suspensa'}
-                        </Badge>
-                      </td>
-                      <td className="py-3 text-muted-foreground">
-                        {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
-                      </td>
-                    </motion.tr>
-                  ))}
+                  {tenants.map((tenant) => {
+                    const days = daysRemaining(tenant.plan_expires_at);
+                    const expired = isExpired(tenant.plan_expires_at);
+
+                    return (
+                      <motion.tr
+                        key={tenant.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-border/50"
+                      >
+                        <td className="py-3 font-medium">{tenant.name}</td>
+                        <td className="py-3 text-muted-foreground">{tenant.slug || '—'}</td>
+                        <td className="py-3">
+                          <Badge variant={tenant.status === 'active' ? 'default' : 'destructive'}>
+                            {tenant.status === 'active' ? 'Ativa' : 'Suspensa'}
+                          </Badge>
+                        </td>
+                        <td className="py-3">
+                          {getPlanBadge(expired ? 'expired' : tenant.plan_type)}
+                        </td>
+                        <td className="py-3">
+                          {tenant.plan_expires_at ? (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-muted-foreground" />
+                              <span className={expired ? 'text-red-400' : days !== null && days <= 3 ? 'text-yellow-400' : 'text-muted-foreground'}>
+                                {expired
+                                  ? 'Expirado'
+                                  : `${days}d restantes`}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 text-muted-foreground">
+                          {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2 justify-end">
+                            {/* Plan selector */}
+                            <Select
+                              defaultValue={tenant.plan_type}
+                              onValueChange={(value) =>
+                                manageStore(tenant.id, 'update_plan', {
+                                  plan_type: value,
+                                  plan_expires_at: value === 'paid'
+                                    ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                                    : value === 'trial'
+                                    ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                                    : null,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="w-24 h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="trial">Trial</SelectItem>
+                                <SelectItem value="paid">Pago</SelectItem>
+                              </SelectContent>
+                            </Select>
+
+                            {/* Suspend / Activate */}
+                            {tenant.status === 'active' ? (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8 text-xs"
+                                disabled={actionLoading === tenant.id}
+                                onClick={() => manageStore(tenant.id, 'suspend')}
+                              >
+                                <Ban className="w-3 h-3 mr-1" />
+                                Suspender
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="h-8 text-xs bg-green-600 hover:bg-green-700"
+                                disabled={actionLoading === tenant.id}
+                                onClick={() => manageStore(tenant.id, 'activate')}
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Ativar
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
