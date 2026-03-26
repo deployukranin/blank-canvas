@@ -2,53 +2,43 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  LayoutDashboard, 
-  Lightbulb, 
-  ShoppingCart, 
-  Users, 
-  FileText,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  ArrowLeft,
-  Shield,
-  CreditCard,
-  Crown,
-  Video,
-  Headphones,
-  Youtube
+  LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
+  Settings, LogOut, Menu, X, ArrowLeft, Shield, CreditCard,
+  Crown, Video, Headphones, Youtube
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
 }
 
-const menuItems = [
-  { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/admin/ideias', icon: Lightbulb, label: 'Ideias' },
-  { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
-  { path: '/admin/pagamentos-pix', icon: CreditCard, label: 'Pagamentos PIX' },
-  { path: '/admin/vip-precos', icon: Crown, label: 'Preços VIP' },
-  { path: '/admin/videos', icon: Video, label: 'Vídeos' },
-  { path: '/admin/audios', icon: Headphones, label: 'Áudios' },
-  { path: '/admin/youtube', icon: Youtube, label: 'YouTube' },
-  { path: '/admin/usuarios', icon: Users, label: 'Usuários' },
-  { path: '/admin/conteudo', icon: FileText, label: 'Conteúdo' },
-  { path: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
-];
-
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { roles } = useUserRole();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+  const menuItems = [
+    { path: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
+    { path: '/admin/ideias', icon: Lightbulb, label: t('admin.ideas') },
+    { path: '/admin/pedidos', icon: ShoppingCart, label: t('admin.orders') },
+    { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.pixPayments') },
+    { path: '/admin/vip-precos', icon: Crown, label: t('admin.vipPricing') },
+    { path: '/admin/videos', icon: Video, label: t('admin.videos') },
+    { path: '/admin/audios', icon: Headphones, label: t('admin.audios') },
+    { path: '/admin/youtube', icon: Youtube, label: t('admin.youtube') },
+    { path: '/admin/usuarios', icon: Users, label: t('admin.users') },
+    { path: '/admin/conteudo', icon: FileText, label: t('admin.content') },
+    { path: '/admin/configuracoes', icon: Settings, label: t('admin.settings') },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -57,7 +47,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-black/90 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4">
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white/70 hover:text-white hover:bg-white/5">
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -68,7 +57,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </Button>
       </header>
 
-      {/* Sidebar */}
       <aside className={cn(
         "fixed inset-y-0 left-0 w-64 bg-black border-r border-purple-500/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -78,7 +66,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-lg font-bold text-white">Creator Panel</h2>
+            <h2 className="text-lg font-bold text-white">{t('admin.panel')}</h2>
           </div>
           <div className="flex items-center gap-2 mt-3">
             <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
@@ -97,17 +85,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
+              <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
                   isActive
                     ? "bg-purple-600/20 text-purple-400 border border-purple-500/20"
                     : "text-white/50 hover:bg-white/5 hover:text-white/80 border border-transparent"
-                )}
-              >
+                )}>
                 <item.icon className="w-4 h-4" />
                 <span className="font-medium">{item.label}</span>
               </Link>
@@ -116,62 +100,45 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </nav>
 
         <div className="p-3 border-t border-purple-500/10 space-y-1 shrink-0">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm"
-            onClick={() => navigate('/')}
-          >
+          <div className="px-3 py-1">
+            <LanguageSelector />
+          </div>
+          <Button variant="ghost" className="w-full justify-start gap-3 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm"
+            onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4" />
-            <span>Voltar ao App</span>
+            <span>{t('common.backToApp')}</span>
           </Button>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
-            onClick={handleLogout}
-          >
+          <Button variant="ghost" className="w-full justify-start gap-3 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
+            onClick={handleLogout}>
             <LogOut className="w-4 h-4" />
-            <span>Sair</span>
+            <span>{t('common.logout')}</span>
           </Button>
         </div>
       </aside>
 
-      {/* Overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/70 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Main Content */}
       <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-black">
         <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-purple-500/10">
           <h1 className="text-lg font-semibold text-white">{title}</h1>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="gap-2 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm"
-            >
+            <LanguageSelector variant="minimal" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}
+              className="gap-2 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm">
               <ArrowLeft className="w-4 h-4" />
-              Voltar
+              {t('common.back')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
-            >
+            <Button variant="ghost" size="sm" onClick={handleLogout}
+              className="gap-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm">
               <LogOut className="w-4 h-4" />
-              Sair
+              {t('common.logout')}
             </Button>
           </div>
         </div>
         
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="p-4 lg:p-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="p-4 lg:p-6">
           {children}
         </motion.div>
       </main>
