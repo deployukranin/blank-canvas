@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +29,13 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [youtubeHandle, setYoutubeHandle] = useState("");
+
+  const features = [
+    { icon: Palette, title: t("auth.featureCustom"), desc: t("auth.featureCustomDesc") },
+    { icon: BarChart3, title: t("auth.featureAdmin"), desc: t("auth.featureAdminDesc") },
+    { icon: Users, title: t("auth.featureFans"), desc: t("auth.featureFansDesc") },
+    { icon: Sparkles, title: t("auth.featureYoutube"), desc: t("auth.featureYoutubeDesc") },
+  ];
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -46,8 +54,8 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateEmail(loginEmail)) { toast.error("Digite um email válido"); return; }
-    if (loginPassword.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return; }
+    if (!validateEmail(loginEmail)) { toast.error(t("auth.invalidEmail")); return; }
+    if (loginPassword.length < 6) { toast.error(t("auth.passwordMin")); return; }
 
     setIsSubmitting(true);
     const result = await signIn(loginEmail, loginPassword);
@@ -57,35 +65,35 @@ const Auth = () => {
       if (user) {
         const { isAdmin } = await checkUserRoles(user.id);
         if (isAdmin) {
-          toast.success("🛡️ Bem-vindo de volta!");
+          toast.success(t("auth.welcomeAdmin"));
           navigate("/admin", { replace: true });
         } else {
-          toast.success("Login realizado com sucesso!");
+          toast.success(t("auth.enterButton") + "!");
           navigate("/", { replace: true });
         }
       } else {
         navigate("/", { replace: true });
       }
     } else {
-      toast.error(result.error || "Erro ao fazer login");
+      toast.error(result.error || t("auth.errorLoggingIn"));
     }
     setIsSubmitting(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateEmail(signupEmail)) { toast.error("Digite um email válido"); return; }
-    if (signupPassword.length < 6) { toast.error("A senha deve ter pelo menos 6 caracteres"); return; }
-    if (signupPassword !== signupConfirmPassword) { toast.error("As senhas não coincidem"); return; }
+    if (!validateEmail(signupEmail)) { toast.error(t("auth.invalidEmail")); return; }
+    if (signupPassword.length < 6) { toast.error(t("auth.passwordMin")); return; }
+    if (signupPassword !== signupConfirmPassword) { toast.error(t("auth.passwordMismatch")); return; }
 
     setIsSubmitting(true);
     const result = await signUp(signupEmail, signupPassword);
 
     if (result.success) {
-      toast.success("Conta criada com sucesso! Bem-vindo à plataforma.");
+      toast.success(t("auth.accountCreated"));
       navigate("/admin", { replace: true });
     } else {
-      toast.error(result.error || "Erro ao criar conta");
+      toast.error(result.error || t("auth.errorCreatingAccount"));
     }
     setIsSubmitting(false);
   };
@@ -99,10 +107,14 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a]">
+    <div className="min-h-screen flex bg-[#0a0a0a] relative">
+      {/* Language selector — top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector variant="minimal" />
+      </div>
+
       {/* Left side — Branding / Features */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0a0a] to-[#0a0a0a]" />
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
@@ -123,13 +135,13 @@ const Auth = () => {
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
-              Crie sua plataforma
+              {t("auth.heroTitle1")}
               <br />
-              <span className="text-purple-400">de conteúdo ASMR</span>
+              <span className="text-purple-400">{t("auth.heroTitle2")}</span>
             </h1>
 
             <p className="text-gray-400 text-lg mb-12 max-w-md">
-              Tenha sua própria plataforma personalizada com painel admin, gestão de fãs e integração com YouTube.
+              {t("auth.heroDesc")}
             </p>
 
             <div className="space-y-6">
@@ -174,13 +186,10 @@ const Auth = () => {
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">
-                {defaultTab === "signup" ? "Criar sua plataforma" : "Entrar na plataforma"}
+                {defaultTab === "signup" ? t("auth.creatorSignup") : t("auth.creatorLogin")}
               </h2>
               <p className="text-gray-500 text-sm mt-1">
-                {defaultTab === "signup"
-                  ? "Preencha seus dados para começar"
-                  : "Acesse seu painel de criador"
-                }
+                {defaultTab === "signup" ? t("auth.creatorSignupDesc") : t("auth.creatorLoginDesc")}
               </p>
             </div>
 
@@ -190,13 +199,13 @@ const Auth = () => {
                   value="login"
                   className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-400"
                 >
-                  Entrar
+                  {t("auth.loginTab")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
                   className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-400"
                 >
-                  Criar Conta
+                  {t("auth.signupTab")}
                 </TabsTrigger>
               </TabsList>
 
@@ -204,13 +213,13 @@ const Auth = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-gray-300 text-sm">Email</Label>
+                    <Label htmlFor="login-email" className="text-gray-300 text-sm">{t("common.email")}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
                         id="login-email"
                         type="email"
-                        placeholder="seu@email.com"
+                        placeholder={t("auth.emailPlaceholder")}
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
@@ -220,7 +229,7 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-gray-300 text-sm">Senha</Label>
+                    <Label htmlFor="login-password" className="text-gray-300 text-sm">{t("common.password")}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
@@ -248,7 +257,7 @@ const Auth = () => {
                     disabled={isSubmitting}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Entrar
+                    {t("auth.loginTab")}
                   </Button>
                 </form>
               </TabsContent>
@@ -257,13 +266,13 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-gray-300 text-sm">Email</Label>
+                    <Label htmlFor="signup-email" className="text-gray-300 text-sm">{t("common.email")}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
                         id="signup-email"
                         type="email"
-                        placeholder="seu@email.com"
+                        placeholder={t("auth.emailPlaceholder")}
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
                         className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
@@ -273,7 +282,7 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-gray-300 text-sm">Senha</Label>
+                    <Label htmlFor="signup-password" className="text-gray-300 text-sm">{t("common.password")}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
@@ -296,7 +305,7 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm" className="text-gray-300 text-sm">Confirmar Senha</Label>
+                    <Label htmlFor="signup-confirm" className="text-gray-300 text-sm">{t("auth.confirmPassword")}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
@@ -313,21 +322,21 @@ const Auth = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="signup-youtube" className="text-gray-300 text-sm">
-                      Canal do YouTube <span className="text-gray-500 font-normal">(opcional)</span>
+                      {t("auth.youtubeChannel")} <span className="text-gray-500 font-normal">({t("auth.youtubeOptional")})</span>
                     </Label>
                     <div className="relative">
                       <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
                         id="signup-youtube"
                         type="text"
-                        placeholder="@seucanal"
+                        placeholder="@yourchannel"
                         value={youtubeHandle}
                         onChange={(e) => setYoutubeHandle(e.target.value)}
                         className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
                       />
                     </div>
                     <p className="text-xs text-gray-500">
-                      Informe o @ do seu canal para importar seus vídeos automaticamente
+                      {t("auth.youtubeHint")}
                     </p>
                   </div>
 
@@ -337,17 +346,17 @@ const Auth = () => {
                     disabled={isSubmitting}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Criar Conta
+                    {t("auth.createAccount")}
                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
 
             <p className="text-center text-xs text-gray-600 mt-6">
-              Ao continuar, você concorda com nossos{" "}
-              <a href="/termos" className="text-purple-400 hover:underline">Termos de Uso</a>{" "}
-              e{" "}
-              <a href="/privacidade" className="text-purple-400 hover:underline">Política de Privacidade</a>
+              {t("auth.terms")}{" "}
+              <a href="/termos" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
+              {t("auth.and")}{" "}
+              <a href="/privacidade" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
             </p>
           </div>
         </motion.div>
