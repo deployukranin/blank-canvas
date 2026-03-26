@@ -84,8 +84,10 @@ const AdminDashboard: React.FC = () => {
     </div>
   );
 
+  const isLight = config.colors.mode === 'light';
+
   const chartTooltipStyle = {
-    contentStyle: { background: '#0a0a0a', border: `1px solid ${chartColor}33`, borderRadius: 8, fontSize: 12, color: '#fff' },
+    contentStyle: { background: isLight ? '#ffffff' : '#0a0a0a', border: `1px solid ${chartColor}33`, borderRadius: 8, fontSize: 12, color: isLight ? '#111' : '#fff' },
     itemStyle: { color: chartColorLight },
   };
 
@@ -110,9 +112,9 @@ const AdminDashboard: React.FC = () => {
                     <stop offset="100%" stopColor={chartColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'} />
+                <XAxis dataKey="name" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip {...chartTooltipStyle} />
                 <Area type="monotone" dataKey="receita" stroke={chartColor} fill="url(#adminThemeGrad)" strokeWidth={2} />
                 <Area type="monotone" dataKey="pedidos" stroke={chartColorLight} fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
@@ -138,7 +140,7 @@ const AdminDashboard: React.FC = () => {
               <div className="space-y-2">
                 {pendingOrders.map((order) => (
                   <motion.div key={order.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-foreground/[0.02] border border-white/5">
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-foreground/[0.02] border border-border/50">
                     <div>
                       <p className="font-medium text-xs text-foreground/80">{order.category_name || 'Custom'}</p>
                       <p className="text-[10px] text-foreground/30">{order.customer_name}</p>
