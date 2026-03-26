@@ -1,8 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import type { BannerConfig } from "@/contexts/WhiteLabelContext";
 
 interface HeroBannerProps {
   images: string[];
+  banners?: BannerConfig[];
   greeting?: string;
   subtitle?: string;
   autoPlayInterval?: number;
@@ -10,12 +13,29 @@ interface HeroBannerProps {
 
 export function HeroBanner({
   images,
+  banners,
   greeting,
   subtitle,
   autoPlayInterval = 6000,
 }: HeroBannerProps) {
+  const isMobile = useIsMobile();
   const [current, setCurrent] = useState(0);
-  const total = images.length;
+
+  // Build resolved image list from banners (with desktop/mobile) or fallback to images prop
+  const resolvedImages = (() => {
+    if (banners && banners.length > 0) {
+      const enabled = banners.filter(b => b.enabled);
+      if (enabled.length > 0) {
+        return enabled.map(b => {
+          if (isMobile && b.mobileUrl) return b.mobileUrl;
+          return b.desktopUrl || b.mobileUrl || '';
+        }).filter(Boolean);
+      }
+    }
+    return images;
+  })();
+
+  const total = resolvedImages.length;
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % total);
@@ -33,8 +53,7 @@ export function HeroBanner({
 
   return (
     <div className="relative w-full overflow-hidden" style={{ height: "65vh", minHeight: 380 }}>
-      {/* All slides rendered, opacity toggled for smooth fade */}
-      {images.map((src, i) => (
+      {resolvedImages.map((src, i) => (
         <div
           key={`${src}-${i}`}
           className="absolute inset-0 transition-opacity duration-700 ease-in-out"
@@ -52,7 +71,6 @@ export function HeroBanner({
         </div>
       ))}
 
-      {/* Login button top-right */}
       <button
         className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full bg-background/30 backdrop-blur-sm px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-background/50 transition-colors"
         aria-label="Login ou Cadastro"
@@ -61,7 +79,6 @@ export function HeroBanner({
         <span>Entrar</span>
       </button>
 
-      {/* Text overlay */}
       <div className="absolute bottom-16 left-0 right-0 z-10 px-6 md:px-16">
         <div className="max-w-2xl">
           {greeting && (
@@ -77,7 +94,6 @@ export function HeroBanner({
         </div>
       </div>
 
-      {/* Navigation buttons */}
       {total > 1 && (
         <>
           <button
@@ -97,10 +113,9 @@ export function HeroBanner({
         </>
       )}
 
-      {/* Dot indicators */}
       {total > 1 && (
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-          {images.map((_, i) => (
+          {resolvedImages.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}
