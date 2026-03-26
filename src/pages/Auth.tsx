@@ -49,6 +49,36 @@ const Auth = () => {
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  const verifyYoutubeHandle = async () => {
+    const handle = youtubeHandle.trim();
+    if (!handle) return;
+    
+    setYoutubeVerifying(true);
+    setYoutubeError("");
+    setYoutubeVerified(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("youtube-videos", {
+        body: { channelId: handle, action: "verify" },
+      });
+
+      if (error || !data?.success) {
+        setYoutubeError(t("auth.youtubeNotFound"));
+        return;
+      }
+
+      setYoutubeVerified({
+        channelId: data.channelId,
+        channelTitle: data.channelTitle || "",
+        thumbnailUrl: data.thumbnailUrl || "",
+      });
+    } catch {
+      setYoutubeError(t("auth.youtubeVerifyError"));
+    } finally {
+      setYoutubeVerifying(false);
+    }
+  };
+
   const checkUserRoles = async (userId: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
     const roles = data?.map((r) => r.role) || [];
