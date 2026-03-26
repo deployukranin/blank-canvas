@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ const ClientAuth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
+  const { store, basePath, isTenantScope } = useTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
@@ -26,11 +28,13 @@ const ClientAuth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
 
+  const homePath = isTenantScope ? basePath : "/";
+
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate("/", { replace: true });
+      navigate(homePath, { replace: true });
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate, homePath]);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -43,8 +47,19 @@ const ClientAuth = () => {
     const result = await signIn(loginEmail, loginPassword);
 
     if (result.success) {
+      // If in tenant context, ensure user is linked to this store
+      if (store?.id) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Link to store if not already
+          await supabase.from("store_users").upsert(
+            { store_id: store.id, user_id: user.id },
+            { onConflict: "store_id,user_id" }
+          ).select();
+        }
+      }
       toast.success("Bem-vindo de volta! 🎉");
-      navigate("/", { replace: true });
+      navigate(homePath, { replace: true });
     } else {
       toast.error(result.error || "Erro ao fazer login");
     }
@@ -59,26 +74,65 @@ const ClientAuth = () => {
     if (signupPassword !== signupConfirmPassword) { toast.error("As senhas não coincidem"); return; }
 
     setIsSubmitting(true);
-    const result = await signUp(signupEmail, signupPassword);
+    try {
+      const result = await signUp(signupEmail, signupPassword);
 
-    if (result.success) {
-      // Wait for session, then assign client role
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Assign 'client' role
-        await supabase.from("user_roles").insert({ user_id: user.id, role: "client" as any });
-        
-        // Create profile with display name
-        await supabase.from("profiles").upsert({
-          user_id: user.id,
-          display_name: signupName.trim(),
-        }, { onConflict: "user_id" });
+      if (!result.success) {
+        toast.error(result.error || "Erro ao criar conta");
+        setIsSubmitting(false);
+        return;
       }
-      
+
+      // Wait for session
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      let userId: string | null = null;
+      for (let i = 0; i < 3; i++) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          userId = session.user.id;
+          break;
+        }
+        if (i === 1) {
+          const { data } = await supabase.auth.signInWithPassword({
+            email: signupEmail, password: signupPassword,
+          });
+          if (data?.session?.user?.id) {
+            userId = data.session.user.id;
+            break;
+          }
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      if (!userId) {
+        toast.error("Erro ao obter sessão. Tente fazer login.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Assign 'client' role
+      await supabase.from("user_roles").insert({ user_id: userId, role: "client" as any });
+
+      // Create profile with display name
+      await supabase.from("profiles").upsert({
+        user_id: userId,
+        display_name: signupName.trim(),
+      }, { onConflict: "user_id" });
+
+      // Link to store if in tenant context
+      if (store?.id) {
+        await supabase.from("store_users").upsert(
+          { store_id: store.id, user_id: userId },
+          { onConflict: "store_id,user_id" }
+        ).select();
+      }
+
       toast.success("Conta criada com sucesso! 🎉");
-      navigate("/", { replace: true });
-    } else {
-      toast.error(result.error || "Erro ao criar conta");
+      navigate(homePath, { replace: true });
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error("Erro ao criar conta");
     }
     setIsSubmitting(false);
   };
@@ -91,6 +145,8 @@ const ClientAuth = () => {
     );
   }
 
+  const storeName = store?.name || "a comunidade";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
       <motion.div
@@ -101,11 +157,15 @@ const ClientAuth = () => {
       >
         {/* Branding */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-            <Sparkles className="w-7 h-7 text-primary" />
-          </div>
+          {store?.avatar_url ? (
+            <img src={store.avatar_url} alt={store.name} className="w-14 h-14 rounded-2xl mb-4 object-cover" />
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+              <Sparkles className="w-7 h-7 text-primary" />
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-foreground font-['Space_Grotesk']">
-            Bem-vindo
+            {store?.name || "Bem-vindo"}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Entre ou crie sua conta para participar

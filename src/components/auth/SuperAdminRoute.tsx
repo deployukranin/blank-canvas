@@ -20,7 +20,7 @@ export const SuperAdminRoute: React.FC<SuperAdminRouteProps> = ({ children }) =>
   }
 
   if (!session || !isSuperAdmin()) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin-master/login" replace />;
   }
 
   return <>{children}</>;

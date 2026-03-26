@@ -49,6 +49,7 @@ import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 import AdminBanners from "./pages/admin/AdminBanners";
 
 // Super Admin Pages
+import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 import SuperAdminTenants from "./pages/super-admin/SuperAdminTenants";
 import SuperAdminRanking from "./pages/super-admin/SuperAdminRanking";
@@ -117,6 +118,7 @@ const App = () => (
                 <Route path="/admin/banners" element={<AdminRoute requiredRole="admin"><AdminBanners /></AdminRoute>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
+                <Route path="/admin-master/login" element={<SuperAdminLogin />} />
                 <Route path="/admin-master" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
