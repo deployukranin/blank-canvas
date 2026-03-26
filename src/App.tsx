@@ -42,6 +42,7 @@ import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 
 // Super Admin Pages
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
