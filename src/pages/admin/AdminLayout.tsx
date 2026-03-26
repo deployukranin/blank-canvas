@@ -30,7 +30,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
     { path: '/admin/ideias', icon: Lightbulb, label: t('admin.ideas') },
     { path: '/admin/pedidos', icon: ShoppingCart, label: t('admin.orders') },
-    { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.pixPayments') },
+    { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.payments') },
     { path: '/admin/vip-precos', icon: Crown, label: t('admin.vipPricing') },
     { path: '/admin/videos', icon: Video, label: t('admin.videos') },
     { path: '/admin/audios', icon: Headphones, label: t('admin.audios') },
@@ -62,13 +62,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b border-purple-500/10 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-lg font-bold text-white">{t('admin.panel')}</h2>
-          </div>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-1">
             <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
               <span className="text-xs text-purple-400 font-bold">
                 {user?.username?.charAt(0)?.toUpperCase() || 'A'}

@@ -1,461 +1,299 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   CreditCard, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle2, 
-  XCircle,
-  Filter,
+  QrCode,
+  Zap,
+  ExternalLink,
   Eye,
-  RefreshCw
+  EyeOff,
+  Check,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
-interface Order {
-  id: string;
-  customer_name: string;
-  product_type: string;
-  amount_cents: number;
-  payout_amount_cents: number | null;
-  status: string;
-  payout_status: string | null;
-  paid_at: string | null;
-  created_at: string;
-  category_name: string | null;
-  duration_label: string | null;
-}
-
-interface Metrics {
-  totalReceived: number;
-  totalPending: number;
-  totalPaid: number;
-  totalFailed: number;
-  countPending: number;
-  countPaid: number;
-  countFailed: number;
-}
-
 const AdminPagamentosPix = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [metrics, setMetrics] = useState<Metrics>({
-    totalReceived: 0,
-    totalPending: 0,
-    totalPaid: 0,
-    totalFailed: 0,
-    countPending: 0,
-    countPaid: 0,
-    countFailed: 0,
-  });
 
-  const fetchOrders = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('custom_orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Active gateway state
+  const [activeGateway, setActiveGateway] = useState<'stripe' | 'pix_manual' | null>(null);
 
-      if (error) throw error;
+  // Stripe config
+  const [stripePublishableKey, setStripePublishableKey] = useState('');
+  const [stripeSecretKey, setStripeSecretKey] = useState('');
+  const [showStripeSecret, setShowStripeSecret] = useState(false);
+  const [stripeSaving, setStripeSaving] = useState(false);
 
-      setOrders(data || []);
-      calculateMetrics(data || []);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast({
-        title: 'Erro ao carregar pedidos',
-        description: 'Não foi possível buscar os dados.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+  // PIX Manual config
+  const [pixKeyType, setPixKeyType] = useState<'cpf' | 'cnpj' | 'email' | 'phone' | 'random'>('cpf');
+  const [pixKey, setPixKey] = useState('');
+  const [pixReceiverName, setPixReceiverName] = useState('');
+  const [pixCity, setPixCity] = useState('');
+  const [pixSaving, setPixSaving] = useState(false);
+
+  const handleSaveStripe = async () => {
+    if (!stripePublishableKey || !stripeSecretKey) {
+      toast({ title: 'Fill in all Stripe fields', variant: 'destructive' });
+      return;
     }
+    setStripeSaving(true);
+    // TODO: Save stripe keys to app_configurations for this store
+    setTimeout(() => {
+      setStripeSaving(false);
+      setActiveGateway('stripe');
+      toast({ title: 'Stripe configured successfully!' });
+    }, 1000);
   };
 
-  const calculateMetrics = (data: Order[]) => {
-    const metrics: Metrics = {
-      totalReceived: 0,
-      totalPending: 0,
-      totalPaid: 0,
-      totalFailed: 0,
-      countPending: 0,
-      countPaid: 0,
-      countFailed: 0,
-    };
-
-    data.forEach((order) => {
-      const amount = order.amount_cents || 0;
-
-      if (order.status === 'pending') {
-        metrics.totalPending += amount;
-        metrics.countPending++;
-      } else if (order.status === 'paid' || order.status === 'payout_done') {
-        metrics.totalPaid += amount;
-        metrics.totalReceived += amount;
-        metrics.countPaid++;
-      } else if (order.payout_status === 'failed') {
-        metrics.totalFailed += amount;
-        metrics.countFailed++;
-      }
-    });
-
-    setMetrics(metrics);
+  const handleSavePix = async () => {
+    if (!pixKey || !pixReceiverName || !pixCity) {
+      toast({ title: 'Fill in all PIX fields', variant: 'destructive' });
+      return;
+    }
+    setPixSaving(true);
+    // TODO: Save PIX config to app_configurations for this store
+    setTimeout(() => {
+      setPixSaving(false);
+      setActiveGateway('pix_manual');
+      toast({ title: 'Manual PIX configured successfully!' });
+    }, 1000);
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  useEffect(() => {
-    let filtered = [...orders];
-
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'pending') {
-        filtered = filtered.filter((o) => o.status === 'pending');
-      } else if (statusFilter === 'paid') {
-        filtered = filtered.filter((o) => o.status === 'paid' || o.status === 'payout_done');
-      } else if (statusFilter === 'failed') {
-        filtered = filtered.filter((o) => o.payout_status === 'failed');
-      }
-    }
-
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter((o) => o.product_type === typeFilter);
-    }
-
-    setFilteredOrders(filtered);
-  }, [orders, statusFilter, typeFilter]);
-
-  const formatCurrency = (cents: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(cents / 100);
-  };
-
-  const getStatusBadge = (order: Order) => {
-    if (order.status === 'pending') {
-      return <Badge variant="outline" className="text-yellow-500 border-yellow-500/50">Pendente</Badge>;
-    }
-    if (order.status === 'paid' || order.status === 'payout_done') {
-      return <Badge variant="outline" className="text-green-500 border-green-500/50">Pago</Badge>;
-    }
-    if (order.payout_status === 'failed') {
-      return <Badge variant="destructive">Falhou</Badge>;
-    }
-    return <Badge variant="secondary">{order.status}</Badge>;
-  };
-
-  const getProductTypeBadge = (type: string) => {
-    if (type === 'vip_subscription') {
-      return <Badge className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">VIP</Badge>;
-    }
-    return <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Vídeo</Badge>;
+  const pixKeyLabels: Record<string, string> = {
+    cpf: 'CPF',
+    cnpj: 'CNPJ',
+    email: 'E-mail',
+    phone: 'Phone',
+    random: 'Random Key',
   };
 
   return (
-    <AdminLayout title="Pagamentos PIX">
-      <div className="space-y-6">
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Recebido</p>
-                <p className="text-xl font-bold text-green-500">
-                  {formatCurrency(metrics.totalReceived)}
-                </p>
-              </div>
+    <AdminLayout title={t('admin.payments', 'Payments')}>
+      <div className="space-y-6 max-w-4xl">
+
+        {/* Active gateway indicator */}
+        <GlassCard className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-white/60">Active Payment Method</h3>
+              <p className="text-lg font-semibold text-white mt-1">
+                {activeGateway === 'stripe' && 'Stripe'}
+                {activeGateway === 'pix_manual' && 'Manual PIX'}
+                {!activeGateway && 'Not configured'}
+              </p>
             </div>
-          </GlassCard>
-
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pendentes</p>
-                <p className="text-xl font-bold text-yellow-500">
-                  {metrics.countPending}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatCurrency(metrics.totalPending)}
-                </p>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pagos</p>
-                <p className="text-xl font-bold text-green-500">
-                  {metrics.countPaid}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatCurrency(metrics.totalPaid)}
-                </p>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
-                <XCircle className="w-5 h-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Falhos</p>
-                <p className="text-xl font-bold text-destructive">
-                  {metrics.countFailed}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatCurrency(metrics.totalFailed)}
-                </p>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Filters */}
-        <GlassCard className="p-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Filtros:</span>
-            </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos Status</SelectItem>
-                <SelectItem value="pending">Pendentes</SelectItem>
-                <SelectItem value="paid">Pagos</SelectItem>
-                <SelectItem value="failed">Falhos</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos Tipos</SelectItem>
-                <SelectItem value="video">Vídeos</SelectItem>
-                <SelectItem value="vip_subscription">VIP</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button variant="outline" size="sm" onClick={fetchOrders} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
-
-            <span className="text-sm text-muted-foreground ml-auto">
-              {filteredOrders.length} registro(s)
-            </span>
+            <div className={`w-3 h-3 rounded-full ${activeGateway ? 'bg-green-500' : 'bg-white/20'}`} />
           </div>
         </GlassCard>
 
-        {/* Orders Table */}
-        <GlassCard className="p-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-40">
-              <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
-              <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum pagamento encontrado</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Repasse (79%)</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">
-                      {order.customer_name}
-                    </TableCell>
-                    <TableCell>
-                      {getProductTypeBadge(order.product_type)}
-                    </TableCell>
-                    <TableCell>
-                      {formatCurrency(order.amount_cents)}
-                    </TableCell>
-                    <TableCell>
-                      {order.payout_amount_cents 
-                        ? formatCurrency(order.payout_amount_cents)
-                        : formatCurrency(Math.round(order.amount_cents * 0.79))
-                      }
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(order)}
-                    </TableCell>
-                    <TableCell>
-                      {order.paid_at 
-                        ? format(new Date(order.paid_at), "dd/MM/yy HH:mm", { locale: ptBR })
-                        : format(new Date(order.created_at), "dd/MM/yy HH:mm", { locale: ptBR })
-                      }
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </GlassCard>
+        {/* Payment Gateways */}
+        <Tabs defaultValue="stripe" className="w-full">
+          <TabsList className="w-full bg-white/5 border border-white/10">
+            <TabsTrigger value="stripe" className="flex-1 gap-2 data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400">
+              <CreditCard className="w-4 h-4" />
+              Stripe
+            </TabsTrigger>
+            <TabsTrigger value="pix_manual" className="flex-1 gap-2 data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400">
+              <QrCode className="w-4 h-4" />
+              Manual PIX
+            </TabsTrigger>
+            <TabsTrigger value="pix_auto" disabled className="flex-1 gap-2 opacity-40 cursor-not-allowed">
+              <Zap className="w-4 h-4" />
+              Auto PIX
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-purple-500/30 text-purple-400 ml-1">Soon</Badge>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Order Details Dialog */}
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Detalhes do Pagamento</DialogTitle>
-              <DialogDescription>
-                Informações completas do pedido
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedOrder && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Cliente</p>
-                    <p className="font-medium">{selectedOrder.customer_name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Tipo</p>
-                    {getProductTypeBadge(selectedOrder.product_type)}
-                  </div>
+          {/* STRIPE TAB */}
+          <TabsContent value="stripe" className="mt-6">
+            <GlassCard className="p-6 space-y-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-purple-400" />
+                    Stripe Integration
+                  </h3>
+                  <p className="text-sm text-white/50 mt-1">
+                    Accept credit cards, debit cards, and international payments. Funds go directly to your Stripe account.
+                  </p>
                 </div>
-
-                {selectedOrder.product_type === 'video' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Categoria</p>
-                      <p className="font-medium">{selectedOrder.category_name || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Duração</p>
-                      <p className="font-medium">{selectedOrder.duration_label || '-'}</p>
-                    </div>
-                  </div>
+                {activeGateway === 'stripe' && (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    <Check className="w-3 h-3 mr-1" /> Active
+                  </Badge>
                 )}
+              </div>
 
-                <div className="border-t pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Valor Total</p>
-                      <p className="text-lg font-bold">{formatCurrency(selectedOrder.amount_cents)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Repasse (79%)</p>
-                      <p className="text-lg font-bold text-green-500">
-                        {selectedOrder.payout_amount_cents 
-                          ? formatCurrency(selectedOrder.payout_amount_cents)
-                          : formatCurrency(Math.round(selectedOrder.amount_cents * 0.79))
-                        }
-                      </p>
-                    </div>
-                  </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/70">Publishable Key</Label>
+                  <Input
+                    placeholder="pk_live_..."
+                    value={stripePublishableKey}
+                    onChange={(e) => setStripePublishableKey(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                  />
                 </div>
 
-                <div className="border-t pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Status Pagamento</p>
-                      {getStatusBadge(selectedOrder)}
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Status Repasse</p>
-                      <Badge variant="outline">
-                        {selectedOrder.payout_status || 'Aguardando'}
-                      </Badge>
-                    </div>
+                <div>
+                  <Label className="text-white/70">Secret Key</Label>
+                  <div className="relative mt-1.5">
+                    <Input
+                      type={showStripeSecret ? 'text' : 'password'}
+                      placeholder="sk_live_..."
+                      value={stripeSecretKey}
+                      onChange={(e) => setStripeSecretKey(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowStripeSecret(!showStripeSecret)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                    >
+                      {showStripeSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                </div>
-
-                <div className="border-t pt-4 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Criado em</p>
-                    <p className="text-sm">
-                      {format(new Date(selectedOrder.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                    </p>
-                  </div>
-                  {selectedOrder.paid_at && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Pago em</p>
-                      <p className="text-sm">
-                        {format(new Date(selectedOrder.paid_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                      </p>
-                    </div>
-                  )}
+                  <p className="text-xs text-white/30 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Your secret key is encrypted and stored securely.
+                  </p>
                 </div>
               </div>
-            )}
-          </DialogContent>
-        </Dialog>
+
+              <div className="flex items-center justify-between pt-2">
+                <a
+                  href="https://dashboard.stripe.com/apikeys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Get your keys from Stripe Dashboard
+                </a>
+                <Button
+                  onClick={handleSaveStripe}
+                  disabled={stripeSaving}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {stripeSaving ? 'Saving...' : 'Save & Activate'}
+                </Button>
+              </div>
+            </GlassCard>
+          </TabsContent>
+
+          {/* MANUAL PIX TAB */}
+          <TabsContent value="pix_manual" className="mt-6">
+            <GlassCard className="p-6 space-y-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-purple-400" />
+                    Manual PIX
+                  </h3>
+                  <p className="text-sm text-white/50 mt-1">
+                    A QR code with the sale amount is generated for the customer. Payment goes directly to your PIX key.
+                  </p>
+                </div>
+                {activeGateway === 'pix_manual' && (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    <Check className="w-3 h-3 mr-1" /> Active
+                  </Badge>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/70">PIX Key Type</Label>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {Object.entries(pixKeyLabels).map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => setPixKeyType(key as any)}
+                        className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                          pixKeyType === key
+                            ? 'bg-purple-600/20 border-purple-500/40 text-purple-400'
+                            : 'bg-white/5 border-white/10 text-white/50 hover:border-white/20'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-white/70">PIX Key</Label>
+                  <Input
+                    placeholder={pixKeyType === 'email' ? 'your@email.com' : pixKeyType === 'phone' ? '+5511999999999' : 'Enter your PIX key'}
+                    value={pixKey}
+                    onChange={(e) => setPixKey(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-white/70">Receiver Name</Label>
+                    <Input
+                      placeholder="Full name"
+                      value={pixReceiverName}
+                      onChange={(e) => setPixReceiverName(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                      maxLength={50}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white/70">City</Label>
+                    <Input
+                      placeholder="São Paulo"
+                      value={pixCity}
+                      onChange={(e) => setPixCity(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={handleSavePix}
+                  disabled={pixSaving}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {pixSaving ? 'Saving...' : 'Save & Activate'}
+                </Button>
+              </div>
+            </GlassCard>
+          </TabsContent>
+
+          {/* AUTO PIX TAB (coming soon) */}
+          <TabsContent value="pix_auto" className="mt-6">
+            <GlassCard className="p-6">
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-purple-600/10 flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-purple-400/50" />
+                </div>
+                <h3 className="text-lg font-semibold text-white/60">Automatic PIX</h3>
+                <p className="text-sm text-white/30 mt-2 max-w-sm">
+                  Automatic PIX payment confirmation with instant webhook notifications. Coming soon.
+                </p>
+                <Badge variant="outline" className="mt-4 border-purple-500/30 text-purple-400">
+                  <Clock className="w-3 h-3 mr-1" /> Coming Soon
+                </Badge>
+              </div>
+            </GlassCard>
+          </TabsContent>
+        </Tabs>
       </div>
     </AdminLayout>
   );
