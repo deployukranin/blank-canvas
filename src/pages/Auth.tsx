@@ -2,20 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users, Youtube } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const features = [
-  { icon: Palette, title: "Plataforma personalizada", desc: "Tema, cores e layout 100% customizáveis" },
-  { icon: BarChart3, title: "Painel administrativo", desc: "Dashboard completo com métricas e gestão" },
-  { icon: Users, title: "Gestão de fãs", desc: "Comunidade, VIP e pedidos personalizados" },
-  { icon: Sparkles, title: "Integração YouTube", desc: "Importe vídeos automaticamente do seu canal" },
-];
 
 const Auth = () => {
   const navigate = useNavigate();
