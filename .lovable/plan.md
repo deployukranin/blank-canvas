@@ -1,54 +1,54 @@
 
 
-# Plano: Aplicar Estilo de Banner do LANCY STUDIO + Auto-scroll Suave no Carrossel
+## Plan: Slug Creation + VIP Navigation Tab + Currency Localization
 
-## O que muda
+### What needs to happen
 
-### 1. Refatorar o Hero Banner da Index para o estilo LANCY STUDIO
+1. **Add "Store Name / Slug" field to creator signup** (`src/pages/Auth.tsx`)
+   - Add a new input field for the store name (which auto-generates a slug)
+   - Slug is derived from the name: lowercase, spaces to hyphens, no special chars
+   - Validate slug uniqueness against `stores` table before submitting
+   - Validate against reserved routes list
+   - On signup success, create a `stores` row with the slug, and link `store_admins` + `user_roles` (admin)
 
-O banner atual e pequeno (h-48) e usa o componente Embla Carousel padrao. O LANCY STUDIO usa um banner fullwidth com altura generosa (65vh), navegacao com botoes transparentes com blur, indicadores de dot animados, e transicao por opacity (fade) com auto-play a cada 6 segundos.
+2. **Add VIP tab to bottom navigation** (`src/contexts/WhiteLabelContext.tsx`)
+   - Add a VIP entry to `defaultNavigationTabs` array with path `/vip`, icon `Crown`, order 2
 
-**Alteracoes em `src/pages/Index.tsx`:**
-- Substituir o bloco `{/* Hero Card */}` pelo novo componente `HeroBanner`
-- Remover imports de Carousel/CarouselContent/CarouselItem/CarouselPrevious/CarouselNext (do banner; manter se usado em outro lugar)
-- Manter o restante da pagina intacto
+3. **Update VIP page with blurred preview for non-subscribers** (`src/pages/VIP.tsx`)
+   - Show fake/blurred content cards as a teaser when user is not VIP
+   - Display the actual plans from admin config (`/admin/vip-precos`) with proper pricing
+   - Add currency localization: BRL when language is `pt-BR`, USD when `en`
 
-**Criar `src/components/layout/HeroBanner.tsx`:**
-- Banner com altura `h-[55vh] min-h-[300px]` (adaptado para mobile, menor que o LANCY que e desktop-first)
-- Transicao por fade (opacity) entre slides, nao swipe
-- Botoes prev/next transparentes com `bg-background/30 backdrop-blur-sm` sobre o banner
-- Indicadores dot na parte inferior: dot ativo = barra larga com cor primary, inativos = pontos pequenos
-- Gradiente overlay: `from-background via-background/60 to-transparent` de baixo para cima + gradiente lateral
-- Texto de boas-vindas posicionado no canto inferior esquerdo sobre o gradiente
-- Auto-play: troca de slide a cada 6 segundos
-- Usa as mesmas imagens dinamicas do config (`config.bannerImages` / `config.bannerImage` / fallback `heroImage`)
+4. **Currency formatting based on locale** (`src/pages/VIP.tsx` + `src/pages/admin/AdminVipPrecos.tsx`)
+   - Use `useTranslation` to detect current language
+   - When `pt-BR`: format as R$ (BRL)
+   - When `en`: convert display to $ (USD) — same numeric value, different currency symbol
 
-### 2. Adicionar auto-scroll suave ao carrossel de videos
+### Technical Details
 
-O carrossel de videos (`VideoGalleryCarousel`) ja usa Embla Carousel. Vou adicionar o plugin `embla-carousel-autoplay` para que ele role sozinho suavemente.
+**Auth.tsx changes:**
+- New state: `storeName`, `storeSlug`
+- Auto-generate slug from name with debounced uniqueness check via `supabase.from('stores').select('id').eq('slug', slug)`
+- After successful `signUp()`, insert into `stores` table with `slug`, `name`, `created_by`, then insert `store_admins` and `user_roles` with admin role
 
-**Instalar:** `embla-carousel-autoplay` (dependencia npm)
+**WhiteLabelContext.tsx:**
+- Add to `defaultNavigationTabs` at index 2:
+  ```
+  { id: 'vip', label: 'VIP', path: '/vip', icon: { type: 'lucide', value: 'Crown' }, enabled: true, order: 2 }
+  ```
 
-**Alterar `src/components/video/VideoGalleryCarousel.tsx`:**
-- Importar e configurar o plugin Autoplay com `delay: 4000`, `stopOnInteraction: true`
-- Passar o plugin ao componente `<Carousel plugins={[autoplay]}>` 
+**VIP.tsx blurred preview:**
+- When user is not VIP, show 3-4 fake content cards with `blur-sm` and a lock overlay
+- Plans section shows real plans from store config
+- "Subscribe" CTA is prominent
 
-## Secao Tecnica
+**Currency localization:**
+- Helper function checks `i18n.language` — if starts with `pt`, use BRL; otherwise USD
+- Applied in VIP page plan display and purchase dialog
 
-### Estrutura do HeroBanner
-```text
-<div relative overflow-hidden h-[55vh]>
-  {slides.map → <div absolute inset-0 opacity fade 700ms>}
-  <gradient overlays>
-  <text bottom-left>
-  <btn prev transparent blur left-4>
-  <btn next transparent blur right-4>
-  <dots bottom-center>
-</div>
-```
-
-### Arquivos alterados
-1. **Criar** `src/components/layout/HeroBanner.tsx` — novo componente de banner estilo LANCY
-2. **Editar** `src/pages/Index.tsx` — trocar bloco do banner pelo novo componente
-3. **Editar** `src/components/video/VideoGalleryCarousel.tsx` — adicionar plugin autoplay
+### Files to modify
+- `src/pages/Auth.tsx` — add store name/slug field + store creation on signup
+- `src/contexts/WhiteLabelContext.tsx` — add VIP to default nav tabs
+- `src/pages/VIP.tsx` — blurred preview, currency localization
+- `src/pages/admin/AdminVipPrecos.tsx` — currency-aware formatting
 
