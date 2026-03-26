@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users, Youtube } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [youtubeHandle, setYoutubeHandle] = useState("");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -312,6 +313,26 @@ const Auth = () => {
                         required
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-youtube" className="text-gray-300 text-sm">
+                      Canal do YouTube <span className="text-gray-500 font-normal">(opcional)</span>
+                    </Label>
+                    <div className="relative">
+                      <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                      <Input
+                        id="signup-youtube"
+                        type="text"
+                        placeholder="@seucanal"
+                        value={youtubeHandle}
+                        onChange={(e) => setYoutubeHandle(e.target.value)}
+                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Informe o @ do seu canal para importar seus vídeos automaticamente
+                    </p>
                   </div>
 
                   <Button
