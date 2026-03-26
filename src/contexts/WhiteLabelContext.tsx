@@ -783,6 +783,7 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImage: '/placeholder.svg',
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
+  banners: [],
   navigationTabs: defaultNavigationTabs,
   youtube: {
     enabled: true,
