@@ -886,40 +886,50 @@ const getCachedConfig = (): WhiteLabelConfig => {
 };
 
 export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { store } = useTenant();
+  const storeId = store?.id || null;
   const [config, setConfig] = useState<WhiteLabelConfig>(getCachedConfig);
   const [isDbLoaded, setIsDbLoaded] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialLoadRef = useRef(false);
+  const lastStoreIdRef = useRef<string | null>(null);
 
-  // Load from database on mount
+  // Load from database on mount and when store changes
   useEffect(() => {
+    // Avoid reloading if storeId hasn't changed
+    if (lastStoreIdRef.current === storeId && initialLoadRef.current) return;
+    lastStoreIdRef.current = storeId;
+
     const loadFromDb = async () => {
       try {
-        const dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
+        // Try store-specific config first, then fall back to global
+        let dbConfig = storeId 
+          ? await loadConfig<WhiteLabelConfig>('white_label_config', storeId)
+          : null;
+        
+        if (!dbConfig) {
+          dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
+        }
         
         if (dbConfig) {
-          // Deep merge with defaults
           const merged = mergeConfig(defaultConfig, dbConfig);
           setConfig(merged);
           try { localStorage.setItem(CACHE_KEY, JSON.stringify(merged)); } catch {}
-          localStorage.removeItem(STORAGE_KEY); // Clear old localStorage
+          localStorage.removeItem(STORAGE_KEY);
         } else {
-          // No DB config, try localStorage migration
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
             const parsed = JSON.parse(saved);
             const merged = mergeConfig(defaultConfig, parsed);
             setConfig(merged);
             
-            // Save to DB
-            await saveConfig('white_label_config', merged);
+            await saveConfig('white_label_config', merged, storeId);
             localStorage.removeItem(STORAGE_KEY);
             console.log('Migrated whitelabel config to database');
           }
         }
       } catch (err) {
         console.error('Error loading config:', err);
-        // Fallback to localStorage
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -932,7 +942,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     loadFromDb();
-  }, []);
+  }, [storeId]);
 
   // Helper function to merge config with defaults
   const mergeConfig = (defaults: WhiteLabelConfig, parsed: Partial<WhiteLabelConfig>): WhiteLabelConfig => {
