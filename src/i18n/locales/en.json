@@ -95,7 +95,9 @@
     "bulkPaste": "Bulk Paste",
     "bulkPastePlaceholder": "Paste one keyword per line...",
     "addAll": "Add All",
-    "keywordsDetected": "keywords detected"
+    "keywordsDetected": "keywords detected",
+    "categoriesSavedGlobal": "Categories and keywords saved as global defaults for all new platforms",
+    "categoriesSaveError": "Failed to save categories"
   },
   "superAdmin": {
     "title": "Super Admin",

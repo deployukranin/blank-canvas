@@ -95,7 +95,9 @@
     "bulkPaste": "Colar Lista",
     "bulkPastePlaceholder": "Cole uma palavra-chave por linha...",
     "addAll": "Adicionar Todas",
-    "keywordsDetected": "palavras-chave detectadas"
+    "keywordsDetected": "palavras-chave detectadas",
+    "categoriesSavedGlobal": "Categorias e palavras-chave salvas como padrão global para todas as novas plataformas",
+    "categoriesSaveError": "Falha ao salvar categorias"
   },
   "superAdmin": {
     "title": "Super Admin",
