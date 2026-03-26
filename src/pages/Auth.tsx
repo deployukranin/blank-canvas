@@ -149,42 +149,90 @@ const Auth = () => {
     if (signupPassword !== signupConfirmPassword) { toast.error(t("auth.passwordMismatch")); return; }
 
     setIsSubmitting(true);
-    const result = await signUp(signupEmail, signupPassword);
+    try {
+      const result = await signUp(signupEmail, signupPassword);
 
-    if (result.success) {
-      // Get the newly created user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Create store
-        const { data: store, error: storeError } = await supabase
-          .from('stores')
-          .insert({
-            name: storeName.trim(),
-            slug: storeSlug,
-            created_by: user.id,
-          })
-          .select()
-          .single();
+      if (!result.success) {
+        toast.error(result.error || t("auth.errorCreatingAccount"));
+        setIsSubmitting(false);
+        return;
+      }
 
-        if (store && !storeError) {
-          // Link admin
-          await supabase.from('store_admins').insert({ store_id: store.id, user_id: user.id });
-          await supabase.from('user_roles').insert({ user_id: user.id, role: 'admin' as any });
+      // Wait a moment for session to establish after auto-confirm
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-          // Save youtube channel if verified
-          if (youtubeVerified) {
-            await supabase.from('app_configurations').insert({
-              config_key: 'youtube_channel',
-              config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
-              store_id: store.id,
-            });
+      // Get session - try multiple times since auto-confirm might take a moment
+      let userId: string | null = null;
+      for (let i = 0; i < 3; i++) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          userId = session.user.id;
+          break;
+        }
+        // If no session yet, try signing in directly
+        if (i === 1) {
+          const { data } = await supabase.auth.signInWithPassword({
+            email: signupEmail,
+            password: signupPassword,
+          });
+          if (data?.session?.user?.id) {
+            userId = data.session.user.id;
+            break;
           }
         }
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
+
+      if (!userId) {
+        toast.error("Erro ao obter sessão. Tente fazer login.");
+        navigate("/auth", { replace: true });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create store
+      const { data: store, error: storeError } = await supabase
+        .from('stores')
+        .insert({
+          name: storeName.trim(),
+          slug: storeSlug,
+          created_by: userId,
+        })
+        .select()
+        .single();
+
+      if (storeError) {
+        console.error('Error creating store:', storeError);
+        toast.error("Erro ao criar loja: " + storeError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (store) {
+        // Link admin role and store_admins
+        const [adminResult, roleResult] = await Promise.all([
+          supabase.from('store_admins').insert({ store_id: store.id, user_id: userId }),
+          supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any }),
+        ]);
+
+        if (adminResult.error) console.error('store_admins error:', adminResult.error);
+        if (roleResult.error) console.error('user_roles error:', roleResult.error);
+
+        // Save youtube channel if verified
+        if (youtubeVerified) {
+          await supabase.from('app_configurations').insert({
+            config_key: 'youtube_channel',
+            config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
+            store_id: store.id,
+          });
+        }
+      }
+
       toast.success(t("auth.accountCreated"));
       navigate("/admin", { replace: true });
-    } else {
-      toast.error(result.error || t("auth.errorCreatingAccount"));
+    } catch (err) {
+      console.error('Signup error:', err);
+      toast.error(t("auth.errorCreatingAccount"));
     }
     setIsSubmitting(false);
   };
