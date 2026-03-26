@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const allowedRoles = ["admin", "ceo", "super_admin"];
+    const allowedRoles = ["admin", "ceo", "super_admin", "creator"];
     const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
 
     if (!hasPermission) {
