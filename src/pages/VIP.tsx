@@ -121,7 +121,6 @@ const VIPPage = () => {
 
   // Check VIP status and load content
   useEffect(() => {
-    if (!storeId) return;
     const checkVIP = async () => {
       setIsLoading(true);
       if (!userId) {
