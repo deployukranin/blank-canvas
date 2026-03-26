@@ -32,6 +32,32 @@ const Auth = () => {
   const [youtubeVerified, setYoutubeVerified] = useState<null | { channelId: string; channelTitle: string; thumbnailUrl: string }>(null);
   const [youtubeVerifying, setYoutubeVerifying] = useState(false);
   const [youtubeError, setYoutubeError] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [storeSlug, setStoreSlug] = useState("");
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [slugChecking, setSlugChecking] = useState(false);
+
+  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'perfil', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'comunidade', 'galeria-videos', 'ideias', 'notificacoes', 'ajuda', 'audios', 'videos', 'termos', 'privacidade', 'assinaturas', 'meus-pedidos', 'client-auth'];
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40);
+  };
+
+  const checkSlugAvailability = async (slug: string) => {
+    if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
+    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); return; }
+    setSlugChecking(true);
+    const { data } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle();
+    setSlugAvailable(!data);
+    setSlugChecking(false);
+  };
 
   const features = [
     { icon: Palette, title: t("auth.featureCustom"), desc: t("auth.featureCustomDesc") },
@@ -115,6 +141,9 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!storeName.trim() || !storeSlug.trim()) { toast.error(t("auth.storeNameRequired")); return; }
+    if (storeSlug.length < 3) { toast.error(t("auth.slugTooShort")); return; }
+    if (slugAvailable === false) { toast.error(t("auth.slugUnavailable")); return; }
     if (!validateEmail(signupEmail)) { toast.error(t("auth.invalidEmail")); return; }
     if (signupPassword.length < 6) { toast.error(t("auth.passwordMin")); return; }
     if (signupPassword !== signupConfirmPassword) { toast.error(t("auth.passwordMismatch")); return; }
@@ -123,6 +152,35 @@ const Auth = () => {
     const result = await signUp(signupEmail, signupPassword);
 
     if (result.success) {
+      // Get the newly created user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Create store
+        const { data: store, error: storeError } = await supabase
+          .from('stores')
+          .insert({
+            name: storeName.trim(),
+            slug: storeSlug,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (store && !storeError) {
+          // Link admin
+          await supabase.from('store_admins').insert({ store_id: store.id, user_id: user.id });
+          await supabase.from('user_roles').insert({ user_id: user.id, role: 'admin' as any });
+
+          // Save youtube channel if verified
+          if (youtubeVerified) {
+            await supabase.from('app_configurations').insert({
+              config_key: 'youtube_channel',
+              config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
+              store_id: store.id,
+            });
+          }
+        }
+      }
       toast.success(t("auth.accountCreated"));
       navigate("/admin", { replace: true });
     } else {
