@@ -1,5 +1,7 @@
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Sparkles, LogIn } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 interface MobileHeaderProps {
   title?: string;
@@ -8,6 +10,7 @@ interface MobileHeaderProps {
 
 export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 safe-area-top">
@@ -29,8 +32,17 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
           {title || 'ASMR Luna'}
         </h1>
 
-        {/* Spacer for centering */}
-        <div className="w-10" />
+        {/* Login button for unauthenticated users */}
+        {!isAuthenticated ? (
+          <Link to="/entrar">
+            <Button variant="ghost" size="sm" className="text-primary gap-1.5 h-9 px-3">
+              <LogIn className="w-4 h-4" />
+              <span className="text-xs font-medium">Entrar</span>
+            </Button>
+          </Link>
+        ) : (
+          <div className="w-10" />
+        )}
       </div>
     </header>
   );
