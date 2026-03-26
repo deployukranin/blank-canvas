@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenant } from "@/contexts/TenantContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,13 +10,15 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { basePath, isTenantScope } = useTenant();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate("/entrar", { replace: true });
+      const authPath = isTenantScope ? `${basePath}/entrar` : "/entrar";
+      navigate(authPath, { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, basePath, isTenantScope]);
 
   if (isLoading) {
     return (
