@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,10 +12,11 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
   const navigate = useNavigate();
+  const { basePath, isTenantScope } = useTenant();
 
   const handleGoToAuth = () => {
     onClose();
-    navigate('/entrar');
+    navigate(isTenantScope ? `${basePath}/entrar` : '/entrar');
   };
 
   return (
