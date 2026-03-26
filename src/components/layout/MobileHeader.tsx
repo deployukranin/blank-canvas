@@ -38,9 +38,8 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
         {/* Login button for unauthenticated users */}
         {!isAuthenticated ? (
           <Link to={loginPath}>
-            <Button variant="ghost" size="sm" className="text-primary gap-1.5 h-9 px-3">
+            <Button variant="ghost" size="sm" className="text-primary h-9 w-9 p-0">
               <LogIn className="w-4 h-4" />
-              <span className="text-xs font-medium">Entrar</span>
             </Button>
           </Link>
         ) : (
