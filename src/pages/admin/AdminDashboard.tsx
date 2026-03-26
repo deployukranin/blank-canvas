@@ -21,7 +21,9 @@ const AdminDashboard: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
 
-  const platformUrl = storeSlug ? `${window.location.origin}/${storeSlug}` : window.location.origin;
+  // Use published domain; fall back to current origin for local/preview
+  const publishedDomain = import.meta.env.VITE_PUBLISHED_URL || window.location.origin;
+  const platformUrl = storeSlug ? `${publishedDomain}/${storeSlug}` : publishedDomain;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(platformUrl);
