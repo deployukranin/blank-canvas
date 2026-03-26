@@ -446,6 +446,36 @@ const VIPPage = () => {
           </div>
         )}
 
+        {/* Blurred Content Preview */}
+        <div>
+          <h3 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            Exclusive Content
+          </h3>
+          <div className="space-y-3 relative">
+            {[1, 2, 3].map((i) => (
+              <GlassCard key={i} className="p-4 blur-[6px] pointer-events-none select-none">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Play className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="h-4 w-32 bg-muted rounded mb-2" />
+                    <div className="h-3 w-full bg-muted/60 rounded mb-1" />
+                    <div className="h-3 w-2/3 bg-muted/40 rounded" />
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <Lock className="w-8 h-8 mx-auto mb-2 text-primary" />
+                <p className="text-sm font-semibold">Subscribe to unlock</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {vipPlans.length === 0 && (
           <GlassCard className="p-8 text-center">
             <Lock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
