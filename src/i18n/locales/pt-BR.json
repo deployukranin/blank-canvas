@@ -76,7 +76,22 @@
     "pending": "Pendentes",
     "viewAll": "Ver todos",
     "ideasLabel": "Ideias",
-    "newToday": "Novos Hoje"
+    "newToday": "Novos Hoje",
+    "videoCategories": "Categorias de Vídeo",
+    "categoriesOrganized": "{{count}} categorias • {{videos}} vídeos organizados",
+    "autoCategorize": "Auto-categorizar por palavras-chave",
+    "runNow": "Executar Agora",
+    "createCategory": "Criar categoria",
+    "categoriesKeywords": "Categorias & Palavras-chave",
+    "addKeyword": "Adicionar palavra-chave...",
+    "noCategory": "Sem categoria",
+    "searchVideos": "Buscar por título...",
+    "linkVideos": "Vincular vídeos",
+    "showing": "Mostrando {{count}} vídeos. Use a busca para encontrar mais.",
+    "showingResults": "Mostrando {{count}} resultados. Refine sua busca.",
+    "noVideosFound": "Nenhum vídeo encontrado.",
+    "categoryName": "Nome da categoria",
+    "renamePlaceholder": "Novo nome..."
   },
   "superAdmin": {
     "title": "Super Admin",

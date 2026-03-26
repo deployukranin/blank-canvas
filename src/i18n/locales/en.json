@@ -76,7 +76,22 @@
     "pending": "Pending",
     "viewAll": "View all",
     "ideasLabel": "Ideas",
-    "newToday": "New Today"
+    "newToday": "New Today",
+    "videoCategories": "Video Categories",
+    "categoriesOrganized": "{{count}} categories • {{videos}} videos organized",
+    "autoCategorize": "Auto-categorize by keywords",
+    "runNow": "Run Now",
+    "createCategory": "Create category",
+    "categoriesKeywords": "Categories & Keywords",
+    "addKeyword": "Add keyword...",
+    "noCategory": "No category",
+    "searchVideos": "Search by title...",
+    "linkVideos": "Link videos",
+    "showing": "Showing {{count}} videos. Use search to find more.",
+    "showingResults": "Showing {{count}} results. Refine your search.",
+    "noVideosFound": "No videos found.",
+    "categoryName": "Category name",
+    "renamePlaceholder": "New name..."
   },
   "superAdmin": {
     "title": "Super Admin",
