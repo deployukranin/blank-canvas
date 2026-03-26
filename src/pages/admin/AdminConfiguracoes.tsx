@@ -11,56 +11,34 @@ import { useToast } from '@/hooks/use-toast';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useTranslation } from 'react-i18next';
 
-const colorTemplates = [
-  {
-    id: 'purple',
-    label: 'Purple',
-    primary: '263 70% 58%',
-    accent: '263 50% 25%',
-    preview: 'bg-purple-500',
-    ring: 'ring-purple-500',
-  },
-  {
-    id: 'red',
-    label: 'Red',
-    primary: '0 72% 51%',
-    accent: '0 50% 25%',
-    preview: 'bg-red-500',
-    ring: 'ring-red-500',
-  },
-  {
-    id: 'green',
-    label: 'Green',
-    primary: '142 71% 45%',
-    accent: '142 50% 22%',
-    preview: 'bg-green-500',
-    ring: 'ring-green-500',
-  },
-  {
-    id: 'blue',
-    label: 'Blue',
-    primary: '217 91% 60%',
-    accent: '217 50% 25%',
-    preview: 'bg-blue-500',
-    ring: 'ring-blue-500',
-  },
-  {
-    id: 'pink',
-    label: 'Pink',
-    primary: '330 81% 60%',
-    accent: '330 50% 25%',
-    preview: 'bg-pink-500',
-    ring: 'ring-pink-500',
-  },
-  {
-    id: 'yellow',
-    label: 'Yellow',
-    primary: '45 93% 47%',
-    accent: '45 50% 25%',
-    preview: 'bg-yellow-500',
-    ring: 'ring-yellow-500',
-  },
+interface ColorTemplate {
+  id: string;
+  label: string;
+  primary: string;
+  accent: string;
+  mode: 'dark' | 'light';
+  preview: string;
+}
+
+const darkTemplates: ColorTemplate[] = [
+  { id: 'purple', label: 'Purple', primary: '263 70% 58%', accent: '263 50% 25%', mode: 'dark', preview: 'bg-purple-500' },
+  { id: 'red', label: 'Red', primary: '0 72% 51%', accent: '0 50% 25%', mode: 'dark', preview: 'bg-red-500' },
+  { id: 'green', label: 'Green', primary: '142 71% 45%', accent: '142 50% 22%', mode: 'dark', preview: 'bg-green-500' },
+  { id: 'blue', label: 'Blue', primary: '217 91% 60%', accent: '217 50% 25%', mode: 'dark', preview: 'bg-blue-500' },
+  { id: 'pink', label: 'Pink', primary: '330 81% 60%', accent: '330 50% 25%', mode: 'dark', preview: 'bg-pink-500' },
+  { id: 'yellow', label: 'Yellow', primary: '45 93% 47%', accent: '45 50% 25%', mode: 'dark', preview: 'bg-yellow-500' },
 ];
+
+const lightTemplates: ColorTemplate[] = [
+  { id: 'light-purple', label: 'Purple', primary: '263 70% 55%', accent: '263 40% 92%', mode: 'light', preview: 'bg-purple-500' },
+  { id: 'light-red', label: 'Red', primary: '0 72% 50%', accent: '0 40% 92%', mode: 'light', preview: 'bg-red-500' },
+  { id: 'light-green', label: 'Green', primary: '142 71% 40%', accent: '142 40% 92%', mode: 'light', preview: 'bg-green-500' },
+  { id: 'light-blue', label: 'Blue', primary: '217 91% 55%', accent: '217 40% 92%', mode: 'light', preview: 'bg-blue-500' },
+  { id: 'light-pink', label: 'Pink', primary: '330 81% 55%', accent: '330 40% 92%', mode: 'light', preview: 'bg-pink-500' },
+  { id: 'light-yellow', label: 'Yellow', primary: '45 93% 40%', accent: '45 40% 92%', mode: 'light', preview: 'bg-yellow-500' },
+];
+
+const allTemplates = [...darkTemplates, ...lightTemplates];
 
 const AdminConfiguracoes: React.FC = () => {
   const { toast } = useToast();
@@ -74,19 +52,20 @@ const AdminConfiguracoes: React.FC = () => {
   });
 
   // Find currently active template
-  const activeTemplate = colorTemplates.find(
-    (tmpl) => tmpl.primary === config.colors.primary
-  ) || colorTemplates[0];
+  const activeTemplate = allTemplates.find(
+    (tmpl) => tmpl.primary === config.colors.primary && tmpl.mode === (config.colors.mode || 'dark')
+  ) || allTemplates[0];
 
-  const handleSelectTemplate = (template: typeof colorTemplates[0]) => {
+  const handleSelectTemplate = (template: ColorTemplate) => {
     updateColors({
       primary: template.primary,
       accent: template.accent,
-      background: '0 0% 4%',
+      background: template.mode === 'light' ? '0 0% 98%' : '0 0% 4%',
+      mode: template.mode,
     });
     toast({
       title: t('admin.settings.themeSaved', 'Theme updated!'),
-      description: `${template.label} template applied.`,
+      description: `${template.label} (${template.mode}) template applied.`,
     });
   };
 
@@ -110,25 +89,20 @@ const AdminConfiguracoes: React.FC = () => {
               <Palette className="w-5 h-5 text-primary" />
               <h3 className="font-semibold">{t('admin.settings.colorTheme', 'Color Theme')}</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              {t('admin.settings.colorThemeDesc', 'Choose a color template for your platform. The black base is preserved.')}
+            <p className="text-sm text-muted-foreground mb-5">
+              {t('admin.settings.colorThemeDesc', 'Choose a color template for your platform.')}
             </p>
-            
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-              {colorTemplates.map((template) => {
+
+            {/* Dark Templates */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Dark</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-5">
+              {darkTemplates.map((template) => {
                 const isActive = activeTemplate.id === template.id;
                 return (
-                  <button
-                    key={template.id}
-                    onClick={() => handleSelectTemplate(template)}
-                    className={`
-                      relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200
-                      ${isActive
-                        ? 'border-primary bg-primary/10 scale-105'
-                        : 'border-border/50 hover:border-border hover:bg-card/50'
-                      }
-                    `}
-                  >
+                  <button key={template.id} onClick={() => handleSelectTemplate(template)}
+                    className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isActive ? 'border-primary bg-primary/10 scale-105' : 'border-border/50 hover:border-border hover:bg-card/50'
+                    }`}>
                     <div className={`w-10 h-10 rounded-full ${template.preview} shadow-lg`}>
                       {isActive && (
                         <div className="w-full h-full rounded-full flex items-center justify-center bg-black/30">
@@ -136,9 +110,32 @@ const AdminConfiguracoes: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs font-medium text-foreground/80">
-                      {template.label}
-                    </span>
+                    <span className="text-xs font-medium text-foreground/80">{template.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Light Templates */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Light</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {lightTemplates.map((template) => {
+                const isActive = activeTemplate.id === template.id;
+                return (
+                  <button key={template.id} onClick={() => handleSelectTemplate(template)}
+                    className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isActive ? 'border-primary bg-primary/10 scale-105' : 'border-border/50 hover:border-border hover:bg-card/50'
+                    }`}>
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center">
+                      <div className={`w-6 h-6 rounded-full ${template.preview}`}>
+                        {isActive && (
+                          <div className="w-full h-full rounded-full flex items-center justify-center bg-black/20">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-foreground/80">{template.label}</span>
                   </button>
                 );
               })}

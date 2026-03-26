@@ -46,19 +46,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-black/90 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4">
-        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white/70 hover:text-white hover:bg-white/5">
+    <div className="min-h-screen bg-background">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-background/90 backdrop-blur-xl border-b border-border/30 z-50 flex items-center justify-between px-4">
+        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} className="text-foreground/70 hover:text-foreground hover:bg-foreground/5">
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
-        <h1 className="font-semibold text-white">{title}</h1>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-white/70 hover:text-white hover:bg-white/5">
+        <h1 className="font-semibold text-foreground">{title}</h1>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-foreground/70 hover:text-foreground hover:bg-foreground/5">
           <ArrowLeft className="w-5 h-5" />
         </Button>
       </header>
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-black border-r border-primary/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 w-64 bg-background border-r border-primary/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b border-primary/10 shrink-0">
@@ -69,8 +69,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium text-white/90">{user?.username}</p>
-              <p className="text-[11px] text-white/40">{user?.email}</p>
+              <p className="text-sm font-medium text-foreground/90">{user?.username}</p>
+              <p className="text-[11px] text-foreground/40">{user?.email}</p>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
                   isActive
                     ? "bg-primary/20 text-primary border border-primary/20"
-                    : "text-white/50 hover:bg-white/5 hover:text-white/80 border border-transparent"
+                    : "text-foreground/50 hover:bg-foreground/5 hover:text-foreground/80 border border-transparent"
                 )}>
                 <item.icon className="w-4 h-4" />
                 <span className="font-medium">{item.label}</span>
@@ -97,7 +97,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <div className="px-3 py-1">
             <LanguageSelector />
           </div>
-          <Button variant="ghost" className="w-full justify-start gap-3 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm"
+          <Button variant="ghost" className="w-full justify-start gap-3 text-foreground/40 hover:text-foreground/80 hover:bg-foreground/5 text-sm"
             onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4" />
             <span>{t('common.backToApp')}</span>
@@ -114,13 +114,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         <div className="fixed inset-0 bg-black/70 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-black">
+      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-background">
         <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-primary/10">
-          <h1 className="text-lg font-semibold text-white">{title}</h1>
+          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           <div className="flex items-center gap-2">
             <LanguageSelector variant="minimal" />
             <Button variant="ghost" size="sm" onClick={() => navigate('/')}
-              className="gap-2 text-white/40 hover:text-white/80 hover:bg-white/5 text-sm">
+              className="gap-2 text-foreground/40 hover:text-foreground/80 hover:bg-foreground/5 text-sm">
               <ArrowLeft className="w-4 h-4" />
               {t('common.back')}
             </Button>
