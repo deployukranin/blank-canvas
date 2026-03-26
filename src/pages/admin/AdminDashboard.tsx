@@ -70,11 +70,11 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
-    <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4">
+    <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
-          <p className="text-2xl font-bold text-white mt-1">{isLoading ? '—' : value}</p>
+          <p className="text-xs text-foreground/40 uppercase tracking-wider">{label}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{isLoading ? '—' : value}</p>
           {sub && <p className="text-[11px] text-primary mt-0.5">{sub}</p>}
         </div>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
@@ -100,8 +100,8 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 bg-white/[0.03] border border-primary/10 rounded-xl p-5">
-            <h3 className="text-sm font-medium text-white/70 mb-4">{t('admin.weeklyActivity')}</h3>
+          <div className="lg:col-span-2 bg-foreground/[0.03] border border-primary/10 rounded-xl p-5">
+            <h3 className="text-sm font-medium text-foreground/70 mb-4">{t('admin.weeklyActivity')}</h3>
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData}>
                 <defs>
@@ -120,9 +120,9 @@ const AdminDashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-5">
+          <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-white/70 flex items-center gap-2">
+              <h3 className="text-sm font-medium text-foreground/70 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" />
                 {t('admin.pending')}
               </h3>
@@ -131,20 +131,20 @@ const AdminDashboard: React.FC = () => {
               </Link>
             </div>
             {isLoading ? (
-              <p className="text-white/30 text-sm">{t('common.loading')}</p>
+              <p className="text-foreground/30 text-sm">{t('common.loading')}</p>
             ) : pendingOrders.length === 0 ? (
-              <p className="text-white/30 text-sm">{t('common.none')}</p>
+              <p className="text-foreground/30 text-sm">{t('common.none')}</p>
             ) : (
               <div className="space-y-2">
                 {pendingOrders.map((order) => (
                   <motion.div key={order.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-foreground/[0.02] border border-white/5">
                     <div>
-                      <p className="font-medium text-xs text-white/80">{order.category_name || 'Custom'}</p>
-                      <p className="text-[10px] text-white/30">{order.customer_name}</p>
+                      <p className="font-medium text-xs text-foreground/80">{order.category_name || 'Custom'}</p>
+                      <p className="text-[10px] text-foreground/30">{order.customer_name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-xs text-white/80">R$ {(order.amount_cents / 100).toFixed(2)}</p>
+                      <p className="font-medium text-xs text-foreground/80">R$ {(order.amount_cents / 100).toFixed(2)}</p>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
                         {t('admin.pending')}
                       </span>
@@ -157,20 +157,20 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+          <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Lightbulb className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-white">—</p>
-            <p className="text-[11px] text-white/40">{t('admin.ideasLabel')}</p>
+            <p className="text-xl font-bold text-foreground">—</p>
+            <p className="text-[11px] text-foreground/40">{t('admin.ideasLabel')}</p>
           </div>
-          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+          <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-white">{isLoading ? '—' : stats.pendingOrders}</p>
-            <p className="text-[11px] text-white/40">{t('admin.pending')}</p>
+            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.pendingOrders}</p>
+            <p className="text-[11px] text-foreground/40">{t('admin.pending')}</p>
           </div>
-          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+          <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Activity className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-white">{isLoading ? '—' : stats.newUsersToday}</p>
-            <p className="text-[11px] text-white/40">{t('admin.newToday')}</p>
+            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.newUsersToday}</p>
+            <p className="text-[11px] text-foreground/40">{t('admin.newToday')}</p>
           </div>
         </div>
       </div>
