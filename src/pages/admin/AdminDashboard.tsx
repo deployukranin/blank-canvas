@@ -7,18 +7,21 @@ import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { config } = useWhiteLabel();
+  const { session } = useAuth();
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [storeSlug, setStoreSlug] = useState<string | null>(null);
 
-  const platformUrl = window.location.origin;
+  const platformUrl = storeSlug ? `${window.location.origin}/${storeSlug}` : window.location.origin;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(platformUrl);
@@ -26,6 +29,57 @@ const AdminDashboard: React.FC = () => {
     toast.success(t('admin.linkCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      setStoreSlug(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const resolveStoreSlug = async () => {
+      const { data: adminStore } = await supabase
+        .from('store_admins')
+        .select('store_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      let storeId = adminStore?.store_id ?? null;
+
+      if (!storeId) {
+        const { data: ownedStore } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('created_by', userId)
+          .limit(1)
+          .maybeSingle();
+
+        storeId = ownedStore?.id ?? null;
+      }
+
+      if (!storeId) {
+        if (!cancelled) setStoreSlug(null);
+        return;
+      }
+
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('slug')
+        .eq('id', storeId)
+        .maybeSingle();
+
+      if (!cancelled) setStoreSlug(storeData?.slug ?? null);
+    };
+
+    resolveStoreSlug();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
 
   // Derive chart color from the current primary HSL
   const chartColor = useMemo(() => {
