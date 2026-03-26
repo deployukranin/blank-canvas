@@ -20,6 +20,7 @@ const AdminYoutube = () => {
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: config.youtube?.categories || [],
     videoCategoryMap: config.youtube?.videoCategoryMap || {},
+    autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
 
   // Sync draft with context when config changes
@@ -27,6 +28,7 @@ const AdminYoutube = () => {
     setCategorizationDraft({
       categories: config.youtube?.categories || [],
       videoCategoryMap: config.youtube?.videoCategoryMap || {},
+      autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
     });
   }, [config.youtube?.categories, config.youtube?.videoCategoryMap]);
 
