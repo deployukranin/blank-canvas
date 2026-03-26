@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { motion } from 'framer-motion';
-import { Store, Users, DollarSign, TrendingUp, Ban, CheckCircle, Crown, Clock } from 'lucide-react';
+import { Store, Users, DollarSign, TrendingUp, Ban, CheckCircle, Crown, Clock, Trash2 } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -297,6 +298,37 @@ const SuperAdminDashboard: React.FC = () => {
                                 Ativar
                               </Button>
                             )}
+
+                            {/* Delete */}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  disabled={actionLoading === tenant.id}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Apagar plataforma</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja apagar <strong>{tenant.name}</strong>? Todos os dados (pedidos, usuários, configurações) serão removidos permanentemente.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-red-600 hover:bg-red-700"
+                                    onClick={() => manageStore(tenant.id, 'delete')}
+                                  >
+                                    Apagar permanentemente
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </td>
                       </motion.tr>
