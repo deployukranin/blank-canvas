@@ -362,17 +362,74 @@ const Auth = () => {
                     <Label htmlFor="signup-youtube" className="text-gray-300 text-sm">
                       {t("auth.youtubeChannel")} <span className="text-gray-500 font-normal">({t("auth.youtubeOptional")})</span>
                     </Label>
-                    <div className="relative">
-                      <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                      <Input
-                        id="signup-youtube"
-                        type="text"
-                        placeholder="@yourchannel"
-                        value={youtubeHandle}
-                        onChange={(e) => setYoutubeHandle(e.target.value)}
-                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
-                      />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <Input
+                          id="signup-youtube"
+                          type="text"
+                          placeholder="@yourchannel"
+                          value={youtubeHandle}
+                          onChange={(e) => {
+                            setYoutubeHandle(e.target.value);
+                            setYoutubeVerified(null);
+                            setYoutubeError("");
+                          }}
+                          className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={verifyYoutubeHandle}
+                        disabled={youtubeVerifying || !youtubeHandle.trim()}
+                        className="border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 h-10 w-10 flex-shrink-0"
+                      >
+                        {youtubeVerifying ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Search className="w-4 h-4" />
+                        )}
+                      </Button>
                     </div>
+
+                    {/* Verified channel preview */}
+                    {youtubeVerified && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20"
+                      >
+                        {youtubeVerified.thumbnailUrl && (
+                          <img
+                            src={youtubeVerified.thumbnailUrl}
+                            alt={youtubeVerified.channelTitle}
+                            className="w-8 h-8 rounded-full"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-green-400 font-medium truncate">
+                            {youtubeVerified.channelTitle}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">{youtubeVerified.channelId}</p>
+                        </div>
+                        <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      </motion.div>
+                    )}
+
+                    {/* Error */}
+                    {youtubeError && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+                      >
+                        <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                        <p className="text-sm text-red-400">{youtubeError}</p>
+                      </motion.div>
+                    )}
+
                     <p className="text-xs text-gray-500">
                       {t("auth.youtubeHint")}
                     </p>
