@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.save-app-config]
 verify_jwt = false
+
+[functions.super-admin-metrics]
+verify_jwt = false
