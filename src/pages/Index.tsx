@@ -68,6 +68,32 @@ const Index = () => {
 
       <div className="px-4 py-6 space-y-6">
 
+        {/* Auth CTA for non-authenticated users */}
+        {!user && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass rounded-2xl p-5 border border-primary/20"
+          >
+            <h3 className="font-display font-semibold text-foreground mb-1">Junte-se à comunidade! 🎉</h3>
+            <p className="text-sm text-muted-foreground mb-4">Crie sua conta para comprar customs e participar da comunidade.</p>
+            <div className="flex gap-3">
+              <Link to="/entrar?tab=signup" className="flex-1">
+                <Button className="w-full gap-2 h-10" size="sm">
+                  <UserPlus className="w-4 h-4" />
+                  Cadastrar
+                </Button>
+              </Link>
+              <Link to="/entrar" className="flex-1">
+                <Button variant="outline" className="w-full gap-2 h-10" size="sm">
+                  <LogIn className="w-4 h-4" />
+                  Entrar
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
+
         {/* Quick Actions */}
         <div>
           <h3 className="font-display font-semibold mb-3 text-foreground">Explorar</h3>
