@@ -11,56 +11,34 @@ import { useToast } from '@/hooks/use-toast';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useTranslation } from 'react-i18next';
 
-const colorTemplates = [
-  {
-    id: 'purple',
-    label: 'Purple',
-    primary: '263 70% 58%',
-    accent: '263 50% 25%',
-    preview: 'bg-purple-500',
-    ring: 'ring-purple-500',
-  },
-  {
-    id: 'red',
-    label: 'Red',
-    primary: '0 72% 51%',
-    accent: '0 50% 25%',
-    preview: 'bg-red-500',
-    ring: 'ring-red-500',
-  },
-  {
-    id: 'green',
-    label: 'Green',
-    primary: '142 71% 45%',
-    accent: '142 50% 22%',
-    preview: 'bg-green-500',
-    ring: 'ring-green-500',
-  },
-  {
-    id: 'blue',
-    label: 'Blue',
-    primary: '217 91% 60%',
-    accent: '217 50% 25%',
-    preview: 'bg-blue-500',
-    ring: 'ring-blue-500',
-  },
-  {
-    id: 'pink',
-    label: 'Pink',
-    primary: '330 81% 60%',
-    accent: '330 50% 25%',
-    preview: 'bg-pink-500',
-    ring: 'ring-pink-500',
-  },
-  {
-    id: 'yellow',
-    label: 'Yellow',
-    primary: '45 93% 47%',
-    accent: '45 50% 25%',
-    preview: 'bg-yellow-500',
-    ring: 'ring-yellow-500',
-  },
+interface ColorTemplate {
+  id: string;
+  label: string;
+  primary: string;
+  accent: string;
+  mode: 'dark' | 'light';
+  preview: string;
+}
+
+const darkTemplates: ColorTemplate[] = [
+  { id: 'purple', label: 'Purple', primary: '263 70% 58%', accent: '263 50% 25%', mode: 'dark', preview: 'bg-purple-500' },
+  { id: 'red', label: 'Red', primary: '0 72% 51%', accent: '0 50% 25%', mode: 'dark', preview: 'bg-red-500' },
+  { id: 'green', label: 'Green', primary: '142 71% 45%', accent: '142 50% 22%', mode: 'dark', preview: 'bg-green-500' },
+  { id: 'blue', label: 'Blue', primary: '217 91% 60%', accent: '217 50% 25%', mode: 'dark', preview: 'bg-blue-500' },
+  { id: 'pink', label: 'Pink', primary: '330 81% 60%', accent: '330 50% 25%', mode: 'dark', preview: 'bg-pink-500' },
+  { id: 'yellow', label: 'Yellow', primary: '45 93% 47%', accent: '45 50% 25%', mode: 'dark', preview: 'bg-yellow-500' },
 ];
+
+const lightTemplates: ColorTemplate[] = [
+  { id: 'light-purple', label: 'Purple', primary: '263 70% 55%', accent: '263 40% 92%', mode: 'light', preview: 'bg-purple-500' },
+  { id: 'light-red', label: 'Red', primary: '0 72% 50%', accent: '0 40% 92%', mode: 'light', preview: 'bg-red-500' },
+  { id: 'light-green', label: 'Green', primary: '142 71% 40%', accent: '142 40% 92%', mode: 'light', preview: 'bg-green-500' },
+  { id: 'light-blue', label: 'Blue', primary: '217 91% 55%', accent: '217 40% 92%', mode: 'light', preview: 'bg-blue-500' },
+  { id: 'light-pink', label: 'Pink', primary: '330 81% 55%', accent: '330 40% 92%', mode: 'light', preview: 'bg-pink-500' },
+  { id: 'light-yellow', label: 'Yellow', primary: '45 93% 40%', accent: '45 40% 92%', mode: 'light', preview: 'bg-yellow-500' },
+];
+
+const allTemplates = [...darkTemplates, ...lightTemplates];
 
 const AdminConfiguracoes: React.FC = () => {
   const { toast } = useToast();
