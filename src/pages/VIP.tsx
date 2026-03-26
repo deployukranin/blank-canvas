@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ const VIPPage = () => {
   const { session } = useAuth();
   const { store } = useTenant();
   const { toast } = useToast();
+  const { i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
   const storeId = store?.id;
@@ -185,8 +187,13 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, storeId]);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  const formatCurrency = (value: number) => {
+    const isBR = i18n.language?.startsWith('pt');
+    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+      style: 'currency',
+      currency: isBR ? 'BRL' : 'USD',
+    }).format(value);
+  };
 
   const getPlanLabel = (type: string) => {
     switch (type) {

@@ -361,6 +361,61 @@ const Auth = () => {
               {/* Signup Tab */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Store Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-store-name" className="text-gray-300 text-sm">
+                      {t("auth.storeName")} <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      id="signup-store-name"
+                      type="text"
+                      placeholder={t("auth.storeNamePlaceholder")}
+                      value={storeName}
+                      onChange={(e) => {
+                        setStoreName(e.target.value);
+                        const slug = generateSlug(e.target.value);
+                        setStoreSlug(slug);
+                        setSlugAvailable(null);
+                        if (slug.length >= 3) checkSlugAvailability(slug);
+                      }}
+                      className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                      required
+                    />
+                  </div>
+
+                  {/* Store Slug */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-slug" className="text-gray-300 text-sm">
+                      {t("auth.storeSlug")} <span className="text-red-400">*</span>
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">/</span>
+                      <Input
+                        id="signup-slug"
+                        type="text"
+                        placeholder="my-store"
+                        value={storeSlug}
+                        onChange={(e) => {
+                          const slug = generateSlug(e.target.value);
+                          setStoreSlug(slug);
+                          setSlugAvailable(null);
+                          if (slug.length >= 3) checkSlugAvailability(slug);
+                        }}
+                        className="pl-7 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        required
+                      />
+                      {slugChecking && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />}
+                      {!slugChecking && slugAvailable === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-400" />}
+                      {!slugChecking && slugAvailable === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />}
+                    </div>
+                    {slugAvailable === false && (
+                      <p className="text-xs text-red-400">{t("auth.slugUnavailable")}</p>
+                    )}
+                    {slugAvailable === true && (
+                      <p className="text-xs text-green-400">{t("auth.slugAvailable")}</p>
+                    )}
+                    <p className="text-xs text-gray-500">{t("auth.slugHint")}</p>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email" className="text-gray-300 text-sm">{t("common.email")}</Label>
                     <div className="relative">
