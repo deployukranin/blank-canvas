@@ -177,6 +177,46 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
+        {/* Trial banner */}
+        {storePlan?.type === 'trial' && storePlan.expiresAt && (() => {
+          const daysLeft = differenceInDays(parseISO(storePlan.expiresAt), new Date());
+          const isUrgent = daysLeft <= 2;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex items-center justify-between gap-4 p-4 rounded-xl border ${
+                isUrgent
+                  ? 'bg-destructive/10 border-destructive/30'
+                  : 'bg-yellow-500/10 border-yellow-500/30'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {isUrgent ? (
+                  <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
+                ) : (
+                  <Zap className="w-5 h-5 text-yellow-500 shrink-0" />
+                )}
+                <div>
+                  <p className={`font-semibold text-sm ${isUrgent ? 'text-destructive' : 'text-yellow-500'}`}>
+                    {daysLeft <= 0
+                      ? t('admin.trial.expired', 'Seu trial expirou!')
+                      : t('admin.trial.daysLeft', '{{days}} dias restantes de trial', { days: Math.max(0, daysLeft) })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('admin.trial.upgradeHint', 'Faça upgrade para manter sua plataforma ativa.')}
+                  </p>
+                </div>
+              </div>
+              <Link to="/admin/planos">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">
+                  {t('admin.trial.upgrade', 'Ver Planos')}
+                </Button>
+              </Link>
+            </motion.div>
+          );
+        })()}
+
         {/* Platform quick actions */}
         <div className="flex flex-wrap items-center gap-3">
           <Button
