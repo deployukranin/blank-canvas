@@ -16,6 +16,16 @@ const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const platformUrl = window.location.origin;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(platformUrl);
+    setCopied(true);
+    toast.success(t('admin.linkCopied'));
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Derive chart color from the current primary HSL
   const chartColor = useMemo(() => {
