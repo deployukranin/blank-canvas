@@ -51,7 +51,8 @@ const AdminYoutube = () => {
         ...config.youtube,
         categories: categorizationDraft.categories,
         videoCategoryMap: categorizationDraft.videoCategoryMap,
-      });
+        autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
+      } as any);
       toast({
         title: "Categorias salvas",
         description: "As configurações de categorias foram salvas com sucesso",
