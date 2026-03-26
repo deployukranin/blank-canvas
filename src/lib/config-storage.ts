@@ -9,7 +9,8 @@ export type ConfigKey =
   | 'video_config' 
   | 'vip_config' 
   | 'white_label_config'
-  | 'global_default_categories';
+  | 'global_default_categories'
+  | 'payment_config';
 
 /**
  * Load configuration from database.

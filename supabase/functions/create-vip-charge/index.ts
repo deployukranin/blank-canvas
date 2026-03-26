@@ -11,29 +11,71 @@ interface CreateVIPChargeRequest {
   storeId?: string;
 }
 
+// ─── BRCode Generator (PIX Manual) ───
+function generatePixBrCode(
+  pixKey: string,
+  receiverName: string,
+  city: string,
+  amountBRL: number,
+  txId: string
+): string {
+  const cleanKey = pixKey.replace(/[.\-\/\s]/g, '');
+  const cleanName = receiverName.substring(0, 25).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const cleanCity = city.substring(0, 15).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const cleanTxId = txId.substring(0, 25);
+  const amountStr = amountBRL.toFixed(2);
+
+  const tlv = (id: string, value: string) => `${id}${value.length.toString().padStart(2, '0')}${value}`;
+
+  // Merchant Account Information (GUI + Key)
+  const gui = tlv('00', 'br.gov.bcb.pix');
+  const key = tlv('01', cleanKey);
+  const mai = tlv('26', gui + key);
+
+  let payload = '';
+  payload += tlv('00', '01');           // Payload Format Indicator
+  payload += mai;                        // Merchant Account Information
+  payload += tlv('52', '0000');          // Merchant Category Code
+  payload += tlv('53', '986');           // Transaction Currency (BRL)
+  payload += tlv('54', amountStr);       // Transaction Amount
+  payload += tlv('58', 'BR');            // Country Code
+  payload += tlv('59', cleanName);       // Merchant Name
+  payload += tlv('60', cleanCity);       // Merchant City
+  payload += tlv('62', tlv('05', cleanTxId)); // Additional Data (txid)
+  payload += '6304';                     // CRC placeholder
+
+  // CRC16-CCITT
+  const crc = crc16CCITT(payload);
+  return payload + crc;
+}
+
+function crc16CCITT(str: string): string {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if (crc & 0x8000) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc <<= 1;
+      }
+      crc &= 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    if (!OPENPIX_APP_ID) {
-      console.error('OPENPIX_APP_ID not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Payment provider not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get user ID from auth header - REQUIRED for VIP subscription
+    // Auth
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -44,9 +86,7 @@ Deno.serve(async (req) => {
 
     const token = authHeader.replace('Bearer ', '');
     const { data: userData, error: authError } = await supabase.auth.getUser(token);
-    
     if (authError || !userData.user) {
-      console.error('Auth error:', authError);
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid authentication token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -54,12 +94,9 @@ Deno.serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    const userEmail = userData.user.email || 'Usuário';
-    console.log('Creating VIP charge for user:', userId);
-
+    const userEmail = userData.user.email || 'User';
     const body: CreateVIPChargeRequest = await req.json();
-    
-    // Validate plan type
+
     if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid plan type' }),
@@ -69,7 +106,7 @@ Deno.serve(async (req) => {
 
     const storeId = body.storeId || null;
 
-    // Check if user already has active VIP subscription
+    // Check existing active subscription
     let existingSubQuery = supabase
       .from('vip_subscriptions')
       .select('id, expires_at')
@@ -82,88 +119,93 @@ Deno.serve(async (req) => {
     }
 
     const { data: existingSub } = await existingSubQuery.maybeSingle();
-
     if (existingSub) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Você já possui uma assinatura VIP ativa',
-          expires_at: existingSub.expires_at 
-        }),
+        JSON.stringify({ success: false, error: 'You already have an active VIP subscription', expires_at: existingSub.expires_at }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Set prices (in cents) - these should match admin config
-    const prices: Record<string, number> = {
-      monthly: 1990,   // R$ 19,90
-      quarterly: 4990, // R$ 49,90
-      yearly: 19990,   // R$ 199,90
-    };
-    const amountCents = prices[body.planType] || prices.monthly;
-    
-    // Generate unique correlationID
+    // ─── Load store's VIP prices ───
+    let amountCents: number;
+    if (storeId) {
+      const { data: vipCfg } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_config')
+        .eq('store_id', storeId)
+        .maybeSingle();
+
+      const plans = (vipCfg?.config_value as any)?.plans || [];
+      const matchingPlan = plans.find((p: any) => p.type === body.planType);
+      amountCents = matchingPlan ? Math.round(matchingPlan.price * 100) : 1990;
+    } else {
+      const defaultPrices: Record<string, number> = { monthly: 1990, quarterly: 4990, yearly: 19990 };
+      amountCents = defaultPrices[body.planType] || 1990;
+    }
+
     const correlationID = `vip_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    
-    // Calculate expiration for charge (15 minutes)
-    const chargeExpiresAt = new Date();
-    chargeExpiresAt.setMinutes(chargeExpiresAt.getMinutes() + 15);
 
     // Calculate subscription expiration
     const subscriptionExpiresAt = new Date();
-    if (body.planType === 'monthly') {
-      subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 1);
-    } else if (body.planType === 'quarterly') {
-      subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 3);
-    } else {
-      subscriptionExpiresAt.setFullYear(subscriptionExpiresAt.getFullYear() + 1);
+    if (body.planType === 'monthly') subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 1);
+    else if (body.planType === 'quarterly') subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 3);
+    else subscriptionExpiresAt.setFullYear(subscriptionExpiresAt.getFullYear() + 1);
+
+    // ─── Load store's payment config ───
+    let paymentConfig: any = null;
+    if (storeId) {
+      const { data: payCfg } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'payment_config')
+        .eq('store_id', storeId)
+        .maybeSingle();
+      paymentConfig = payCfg?.config_value;
     }
 
-    // Plan name for display
-    const planNames: Record<string, string> = {
-      monthly: 'Mensal',
-      quarterly: 'Trimestral',
-      yearly: 'Anual',
-    };
+    const activeGateway = paymentConfig?.activeGateway || null;
+    const chargeExpiresAt = new Date();
+    chargeExpiresAt.setMinutes(chargeExpiresAt.getMinutes() + 30);
 
-    // Create charge in OpenPix
-    console.log('Calling OpenPix API for VIP charge...');
-    const openPixResponse = await fetch('https://api.openpix.com.br/api/v1/charge', {
-      method: 'POST',
-      headers: {
-        'Authorization': OPENPIX_APP_ID,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        correlationID,
-        value: amountCents,
-        comment: `Assinatura VIP ${planNames[body.planType]}`,
-        expiresIn: 900, // 15 minutes in seconds
-        additionalInfo: [
-          { key: 'user_id', value: userId },
-          { key: 'plan_type', value: body.planType },
-        ],
-      }),
-    });
+    let qrCodeImage: string | null = null;
+    let brCode: string | null = null;
+    let paymentMethod = 'pending_config';
 
-    const openPixData = await openPixResponse.json();
-    console.log('OpenPix response:', JSON.stringify(openPixData));
+    // ─── PIX Manual: Generate BRCode ───
+    if (activeGateway === 'pix_manual') {
+      const pix = paymentConfig.pixManual;
+      if (!pix?.key || !pix?.receiverName || !pix?.city) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Store PIX payment not fully configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
-    if (!openPixResponse.ok || openPixData.error) {
-      console.error('OpenPix error:', openPixData);
+      const txId = correlationID.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '');
+      brCode = generatePixBrCode(pix.key, pix.receiverName, pix.city, amountCents / 100, txId);
+
+      // Generate QR code image via Google Charts API
+      qrCodeImage = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(brCode)}&choe=UTF-8`;
+      paymentMethod = 'pix_manual';
+    }
+    // ─── Stripe: placeholder for future integration ───
+    else if (activeGateway === 'stripe') {
+      // TODO: Create Stripe checkout session using store's stripe keys
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: openPixData.error || 'Failed to create charge',
-          details: openPixData 
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Stripe payments coming soon. Please configure Manual PIX for now.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    // ─── No payment configured ───
+    else {
+      return new Response(
+        JSON.stringify({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const charge = openPixData.charge;
-
-    // Create pending VIP subscription in database
+    // Create pending VIP subscription
     const { data: subscription, error: dbError } = await supabase
       .from('vip_subscriptions')
       .insert({
@@ -180,14 +222,12 @@ Deno.serve(async (req) => {
     if (dbError) {
       console.error('Database error:', dbError);
       return new Response(
-        JSON.stringify({ success: false, error: 'Failed to save subscription', details: dbError }),
+        JSON.stringify({ success: false, error: 'Failed to save subscription' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('VIP subscription created with pending payment:', subscription.id);
-
-    // Also create a custom_orders entry to track the payment (reusing existing webhook)
+    // Create order entry for tracking
     await supabase
       .from('custom_orders')
       .insert({
@@ -195,13 +235,12 @@ Deno.serve(async (req) => {
         product_type: 'vip_subscription',
         product_id: subscription.id,
         category: body.planType,
-        category_name: `VIP ${planNames[body.planType]}`,
+        category_name: `VIP ${body.planType}`,
         customer_name: body.customerName || userEmail,
         amount_cents: amountCents,
         correlation_id: correlationID,
-        openpix_charge_id: charge.identifier,
-        qr_code_image: charge.qrCodeImage,
-        br_code: charge.brCode,
+        qr_code_image: qrCodeImage,
+        br_code: brCode,
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
         store_id: storeId,
@@ -212,11 +251,12 @@ Deno.serve(async (req) => {
         success: true,
         subscription_id: subscription.id,
         correlation_id: correlationID,
-        qr_code_image: charge.qrCodeImage,
-        br_code: charge.brCode,
+        qr_code_image: qrCodeImage,
+        br_code: brCode,
         expires_at: chargeExpiresAt.toISOString(),
         amount_cents: amountCents,
         plan_type: body.planType,
+        payment_method: paymentMethod,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
