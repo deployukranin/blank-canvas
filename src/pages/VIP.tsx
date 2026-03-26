@@ -59,8 +59,9 @@ const VIPPage = () => {
   const { i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
-  const storeId = store?.id;
+  const tenantStoreId = store?.id;
 
+  const [resolvedStoreId, setResolvedStoreId] = useState<string | undefined>(tenantStoreId);
   const [isLoading, setIsLoading] = useState(true);
   const [isVIP, setIsVIP] = useState(false);
   const [subscription, setSubscription] = useState<VipSub | null>(null);
@@ -74,6 +75,55 @@ const VIPPage = () => {
   const [chargeData, setChargeData] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Resolve storeId: use tenant context, or find user's associated store
+  useEffect(() => {
+    if (tenantStoreId) {
+      setResolvedStoreId(tenantStoreId);
+      return;
+    }
+    if (!userId) {
+      setResolvedStoreId(undefined);
+      return;
+    }
+    const resolve = async () => {
+      // Check if user is a store admin
+      const { data: adminStore } = await supabase
+        .from('store_admins')
+        .select('store_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      if (adminStore?.store_id) {
+        setResolvedStoreId(adminStore.store_id);
+        return;
+      }
+      // Check if user belongs to a store
+      const { data: userStore } = await supabase
+        .from('store_users')
+        .select('store_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      if (userStore?.store_id) {
+        setResolvedStoreId(userStore.store_id);
+        return;
+      }
+      // Check if user created a store
+      const { data: ownedStore } = await supabase
+        .from('stores')
+        .select('id')
+        .eq('created_by', userId)
+        .limit(1)
+        .maybeSingle();
+      if (ownedStore?.id) {
+        setResolvedStoreId(ownedStore.id);
+        return;
+      }
+      setResolvedStoreId(undefined);
+    };
+    resolve();
+  }, [tenantStoreId, userId]);
 
   // Load VIP plans from store config or global
   useEffect(() => {
