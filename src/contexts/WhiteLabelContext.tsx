@@ -1109,7 +1109,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Debounce save to avoid too many writes
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await saveConfig('white_label_config', config);
+        await saveConfig('white_label_config', config, storeId);
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(config)); } catch {}
       } catch (err) {
         console.error('Error saving config to database:', err);
