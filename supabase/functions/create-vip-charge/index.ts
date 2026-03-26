@@ -204,6 +204,7 @@ Deno.serve(async (req) => {
         br_code: charge.brCode,
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
+        store_id: storeId,
       });
 
     return new Response(
