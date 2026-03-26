@@ -140,9 +140,14 @@ const Auth = () => {
               <span className="text-purple-400">{t("auth.heroTitle2")}</span>
             </h1>
 
-            <p className="text-gray-400 text-lg mb-12 max-w-md">
+            <p className="text-gray-400 text-lg mb-6 max-w-md">
               {t("auth.heroDesc")}
             </p>
+
+            <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-full px-5 py-2.5 mb-12">
+              <Sparkles className="w-4 h-4 text-green-400" />
+              <span className="text-green-400 font-semibold text-sm">{t("auth.trialBadge")}</span>
+            </div>
 
             <div className="space-y-6">
               {features.map((feature, i) => (
