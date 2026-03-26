@@ -18,7 +18,7 @@ const TenantContext = createContext<TenantInfo>({
 /** Reserved top-level routes that are NOT tenant slugs */
 const RESERVED_ROUTES = new Set([
   'admin', 'admin-master', 'auth', 'login', 'signup',
-  'ajuda', 'termos', 'privacidade', 'loja', 'assinaturas',
+  'ajuda', 'termos', 'privacidade', 'assinaturas',
   'ideias', 'vip', 'customs', 'comunidade', 'galeria',
   'perfil', 'meus-pedidos', 'notificacoes', 'audios', 'videos',
 ]);
