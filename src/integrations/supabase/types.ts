@@ -401,6 +401,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          read_at: string | null
           sender_id: string
           sender_role: string
           ticket_id: string
@@ -409,6 +410,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          read_at?: string | null
           sender_id: string
           sender_role?: string
           ticket_id: string
@@ -417,6 +419,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          read_at?: string | null
           sender_id?: string
           sender_role?: string
           ticket_id?: string
@@ -434,27 +437,33 @@ export type Database = {
       support_tickets: {
         Row: {
           created_at: string
+          creator_email: string | null
           id: string
           status: string
           store_id: string | null
+          store_name: string | null
           subject: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          creator_email?: string | null
           id?: string
           status?: string
           store_id?: string | null
+          store_name?: string | null
           subject: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          creator_email?: string | null
           id?: string
           status?: string
           store_id?: string | null
+          store_name?: string | null
           subject?: string
           updated_at?: string
           user_id?: string
