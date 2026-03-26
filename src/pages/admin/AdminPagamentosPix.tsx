@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   CreditCard, 
   QrCode,
@@ -8,7 +8,9 @@ import {
   EyeOff,
   Check,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Save,
+  Loader2
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -17,56 +19,67 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
+
+export interface PaymentConfig {
+  activeGateway: 'stripe' | 'pix_manual' | null;
+  stripe: {
+    publishableKey: string;
+    secretKey: string;
+  };
+  pixManual: {
+    keyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
+    key: string;
+    receiverName: string;
+    city: string;
+  };
+}
+
+const defaultPaymentConfig: PaymentConfig = {
+  activeGateway: null,
+  stripe: { publishableKey: '', secretKey: '' },
+  pixManual: { keyType: 'cpf', key: '', receiverName: '', city: '' },
+};
 
 const AdminPagamentosPix = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  // Active gateway state
-  const [activeGateway, setActiveGateway] = useState<'stripe' | 'pix_manual' | null>(null);
+  const {
+    config,
+    setConfig,
+    isLoading,
+    isSaving,
+    saveNow,
+  } = usePersistentConfig<PaymentConfig>({
+    configKey: 'payment_config',
+    defaultValue: defaultPaymentConfig,
+    localStorageKey: 'paymentConfig',
+    debounceMs: 3000,
+  });
 
-  // Stripe config
-  const [stripePublishableKey, setStripePublishableKey] = useState('');
-  const [stripeSecretKey, setStripeSecretKey] = useState('');
   const [showStripeSecret, setShowStripeSecret] = useState(false);
-  const [stripeSaving, setStripeSaving] = useState(false);
-
-  // PIX Manual config
-  const [pixKeyType, setPixKeyType] = useState<'cpf' | 'cnpj' | 'email' | 'phone' | 'random'>('cpf');
-  const [pixKey, setPixKey] = useState('');
-  const [pixReceiverName, setPixReceiverName] = useState('');
-  const [pixCity, setPixCity] = useState('');
-  const [pixSaving, setPixSaving] = useState(false);
 
   const handleSaveStripe = async () => {
-    if (!stripePublishableKey || !stripeSecretKey) {
+    if (!config.stripe.publishableKey || !config.stripe.secretKey) {
       toast({ title: 'Fill in all Stripe fields', variant: 'destructive' });
       return;
     }
-    setStripeSaving(true);
-    // TODO: Save stripe keys to app_configurations for this store
-    setTimeout(() => {
-      setStripeSaving(false);
-      setActiveGateway('stripe');
-      toast({ title: 'Stripe configured successfully!' });
-    }, 1000);
+    setConfig(prev => ({ ...prev, activeGateway: 'stripe' as const }));
+    await saveNow();
+    toast({ title: 'Stripe configured and activated!' });
   };
 
   const handleSavePix = async () => {
-    if (!pixKey || !pixReceiverName || !pixCity) {
+    if (!config.pixManual.key || !config.pixManual.receiverName || !config.pixManual.city) {
       toast({ title: 'Fill in all PIX fields', variant: 'destructive' });
       return;
     }
-    setPixSaving(true);
-    // TODO: Save PIX config to app_configurations for this store
-    setTimeout(() => {
-      setPixSaving(false);
-      setActiveGateway('pix_manual');
-      toast({ title: 'Manual PIX configured successfully!' });
-    }, 1000);
+    setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
+    await saveNow();
+    toast({ title: 'Manual PIX configured and activated!' });
   };
 
   const pixKeyLabels: Record<string, string> = {
@@ -77,6 +90,17 @@ const AdminPagamentosPix = () => {
     random: 'Random Key',
   };
 
+  if (isLoading) {
+    return (
+      <AdminLayout title={t('admin.payments', 'Payments')}>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
+          <span className="text-muted-foreground">Loading payment settings...</span>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout title={t('admin.payments', 'Payments')}>
       <div className="space-y-6 max-w-4xl">
@@ -85,32 +109,39 @@ const AdminPagamentosPix = () => {
         <GlassCard className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-white/60">Active Payment Method</h3>
-              <p className="text-lg font-semibold text-white mt-1">
-                {activeGateway === 'stripe' && 'Stripe'}
-                {activeGateway === 'pix_manual' && 'Manual PIX'}
-                {!activeGateway && 'Not configured'}
+              <h3 className="text-sm font-medium text-muted-foreground">Active Payment Method</h3>
+              <p className="text-lg font-semibold mt-1">
+                {config.activeGateway === 'stripe' && '💳 Stripe'}
+                {config.activeGateway === 'pix_manual' && '📱 Manual PIX'}
+                {!config.activeGateway && 'Not configured'}
               </p>
             </div>
-            <div className={`w-3 h-3 rounded-full ${activeGateway ? 'bg-green-500' : 'bg-white/20'}`} />
+            <div className="flex items-center gap-2">
+              {isSaving && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+                </span>
+              )}
+              <div className={`w-3 h-3 rounded-full ${config.activeGateway ? 'bg-green-500' : 'bg-muted'}`} />
+            </div>
           </div>
         </GlassCard>
 
         {/* Payment Gateways */}
-        <Tabs defaultValue="stripe" className="w-full">
-          <TabsList className="w-full bg-white/5 border border-white/10">
-            <TabsTrigger value="stripe" className="flex-1 gap-2 data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400">
+        <Tabs defaultValue={config.activeGateway === 'pix_manual' ? 'pix_manual' : 'stripe'} className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="stripe" className="flex-1 gap-2">
               <CreditCard className="w-4 h-4" />
               Stripe
             </TabsTrigger>
-            <TabsTrigger value="pix_manual" className="flex-1 gap-2 data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400">
+            <TabsTrigger value="pix_manual" className="flex-1 gap-2">
               <QrCode className="w-4 h-4" />
               Manual PIX
             </TabsTrigger>
             <TabsTrigger value="pix_auto" disabled className="flex-1 gap-2 opacity-40 cursor-not-allowed">
               <Zap className="w-4 h-4" />
               Auto PIX
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-purple-500/30 text-purple-400 ml-1">Soon</Badge>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">Soon</Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -119,16 +150,16 @@ const AdminPagamentosPix = () => {
             <GlassCard className="p-6 space-y-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary" />
                     Stripe Integration
                   </h3>
-                  <p className="text-sm text-white/50 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Accept credit cards, debit cards, and international payments. Funds go directly to your Stripe account.
                   </p>
                 </div>
-                {activeGateway === 'stripe' && (
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                {config.activeGateway === 'stripe' && (
+                  <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> Active
                   </Badge>
                 )}
@@ -136,36 +167,42 @@ const AdminPagamentosPix = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-white/70">Publishable Key</Label>
+                  <Label>Publishable Key</Label>
                   <Input
                     placeholder="pk_live_..."
-                    value={stripePublishableKey}
-                    onChange={(e) => setStripePublishableKey(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                    value={config.stripe.publishableKey}
+                    onChange={(e) => setConfig(prev => ({
+                      ...prev,
+                      stripe: { ...prev.stripe, publishableKey: e.target.value }
+                    }))}
+                    className="mt-1.5"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-white/70">Secret Key</Label>
+                  <Label>Secret Key</Label>
                   <div className="relative mt-1.5">
                     <Input
                       type={showStripeSecret ? 'text' : 'password'}
                       placeholder="sk_live_..."
-                      value={stripeSecretKey}
-                      onChange={(e) => setStripeSecretKey(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 pr-10"
+                      value={config.stripe.secretKey}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        stripe: { ...prev.stripe, secretKey: e.target.value }
+                      }))}
+                      className="pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowStripeSecret(!showStripeSecret)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showStripeSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-white/30 mt-1.5 flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
-                    Your secret key is encrypted and stored securely.
+                    Your secret key is stored securely in the database.
                   </p>
                 </div>
               </div>
@@ -175,18 +212,22 @@ const AdminPagamentosPix = () => {
                   href="https://dashboard.stripe.com/apikeys"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   Get your keys from Stripe Dashboard
                 </a>
-                <Button
-                  onClick={handleSaveStripe}
-                  disabled={stripeSaving}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  {stripeSaving ? 'Saving...' : 'Save & Activate'}
+                <Button onClick={handleSaveStripe} disabled={isSaving}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isSaving ? 'Saving...' : 'Save & Activate'}
                 </Button>
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Stripe checkout integration coming soon. Configuration will be ready when Stripe payments go live.
+                </p>
               </div>
             </GlassCard>
           </TabsContent>
@@ -196,16 +237,16 @@ const AdminPagamentosPix = () => {
             <GlassCard className="p-6 space-y-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <QrCode className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <QrCode className="w-5 h-5 text-primary" />
                     Manual PIX
                   </h3>
-                  <p className="text-sm text-white/50 mt-1">
-                    A QR code with the sale amount is generated for the customer. Payment goes directly to your PIX key.
+                  <p className="text-sm text-muted-foreground mt-1">
+                    A QR code with the sale amount is generated for the customer. Payment goes directly to your PIX key. You confirm payment manually.
                   </p>
                 </div>
-                {activeGateway === 'pix_manual' && (
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                {config.activeGateway === 'pix_manual' && (
+                  <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> Active
                   </Badge>
                 )}
@@ -213,16 +254,19 @@ const AdminPagamentosPix = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-white/70">PIX Key Type</Label>
+                  <Label>PIX Key Type</Label>
                   <div className="flex flex-wrap gap-2 mt-1.5">
                     {Object.entries(pixKeyLabels).map(([key, label]) => (
                       <button
                         key={key}
-                        onClick={() => setPixKeyType(key as any)}
+                        onClick={() => setConfig(prev => ({
+                          ...prev,
+                          pixManual: { ...prev.pixManual, keyType: key as any }
+                        }))}
                         className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
-                          pixKeyType === key
-                            ? 'bg-purple-600/20 border-purple-500/40 text-purple-400'
-                            : 'bg-white/5 border-white/10 text-white/50 hover:border-white/20'
+                          config.pixManual.keyType === key
+                            ? 'bg-primary/10 border-primary/40 text-primary'
+                            : 'bg-muted border-border text-muted-foreground hover:border-primary/30'
                         }`}
                       >
                         {label}
@@ -232,45 +276,55 @@ const AdminPagamentosPix = () => {
                 </div>
 
                 <div>
-                  <Label className="text-white/70">PIX Key</Label>
+                  <Label>PIX Key</Label>
                   <Input
-                    placeholder={pixKeyType === 'email' ? 'your@email.com' : pixKeyType === 'phone' ? '+5511999999999' : 'Enter your PIX key'}
-                    value={pixKey}
-                    onChange={(e) => setPixKey(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                    placeholder={
+                      config.pixManual.keyType === 'email' ? 'your@email.com' :
+                      config.pixManual.keyType === 'phone' ? '+5511999999999' :
+                      'Enter your PIX key'
+                    }
+                    value={config.pixManual.key}
+                    onChange={(e) => setConfig(prev => ({
+                      ...prev,
+                      pixManual: { ...prev.pixManual, key: e.target.value }
+                    }))}
+                    className="mt-1.5"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white/70">Receiver Name</Label>
+                    <Label>Receiver Name</Label>
                     <Input
                       placeholder="Full name"
-                      value={pixReceiverName}
-                      onChange={(e) => setPixReceiverName(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                      value={config.pixManual.receiverName}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        pixManual: { ...prev.pixManual, receiverName: e.target.value }
+                      }))}
+                      className="mt-1.5"
                       maxLength={50}
                     />
                   </div>
                   <div>
-                    <Label className="text-white/70">City</Label>
+                    <Label>City</Label>
                     <Input
                       placeholder="São Paulo"
-                      value={pixCity}
-                      onChange={(e) => setPixCity(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 mt-1.5"
+                      value={config.pixManual.city}
+                      onChange={(e) => setConfig(prev => ({
+                        ...prev,
+                        pixManual: { ...prev.pixManual, city: e.target.value }
+                      }))}
+                      className="mt-1.5"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button
-                  onClick={handleSavePix}
-                  disabled={pixSaving}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  {pixSaving ? 'Saving...' : 'Save & Activate'}
+                <Button onClick={handleSavePix} disabled={isSaving}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isSaving ? 'Saving...' : 'Save & Activate'}
                 </Button>
               </div>
             </GlassCard>
@@ -280,14 +334,14 @@ const AdminPagamentosPix = () => {
           <TabsContent value="pix_auto" className="mt-6">
             <GlassCard className="p-6">
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-purple-600/10 flex items-center justify-center mb-4">
-                  <Zap className="w-8 h-8 text-purple-400/50" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-primary/50" />
                 </div>
-                <h3 className="text-lg font-semibold text-white/60">Automatic PIX</h3>
-                <p className="text-sm text-white/30 mt-2 max-w-sm">
+                <h3 className="text-lg font-semibold text-muted-foreground">Automatic PIX</h3>
+                <p className="text-sm text-muted-foreground/60 mt-2 max-w-sm">
                   Automatic PIX payment confirmation with instant webhook notifications. Coming soon.
                 </p>
-                <Badge variant="outline" className="mt-4 border-purple-500/30 text-purple-400">
+                <Badge variant="outline" className="mt-4">
                   <Clock className="w-3 h-3 mr-1" /> Coming Soon
                 </Badge>
               </div>
