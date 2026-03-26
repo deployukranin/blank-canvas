@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { Youtube } from "lucide-react";
+import { Youtube, Globe } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
+import { loadConfig, saveConfig } from "@/lib/config-storage";
 import {
   YouTubeCategoryManager,
   type YouTubeCategorizationDraft,
 } from "@/components/video/YouTubeCategoryManager";
+import { useTranslation } from "react-i18next";
 
 const DEFAULT_CATEGORIES: YouTubeCategorizationDraft["categories"] = [
   // 1. Mouth & Voice
@@ -57,9 +59,11 @@ function mergeWithDefaults(
 
 const AdminYoutube = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { config, updateYouTube } = useWhiteLabel();
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingGlobal, setIsSavingGlobal] = useState(false);
 
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: mergeWithDefaults(config.youtube?.categories),
@@ -67,13 +71,36 @@ const AdminYoutube = () => {
     autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
 
+  // Load global defaults on mount, merge with local
+  useEffect(() => {
+    const loadGlobalDefaults = async () => {
+      const globalCats = await loadConfig<YouTubeCategorizationDraft["categories"]>("global_default_categories");
+      if (globalCats && globalCats.length > 0) {
+        setCategorizationDraft((prev) => {
+          const merged = mergeWithDefaults(prev.categories.length > 0 ? prev.categories : globalCats);
+          // Also merge global keywords into existing categories
+          const globalMap = new Map(globalCats.map((c) => [c.id, c]));
+          const enriched = merged.map((cat) => {
+            const global = globalMap.get(cat.id);
+            if (!global) return cat;
+            const existingKws = new Set(cat.keywords?.map((k) => k.toLowerCase()) || []);
+            const newKws = (global.keywords || []).filter((k) => !existingKws.has(k.toLowerCase()));
+            return { ...cat, keywords: [...(cat.keywords || []), ...newKws] };
+          });
+          return { ...prev, categories: enriched };
+        });
+      }
+    };
+    loadGlobalDefaults();
+  }, []);
+
   // Sync draft with context when config changes
   useEffect(() => {
-    setCategorizationDraft({
+    setCategorizationDraft((prev) => ({
       categories: mergeWithDefaults(config.youtube?.categories),
       videoCategoryMap: config.youtube?.videoCategoryMap || {},
       autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
-    });
+    }));
   }, [config.youtube?.categories, config.youtube?.videoCategoryMap]);
 
   const {
@@ -97,14 +124,18 @@ const AdminYoutube = () => {
         videoCategoryMap: categorizationDraft.videoCategoryMap,
         autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
       } as any);
+
+      // Also save as global defaults for new platforms
+      await saveConfig("global_default_categories", categorizationDraft.categories);
+
       toast({
-        title: "Categorias salvas",
-        description: "As configurações de categorias foram salvas com sucesso",
+        title: t("common.save"),
+        description: t("admin.categoriesSavedGlobal"),
       });
     } catch (err) {
       toast({
-        title: "Erro",
-        description: "Falha ao salvar as categorias",
+        title: "Error",
+        description: t("admin.categoriesSaveError"),
         variant: "destructive",
       });
     } finally {

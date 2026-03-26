@@ -9,7 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 export type ConfigKey = 
   | 'video_config' 
   | 'vip_config' 
-  | 'white_label_config';
+  | 'white_label_config'
+  | 'global_default_categories';
 
 /**
  * Load configuration from database
