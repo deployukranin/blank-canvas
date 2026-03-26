@@ -37,6 +37,45 @@ const json = (body: unknown, status = 200) =>
 // Cache TTL in minutes (30 days = 43200 minutes)
 const CACHE_TTL_MINUTES = 43200;
 
+// Resolve @handle or channel name to a channel ID (costs 1 quota unit)
+async function resolveHandleToChannelId(handle: string, apiKey: string): Promise<{ channelId: string; channelTitle: string; thumbnailUrl: string } | null> {
+  // Clean up handle
+  let cleanHandle = handle.trim();
+  if (cleanHandle.startsWith("@")) {
+    cleanHandle = cleanHandle.substring(1);
+  }
+  // Remove full URL if provided
+  if (cleanHandle.includes("youtube.com/")) {
+    const match = cleanHandle.match(/@([^/?\s]+)/);
+    if (match) cleanHandle = match[1];
+  }
+
+  console.log("[youtube-videos] Resolving handle:", cleanHandle);
+
+  // Use the channels endpoint with forHandle parameter
+  const params = new URLSearchParams({
+    part: "id,snippet",
+    forHandle: cleanHandle,
+    key: apiKey,
+  });
+
+  const url = `https://www.googleapis.com/youtube/v3/channels?${params.toString()}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (!res.ok || !data.items?.length) {
+    console.log("[youtube-videos] Handle resolution failed:", data);
+    return null;
+  }
+
+  const channel = data.items[0];
+  return {
+    channelId: channel.id,
+    channelTitle: channel.snippet?.title || "",
+    thumbnailUrl: channel.snippet?.thumbnails?.default?.url || "",
+  };
+}
+
 // Get the uploads playlist ID from a channel (costs 1 quota unit)
 async function getUploadsPlaylistId(channelId: string, apiKey: string): Promise<string | null> {
   const params = new URLSearchParams({
