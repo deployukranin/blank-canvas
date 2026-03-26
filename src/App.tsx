@@ -45,6 +45,9 @@ import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 
 // Super Admin Pages
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
+import SuperAdminTenants from "./pages/super-admin/SuperAdminTenants";
+import SuperAdminRanking from "./pages/super-admin/SuperAdminRanking";
+import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
 
 const queryClient = new QueryClient();
 
