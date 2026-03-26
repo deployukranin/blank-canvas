@@ -59,6 +59,7 @@ const Index = () => {
       >
         <HeroBanner
           images={[bannerStudio]}
+          banners={config.banners}
           greeting={user ? `Olá, ${displayName}! 🤍` : 'Bem-vindo! 🤍'}
           subtitle="Relaxe com ASMR de qualidade"
         />
