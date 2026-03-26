@@ -296,19 +296,69 @@ Deno.serve(async (req) => {
 
     let channelId = "";
     let forceRefresh = false;
+    let action = "videos"; // default action
 
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({}));
       channelId = String((body as Record<string, unknown>)?.channelId ?? "").trim();
       forceRefresh = Boolean((body as Record<string, unknown>)?.forceRefresh);
+      action = String((body as Record<string, unknown>)?.action ?? "videos");
     } else {
       const url = new URL(req.url);
       channelId = String(url.searchParams.get("channelId") ?? "").trim();
       forceRefresh = url.searchParams.get("forceRefresh") === "true";
+      action = url.searchParams.get("action") ?? "videos";
     }
 
+    // Handle "verify" action — resolve @handle to channel ID and return channel info
+    if (action === "verify") {
+      if (!channelId) {
+        return json({ error: "channelId or handle is required" }, 400);
+      }
+      if (!apiKey) {
+        return json({ error: "Missing YOUTUBE_API_KEY" }, 500);
+      }
+
+      // If it looks like a handle (starts with @ or doesn't start with UC)
+      const isHandle = channelId.startsWith("@") || !channelId.startsWith("UC");
+      
+      if (isHandle) {
+        const resolved = await resolveHandleToChannelId(channelId, apiKey);
+        if (!resolved) {
+          return json({ success: false, error: "Channel not found for this handle" }, 404);
+        }
+        return json({
+          success: true,
+          channelId: resolved.channelId,
+          channelTitle: resolved.channelTitle,
+          thumbnailUrl: resolved.thumbnailUrl,
+        });
+      } else {
+        // It's already a channel ID, verify it exists
+        const playlistId = await getUploadsPlaylistId(channelId, apiKey);
+        if (!playlistId) {
+          return json({ success: false, error: "Channel not found" }, 404);
+        }
+        return json({ success: true, channelId });
+      }
+    }
+
+    // --- Default "videos" action ---
     if (!channelId) {
       return json({ error: "channelId is required" }, 400);
+    }
+
+    // Auto-resolve handle to channel ID if needed
+    if ((channelId.startsWith("@") || !channelId.startsWith("UC")) && apiKey) {
+      console.log("[youtube-videos] Resolving handle to channelId:", channelId);
+      const resolved = await resolveHandleToChannelId(channelId, apiKey);
+      if (resolved) {
+        console.log("[youtube-videos] Resolved to:", resolved.channelId);
+        channelId = resolved.channelId;
+      } else {
+        console.log("[youtube-videos] Could not resolve handle:", channelId);
+        return json({ error: "Could not resolve YouTube handle to channel" }, 404);
+      }
     }
 
     console.log("[youtube-videos] Processing request for channelId:", channelId, "forceRefresh:", forceRefresh);
