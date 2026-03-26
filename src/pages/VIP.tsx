@@ -233,7 +233,11 @@ const VIPPage = () => {
   };
 
   const handleConfirmSubscription = async () => {
-    if (!selectedPlan || !storeId) return;
+    if (!selectedPlan) return;
+    if (!storeId) {
+      toast({ title: 'Error', description: 'Store context is required for payment. Access via a creator\'s store link.', variant: 'destructive' });
+      return;
+    }
     setIsProcessing(true);
 
     try {
