@@ -351,8 +351,11 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          plan_expires_at: string | null
+          plan_type: string
           slug: string | null
           status: string
+          suspended_at: string | null
           updated_at: string
           url: string
           username: string | null
@@ -365,8 +368,11 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          plan_expires_at?: string | null
+          plan_type?: string
           slug?: string | null
           status?: string
+          suspended_at?: string | null
           updated_at?: string
           url?: string
           username?: string | null
@@ -379,8 +385,11 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          plan_expires_at?: string | null
+          plan_type?: string
           slug?: string | null
           status?: string
+          suspended_at?: string | null
           updated_at?: string
           url?: string
           username?: string | null
