@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
+import { useTenant } from '@/contexts/TenantContext';
 // Available Lucide icons for customization
 export const availableLucideIcons = [
   // Navigation & UI
