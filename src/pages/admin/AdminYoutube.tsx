@@ -62,10 +62,11 @@ const AdminYoutube = () => {
     autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
 
-  // Sync draft with context when config changes
+  // Sync draft with context when config changes (but keep defaults if no saved categories)
   useEffect(() => {
+    const savedCategories = config.youtube?.categories;
     setCategorizationDraft({
-      categories: config.youtube?.categories || [],
+      categories: savedCategories && savedCategories.length > 0 ? savedCategories : DEFAULT_CATEGORIES,
       videoCategoryMap: config.youtube?.videoCategoryMap || {},
       autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
     });
