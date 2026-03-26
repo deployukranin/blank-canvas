@@ -75,6 +75,13 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Handle no store context
+  useEffect(() => {
+    if (!storeId) {
+      setIsLoading(false);
+    }
+  }, [storeId]);
+
   // Load VIP plans from store config
   useEffect(() => {
     if (!storeId) return;
