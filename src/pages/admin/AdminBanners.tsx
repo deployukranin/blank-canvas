@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Image, Trash2, Plus, Monitor, Smartphone, Info, Eye } from 'lucide-react';
+import { Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
+const BUCKET = 'banners';
 
 const AdminBanners: React.FC = () => {
   const { t } = useTranslation();
@@ -25,6 +27,7 @@ const AdminBanners: React.FC = () => {
   );
 
   const [previewBanner, setPreviewBanner] = useState<{ url: string; type: string } | null>(null);
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
 
   const canAdd = banners.length < 3;
 
@@ -39,6 +42,66 @@ const AdminBanners: React.FC = () => {
 
   const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean) => {
     setBanners(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
+  };
+
+  const uploadFile = async (file: File, bannerId: string, variant: 'desktop' | 'mobile') => {
+    const uploadKey = `${bannerId}-${variant}`;
+    setUploading(prev => ({ ...prev, [uploadKey]: true }));
+
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const path = `${bannerId}/${variant}-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+
+      const field = variant === 'desktop' ? 'desktopUrl' : 'mobileUrl';
+      updateBanner(bannerId, field, publicUrl);
+
+      toast({
+        title: t('admin.banners.uploadSuccess', 'Image uploaded!'),
+        description: `${variant === 'desktop' ? 'Desktop' : 'Mobile'} banner uploaded successfully.`,
+      });
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast({
+        title: t('admin.banners.uploadError', 'Upload failed'),
+        description: err.message || 'An error occurred while uploading.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(prev => ({ ...prev, [uploadKey]: false }));
+    }
+  };
+
+  const handleFileSelect = (bannerId: string, variant: 'desktop' | 'mobile') => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: t('admin.banners.fileTooLarge', 'File too large'),
+            description: t('admin.banners.maxSize', 'Maximum file size is 5MB.'),
+            variant: 'destructive',
+          });
+          return;
+        }
+        uploadFile(file, bannerId, variant);
+      }
+    };
+    input.click();
+  };
+
+  const clearImage = (bannerId: string, field: 'desktopUrl' | 'mobileUrl') => {
+    updateBanner(bannerId, field, '');
   };
 
   const handleSave = () => {
@@ -58,6 +121,80 @@ const AdminBanners: React.FC = () => {
     });
   };
 
+  const renderUploadArea = (banner: BannerConfig, variant: 'desktop' | 'mobile', index: number) => {
+    const field = variant === 'desktop' ? 'desktopUrl' : 'mobileUrl';
+    const url = banner[field];
+    const uploadKey = `${banner.id}-${variant}`;
+    const isUploading = uploading[uploadKey];
+    const isDesktop = variant === 'desktop';
+
+    return (
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2 text-sm">
+          {isDesktop ? <Monitor className="w-4 h-4 text-primary/70" /> : <Smartphone className="w-4 h-4 text-primary/70" />}
+          {isDesktop ? 'Desktop' : 'Mobile'}
+        </Label>
+
+        {url ? (
+          /* Image preview with actions */
+          <div className="relative group">
+            <div className={`relative rounded-lg overflow-hidden bg-background/30 border border-border/20 ${isDesktop ? 'w-full h-28' : 'w-32 h-40'}`}>
+              <img
+                src={url}
+                alt={`${variant} Banner ${index + 1}`}
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 bg-background/70 hover:bg-background text-foreground"
+                  onClick={() => setPreviewBanner({ url, type: isDesktop ? 'Desktop' : 'Mobile' })}
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 bg-destructive/70 hover:bg-destructive text-destructive-foreground"
+                  onClick={() => clearImage(banner.id, field)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Upload drop zone */
+          <div
+            onClick={() => !isUploading && handleFileSelect(banner.id, variant)}
+            className={`relative rounded-lg border-2 border-dashed border-border/40 hover:border-primary/40 bg-background/20 hover:bg-primary/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${isDesktop ? 'w-full h-28' : 'w-32 h-40'}`}
+          >
+            {isUploading ? (
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
+            ) : (
+              <>
+                <Upload className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground text-center px-2">
+                  {t('admin.banners.clickToUpload', 'Click to upload')}
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* URL input as fallback */}
+        <Input
+          placeholder={`${isDesktop ? 'Desktop' : 'Mobile'} URL (${t('admin.banners.orPasteUrl', 'or paste URL')})`}
+          value={url}
+          onChange={(e) => updateBanner(banner.id, field, e.target.value)}
+          className="bg-background/50 border-border/30 text-xs h-8"
+        />
+      </div>
+    );
+  };
+
   return (
     <AdminLayout title={t('admin.banners.title', 'Banners')}>
       <div className="max-w-4xl mx-auto space-y-6">
@@ -69,7 +206,7 @@ const AdminBanners: React.FC = () => {
               {t('admin.banners.title', 'Banners')}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {t('admin.banners.subtitle', 'Configure up to 3 banners for the home screen. Add desktop and mobile versions for full responsiveness.')}
+              {t('admin.banners.subtitle', 'Configure up to 3 banners for the home screen. Upload or paste URLs for desktop and mobile versions.')}
             </p>
           </div>
           <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">
@@ -96,7 +233,7 @@ const AdminBanners: React.FC = () => {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground/70 mt-1">
-                {t('admin.banners.sizeHint', 'Use JPG or WebP for best performance. Keep file size under 500KB.')}
+                {t('admin.banners.sizeHint', 'JPG, PNG or WebP. Max 5MB per image.')}
               </p>
             </div>
           </div>
@@ -136,7 +273,7 @@ const AdminBanners: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                         onClick={() => removeBanner(banner.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -146,82 +283,13 @@ const AdminBanners: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Desktop */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm">
-                      <Monitor className="w-4 h-4 text-primary/70" />
-                      Desktop
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="https://example.com/banner-desktop.jpg"
-                        value={banner.desktopUrl}
-                        onChange={(e) => updateBanner(banner.id, 'desktopUrl', e.target.value)}
-                        className="bg-background/50 border-border/30"
-                      />
-                      {banner.desktopUrl && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="shrink-0 text-muted-foreground hover:text-foreground"
-                          onClick={() => setPreviewBanner({ url: banner.desktopUrl, type: 'Desktop' })}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    {banner.desktopUrl && (
-                      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-background/30 border border-border/20">
-                        <img
-                          src={banner.desktopUrl}
-                          alt={`Desktop Banner ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Mobile */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm">
-                      <Smartphone className="w-4 h-4 text-primary/70" />
-                      Mobile
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="https://example.com/banner-mobile.jpg"
-                        value={banner.mobileUrl}
-                        onChange={(e) => updateBanner(banner.id, 'mobileUrl', e.target.value)}
-                        className="bg-background/50 border-border/30"
-                      />
-                      {banner.mobileUrl && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="shrink-0 text-muted-foreground hover:text-foreground"
-                          onClick={() => setPreviewBanner({ url: banner.mobileUrl, type: 'Mobile' })}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    {banner.mobileUrl && (
-                      <div className="relative w-24 h-32 rounded-lg overflow-hidden bg-background/30 border border-border/20">
-                        <img
-                          src={banner.mobileUrl}
-                          alt={`Mobile Banner ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                      </div>
-                    )}
-                  </div>
+                  {renderUploadArea(banner, 'desktop', index)}
+                  {renderUploadArea(banner, 'mobile', index)}
                 </div>
 
                 {!banner.desktopUrl && !banner.mobileUrl && (
-                  <p className="text-xs text-muted-foreground/60 mt-2 italic">
-                    {t('admin.banners.emptyHint', 'Paste a URL for the desktop and/or mobile banner image.')}
+                  <p className="text-xs text-muted-foreground/60 mt-3 italic">
+                    {t('admin.banners.emptyHint', 'Upload an image or paste a URL for desktop and/or mobile banner.')}
                   </p>
                 )}
               </GlassCard>
