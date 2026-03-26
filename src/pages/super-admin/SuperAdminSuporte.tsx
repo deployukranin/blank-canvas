@@ -6,7 +6,7 @@ import SuperAdminLayout from './SuperAdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Send, ArrowLeft, MessageCircle, Clock, CheckCircle2, Store, XCircle } from 'lucide-react';
+import { Send, ArrowLeft, MessageCircle, Clock, CheckCircle2, Store, XCircle, Check, CheckCheck, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -17,6 +17,8 @@ interface Ticket {
   status: string;
   user_id: string;
   store_id: string | null;
+  store_name: string | null;
+  creator_email: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +30,7 @@ interface Message {
   sender_role: string;
   message: string;
   created_at: string;
+  read_at: string | null;
 }
 
 interface StoreInfo {
@@ -50,7 +53,7 @@ const SuperAdminSuporte = () => {
   const [filter, setFilter] = useState<'all' | 'open' | 'answered' | 'closed'>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch all tickets with store info
+  // Fetch all tickets
   const { data: tickets = [] } = useQuery({
     queryKey: ['sa-support-tickets'],
     queryFn: async () => {
@@ -63,8 +66,8 @@ const SuperAdminSuporte = () => {
     },
   });
 
-  // Fetch store names for all tickets
-  const storeIds = [...new Set(tickets.map(t => t.store_id).filter(Boolean))] as string[];
+  // Fetch store names for tickets that don't have store_name cached
+  const storeIds = [...new Set(tickets.filter(t => t.store_id && !t.store_name).map(t => t.store_id))] as string[];
   const { data: stores = [] } = useQuery({
     queryKey: ['sa-stores-for-tickets', storeIds],
     queryFn: async () => {
@@ -76,6 +79,13 @@ const SuperAdminSuporte = () => {
   });
 
   const storeMap = new Map(stores.map(s => [s.id, s]));
+
+  // Helper to get store name (from ticket field or from fetched stores)
+  const getStoreName = (t: Ticket) => {
+    if (t.store_name) return t.store_name;
+    if (t.store_id) return storeMap.get(t.store_id)?.name ?? null;
+    return null;
+  };
 
   // Fetch messages
   const { data: messages = [] } = useQuery({
@@ -92,13 +102,29 @@ const SuperAdminSuporte = () => {
     enabled: !!selectedTicket?.id,
   });
 
+  // Mark creator messages as read when super admin opens the chat
+  useEffect(() => {
+    if (!selectedTicket?.id || !user?.id) return;
+    const unreadFromCreator = messages.filter(m => m.sender_role === 'creator' && !m.read_at);
+    if (unreadFromCreator.length > 0) {
+      const ids = unreadFromCreator.map(m => m.id);
+      supabase
+        .from('support_messages')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', ids)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['sa-support-messages', selectedTicket.id] });
+        });
+    }
+  }, [selectedTicket?.id, messages, user?.id, queryClient]);
+
   // Realtime
   useEffect(() => {
     if (!selectedTicket?.id) return;
     const channel = supabase
       .channel(`sa-support-${selectedTicket.id}`)
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'support_messages',
         filter: `ticket_id=eq.${selectedTicket.id}`,
@@ -108,6 +134,21 @@ const SuperAdminSuporte = () => {
       .subscribe();
     return () => { channel.unsubscribe(); };
   }, [selectedTicket?.id, queryClient]);
+
+  // Also listen for new tickets
+  useEffect(() => {
+    const channel = supabase
+      .channel('sa-new-tickets')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'support_tickets',
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['sa-support-tickets'] });
+      })
+      .subscribe();
+    return () => { channel.unsubscribe(); };
+  }, [queryClient]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -149,12 +190,26 @@ const SuperAdminSuporte = () => {
     },
   });
 
+  // Read receipt indicator
+  const ReadReceipt = ({ msg }: { msg: Message }) => {
+    if (msg.sender_role !== 'super_admin') return null;
+    return (
+      <span className="inline-flex ml-1">
+        {msg.read_at ? (
+          <CheckCheck className="w-3.5 h-3.5 text-blue-400" />
+        ) : (
+          <Check className="w-3.5 h-3.5 text-white/30" />
+        )}
+      </span>
+    );
+  };
+
   const filteredTickets = filter === 'all' ? tickets : tickets.filter(t => t.status === filter);
   const openCount = tickets.filter(t => t.status === 'open').length;
 
   // Chat view
   if (selectedTicket) {
-    const store = selectedTicket.store_id ? storeMap.get(selectedTicket.store_id) : null;
+    const storeName = getStoreName(selectedTicket);
     const status = statusConfig[selectedTicket.status] || statusConfig.open;
     return (
       <SuperAdminLayout title="Suporte - Chat">
@@ -164,28 +219,35 @@ const SuperAdminSuporte = () => {
           </Button>
 
           <div className="rounded-xl border border-purple-500/20 bg-black/50 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 200px)' }}>
-            {/* Header */}
-            <div className="p-4 border-b border-purple-500/10 flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-white">{selectedTicket.subject}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  {store && (
-                    <span className="text-xs text-purple-400 flex items-center gap-1">
-                      <Store className="w-3 h-3" /> {store.name}
+            {/* Header with platform info */}
+            <div className="p-4 border-b border-purple-500/10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-white">{selectedTicket.subject}</h3>
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                    {storeName && (
+                      <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Store className="w-3 h-3" /> {storeName}
+                      </span>
+                    )}
+                    {selectedTicket.creator_email && (
+                      <span className="text-xs text-white/40 flex items-center gap-1">
+                        <Mail className="w-3 h-3" /> {selectedTicket.creator_email}
+                      </span>
+                    )}
+                    <span className="text-xs text-white/30">
+                      {format(new Date(selectedTicket.created_at), "dd MMM yyyy", { locale: ptBR })}
                     </span>
-                  )}
-                  <span className="text-xs text-white/40">
-                    {format(new Date(selectedTicket.created_at), "dd MMM yyyy", { locale: ptBR })}
-                  </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={status.color}>{status.label}</Badge>
-                {selectedTicket.status !== 'closed' && (
-                  <Button variant="ghost" size="sm" onClick={() => closeTicket.mutate()} className="text-red-400/70 hover:text-red-400 text-xs">
-                    <XCircle className="w-4 h-4 mr-1" /> Fechar
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={status.color}>{status.label}</Badge>
+                  {selectedTicket.status !== 'closed' && (
+                    <Button variant="ghost" size="sm" onClick={() => closeTicket.mutate()} className="text-red-400/70 hover:text-red-400 text-xs">
+                      <XCircle className="w-4 h-4 mr-1" /> Fechar
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -200,12 +262,19 @@ const SuperAdminSuporte = () => {
                         ? 'bg-purple-600 text-white rounded-br-md'
                         : 'bg-white/10 text-white rounded-bl-md'
                     }`}>
-                      {!isMe && <p className="text-[10px] font-semibold text-purple-300 mb-1">Criador</p>}
-                      {isMe && <p className="text-[10px] font-semibold text-purple-200 mb-1">Você (Super Admin)</p>}
+                      {!isMe && (
+                        <p className="text-[10px] font-semibold text-purple-300 mb-1">
+                          {storeName ? `Criador (${storeName})` : 'Criador'}
+                        </p>
+                      )}
+                      {isMe && <p className="text-[10px] font-semibold text-purple-200 mb-1">Você</p>}
                       <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                      <p className={`text-[10px] mt-1 ${isMe ? 'text-white/50' : 'text-white/30'}`}>
-                        {format(new Date(m.created_at), 'HH:mm')}
-                      </p>
+                      <div className={`flex items-center gap-0.5 mt-1 ${isMe ? 'justify-end' : ''}`}>
+                        <span className={`text-[10px] ${isMe ? 'text-white/50' : 'text-white/30'}`}>
+                          {format(new Date(m.created_at), 'HH:mm')}
+                        </span>
+                        <ReadReceipt msg={m} />
+                      </div>
                     </div>
                   </div>
                 );
@@ -267,30 +336,37 @@ const SuperAdminSuporte = () => {
             {filteredTickets.map((t) => {
               const status = statusConfig[t.status] || statusConfig.open;
               const StatusIcon = status.icon;
-              const store = t.store_id ? storeMap.get(t.store_id) : null;
+              const storeName = getStoreName(t);
               return (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTicket(t)}
-                  className="w-full text-left rounded-xl border border-purple-500/10 bg-black/30 p-4 hover:border-purple-500/30 transition-colors flex items-center justify-between gap-4"
+                  className="w-full text-left rounded-xl border border-purple-500/10 bg-black/30 p-4 hover:border-purple-500/30 transition-colors"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-white truncate">{t.subject}</p>
-                    <div className="flex items-center gap-3 mt-1">
-                      {store && (
-                        <span className="text-xs text-purple-400 flex items-center gap-1">
-                          <Store className="w-3 h-3" /> {store.name}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-white truncate">{t.subject}</p>
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        {storeName && (
+                          <span className="text-xs bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Store className="w-3 h-3" /> {storeName}
+                          </span>
+                        )}
+                        {t.creator_email && (
+                          <span className="text-xs text-white/30 flex items-center gap-1">
+                            <Mail className="w-3 h-3" /> {t.creator_email}
+                          </span>
+                        )}
+                        <span className="text-xs text-white/20">
+                          {format(new Date(t.updated_at), "dd MMM 'às' HH:mm", { locale: ptBR })}
                         </span>
-                      )}
-                      <span className="text-xs text-white/30">
-                        {format(new Date(t.updated_at), "dd MMM 'às' HH:mm", { locale: ptBR })}
-                      </span>
+                      </div>
                     </div>
+                    <Badge variant="outline" className={`${status.color} shrink-0 gap-1`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {status.label}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className={`${status.color} shrink-0 gap-1`}>
-                    <StatusIcon className="w-3 h-3" />
-                    {status.label}
-                  </Badge>
                 </button>
               );
             })}
