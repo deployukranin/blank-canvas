@@ -22,6 +22,7 @@ const Index = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { config } = useWhiteLabel();
+  const { basePath, isTenantScope } = useTenant();
 
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
@@ -79,13 +80,13 @@ const Index = () => {
             <h3 className="font-display font-semibold text-foreground mb-1">Junte-se à comunidade! 🎉</h3>
             <p className="text-sm text-muted-foreground mb-4">Crie sua conta para comprar customs e participar da comunidade.</p>
             <div className="flex gap-3">
-              <Link to="/entrar?tab=signup" className="flex-1">
+              <Link to={`${isTenantScope ? basePath : ''}/entrar?tab=signup`} className="flex-1">
                 <Button className="w-full gap-2 h-10" size="sm">
                   <UserPlus className="w-4 h-4" />
                   Cadastrar
                 </Button>
               </Link>
-              <Link to="/entrar" className="flex-1">
+              <Link to={`${isTenantScope ? basePath : ''}/entrar`} className="flex-1">
                 <Button variant="outline" className="w-full gap-2 h-10" size="sm">
                   <LogIn className="w-4 h-4" />
                   Entrar
