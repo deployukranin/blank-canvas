@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users, Youtube } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [youtubeHandle, setYoutubeHandle] = useState("");
 
   // Redirect if already authenticated
   useEffect(() => {
