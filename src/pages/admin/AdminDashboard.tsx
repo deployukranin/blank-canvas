@@ -79,11 +79,16 @@ const AdminDashboard: React.FC = () => {
 
       const { data: storeData } = await supabase
         .from('stores')
-        .select('slug')
+        .select('slug, plan_type, plan_expires_at')
         .eq('id', storeId)
         .maybeSingle();
 
-      if (!cancelled) setStoreSlug(storeData?.slug ?? null);
+      if (!cancelled) {
+        setStoreSlug(storeData?.slug ?? null);
+        if (storeData) {
+          setStorePlan({ type: storeData.plan_type, expiresAt: storeData.plan_expires_at });
+        }
+      }
     };
 
     resolveStoreSlug();
