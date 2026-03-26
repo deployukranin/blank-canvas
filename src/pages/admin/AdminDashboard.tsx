@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity } from 'lucide-react';
@@ -6,15 +6,36 @@ import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
-
-const PURPLE = '#8b5cf6';
-const PURPLE_LIGHT = '#a78bfa';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const { config } = useWhiteLabel();
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Derive chart color from the current primary HSL
+  const chartColor = useMemo(() => {
+    const parts = config.colors.primary.split(/\s+/);
+    if (parts.length === 3) {
+      const h = parts[0];
+      const s = parts[1];
+      const l = parts[2];
+      return `hsl(${h}, ${s}, ${l})`;
+    }
+    return 'hsl(263, 70%, 58%)';
+  }, [config.colors.primary]);
+
+  const chartColorLight = useMemo(() => {
+    const parts = config.colors.primary.split(/\s+/);
+    if (parts.length === 3) {
+      const h = parts[0];
+      const s = parts[1];
+      return `hsl(${h}, ${s}, 70%)`;
+    }
+    return 'hsl(263, 70%, 70%)';
+  }, [config.colors.primary]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -49,23 +70,23 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
-    <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-4">
+    <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
           <p className="text-2xl font-bold text-white mt-1">{isLoading ? '—' : value}</p>
-          {sub && <p className="text-[11px] text-purple-400 mt-0.5">{sub}</p>}
+          {sub && <p className="text-[11px] text-primary mt-0.5">{sub}</p>}
         </div>
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-purple-600/20">
-          <Icon className="w-4 h-4 text-purple-400" />
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
+          <Icon className="w-4 h-4 text-primary" />
         </div>
       </div>
     </div>
   );
 
   const chartTooltipStyle = {
-    contentStyle: { background: '#0a0a0a', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 8, fontSize: 12, color: '#fff' },
-    itemStyle: { color: '#a78bfa' },
+    contentStyle: { background: '#0a0a0a', border: `1px solid ${chartColor}33`, borderRadius: 8, fontSize: 12, color: '#fff' },
+    itemStyle: { color: chartColorLight },
   };
 
   return (
@@ -79,33 +100,33 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
+          <div className="lg:col-span-2 bg-white/[0.03] border border-primary/10 rounded-xl p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4">{t('admin.weeklyActivity')}</h3>
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData}>
                 <defs>
-                  <linearGradient id="adminPurpleGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={PURPLE} stopOpacity={0.3} />
-                    <stop offset="100%" stopColor={PURPLE} stopOpacity={0} />
+                  <linearGradient id="adminThemeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={chartColor} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={chartColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="receita" stroke={PURPLE} fill="url(#adminPurpleGrad)" strokeWidth={2} />
-                <Area type="monotone" dataKey="pedidos" stroke={PURPLE_LIGHT} fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
+                <Area type="monotone" dataKey="receita" stroke={chartColor} fill="url(#adminThemeGrad)" strokeWidth={2} />
+                <Area type="monotone" dataKey="pedidos" stroke={chartColorLight} fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
+          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-white/70 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-purple-400" />
+                <Clock className="w-4 h-4 text-primary" />
                 {t('admin.pending')}
               </h3>
-              <Link to="/admin/pedidos" className="text-[11px] text-purple-400 hover:text-purple-300">
+              <Link to="/admin/pedidos" className="text-[11px] text-primary hover:text-primary/80">
                 {t('admin.viewAll')} →
               </Link>
             </div>
@@ -124,7 +145,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-xs text-white/80">R$ {(order.amount_cents / 100).toFixed(2)}</p>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
                         {t('admin.pending')}
                       </span>
                     </div>
@@ -136,18 +157,18 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-4 text-center">
-            <Lightbulb className="w-6 h-6 mx-auto text-purple-400 mb-2" />
+          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+            <Lightbulb className="w-6 h-6 mx-auto text-primary mb-2" />
             <p className="text-xl font-bold text-white">—</p>
             <p className="text-[11px] text-white/40">{t('admin.ideasLabel')}</p>
           </div>
-          <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-4 text-center">
-            <Clock className="w-6 h-6 mx-auto text-purple-400 mb-2" />
+          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+            <Clock className="w-6 h-6 mx-auto text-primary mb-2" />
             <p className="text-xl font-bold text-white">{isLoading ? '—' : stats.pendingOrders}</p>
             <p className="text-[11px] text-white/40">{t('admin.pending')}</p>
           </div>
-          <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-4 text-center">
-            <Activity className="w-6 h-6 mx-auto text-purple-400 mb-2" />
+          <div className="bg-white/[0.03] border border-primary/10 rounded-xl p-4 text-center">
+            <Activity className="w-6 h-6 mx-auto text-primary mb-2" />
             <p className="text-xl font-bold text-white">{isLoading ? '—' : stats.newUsersToday}</p>
             <p className="text-[11px] text-white/40">{t('admin.newToday')}</p>
           </div>
