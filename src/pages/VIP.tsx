@@ -501,7 +501,7 @@ const VIPPage = () => {
               <Crown className="w-5 h-5 text-primary" />
               Subscribe VIP
             </DialogTitle>
-            <DialogDescription>Choose your plan and pay via PIX</DialogDescription>
+            <DialogDescription>Choose your plan and complete payment</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-3">
@@ -532,7 +532,7 @@ const VIPPage = () => {
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowPurchaseDialog(false)}>Cancel</Button>
               <Button className="flex-1" onClick={handleConfirmSubscription} disabled={isProcessing || !selectedPlan}>
-                {isProcessing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating PIX...</> : 'Generate PIX'}
+                {isProcessing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</> : 'Continue to Payment'}
               </Button>
             </div>
           </div>
