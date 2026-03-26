@@ -681,8 +681,10 @@ export interface WhiteLabelConfig {
       name: string;
       icon?: string;
       order?: number;
+      keywords?: string[];
     }>;
     videoCategoryMap?: Record<string, string | undefined>;
+    autoCategorizeEnabled?: boolean;
   };
 
   // Icons

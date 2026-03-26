@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Youtube, RefreshCw } from "lucide-react";
+import { Youtube } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ const AdminYoutube = () => {
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: config.youtube?.categories || [],
     videoCategoryMap: config.youtube?.videoCategoryMap || {},
+    autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
 
   // Sync draft with context when config changes
@@ -27,6 +28,7 @@ const AdminYoutube = () => {
     setCategorizationDraft({
       categories: config.youtube?.categories || [],
       videoCategoryMap: config.youtube?.videoCategoryMap || {},
+      autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
     });
   }, [config.youtube?.categories, config.youtube?.videoCategoryMap]);
 
@@ -49,7 +51,8 @@ const AdminYoutube = () => {
         ...config.youtube,
         categories: categorizationDraft.categories,
         videoCategoryMap: categorizationDraft.videoCategoryMap,
-      });
+        autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
+      } as any);
       toast({
         title: "Categorias salvas",
         description: "As configurações de categorias foram salvas com sucesso",
@@ -101,24 +104,12 @@ const AdminYoutube = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              {videos.length > 0 && (
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{videos.length}</p>
-                  <p className="text-xs text-muted-foreground">vídeos</p>
-                </div>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-                Atualizar
-              </Button>
-            </div>
+            {videos.length > 0 && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary">{videos.length}</p>
+                <p className="text-xs text-muted-foreground">vídeos</p>
+              </div>
+            )}
           </div>
 
           {error && (
