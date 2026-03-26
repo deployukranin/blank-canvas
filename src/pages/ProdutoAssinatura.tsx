@@ -76,8 +76,8 @@ const ProdutoAssinatura = () => {
       <MobileLayout title="Produto não encontrado">
         <div className="px-4 py-12 text-center">
           <p className="text-muted-foreground">Este produto não existe.</p>
-          <Button variant="link" onClick={() => navigate('/loja')}>
-            Voltar à loja
+          <Button variant="link" onClick={() => navigate('/')}>
+            Voltar
           </Button>
         </div>
       </MobileLayout>

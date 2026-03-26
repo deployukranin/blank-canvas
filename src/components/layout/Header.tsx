@@ -16,7 +16,7 @@ import {
 const navItems = [
   { path: '/', label: 'Início' },
   { path: '/ideias', label: 'Ideias' },
-  { path: '/loja', label: 'Loja' },
+  
   { path: '/vip', label: 'VIP', isVIP: true },
   { path: '/customs', label: "Custom's" },
   { path: '/comunidade', label: 'Comunidade' },
