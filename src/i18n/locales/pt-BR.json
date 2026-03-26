@@ -91,7 +91,11 @@
     "showingResults": "Mostrando {{count}} resultados. Refine sua busca.",
     "noVideosFound": "Nenhum vídeo encontrado.",
     "categoryName": "Nome da categoria",
-    "renamePlaceholder": "Novo nome..."
+    "renamePlaceholder": "Novo nome...",
+    "bulkPaste": "Colar Lista",
+    "bulkPastePlaceholder": "Cole uma palavra-chave por linha...",
+    "addAll": "Adicionar Todas",
+    "keywordsDetected": "palavras-chave detectadas"
   },
   "superAdmin": {
     "title": "Super Admin",

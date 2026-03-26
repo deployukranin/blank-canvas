@@ -91,7 +91,11 @@
     "showingResults": "Showing {{count}} results. Refine your search.",
     "noVideosFound": "No videos found.",
     "categoryName": "Category name",
-    "renamePlaceholder": "New name..."
+    "renamePlaceholder": "New name...",
+    "bulkPaste": "Bulk Paste",
+    "bulkPastePlaceholder": "Paste one keyword per line...",
+    "addAll": "Add All",
+    "keywordsDetected": "keywords detected"
   },
   "superAdmin": {
     "title": "Super Admin",
