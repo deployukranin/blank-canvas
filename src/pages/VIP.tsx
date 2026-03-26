@@ -75,31 +75,26 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handle no store context
+  // Load VIP plans from store config or global
   useEffect(() => {
-    if (!storeId) {
-      setIsLoading(false);
-    }
-  }, [storeId]);
-
-  // Load VIP plans from store config
-  useEffect(() => {
-    if (!storeId) return;
     const loadPlans = async () => {
-      const { data } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'vip_config')
-        .eq('store_id', storeId)
-        .maybeSingle();
+      let plans: VipPlanConfig[] = [];
 
-      if (data?.config_value) {
-        const cfg = data.config_value as any;
-        const plans = cfg.plans || [];
-        setVipPlans(plans);
-        if (plans.length > 0) setSelectedPlan(plans[0]);
-      } else {
-        // Fallback: try global config
+      if (storeId) {
+        const { data } = await supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'vip_config')
+          .eq('store_id', storeId)
+          .maybeSingle();
+
+        if (data?.config_value) {
+          plans = (data.config_value as any).plans || [];
+        }
+      }
+
+      // Fallback: try global config
+      if (plans.length === 0) {
         const { data: globalData } = await supabase
           .from('app_configurations')
           .select('config_value')
@@ -108,12 +103,18 @@ const VIPPage = () => {
           .maybeSingle();
 
         if (globalData?.config_value) {
-          const cfg = globalData.config_value as any;
-          const plans = cfg.plans || [];
-          setVipPlans(plans);
-          if (plans.length > 0) setSelectedPlan(plans[0]);
+          plans = (globalData.config_value as any).plans || [];
         }
       }
+
+      // Final fallback: use defaults from vip-config
+      if (plans.length === 0) {
+        const { defaultVipConfig } = await import('@/lib/vip-config');
+        plans = defaultVipConfig.plans;
+      }
+
+      setVipPlans(plans);
+      if (plans.length > 0) setSelectedPlan(plans[0]);
     };
     loadPlans();
   }, [storeId]);
