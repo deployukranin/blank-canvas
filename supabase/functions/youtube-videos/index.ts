@@ -34,8 +34,8 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-// Cache TTL in minutes (6 hours = 360 minutes)
-const CACHE_TTL_MINUTES = 360;
+// Cache TTL in minutes (30 days = 43200 minutes)
+const CACHE_TTL_MINUTES = 43200;
 
 // Get the uploads playlist ID from a channel (costs 1 quota unit)
 async function getUploadsPlaylistId(channelId: string, apiKey: string): Promise<string | null> {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Youtube, RefreshCw } from "lucide-react";
+import { Youtube } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -101,24 +101,12 @@ const AdminYoutube = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              {videos.length > 0 && (
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{videos.length}</p>
-                  <p className="text-xs text-muted-foreground">vídeos</p>
-                </div>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-                Atualizar
-              </Button>
-            </div>
+            {videos.length > 0 && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary">{videos.length}</p>
+                <p className="text-xs text-muted-foreground">vídeos</p>
+              </div>
+            )}
           </div>
 
           {error && (
