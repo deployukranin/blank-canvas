@@ -37,6 +37,45 @@ const json = (body: unknown, status = 200) =>
 // Cache TTL in minutes (30 days = 43200 minutes)
 const CACHE_TTL_MINUTES = 43200;
 
+// Resolve @handle or channel name to a channel ID (costs 1 quota unit)
+async function resolveHandleToChannelId(handle: string, apiKey: string): Promise<{ channelId: string; channelTitle: string; thumbnailUrl: string } | null> {
+  // Clean up handle
+  let cleanHandle = handle.trim();
+  if (cleanHandle.startsWith("@")) {
+    cleanHandle = cleanHandle.substring(1);
+  }
+  // Remove full URL if provided
+  if (cleanHandle.includes("youtube.com/")) {
+    const match = cleanHandle.match(/@([^/?\s]+)/);
+    if (match) cleanHandle = match[1];
+  }
+
+  console.log("[youtube-videos] Resolving handle:", cleanHandle);
+
+  // Use the channels endpoint with forHandle parameter
+  const params = new URLSearchParams({
+    part: "id,snippet",
+    forHandle: cleanHandle,
+    key: apiKey,
+  });
+
+  const url = `https://www.googleapis.com/youtube/v3/channels?${params.toString()}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (!res.ok || !data.items?.length) {
+    console.log("[youtube-videos] Handle resolution failed:", data);
+    return null;
+  }
+
+  const channel = data.items[0];
+  return {
+    channelId: channel.id,
+    channelTitle: channel.snippet?.title || "",
+    thumbnailUrl: channel.snippet?.thumbnails?.default?.url || "",
+  };
+}
+
 // Get the uploads playlist ID from a channel (costs 1 quota unit)
 async function getUploadsPlaylistId(channelId: string, apiKey: string): Promise<string | null> {
   const params = new URLSearchParams({
@@ -257,19 +296,69 @@ Deno.serve(async (req) => {
 
     let channelId = "";
     let forceRefresh = false;
+    let action = "videos"; // default action
 
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({}));
       channelId = String((body as Record<string, unknown>)?.channelId ?? "").trim();
       forceRefresh = Boolean((body as Record<string, unknown>)?.forceRefresh);
+      action = String((body as Record<string, unknown>)?.action ?? "videos");
     } else {
       const url = new URL(req.url);
       channelId = String(url.searchParams.get("channelId") ?? "").trim();
       forceRefresh = url.searchParams.get("forceRefresh") === "true";
+      action = url.searchParams.get("action") ?? "videos";
     }
 
+    // Handle "verify" action — resolve @handle to channel ID and return channel info
+    if (action === "verify") {
+      if (!channelId) {
+        return json({ error: "channelId or handle is required" }, 400);
+      }
+      if (!apiKey) {
+        return json({ error: "Missing YOUTUBE_API_KEY" }, 500);
+      }
+
+      // If it looks like a handle (starts with @ or doesn't start with UC)
+      const isHandle = channelId.startsWith("@") || !channelId.startsWith("UC");
+      
+      if (isHandle) {
+        const resolved = await resolveHandleToChannelId(channelId, apiKey);
+        if (!resolved) {
+          return json({ success: false, error: "Channel not found for this handle" }, 404);
+        }
+        return json({
+          success: true,
+          channelId: resolved.channelId,
+          channelTitle: resolved.channelTitle,
+          thumbnailUrl: resolved.thumbnailUrl,
+        });
+      } else {
+        // It's already a channel ID, verify it exists
+        const playlistId = await getUploadsPlaylistId(channelId, apiKey);
+        if (!playlistId) {
+          return json({ success: false, error: "Channel not found" }, 404);
+        }
+        return json({ success: true, channelId });
+      }
+    }
+
+    // --- Default "videos" action ---
     if (!channelId) {
       return json({ error: "channelId is required" }, 400);
+    }
+
+    // Auto-resolve handle to channel ID if needed
+    if ((channelId.startsWith("@") || !channelId.startsWith("UC")) && apiKey) {
+      console.log("[youtube-videos] Resolving handle to channelId:", channelId);
+      const resolved = await resolveHandleToChannelId(channelId, apiKey);
+      if (resolved) {
+        console.log("[youtube-videos] Resolved to:", resolved.channelId);
+        channelId = resolved.channelId;
+      } else {
+        console.log("[youtube-videos] Could not resolve handle:", channelId);
+        return json({ error: "Could not resolve YouTube handle to channel" }, 404);
+      }
     }
 
     console.log("[youtube-videos] Processing request for channelId:", channelId, "forceRefresh:", forceRefresh);
