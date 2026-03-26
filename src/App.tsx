@@ -48,6 +48,7 @@ import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 import AdminBanners from "./pages/admin/AdminBanners";
 import AdminPlanos from "./pages/admin/AdminPlanos";
+import AdminSuporte from "./pages/admin/AdminSuporte";
 
 // Super Admin Pages
 import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
@@ -55,6 +56,7 @@ import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 import SuperAdminTenants from "./pages/super-admin/SuperAdminTenants";
 import SuperAdminRanking from "./pages/super-admin/SuperAdminRanking";
 import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
+import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +120,7 @@ const App = () => (
                 <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
                 <Route path="/admin/banners" element={<AdminRoute requiredRole="admin"><AdminBanners /></AdminRoute>} />
                 <Route path="/admin/planos" element={<AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute>} />
+                <Route path="/admin/suporte" element={<AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
@@ -125,6 +128,7 @@ const App = () => (
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
                 <Route path="/admin-master/configuracoes" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
+                <Route path="/admin-master/suporte" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
