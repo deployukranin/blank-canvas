@@ -975,24 +975,24 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Base tokens
     if (isLight) {
       root.style.setProperty('--background', '0 0% 98%');
-      root.style.setProperty('--foreground', '0 0% 10%');
+      root.style.setProperty('--foreground', '0 0% 5%');
       root.style.setProperty('--card', '0 0% 100%');
-      root.style.setProperty('--card-foreground', '0 0% 10%');
+      root.style.setProperty('--card-foreground', '0 0% 5%');
       root.style.setProperty('--popover', '0 0% 100%');
-      root.style.setProperty('--popover-foreground', '0 0% 10%');
+      root.style.setProperty('--popover-foreground', '0 0% 5%');
       root.style.setProperty('--secondary', '0 0% 94%');
-      root.style.setProperty('--secondary-foreground', '0 0% 15%');
+      root.style.setProperty('--secondary-foreground', '0 0% 8%');
       root.style.setProperty('--muted', '0 0% 94%');
-      root.style.setProperty('--muted-foreground', '0 0% 45%');
-      root.style.setProperty('--border', '0 0% 88%');
-      root.style.setProperty('--input', '0 0% 90%');
+      root.style.setProperty('--muted-foreground', '0 0% 30%');
+      root.style.setProperty('--border', '0 0% 85%');
+      root.style.setProperty('--input', '0 0% 88%');
       root.style.setProperty('--primary-foreground', '0 0% 100%');
-      root.style.setProperty('--accent-foreground', '0 0% 10%');
+      root.style.setProperty('--accent-foreground', '0 0% 5%');
       root.style.setProperty('--sidebar-background', '0 0% 97%');
-      root.style.setProperty('--sidebar-foreground', '0 0% 25%');
+      root.style.setProperty('--sidebar-foreground', '0 0% 15%');
       root.style.setProperty('--sidebar-accent', `${hue} 30% 94%`);
-      root.style.setProperty('--sidebar-accent-foreground', '0 0% 10%');
-      root.style.setProperty('--sidebar-border', '0 0% 90%');
+      root.style.setProperty('--sidebar-accent-foreground', '0 0% 5%');
+      root.style.setProperty('--sidebar-border', '0 0% 88%');
     } else {
       root.style.setProperty('--background', '0 0% 4%');
       root.style.setProperty('--foreground', '0 0% 95%');
