@@ -136,7 +136,7 @@
 @layer components {
   .glass {
     @apply bg-card/60 backdrop-blur-xl border border-border shadow-lg;
-    border-color: hsl(263 70% 58% / 0.1);
+    border-color: var(--glass-border);
     box-shadow: var(--shadow-glass);
   }
 

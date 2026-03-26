@@ -797,9 +797,9 @@ const defaultConfig: WhiteLabelConfig = {
   quickActions: defaultQuickActions,
   community: defaultCommunityConfig,
   colors: {
-    primary: '270 70% 60%',
-    accent: '280 60% 70%',
-    background: '260 30% 6%',
+    primary: '263 70% 58%',
+    accent: '263 50% 25%',
+    background: '0 0% 4%',
   },
   shopify: {
     enabled: false,
