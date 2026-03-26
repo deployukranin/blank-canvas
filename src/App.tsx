@@ -2,13 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
+import { TenantGate } from "@/components/tenant/TenantGate";
 
 import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
@@ -57,14 +58,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <WhiteLabelProvider>
+      <BrowserRouter>
         <TenantProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <WhiteLabelProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
               <Routes>
-                {/* Rotas Públicas */}
+                {/* Rotas Públicas (sem tenant) */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/entrar" element={<ClientAuth />} />
@@ -75,7 +76,7 @@ const App = () => (
                 <Route path="/termos" element={<TermosDeUso />} />
                 <Route path="/privacidade" element={<Privacidade />} />
                 
-                {/* Rotas Protegidas (Usuário Logado) */}
+                {/* Rotas Protegidas (Usuário Logado, sem tenant) */}
                 <Route path="/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
                 <Route path="/vip" element={<ProtectedRoute><VIP /></ProtectedRoute>} />
                 <Route path="/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
@@ -84,6 +85,18 @@ const App = () => (
                 <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
                 <Route path="/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
                 <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+
+                {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
+                <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
+                <Route path="/:slug/entrar" element={<TenantGate><ClientAuth /></TenantGate>} />
+                <Route path="/:slug/customs" element={<TenantGate><ProtectedRoute><Customs /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/comunidade" element={<TenantGate><ProtectedRoute><Comunidade /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/ideias" element={<TenantGate><ProtectedRoute><Ideias /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/vip" element={<TenantGate><ProtectedRoute><VIP /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/galeria" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/perfil" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/meus-pedidos" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/notificacoes" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
 
                 {/* 🛡️ Rotas ADMIN (Creator Panel) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -109,10 +122,10 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+            </TooltipProvider>
+          </WhiteLabelProvider>
         </TenantProvider>
-      </WhiteLabelProvider>
+      </BrowserRouter>
     </AuthProvider>
   </QueryClientProvider>
 );
