@@ -52,19 +52,20 @@ const AdminConfiguracoes: React.FC = () => {
   });
 
   // Find currently active template
-  const activeTemplate = colorTemplates.find(
-    (tmpl) => tmpl.primary === config.colors.primary
-  ) || colorTemplates[0];
+  const activeTemplate = allTemplates.find(
+    (tmpl) => tmpl.primary === config.colors.primary && tmpl.mode === (config.colors.mode || 'dark')
+  ) || allTemplates[0];
 
-  const handleSelectTemplate = (template: typeof colorTemplates[0]) => {
+  const handleSelectTemplate = (template: ColorTemplate) => {
     updateColors({
       primary: template.primary,
       accent: template.accent,
-      background: '0 0% 4%',
+      background: template.mode === 'light' ? '0 0% 98%' : '0 0% 4%',
+      mode: template.mode,
     });
     toast({
       title: t('admin.settings.themeSaved', 'Theme updated!'),
-      description: `${template.label} template applied.`,
+      description: `${template.label} (${template.mode}) template applied.`,
     });
   };
 
