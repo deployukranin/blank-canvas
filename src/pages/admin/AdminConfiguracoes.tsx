@@ -82,6 +82,7 @@ const AdminConfiguracoes: React.FC = () => {
     updateColors({
       primary: template.primary,
       accent: template.accent,
+      background: '0 0% 4%',
     });
     toast({
       title: t('admin.settings.themeSaved', 'Theme updated!'),
