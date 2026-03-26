@@ -712,6 +712,7 @@ export interface WhiteLabelConfig {
     primary: string;
     accent: string;
     background: string;
+    mode?: 'dark' | 'light';
   };
 
   // Shopify Integration
@@ -800,6 +801,7 @@ const defaultConfig: WhiteLabelConfig = {
     primary: '263 70% 58%',
     accent: '263 50% 25%',
     background: '0 0% 4%',
+    mode: 'dark',
   },
   shopify: {
     enabled: false,
