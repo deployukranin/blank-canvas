@@ -951,7 +951,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => {
     const root = document.documentElement;
     
-    // Validate HSL format before applying (should be "H S% L%" format)
     const isValidHSL = (value: string) => {
       const parts = value.trim().split(/\s+/);
       if (parts.length !== 3) return false;
@@ -962,7 +961,6 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
              s.endsWith('%') && l.endsWith('%');
     };
     
-    // Only apply valid HSL colors, otherwise use defaults
     const defaultColors = {
       primary: '263 70% 58%',
       accent: '263 50% 25%',
@@ -971,38 +969,84 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     const primary = isValidHSL(config.colors.primary) ? config.colors.primary : defaultColors.primary;
     const accent = isValidHSL(config.colors.accent) ? config.colors.accent : defaultColors.accent;
-    // Always force pure black background regardless of config
-    const background = '0 0% 4%';
-    
-    // Extract hue from primary for derived variables
     const hue = primary.split(' ')[0];
-    
+    const isLight = config.colors.mode === 'light';
+
+    // Base tokens
+    if (isLight) {
+      root.style.setProperty('--background', '0 0% 98%');
+      root.style.setProperty('--foreground', '0 0% 10%');
+      root.style.setProperty('--card', '0 0% 100%');
+      root.style.setProperty('--card-foreground', '0 0% 10%');
+      root.style.setProperty('--popover', '0 0% 100%');
+      root.style.setProperty('--popover-foreground', '0 0% 10%');
+      root.style.setProperty('--secondary', '0 0% 94%');
+      root.style.setProperty('--secondary-foreground', '0 0% 15%');
+      root.style.setProperty('--muted', '0 0% 94%');
+      root.style.setProperty('--muted-foreground', '0 0% 45%');
+      root.style.setProperty('--border', '0 0% 88%');
+      root.style.setProperty('--input', '0 0% 90%');
+      root.style.setProperty('--primary-foreground', '0 0% 100%');
+      root.style.setProperty('--accent-foreground', '0 0% 10%');
+      root.style.setProperty('--sidebar-background', '0 0% 97%');
+      root.style.setProperty('--sidebar-foreground', '0 0% 25%');
+      root.style.setProperty('--sidebar-accent', `${hue} 30% 94%`);
+      root.style.setProperty('--sidebar-accent-foreground', '0 0% 10%');
+      root.style.setProperty('--sidebar-border', '0 0% 90%');
+    } else {
+      root.style.setProperty('--background', '0 0% 4%');
+      root.style.setProperty('--foreground', '0 0% 95%');
+      root.style.setProperty('--card', '0 0% 8%');
+      root.style.setProperty('--card-foreground', '0 0% 95%');
+      root.style.setProperty('--popover', '0 0% 7%');
+      root.style.setProperty('--popover-foreground', '0 0% 95%');
+      root.style.setProperty('--secondary', '0 0% 14%');
+      root.style.setProperty('--secondary-foreground', '0 0% 95%');
+      root.style.setProperty('--muted', '0 0% 12%');
+      root.style.setProperty('--muted-foreground', '0 0% 55%');
+      root.style.setProperty('--border', '0 0% 16%');
+      root.style.setProperty('--input', '0 0% 12%');
+      root.style.setProperty('--primary-foreground', '0 0% 100%');
+      root.style.setProperty('--accent-foreground', '0 0% 95%');
+      root.style.setProperty('--sidebar-background', '0 0% 6%');
+      root.style.setProperty('--sidebar-foreground', '0 0% 90%');
+      root.style.setProperty('--sidebar-accent', `${hue} 50% 15%`);
+      root.style.setProperty('--sidebar-accent-foreground', '0 0% 95%');
+      root.style.setProperty('--sidebar-border', '0 0% 14%');
+    }
+
     root.style.setProperty('--primary', primary);
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--background', background);
-    
-    // Update all derived variables
+    root.style.setProperty('--accent', isLight ? `${hue} 40% 92%` : accent);
     root.style.setProperty('--ring', primary);
     root.style.setProperty('--sidebar-primary', primary);
     root.style.setProperty('--sidebar-ring', primary);
-    root.style.setProperty('--sidebar-accent', `${hue} 50% 15%`);
     
     // Glass & gradient variables
-    root.style.setProperty('--glass-border', `hsl(${hue} 70% 58% / 0.12)`);
-    root.style.setProperty('--glass-highlight', `hsl(${hue} 70% 58% / 0.06)`);
-    root.style.setProperty('--gradient-primary', `linear-gradient(135deg, hsl(${primary}), hsl(${hue} 50% 35%))`);
-    root.style.setProperty('--gradient-accent', `linear-gradient(135deg, hsl(${hue} 60% 50%), hsl(${hue} 40% 30%))`);
-    root.style.setProperty('--shadow-glass', `0 8px 32px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(${hue} 70% 58% / 0.05)`);
-    root.style.setProperty('--shadow-glow', `0 0 40px hsl(${hue} 70% 58% / 0.12)`);
-    
-    // Gradient mesh
-    root.style.setProperty('--gradient-mesh', `
-      radial-gradient(ellipse at 18% 18%, hsl(${hue} 70% 58% / 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse at 82% 78%, hsl(${hue} 50% 40% / 0.06) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 55%, hsl(${hue} 30% 20% / 0.04) 0%, transparent 70%)
-    `);
+    if (isLight) {
+      root.style.setProperty('--glass-border', `hsl(${hue} 30% 50% / 0.12)`);
+      root.style.setProperty('--glass-highlight', `hsl(${hue} 30% 50% / 0.06)`);
+      root.style.setProperty('--gradient-primary', `linear-gradient(135deg, hsl(${primary}), hsl(${hue} 60% 45%))`);
+      root.style.setProperty('--gradient-accent', `linear-gradient(135deg, hsl(${hue} 50% 55%), hsl(${hue} 40% 45%))`);
+      root.style.setProperty('--shadow-glass', `0 4px 24px hsl(0 0% 0% / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.6)`);
+      root.style.setProperty('--shadow-glow', `0 0 30px hsl(${hue} 70% 58% / 0.08)`);
+      root.style.setProperty('--shadow-card', `0 2px 12px hsl(0 0% 0% / 0.06)`);
+      root.style.setProperty('--gradient-mesh', 'none');
+    } else {
+      root.style.setProperty('--glass-border', `hsl(${hue} 70% 58% / 0.12)`);
+      root.style.setProperty('--glass-highlight', `hsl(${hue} 70% 58% / 0.06)`);
+      root.style.setProperty('--gradient-primary', `linear-gradient(135deg, hsl(${primary}), hsl(${hue} 50% 35%))`);
+      root.style.setProperty('--gradient-accent', `linear-gradient(135deg, hsl(${hue} 60% 50%), hsl(${hue} 40% 30%))`);
+      root.style.setProperty('--shadow-glass', `0 8px 32px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(${hue} 70% 58% / 0.05)`);
+      root.style.setProperty('--shadow-glow', `0 0 40px hsl(${hue} 70% 58% / 0.12)`);
+      root.style.setProperty('--shadow-card', `0 4px 24px hsl(0 0% 0% / 0.6)`);
+      root.style.setProperty('--gradient-mesh', `
+        radial-gradient(ellipse at 18% 18%, hsl(${hue} 70% 58% / 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 82% 78%, hsl(${hue} 50% 40% / 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 55%, hsl(${hue} 30% 20% / 0.04) 0%, transparent 70%)
+      `);
+    }
 
-    // Update scrollbar colors via a dynamic style tag
+    // Scrollbar
     const styleId = 'dynamic-scrollbar-colors';
     let styleEl = document.getElementById(styleId);
     if (!styleEl) {
@@ -1010,10 +1054,12 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       styleEl.id = styleId;
       document.head.appendChild(styleEl);
     }
+    const scrollAlpha = isLight ? 0.15 : 0.2;
+    const scrollAlphaHover = isLight ? 0.3 : 0.4;
     styleEl.textContent = `
-      * { scrollbar-color: hsla(${hue}, 70%, 58%, 0.2) transparent; }
-      *::-webkit-scrollbar-thumb { background: hsla(${hue}, 70%, 58%, 0.2); }
-      *::-webkit-scrollbar-thumb:hover { background: hsla(${hue}, 70%, 58%, 0.4); }
+      * { scrollbar-color: hsla(${hue}, 70%, 58%, ${scrollAlpha}) transparent; }
+      *::-webkit-scrollbar-thumb { background: hsla(${hue}, 70%, 58%, ${scrollAlpha}); }
+      *::-webkit-scrollbar-thumb:hover { background: hsla(${hue}, 70%, 58%, ${scrollAlphaHover}); }
     `;
   }, [config.colors]);
 
