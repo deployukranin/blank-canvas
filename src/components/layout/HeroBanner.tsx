@@ -72,11 +72,10 @@ export function HeroBanner({
       ))}
 
       <button
-        className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full bg-background/30 backdrop-blur-sm px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-background/50 transition-colors"
+        className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/30 backdrop-blur-sm text-foreground/90 hover:bg-background/50 transition-colors"
         aria-label="Login ou Cadastro"
       >
         <User className="h-4 w-4" />
-        <span>Entrar</span>
       </button>
 
       <div className="absolute bottom-16 left-0 right-0 z-10 px-6 md:px-16">
