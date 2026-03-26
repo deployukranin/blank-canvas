@@ -891,6 +891,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           // Deep merge with defaults
           const merged = mergeConfig(defaultConfig, dbConfig);
           setConfig(merged);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(merged)); } catch {}
           localStorage.removeItem(STORAGE_KEY); // Clear old localStorage
         } else {
           // No DB config, try localStorage migration
