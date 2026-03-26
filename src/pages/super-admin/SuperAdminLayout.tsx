@@ -40,14 +40,14 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black">
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-card/80 backdrop-blur-xl border-b border-border z-50 flex items-center justify-between px-4">
-        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-black/90 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-4">
+        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white/70 hover:text-white hover:bg-white/5">
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
-        <h1 className="font-semibold">{title}</h1>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+        <h1 className="font-semibold text-white">{title}</h1>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-white/70 hover:text-white hover:bg-white/5">
           <ArrowLeft className="w-5 h-5" />
         </Button>
       </header>
@@ -55,29 +55,33 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 w-64 bg-card/95 backdrop-blur-xl border-r border-border z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col',
+          'fixed inset-y-0 left-0 w-64 bg-black border-r border-purple-500/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="p-6 border-b border-border shrink-0">
+        <div className="p-6 border-b border-purple-500/10 shrink-0">
           <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-white">
               Super Admin
             </h2>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-yellow-400" />
+          <div className="flex items-center gap-2 mt-3">
+            <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
+              <span className="text-xs text-purple-400 font-bold">
+                {user?.username?.charAt(0)?.toUpperCase() || 'S'}
+              </span>
             </div>
             <div>
-              <p className="text-sm font-medium">{user?.username}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="text-sm font-medium text-white/90">{user?.username}</p>
+              <p className="text-[11px] text-white/40">{user?.email}</p>
             </div>
           </div>
         </div>
 
-        <nav className="p-4 space-y-2 overflow-y-auto flex-1">
+        <nav className="p-3 space-y-1 overflow-y-auto flex-1">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -86,26 +90,26 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg transition-all',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm',
                   isActive
-                    ? 'bg-yellow-500/20 text-yellow-400'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-purple-600/20 text-purple-400 border border-purple-500/20'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white/80 border border-transparent'
                 )}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-4 h-4" />
                 <span className="font-medium">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-border space-y-2 shrink-0">
+        <div className="p-3 border-t border-purple-500/10 shrink-0">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start gap-3 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
             onClick={handleLogout}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
             <span>Sair</span>
           </Button>
         </div>
@@ -113,18 +117,18 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/70 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main Content */}
-      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen">
-        <div className="hidden lg:flex items-center justify-between h-16 px-6 border-b border-border bg-card/50">
-          <h1 className="text-xl font-semibold">{title}</h1>
+      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-black">
+        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-purple-500/10">
+          <h1 className="text-lg font-semibold text-white">{title}</h1>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="gap-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
           >
             <LogOut className="w-4 h-4" />
             Sair
