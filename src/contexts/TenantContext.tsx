@@ -43,7 +43,7 @@ const RESERVED_ROUTES = new Set([
   'ajuda', 'termos', 'privacidade', 'assinaturas',
   'ideias', 'vip', 'customs', 'comunidade', 'galeria',
   'perfil', 'meus-pedidos', 'notificacoes', 'audios', 'videos',
-  'galeria-videos',
+  'galeria-videos', 'setup',
 ]);
 
 /**
