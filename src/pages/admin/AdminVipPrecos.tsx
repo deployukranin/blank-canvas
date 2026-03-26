@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Crown, Sparkles, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import {
 } from '@/lib/vip-config';
 
 const AdminVipPrecos = () => {
+  const { i18n } = useTranslation();
   const { 
     config, 
     setConfig, 
@@ -99,9 +101,10 @@ const AdminVipPrecos = () => {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    const isBR = i18n.language?.startsWith('pt');
+    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
       style: 'currency',
-      currency: 'BRL',
+      currency: isBR ? 'BRL' : 'USD',
     }).format(value);
   };
 
