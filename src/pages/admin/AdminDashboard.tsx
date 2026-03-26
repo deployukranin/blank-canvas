@@ -22,8 +22,16 @@ const AdminDashboard: React.FC = () => {
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
 
   // Use published domain; fall back to current origin for local/preview
-  const publishedDomain = import.meta.env.VITE_PUBLISHED_URL || window.location.origin;
-  const platformUrl = storeSlug ? `${publishedDomain}/${storeSlug}` : publishedDomain;
+  const getPublishedOrigin = () => {
+    const host = window.location.hostname;
+    // If on lovableproject.com (preview), use the published lovable.app domain
+    if (host.includes('lovableproject.com')) {
+      return 'https://cozy-corner-seed.lovable.app';
+    }
+    // If on lovable.app or custom domain, use current origin
+    return window.location.origin;
+  };
+  const platformUrl = storeSlug ? `${getPublishedOrigin()}/${storeSlug}` : getPublishedOrigin();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(platformUrl);
