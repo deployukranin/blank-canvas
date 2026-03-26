@@ -971,7 +971,13 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       },
       icons: { ...defaultIcons, ...parsed.icons },
       quickActions: parsed.quickActions || defaultQuickActions,
-      navigationTabs: parsed.navigationTabs || defaultNavigationTabs,
+      navigationTabs: (() => {
+        const tabs = parsed.navigationTabs || defaultNavigationTabs;
+        // Merge any missing default tabs (e.g. VIP added later)
+        const existingIds = new Set(tabs.map((t: any) => t.id));
+        const missing = defaultNavigationTabs.filter(dt => !existingIds.has(dt.id));
+        return missing.length > 0 ? [...tabs, ...missing] : tabs;
+      })(),
       community: { ...defaultCommunityConfig, ...parsed.community },
       shopify: { ...defaults.shopify, ...parsed.shopify },
       tokens: {
