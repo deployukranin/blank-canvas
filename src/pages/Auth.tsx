@@ -32,6 +32,32 @@ const Auth = () => {
   const [youtubeVerified, setYoutubeVerified] = useState<null | { channelId: string; channelTitle: string; thumbnailUrl: string }>(null);
   const [youtubeVerifying, setYoutubeVerifying] = useState(false);
   const [youtubeError, setYoutubeError] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [storeSlug, setStoreSlug] = useState("");
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [slugChecking, setSlugChecking] = useState(false);
+
+  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'perfil', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'comunidade', 'galeria-videos', 'ideias', 'notificacoes', 'ajuda', 'audios', 'videos', 'termos', 'privacidade', 'assinaturas', 'meus-pedidos', 'client-auth'];
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40);
+  };
+
+  const checkSlugAvailability = async (slug: string) => {
+    if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
+    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); return; }
+    setSlugChecking(true);
+    const { data } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle();
+    setSlugAvailable(!data);
+    setSlugChecking(false);
+  };
 
   const features = [
     { icon: Palette, title: t("auth.featureCustom"), desc: t("auth.featureCustomDesc") },
@@ -115,6 +141,9 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!storeName.trim() || !storeSlug.trim()) { toast.error(t("auth.storeNameRequired")); return; }
+    if (storeSlug.length < 3) { toast.error(t("auth.slugTooShort")); return; }
+    if (slugAvailable === false) { toast.error(t("auth.slugUnavailable")); return; }
     if (!validateEmail(signupEmail)) { toast.error(t("auth.invalidEmail")); return; }
     if (signupPassword.length < 6) { toast.error(t("auth.passwordMin")); return; }
     if (signupPassword !== signupConfirmPassword) { toast.error(t("auth.passwordMismatch")); return; }
@@ -123,6 +152,35 @@ const Auth = () => {
     const result = await signUp(signupEmail, signupPassword);
 
     if (result.success) {
+      // Get the newly created user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Create store
+        const { data: store, error: storeError } = await supabase
+          .from('stores')
+          .insert({
+            name: storeName.trim(),
+            slug: storeSlug,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (store && !storeError) {
+          // Link admin
+          await supabase.from('store_admins').insert({ store_id: store.id, user_id: user.id });
+          await supabase.from('user_roles').insert({ user_id: user.id, role: 'admin' as any });
+
+          // Save youtube channel if verified
+          if (youtubeVerified) {
+            await supabase.from('app_configurations').insert({
+              config_key: 'youtube_channel',
+              config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
+              store_id: store.id,
+            });
+          }
+        }
+      }
       toast.success(t("auth.accountCreated"));
       navigate("/admin", { replace: true });
     } else {
@@ -303,6 +361,61 @@ const Auth = () => {
               {/* Signup Tab */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Store Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-store-name" className="text-gray-300 text-sm">
+                      {t("auth.storeName")} <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      id="signup-store-name"
+                      type="text"
+                      placeholder={t("auth.storeNamePlaceholder")}
+                      value={storeName}
+                      onChange={(e) => {
+                        setStoreName(e.target.value);
+                        const slug = generateSlug(e.target.value);
+                        setStoreSlug(slug);
+                        setSlugAvailable(null);
+                        if (slug.length >= 3) checkSlugAvailability(slug);
+                      }}
+                      className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                      required
+                    />
+                  </div>
+
+                  {/* Store Slug */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-slug" className="text-gray-300 text-sm">
+                      {t("auth.storeSlug")} <span className="text-red-400">*</span>
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">/</span>
+                      <Input
+                        id="signup-slug"
+                        type="text"
+                        placeholder="my-store"
+                        value={storeSlug}
+                        onChange={(e) => {
+                          const slug = generateSlug(e.target.value);
+                          setStoreSlug(slug);
+                          setSlugAvailable(null);
+                          if (slug.length >= 3) checkSlugAvailability(slug);
+                        }}
+                        className="pl-7 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        required
+                      />
+                      {slugChecking && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />}
+                      {!slugChecking && slugAvailable === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-400" />}
+                      {!slugChecking && slugAvailable === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />}
+                    </div>
+                    {slugAvailable === false && (
+                      <p className="text-xs text-red-400">{t("auth.slugUnavailable")}</p>
+                    )}
+                    {slugAvailable === true && (
+                      <p className="text-xs text-green-400">{t("auth.slugAvailable")}</p>
+                    )}
+                    <p className="text-xs text-gray-500">{t("auth.slugHint")}</p>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email" className="text-gray-300 text-sm">{t("common.email")}</Label>
                     <div className="relative">

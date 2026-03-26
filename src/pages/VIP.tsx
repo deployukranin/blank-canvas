@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ const VIPPage = () => {
   const { session } = useAuth();
   const { store } = useTenant();
   const { toast } = useToast();
+  const { i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
   const storeId = store?.id;
@@ -185,8 +187,13 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, storeId]);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  const formatCurrency = (value: number) => {
+    const isBR = i18n.language?.startsWith('pt');
+    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+      style: 'currency',
+      currency: isBR ? 'BRL' : 'USD',
+    }).format(value);
+  };
 
   const getPlanLabel = (type: string) => {
     switch (type) {
@@ -438,6 +445,36 @@ const VIPPage = () => {
             </div>
           </div>
         )}
+
+        {/* Blurred Content Preview */}
+        <div>
+          <h3 className="font-display font-semibold mb-3 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            Exclusive Content
+          </h3>
+          <div className="space-y-3 relative">
+            {[1, 2, 3].map((i) => (
+              <GlassCard key={i} className="p-4 blur-[6px] pointer-events-none select-none">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Play className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="h-4 w-32 bg-muted rounded mb-2" />
+                    <div className="h-3 w-full bg-muted/60 rounded mb-1" />
+                    <div className="h-3 w-2/3 bg-muted/40 rounded" />
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <Lock className="w-8 h-8 mx-auto mb-2 text-primary" />
+                <p className="text-sm font-semibold">Subscribe to unlock</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {vipPlans.length === 0 && (
           <GlassCard className="p-8 text-center">
