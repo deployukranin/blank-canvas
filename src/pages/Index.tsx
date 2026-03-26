@@ -68,7 +68,7 @@ const Index = () => {
 
         {/* Quick Actions */}
         <div>
-          <h3 className="font-display font-semibold mb-3">Explorar</h3>
+          <h3 className="font-display font-semibold mb-3 text-foreground">Explorar</h3>
           <div className="grid grid-cols-3 gap-3">
             {quickActions.map((action, index) => (
               <motion.div
@@ -78,11 +78,11 @@ const Index = () => {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link to={action.path}>
-                  <div className="glass glass-hover rounded-xl p-4 text-center">
-                    <div className={`w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center`}>
-                      <DynamicIcon icon={action.icon} size={20} className="text-white" />
+                  <div className="glass glass-hover rounded-xl p-4 text-center group">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+                      <DynamicIcon icon={action.icon} size={20} className="text-primary" />
                     </div>
-                    <span className="text-xs font-medium">{action.label}</span>
+                    <span className="text-xs font-medium text-foreground">{action.label}</span>
                   </div>
                 </Link>
               </motion.div>
@@ -98,11 +98,11 @@ const Index = () => {
             transition={{ delay: 0.15 }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display font-semibold flex items-center gap-2">
-                <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+              <h3 className="font-display font-semibold flex items-center gap-2 text-foreground">
+                <Heart className="w-4 h-4 fill-primary text-primary" />
                 Meus Favoritos
               </h3>
-              <Link to="/galeria-videos" className="text-primary text-sm font-medium">
+              <Link to="/galeria-videos" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 Ver todos
               </Link>
             </div>
@@ -124,8 +124,8 @@ const Index = () => {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display font-semibold">Vídeos Recentes</h3>
-              <Link to="/galeria-videos" className="text-primary text-sm font-medium">
+              <h3 className="font-display font-semibold text-foreground">Vídeos Recentes</h3>
+              <Link to="/galeria-videos" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 Ver todos
               </Link>
             </div>
@@ -142,8 +142,8 @@ const Index = () => {
         {/* Feed Preview */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Novidades</h3>
-            <Link to="/comunidade" className="text-primary text-sm font-medium">
+            <h3 className="font-display font-semibold text-foreground">Novidades</h3>
+            <Link to="/comunidade" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
               Ver tudo
             </Link>
           </div>
@@ -158,11 +158,11 @@ const Index = () => {
               >
                 <GlassCard className="p-4" hover={false}>
                   <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm">🌙</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm mb-1 truncate">{post.title}</p>
+                      <p className="font-medium text-sm mb-1 truncate text-foreground">{post.title}</p>
                       <p className="text-xs text-muted-foreground line-clamp-2">{post.content}</p>
                     </div>
                   </div>
