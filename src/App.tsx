@@ -38,6 +38,7 @@ import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminPagamentosPix from "./pages/admin/AdminPagamentosPix";
 import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
+import AdminVipConteudo from "./pages/admin/AdminVipConteudo";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
 import AdminYoutube from "./pages/admin/AdminYoutube";
@@ -105,6 +106,7 @@ const App = () => (
                 <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
                 <Route path="/admin/pagamentos-pix" element={<AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute>} />
                 <Route path="/admin/vip-precos" element={<AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute>} />
+                <Route path="/admin/vip-conteudo" element={<AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute>} />
                 <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
                 <Route path="/admin/audios" element={<AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute>} />
                 <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, Shield, CreditCard,
-  Crown, Video, Headphones, Youtube, Palette, Image
+  Crown, Video, Headphones, Youtube, Palette, Image, Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: '/admin/pedidos', icon: ShoppingCart, label: t('admin.orders') },
     { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.payments') },
     { path: '/admin/vip-precos', icon: Crown, label: t('admin.vipPricing') },
+    { path: '/admin/vip-conteudo', icon: Star, label: t('admin.vipContent', 'VIP Content') },
     { path: '/admin/videos', icon: Video, label: t('admin.videos') },
     { path: '/admin/audios', icon: Headphones, label: t('admin.audios') },
     { path: '/admin/youtube', icon: Youtube, label: t('admin.youtube') },

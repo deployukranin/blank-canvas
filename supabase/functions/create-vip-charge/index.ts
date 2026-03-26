@@ -8,6 +8,7 @@ const corsHeaders = {
 interface CreateVIPChargeRequest {
   planType: 'monthly' | 'quarterly' | 'yearly';
   customerName?: string;
+  storeId?: string;
 }
 
 Deno.serve(async (req) => {
@@ -66,14 +67,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    const storeId = body.storeId || null;
+
     // Check if user already has active VIP subscription
-    const { data: existingSub } = await supabase
+    let existingSubQuery = supabase
       .from('vip_subscriptions')
       .select('id, expires_at')
       .eq('user_id', userId)
       .eq('status', 'active')
-      .gt('expires_at', new Date().toISOString())
-      .maybeSingle();
+      .gt('expires_at', new Date().toISOString());
+
+    if (storeId) {
+      existingSubQuery = existingSubQuery.eq('store_id', storeId);
+    }
+
+    const { data: existingSub } = await existingSubQuery.maybeSingle();
 
     if (existingSub) {
       return new Response(
@@ -164,6 +172,7 @@ Deno.serve(async (req) => {
         price_cents: amountCents,
         expires_at: subscriptionExpiresAt.toISOString(),
         status: 'pending_payment',
+        store_id: storeId,
       })
       .select()
       .single();
@@ -195,6 +204,7 @@ Deno.serve(async (req) => {
         br_code: charge.brCode,
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
+        store_id: storeId,
       });
 
     return new Response(
