@@ -14,7 +14,7 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
 
   const handleGoToAuth = () => {
     onClose();
-    navigate('/auth');
+    navigate('/entrar');
   };
 
   return (

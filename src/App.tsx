@@ -28,6 +28,7 @@ import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ClientAuth from "./pages/ClientAuth";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -66,6 +67,7 @@ const App = () => (
                 {/* Rotas Públicas */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/entrar" element={<ClientAuth />} />
                 
                 <Route path="/assinaturas" element={<Assinaturas />} />
                 <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
