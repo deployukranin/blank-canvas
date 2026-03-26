@@ -124,14 +124,18 @@ const AdminYoutube = () => {
         videoCategoryMap: categorizationDraft.videoCategoryMap,
         autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
       } as any);
+
+      // Also save as global defaults for new platforms
+      await saveConfig("global_default_categories", categorizationDraft.categories);
+
       toast({
-        title: "Categorias salvas",
-        description: "As configurações de categorias foram salvas com sucesso",
+        title: t("common.save"),
+        description: t("admin.categoriesSavedGlobal"),
       });
     } catch (err) {
       toast({
-        title: "Erro",
-        description: "Falha ao salvar as categorias",
+        title: "Error",
+        description: t("admin.categoriesSaveError"),
         variant: "destructive",
       });
     } finally {
