@@ -58,13 +58,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       </header>
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-black border-r border-purple-500/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 w-64 bg-black border-r border-primary/10 z-40 transform transition-transform duration-300 lg:translate-x-0 flex flex-col",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 border-b border-purple-500/10 shrink-0">
+        <div className="p-6 border-b border-primary/10 shrink-0">
           <div className="flex items-center gap-2 mt-1">
-            <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
-              <span className="text-xs text-purple-400 font-bold">
+            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-xs text-primary font-bold">
                 {user?.username?.charAt(0)?.toUpperCase() || 'A'}
               </span>
             </div>
@@ -83,7 +83,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
                   isActive
-                    ? "bg-purple-600/20 text-purple-400 border border-purple-500/20"
+                    ? "bg-primary/20 text-primary border border-primary/20"
                     : "text-white/50 hover:bg-white/5 hover:text-white/80 border border-transparent"
                 )}>
                 <item.icon className="w-4 h-4" />
@@ -93,7 +93,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           })}
         </nav>
 
-        <div className="p-3 border-t border-purple-500/10 space-y-1 shrink-0">
+        <div className="p-3 border-t border-primary/10 space-y-1 shrink-0">
           <div className="px-3 py-1">
             <LanguageSelector />
           </div>
@@ -115,7 +115,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       )}
 
       <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-black">
-        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-purple-500/10">
+        <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-primary/10">
           <h1 className="text-lg font-semibold text-white">{title}</h1>
           <div className="flex items-center gap-2">
             <LanguageSelector variant="minimal" />
