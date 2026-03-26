@@ -1,7 +1,6 @@
 /**
  * Configuration Storage - Persists app configurations to Supabase
- * 
- * Uses edge function for saving (bypasses RLS with service role)
+ * Supports per-store configs via store_id
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -13,15 +12,24 @@ export type ConfigKey =
   | 'global_default_categories';
 
 /**
- * Load configuration from database
+ * Load configuration from database.
+ * If storeId is provided, loads store-specific config.
+ * Otherwise loads global config (store_id IS NULL).
  */
-export const loadConfig = async <T>(key: ConfigKey): Promise<T | null> => {
+export const loadConfig = async <T>(key: ConfigKey, storeId?: string | null): Promise<T | null> => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('app_configurations')
       .select('config_value')
-      .eq('config_key', key)
-      .maybeSingle();
+      .eq('config_key', key);
+
+    if (storeId) {
+      query = query.eq('store_id', storeId);
+    } else {
+      query = query.is('store_id', null);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       console.error(`Error loading config ${key}:`, error);
@@ -36,35 +44,31 @@ export const loadConfig = async <T>(key: ConfigKey): Promise<T | null> => {
 };
 
 /**
- * Save configuration to database via edge function
- * This bypasses RLS by using service role in the edge function
- * REQUIRES: User must be logged in with admin/ceo role
+ * Save configuration to database via edge function.
+ * Includes store_id if provided for tenant-scoped configs.
  */
 export const saveConfig = async <T>(
   key: ConfigKey, 
-  value: T
+  value: T,
+  storeId?: string | null
 ): Promise<boolean> => {
   try {
-    // Check if user is authenticated before calling edge function
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // Silently skip saving if not logged in - this is expected behavior
-      // Configs will be loaded from DB on next visit
       console.debug(`Skipping save for ${key}: user not authenticated`);
       return false;
     }
 
-    // Call edge function to save config (auth required)
     const { data, error } = await supabase.functions.invoke('save-app-config', {
       body: {
         config_key: key,
         config_value: value,
+        ...(storeId ? { store_id: storeId } : {}),
       },
     });
 
     if (error) {
-      // Don't log as error if it's just permission denied (user isn't admin)
       if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
         console.debug(`Config ${key} not saved: user lacks admin permissions`);
         return false;
@@ -74,7 +78,6 @@ export const saveConfig = async <T>(
     }
 
     if (!data?.success) {
-      // Handle specific errors gracefully
       if (data?.error?.includes('Acesso negado') || data?.error?.includes('permissão')) {
         console.debug(`Config ${key} not saved: ${data.error}`);
         return false;
@@ -99,15 +102,12 @@ export const migrateLocalStorageToDb = async <T>(
   dbKey: ConfigKey,
   defaultValue: T
 ): Promise<void> => {
-  // Check if already migrated
   const existing = await loadConfig<T>(dbKey);
   if (existing) {
-    // Already in DB, just clear localStorage
     localStorage.removeItem(localStorageKey);
     return;
   }
 
-  // Try to get from localStorage
   const localData = localStorage.getItem(localStorageKey);
   if (localData) {
     try {

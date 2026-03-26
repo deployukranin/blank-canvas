@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     console.log(`Authorized config update by user ${user.id} with roles: ${roles?.map(r => r.role).join(", ")}`);
 
     // 4. Parse request body
-    const { config_key, config_value } = await req.json();
+    const { config_key, config_value, store_id } = await req.json();
 
     if (!config_key || config_value === undefined) {
       return new Response(
@@ -90,23 +90,38 @@ Deno.serve(async (req) => {
     // 5. Use service role to save config (bypasses RLS for the actual save operation)
     const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if config exists
-    const { data: existing } = await serviceClient
+    // Build query based on whether store_id is provided
+    let existingQuery = serviceClient
       .from("app_configurations")
       .select("id")
-      .eq("config_key", config_key)
-      .maybeSingle();
+      .eq("config_key", config_key);
+
+    if (store_id) {
+      existingQuery = existingQuery.eq("store_id", store_id);
+    } else {
+      existingQuery = existingQuery.is("store_id", null);
+    }
+
+    const { data: existing } = await existingQuery.maybeSingle();
 
     let error;
     if (existing) {
       // Update existing
-      const result = await serviceClient
+      let updateQuery = serviceClient
         .from("app_configurations")
         .update({
           config_value,
           updated_at: new Date().toISOString(),
         })
         .eq("config_key", config_key);
+      
+      if (store_id) {
+        updateQuery = updateQuery.eq("store_id", store_id);
+      } else {
+        updateQuery = updateQuery.is("store_id", null);
+      }
+      
+      const result = await updateQuery;
       error = result.error;
     } else {
       // Insert new
@@ -115,6 +130,7 @@ Deno.serve(async (req) => {
         .insert({
           config_key,
           config_value,
+          ...(store_id ? { store_id } : {}),
         });
       error = result.error;
     }
