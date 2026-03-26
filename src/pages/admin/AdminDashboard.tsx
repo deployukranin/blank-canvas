@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -10,6 +10,7 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { differenceInDays, parseISO } from 'date-fns';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ const AdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
+  const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
 
   // Use published domain; fall back to current origin for local/preview
   const getPublishedOrigin = () => {
@@ -77,11 +79,16 @@ const AdminDashboard: React.FC = () => {
 
       const { data: storeData } = await supabase
         .from('stores')
-        .select('slug')
+        .select('slug, plan_type, plan_expires_at')
         .eq('id', storeId)
         .maybeSingle();
 
-      if (!cancelled) setStoreSlug(storeData?.slug ?? null);
+      if (!cancelled) {
+        setStoreSlug(storeData?.slug ?? null);
+        if (storeData) {
+          setStorePlan({ type: storeData.plan_type, expiresAt: storeData.plan_expires_at });
+        }
+      }
     };
 
     resolveStoreSlug();
@@ -170,6 +177,46 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
+        {/* Trial banner */}
+        {storePlan?.type === 'trial' && storePlan.expiresAt && (() => {
+          const daysLeft = differenceInDays(parseISO(storePlan.expiresAt), new Date());
+          const isUrgent = daysLeft <= 2;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex items-center justify-between gap-4 p-4 rounded-xl border ${
+                isUrgent
+                  ? 'bg-destructive/10 border-destructive/30'
+                  : 'bg-yellow-500/10 border-yellow-500/30'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {isUrgent ? (
+                  <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
+                ) : (
+                  <Zap className="w-5 h-5 text-yellow-500 shrink-0" />
+                )}
+                <div>
+                  <p className={`font-semibold text-sm ${isUrgent ? 'text-destructive' : 'text-yellow-500'}`}>
+                    {daysLeft <= 0
+                      ? t('admin.trial.expired', 'Seu trial expirou!')
+                      : t('admin.trial.daysLeft', '{{days}} dias restantes de trial', { days: Math.max(0, daysLeft) })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('admin.trial.upgradeHint', 'Faça upgrade para manter sua plataforma ativa.')}
+                  </p>
+                </div>
+              </div>
+              <Link to="/admin/planos">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">
+                  {t('admin.trial.upgrade', 'Ver Planos')}
+                </Button>
+              </Link>
+            </motion.div>
+          );
+        })()}
+
         {/* Platform quick actions */}
         <div className="flex flex-wrap items-center gap-3">
           <Button
