@@ -646,6 +646,13 @@ export const availableRoutes = [
   { path: '/meus-pedidos', label: 'Meus Pedidos' },
 ];
 
+export interface BannerConfig {
+  id: string;
+  desktopUrl: string;
+  mobileUrl: string;
+  enabled: boolean;
+}
+
 export interface WhiteLabelConfig {
   // Branding
   siteName: string;
@@ -653,6 +660,7 @@ export interface WhiteLabelConfig {
   bannerImage: string;
   bannerImages: string[];
   logoImage: string;
+  banners: BannerConfig[];
 
   // Navigation Tabs
   navigationTabs: NavTabConfig[];
