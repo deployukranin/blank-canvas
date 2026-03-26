@@ -59,8 +59,9 @@ const VIPPage = () => {
   const { i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
-  const storeId = store?.id;
+  const tenantStoreId = store?.id;
 
+  const [resolvedStoreId, setResolvedStoreId] = useState<string | undefined>(tenantStoreId);
   const [isLoading, setIsLoading] = useState(true);
   const [isVIP, setIsVIP] = useState(false);
   const [subscription, setSubscription] = useState<VipSub | null>(null);
@@ -75,17 +76,66 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Resolve resolvedStoreId: use tenant context, or find user's associated store
+  useEffect(() => {
+    if (tenantStoreId) {
+      setResolvedStoreId(tenantStoreId);
+      return;
+    }
+    if (!userId) {
+      setResolvedStoreId(undefined);
+      return;
+    }
+    const resolve = async () => {
+      // Check if user is a store admin
+      const { data: adminStore } = await supabase
+        .from('store_admins')
+        .select('store_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      if (adminStore?.store_id) {
+        setResolvedStoreId(adminStore.store_id);
+        return;
+      }
+      // Check if user belongs to a store
+      const { data: userStore } = await supabase
+        .from('store_users')
+        .select('store_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+      if (userStore?.store_id) {
+        setResolvedStoreId(userStore.store_id);
+        return;
+      }
+      // Check if user created a store
+      const { data: ownedStore } = await supabase
+        .from('stores')
+        .select('id')
+        .eq('created_by', userId)
+        .limit(1)
+        .maybeSingle();
+      if (ownedStore?.id) {
+        setResolvedStoreId(ownedStore.id);
+        return;
+      }
+      setResolvedStoreId(undefined);
+    };
+    resolve();
+  }, [tenantStoreId, userId]);
+
   // Load VIP plans from store config or global
   useEffect(() => {
     const loadPlans = async () => {
       let plans: VipPlanConfig[] = [];
 
-      if (storeId) {
+      if (resolvedStoreId) {
         const { data } = await supabase
           .from('app_configurations')
           .select('config_value')
           .eq('config_key', 'vip_config')
-          .eq('store_id', storeId)
+          .eq('store_id', resolvedStoreId)
           .maybeSingle();
 
         if (data?.config_value) {
@@ -117,7 +167,7 @@ const VIPPage = () => {
       if (plans.length > 0) setSelectedPlan(plans[0]);
     };
     loadPlans();
-  }, [storeId]);
+  }, [resolvedStoreId]);
 
   // Check VIP status and load content
   useEffect(() => {
@@ -136,7 +186,7 @@ const VIPPage = () => {
         .eq('status', 'active')
         .gt('expires_at', new Date().toISOString());
       
-      if (storeId) subQuery = subQuery.eq('store_id', storeId);
+      if (resolvedStoreId) subQuery = subQuery.eq('store_id', resolvedStoreId);
       else subQuery = subQuery.is('store_id', null);
 
       const { data: sub } = await subQuery.maybeSingle();
@@ -151,7 +201,7 @@ const VIPPage = () => {
           .select('id, title, content, content_type, media_url, created_at')
           .order('created_at', { ascending: false });
         
-        if (storeId) contentQuery = contentQuery.eq('store_id', storeId);
+        if (resolvedStoreId) contentQuery = contentQuery.eq('store_id', resolvedStoreId);
         else contentQuery = contentQuery.is('store_id', null);
 
         const { data: contentData } = await contentQuery;
@@ -164,7 +214,7 @@ const VIPPage = () => {
       setIsLoading(false);
     };
     checkVIP();
-  }, [userId, storeId]);
+  }, [userId, resolvedStoreId]);
 
   // Poll payment status
   useEffect(() => {
@@ -179,12 +229,12 @@ const VIPPage = () => {
         if (data?.status === 'paid') {
           setPaymentStatus('paid');
           // Refresh subscription
-          if (userId && storeId) {
+          if (userId && resolvedStoreId) {
             const { data: sub } = await supabase
               .from('vip_subscriptions')
               .select('id, status, plan_type, expires_at, price_cents')
               .eq('user_id', userId)
-              .eq('store_id', storeId)
+              .eq('store_id', resolvedStoreId)
               .eq('status', 'active')
               .gt('expires_at', new Date().toISOString())
               .maybeSingle();
@@ -199,7 +249,7 @@ const VIPPage = () => {
       pollingRef.current = setInterval(poll, 3000);
       return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
     }
-  }, [chargeData?.correlationId, showPaymentDialog, userId, storeId]);
+  }, [chargeData?.correlationId, showPaymentDialog, userId, resolvedStoreId]);
 
   const formatCurrency = (value: number) => {
     const isBR = i18n.language?.startsWith('pt');
@@ -234,7 +284,7 @@ const VIPPage = () => {
 
   const handleConfirmSubscription = async () => {
     if (!selectedPlan) return;
-    if (!storeId) {
+    if (!resolvedStoreId) {
       toast({ title: 'Error', description: 'Store context is required for payment. Access via a creator\'s store link.', variant: 'destructive' });
       return;
     }
@@ -242,7 +292,7 @@ const VIPPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-vip-charge', {
-        body: { planType: selectedPlan.type, storeId },
+        body: { planType: selectedPlan.type, storeId: resolvedStoreId },
       });
 
       if (error || !data?.success) {
