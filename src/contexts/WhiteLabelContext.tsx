@@ -969,7 +969,8 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     const primary = isValidHSL(config.colors.primary) ? config.colors.primary : defaultColors.primary;
     const accent = isValidHSL(config.colors.accent) ? config.colors.accent : defaultColors.accent;
-    const background = isValidHSL(config.colors.background) ? config.colors.background : defaultColors.background;
+    // Always force pure black background regardless of config
+    const background = '0 0% 4%';
     
     // Extract hue from primary for derived variables
     const hue = primary.split(' ')[0];
