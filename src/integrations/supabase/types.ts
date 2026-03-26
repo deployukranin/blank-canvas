@@ -599,6 +599,7 @@ export type Database = {
           created_by: string | null
           id: string
           media_url: string | null
+          store_id: string | null
           title: string
           updated_at: string
         }
@@ -609,6 +610,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           media_url?: string | null
+          store_id?: string | null
           title: string
           updated_at?: string
         }
@@ -619,10 +621,19 @@ export type Database = {
           created_by?: string | null
           id?: string
           media_url?: string | null
+          store_id?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vip_content_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vip_subscriptions: {
         Row: {
@@ -634,6 +645,7 @@ export type Database = {
           price_cents: number
           started_at: string
           status: string
+          store_id: string | null
           updated_at: string
           user_id: string
         }
@@ -646,6 +658,7 @@ export type Database = {
           price_cents: number
           started_at?: string
           status?: string
+          store_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -658,10 +671,19 @@ export type Database = {
           price_cents?: number
           started_at?: string
           status?: string
+          store_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vip_subscriptions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       youtube_api_usage: {
         Row: {
