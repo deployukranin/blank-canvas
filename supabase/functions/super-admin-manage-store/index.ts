@@ -74,6 +74,26 @@ Deno.serve(async (req) => {
         if (plan_type) updateData.plan_type = plan_type;
         if (plan_expires_at) updateData.plan_expires_at = plan_expires_at;
         break;
+      case "delete": {
+        // Delete related data first
+        await adminClient.from("store_admins").delete().eq("store_id", store_id);
+        await adminClient.from("store_users").delete().eq("store_id", store_id);
+        await adminClient.from("invite_codes").delete().eq("store_id", store_id);
+        await adminClient.from("app_configurations").delete().eq("store_id", store_id);
+        await adminClient.from("custom_orders").delete().eq("store_id", store_id);
+        await adminClient.from("video_ideas").delete().eq("store_id", store_id);
+        await adminClient.from("video_chat_messages").delete().eq("store_id", store_id);
+        const { error: delError } = await adminClient.from("stores").delete().eq("id", store_id);
+        if (delError) {
+          return new Response(JSON.stringify({ error: delError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ success: true, deleted: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       default:
         return new Response(JSON.stringify({ error: "Invalid action" }), {
           status: 400,
