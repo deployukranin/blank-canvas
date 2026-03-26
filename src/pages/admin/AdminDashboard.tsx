@@ -21,6 +21,7 @@ const AdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
+  const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
 
   // Use published domain; fall back to current origin for local/preview
   const getPublishedOrigin = () => {
