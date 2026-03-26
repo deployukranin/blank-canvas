@@ -72,6 +72,18 @@ const AdminDashboard: React.FC = () => {
         storeId = ownedStore?.id ?? null;
       }
 
+      // Fallback: if admin has no explicit link, grab first active store
+      if (!storeId) {
+        const { data: anyStore } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('status', 'active')
+          .limit(1)
+          .maybeSingle();
+
+        storeId = anyStore?.id ?? null;
+      }
+
       if (!storeId) {
         if (!cancelled) setStoreSlug(null);
         return;
