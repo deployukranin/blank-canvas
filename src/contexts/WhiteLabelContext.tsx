@@ -663,6 +663,10 @@ export interface WhiteLabelConfig {
   logoImage: string;
   banners: BannerConfig[];
 
+  // Hero Banner Text
+  heroGreeting: string;
+  heroSubtitle: string;
+
   // Navigation Tabs
   navigationTabs: NavTabConfig[];
 
@@ -785,6 +789,8 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
   banners: [],
+  heroGreeting: 'Bem-vindo! 🤍',
+  heroSubtitle: 'Relaxe com ASMR de qualidade',
   navigationTabs: defaultNavigationTabs,
   youtube: {
     enabled: true,

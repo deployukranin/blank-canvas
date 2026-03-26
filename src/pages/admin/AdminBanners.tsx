@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
@@ -19,6 +20,9 @@ const AdminBanners: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { config, setConfig } = useWhiteLabel();
+
+  const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
+  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
 
   const [banners, setBanners] = useState<BannerConfig[]>(
     config.banners?.length ? config.banners : [
@@ -111,6 +115,8 @@ const AdminBanners: React.FC = () => {
     setConfig({
       ...config,
       banners,
+      heroGreeting,
+      heroSubtitle,
       bannerImages: bannerImages.length > 0 ? bannerImages : config.bannerImages,
       bannerImage: bannerImages[0] || config.bannerImage,
     });
@@ -235,6 +241,37 @@ const AdminBanners: React.FC = () => {
               <p className="text-xs text-muted-foreground/70 mt-1">
                 {t('admin.banners.sizeHint', 'JPG, PNG or WebP. Max 5MB per image.')}
               </p>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Hero Text */}
+        <GlassCard className="p-5 space-y-4">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary" />
+            {t('admin.banners.heroText', 'Texto do Banner')}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t('admin.banners.greeting', 'Título / Saudação')}</Label>
+              <Input
+                value={heroGreeting}
+                onChange={(e) => setHeroGreeting(e.target.value)}
+                placeholder="Bem-vindo! 🤍"
+                className="bg-background/50 border-border/30"
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('admin.banners.greetingHint', 'Exibido para visitantes não logados.')}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('admin.banners.subtitle', 'Subtítulo')}</Label>
+              <Input
+                value={heroSubtitle}
+                onChange={(e) => setHeroSubtitle(e.target.value)}
+                placeholder="Relaxe com ASMR de qualidade"
+                className="bg-background/50 border-border/30"
+              />
             </div>
           </div>
         </GlassCard>
