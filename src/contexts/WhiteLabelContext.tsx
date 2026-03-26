@@ -962,22 +962,56 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Only apply valid HSL colors, otherwise use defaults
     const defaultColors = {
-      primary: '270 70% 60%',
-      accent: '280 60% 70%',
-      background: '260 30% 6%',
+      primary: '263 70% 58%',
+      accent: '263 50% 25%',
+      background: '0 0% 4%',
     };
     
     const primary = isValidHSL(config.colors.primary) ? config.colors.primary : defaultColors.primary;
     const accent = isValidHSL(config.colors.accent) ? config.colors.accent : defaultColors.accent;
     const background = isValidHSL(config.colors.background) ? config.colors.background : defaultColors.background;
     
+    // Extract hue from primary for derived variables
+    const hue = primary.split(' ')[0];
+    
     root.style.setProperty('--primary', primary);
     root.style.setProperty('--accent', accent);
     root.style.setProperty('--background', background);
     
-    // Update gradient variables that use primary/accent
+    // Update all derived variables
     root.style.setProperty('--ring', primary);
     root.style.setProperty('--sidebar-primary', primary);
+    root.style.setProperty('--sidebar-ring', primary);
+    root.style.setProperty('--sidebar-accent', `${hue} 50% 15%`);
+    
+    // Glass & gradient variables
+    root.style.setProperty('--glass-border', `hsl(${hue} 70% 58% / 0.12)`);
+    root.style.setProperty('--glass-highlight', `hsl(${hue} 70% 58% / 0.06)`);
+    root.style.setProperty('--gradient-primary', `linear-gradient(135deg, hsl(${primary}), hsl(${hue} 50% 35%))`);
+    root.style.setProperty('--gradient-accent', `linear-gradient(135deg, hsl(${hue} 60% 50%), hsl(${hue} 40% 30%))`);
+    root.style.setProperty('--shadow-glass', `0 8px 32px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(${hue} 70% 58% / 0.05)`);
+    root.style.setProperty('--shadow-glow', `0 0 40px hsl(${hue} 70% 58% / 0.12)`);
+    
+    // Gradient mesh
+    root.style.setProperty('--gradient-mesh', `
+      radial-gradient(ellipse at 18% 18%, hsl(${hue} 70% 58% / 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse at 82% 78%, hsl(${hue} 50% 40% / 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 55%, hsl(${hue} 30% 20% / 0.04) 0%, transparent 70%)
+    `);
+
+    // Update scrollbar colors via a dynamic style tag
+    const styleId = 'dynamic-scrollbar-colors';
+    let styleEl = document.getElementById(styleId);
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `
+      * { scrollbar-color: hsla(${hue}, 70%, 58%, 0.2) transparent; }
+      *::-webkit-scrollbar-thumb { background: hsla(${hue}, 70%, 58%, 0.2); }
+      *::-webkit-scrollbar-thumb:hover { background: hsla(${hue}, 70%, 58%, 0.4); }
+    `;
   }, [config.colors]);
 
   // Debounced save to database whenever config changes
