@@ -540,7 +540,7 @@ const defaultIcons: IconConfig = {
 export const defaultNavigationTabs: NavTabConfig[] = [
   { id: 'home', label: 'Início', path: '/', icon: { type: 'lucide', value: 'Home' }, enabled: true, order: 0 },
   { id: 'customs', label: "Custom's", path: '/customs', icon: { type: 'lucide', value: 'Video' }, enabled: true, order: 1 },
-  { id: 'loja', label: 'Loja', path: '/loja', icon: { type: 'lucide', value: 'ShoppingBag' }, enabled: true, order: 2 },
+  
   { id: 'comunidade', label: 'Comunidade', path: '/comunidade', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
   { id: 'perfil', label: 'Perfil', path: '/perfil', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
 ];
@@ -572,13 +572,6 @@ export const defaultQuickActions: QuickActionItem[] = [
     label: "Custom's",
     path: '/customs',
     color: 'from-pink-500 to-rose-500',
-    enabled: true,
-  },
-  {
-    icon: { type: 'lucide', value: 'ShoppingBag' },
-    label: 'Loja',
-    path: '/loja',
-    color: 'from-green-500 to-emerald-500',
     enabled: true,
   },
   {
@@ -646,7 +639,7 @@ export const availableRoutes = [
   { path: '/ideias', label: 'Ideias' },
   { path: '/vip', label: 'VIP' },
   { path: '/customs', label: "Custom's" },
-  { path: '/loja', label: 'Loja' },
+  
   { path: '/comunidade', label: 'Comunidade' },
   { path: '/assinaturas', label: 'Assinaturas' },
   { path: '/perfil', label: 'Perfil' },
