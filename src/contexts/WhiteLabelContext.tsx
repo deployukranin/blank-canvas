@@ -861,9 +861,22 @@ interface WhiteLabelContextType {
 const WhiteLabelContext = createContext<WhiteLabelContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'whitelabel_config';
+const CACHE_KEY = 'whitelabel_config_cache';
+
+// Try to get cached config synchronously to prevent theme flash on reload
+const getCachedConfig = (): WhiteLabelConfig => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return { ...defaultConfig, ...parsed, colors: { ...defaultConfig.colors, ...parsed.colors } };
+    }
+  } catch {}
+  return defaultConfig;
+};
 
 export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState<WhiteLabelConfig>(defaultConfig);
+  const [config, setConfig] = useState<WhiteLabelConfig>(getCachedConfig);
   const [isDbLoaded, setIsDbLoaded] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialLoadRef = useRef(false);
@@ -878,6 +891,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           // Deep merge with defaults
           const merged = mergeConfig(defaultConfig, dbConfig);
           setConfig(merged);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(merged)); } catch {}
           localStorage.removeItem(STORAGE_KEY); // Clear old localStorage
         } else {
           // No DB config, try localStorage migration
@@ -1076,6 +1090,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         await saveConfig('white_label_config', config);
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(config)); } catch {}
       } catch (err) {
         console.error('Error saving config to database:', err);
       }
