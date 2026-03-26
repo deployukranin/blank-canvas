@@ -10,7 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuidv4 } from 'crypto';
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
 
