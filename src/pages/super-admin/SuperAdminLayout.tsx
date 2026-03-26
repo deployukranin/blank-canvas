@@ -50,12 +50,6 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b border-purple-500/10 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-lg font-bold text-white">{t('superAdmin.title')}</h2>
-          </div>
           <div className="flex items-center gap-2 mt-3">
             <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
               <span className="text-xs text-purple-400 font-bold">
