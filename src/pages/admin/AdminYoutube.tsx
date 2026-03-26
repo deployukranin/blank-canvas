@@ -45,28 +45,32 @@ const DEFAULT_CATEGORIES: YouTubeCategorizationDraft["categories"] = [
   ]},
 ];
 
+// Merge saved categories with defaults: keep saved ones, add missing defaults
+function mergeWithDefaults(
+  saved: YouTubeCategorizationDraft["categories"] | undefined
+): YouTubeCategorizationDraft["categories"] {
+  if (!saved || saved.length === 0) return DEFAULT_CATEGORIES;
+  const savedIds = new Set(saved.map((c) => c.id));
+  const missing = DEFAULT_CATEGORIES.filter((d) => !savedIds.has(d.id));
+  return [...saved, ...missing];
+}
+
 const AdminYoutube = () => {
   const { toast } = useToast();
   const { config, updateYouTube } = useWhiteLabel();
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
 
-  const existingCategories = config.youtube?.categories;
-  const initialCategories = existingCategories && existingCategories.length > 0
-    ? existingCategories
-    : DEFAULT_CATEGORIES;
-
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
-    categories: initialCategories,
+    categories: mergeWithDefaults(config.youtube?.categories),
     videoCategoryMap: config.youtube?.videoCategoryMap || {},
     autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
   }));
 
-  // Sync draft with context when config changes (but keep defaults if no saved categories)
+  // Sync draft with context when config changes
   useEffect(() => {
-    const savedCategories = config.youtube?.categories;
     setCategorizationDraft({
-      categories: savedCategories && savedCategories.length > 0 ? savedCategories : DEFAULT_CATEGORIES,
+      categories: mergeWithDefaults(config.youtube?.categories),
       videoCategoryMap: config.youtube?.videoCategoryMap || {},
       autoCategorizeEnabled: (config.youtube as any)?.autoCategorizeEnabled ?? false,
     });
