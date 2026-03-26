@@ -1,6 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 
 interface MobileHeaderProps {
@@ -11,6 +12,8 @@ interface MobileHeaderProps {
 export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { basePath, isTenantScope } = useTenant();
+  const loginPath = isTenantScope ? `${basePath}/entrar` : '/entrar';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 safe-area-top">
@@ -34,7 +37,7 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
 
         {/* Login button for unauthenticated users */}
         {!isAuthenticated ? (
-          <Link to="/entrar">
+          <Link to={loginPath}>
             <Button variant="ghost" size="sm" className="text-primary gap-1.5 h-9 px-3">
               <LogIn className="w-4 h-4" />
               <span className="text-xs font-medium">Entrar</span>
