@@ -106,6 +106,28 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
+        {/* Platform quick actions */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary/20 hover:bg-primary/10 text-foreground"
+            onClick={() => window.open(platformUrl, '_blank')}
+          >
+            <ExternalLink className="w-4 h-4" />
+            {t('admin.viewPlatform')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary/20 hover:bg-primary/10 text-foreground"
+            onClick={handleCopyLink}
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            {copied ? t('admin.linkCopied') : t('admin.copyLink')}
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
           <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
