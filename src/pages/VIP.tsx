@@ -292,7 +292,7 @@ const VIPPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-vip-charge', {
-        body: { planType: selectedPlan.type, resolvedStoreId },
+        body: { planType: selectedPlan.type, storeId: resolvedStoreId },
       });
 
       if (error || !data?.success) {
