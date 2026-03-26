@@ -12,7 +12,7 @@ import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 
 import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
-import Loja from "./pages/Loja";
+
 import Assinaturas from "./pages/Assinaturas";
 import ProdutoAssinatura from "./pages/ProdutoAssinatura";
 import VIP from "./pages/VIP";
@@ -64,7 +64,7 @@ const App = () => (
                 {/* Rotas Públicas */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/loja" element={<Loja />} />
+                
                 <Route path="/assinaturas" element={<Assinaturas />} />
                 <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
                 <Route path="/ajuda" element={<Ajuda />} />
