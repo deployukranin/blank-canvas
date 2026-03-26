@@ -59,9 +59,9 @@ Deno.serve(async (req) => {
     const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
 
     if (!hasPermission) {
-      console.error(`Access denied for user ${user.id} - no admin/ceo role`);
+      console.error(`Access denied for user ${user.id} - required roles: ${allowedRoles.join(", ")}`);
       return new Response(
-        JSON.stringify({ success: false, error: "Acesso negado: permissão de admin ou CEO necessária" }),
+        JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias (admin, creator, ceo ou super_admin)" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
