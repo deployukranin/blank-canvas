@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -14,6 +16,16 @@ const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const platformUrl = window.location.origin;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(platformUrl);
+    setCopied(true);
+    toast.success(t('admin.linkCopied'));
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Derive chart color from the current primary HSL
   const chartColor = useMemo(() => {
@@ -94,6 +106,28 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
+        {/* Platform quick actions */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary/20 hover:bg-primary/10 text-foreground"
+            onClick={() => window.open(platformUrl, '_blank')}
+          >
+            <ExternalLink className="w-4 h-4" />
+            {t('admin.viewPlatform')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary/20 hover:bg-primary/10 text-foreground"
+            onClick={handleCopyLink}
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            {copied ? t('admin.linkCopied') : t('admin.copyLink')}
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
           <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
