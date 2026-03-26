@@ -245,6 +245,37 @@ const AdminBanners: React.FC = () => {
           </div>
         </GlassCard>
 
+        {/* Hero Text */}
+        <GlassCard className="p-5 space-y-4">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary" />
+            {t('admin.banners.heroText', 'Texto do Banner')}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t('admin.banners.greeting', 'Título / Saudação')}</Label>
+              <Input
+                value={heroGreeting}
+                onChange={(e) => setHeroGreeting(e.target.value)}
+                placeholder="Bem-vindo! 🤍"
+                className="bg-background/50 border-border/30"
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('admin.banners.greetingHint', 'Exibido para visitantes não logados.')}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('admin.banners.subtitle', 'Subtítulo')}</Label>
+              <Input
+                value={heroSubtitle}
+                onChange={(e) => setHeroSubtitle(e.target.value)}
+                placeholder="Relaxe com ASMR de qualidade"
+                className="bg-background/50 border-border/30"
+              />
+            </div>
+          </div>
+        </GlassCard>
+
         {/* Banner Cards */}
         <div className="space-y-4">
           {banners.map((banner, index) => (
