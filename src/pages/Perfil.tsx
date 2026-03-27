@@ -110,7 +110,7 @@ const PerfilPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Link to={isCEO ? '/ceo' : '/admin'}>
+            <Link to={`${basePath}/admin`}>
               <GlassCard className="p-4" hover>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
