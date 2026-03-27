@@ -953,7 +953,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (dbConfig) {
           const merged = mergeConfig(defaultConfig, dbConfig);
           setConfig(merged);
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify(merged)); } catch {}
+          try { localStorage.setItem(getCacheKey(store?.slug || undefined), JSON.stringify(merged)); } catch {}
           localStorage.removeItem(STORAGE_KEY);
         } else {
           const saved = localStorage.getItem(STORAGE_KEY);
@@ -1155,7 +1155,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         await saveConfig('white_label_config', config, storeId);
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(config)); } catch {}
+        try { localStorage.setItem(getCacheKey(store?.slug || undefined), JSON.stringify(config)); } catch {}
       } catch (err) {
         console.error('Error saving config to database:', err);
       }
