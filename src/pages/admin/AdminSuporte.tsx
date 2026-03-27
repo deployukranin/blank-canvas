@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Ticket {
   id: string;
@@ -33,13 +33,14 @@ interface Message {
   read_at: string | null;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  open: { label: 'Aberto', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
-  answered: { label: 'Respondido', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
-  closed: { label: 'Fechado', color: 'bg-muted text-muted-foreground border-border', icon: CheckCircle2 },
-};
+const getStatusConfig = (t: any) => ({
+  open: { label: t('admin.support.statusOpen'), color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
+  answered: { label: t('admin.support.statusAnswered'), color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
+  closed: { label: t('admin.support.statusClosed'), color: 'bg-muted text-muted-foreground border-border', icon: CheckCircle2 },
+});
 
 const AdminSuporte = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
