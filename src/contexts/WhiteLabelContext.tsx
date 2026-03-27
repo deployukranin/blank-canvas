@@ -892,7 +892,14 @@ const getCacheKey = (slug?: string) => `whitelabel_cache_${slug || getSlugFromPa
 // Try to get cached config synchronously to prevent theme flash on reload
 const getCachedConfig = (): WhiteLabelConfig => {
   try {
-    const cached = localStorage.getItem(getCacheKey());
+    // 1) New isolated key per store slug
+    let cached = localStorage.getItem(getCacheKey());
+
+    // 2) Backward compatibility for older sessions that still have the legacy key
+    if (!cached) {
+      cached = localStorage.getItem('whitelabel_config_cache');
+    }
+
     if (cached) {
       const parsed = JSON.parse(cached);
       return { ...defaultConfig, ...parsed, colors: { ...defaultConfig.colors, ...parsed.colors } };
