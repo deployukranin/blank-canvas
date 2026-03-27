@@ -251,6 +251,18 @@ const Auth = () => {
             },
           });
           if (ytError) console.error('youtube_channel save error:', ytError);
+
+          // Save YouTube channel thumbnail as creator's avatar
+          if (youtubeVerified.thumbnailUrl) {
+            // Update store avatar
+            await supabase.from('stores').update({ avatar_url: youtubeVerified.thumbnailUrl }).eq('id', store.id);
+            // Create/update profile with YouTube avatar
+            await supabase.from('profiles').upsert({
+              user_id: userId,
+              avatar_url: youtubeVerified.thumbnailUrl,
+              display_name: storeName.trim(),
+            }, { onConflict: 'user_id' });
+          }
         }
       }
 

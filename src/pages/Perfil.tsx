@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
@@ -12,30 +14,56 @@ import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useProfile } from '@/hooks/use-profile';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useTenant } from '@/contexts/TenantContext';
-
-const quickAccessItems = [
-  { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
-  { icon: Bell, label: 'Notificações', description: 'Comentários e votos', path: '/notificacoes', gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
-  { icon: Lightbulb, label: 'Ideias de Vídeos', description: 'Sugira e vote em ideias', path: '/ideias', gradient: 'from-amber-400 to-orange-500' },
-  { icon: Crown, label: 'Comunidade VIP', description: 'Acesso exclusivo', path: '/vip', gradient: 'from-vip to-amber-500' },
-];
-
-const menuItems = [
-  { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '/ajuda' },
-  { icon: FileText, label: 'Termos de Uso', description: 'Leia nossos termos', path: '/termos' },
-  { icon: Shield, label: 'Privacidade', description: 'Política de privacidade', path: '/privacidade' },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useTranslation();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [savingAvatar, setSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile } = useProfile();
+  const { profile, refetch: refetchProfile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
   const { basePath } = useTenant();
+
+  const quickAccessItems = [
+    { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
+    { icon: Bell, label: t('profile.notifications', 'Notifications'), description: t('profile.commentsVotes', 'Comments and votes'), path: '/notificacoes', gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
+    { icon: Lightbulb, label: t('profile.videoIdeas', 'Video Ideas'), description: t('profile.suggestVote', 'Suggest and vote on ideas'), path: '/ideias', gradient: 'from-amber-400 to-orange-500' },
+    { icon: Crown, label: t('profile.vipCommunity', 'VIP Community'), description: t('profile.exclusiveAccess', 'Exclusive access'), path: '/vip', gradient: 'from-vip to-amber-500' },
+  ];
+
+  const menuItems = [
+    { icon: HelpCircle, label: t('profile.help', 'Help'), description: t('profile.faqSupport', 'FAQ and support'), path: '/ajuda' },
+    { icon: FileText, label: t('profile.terms', 'Terms of Use'), description: t('profile.readTerms', 'Read our terms'), path: '/termos' },
+    { icon: Shield, label: t('profile.privacy', 'Privacy'), description: t('profile.privacyPolicy', 'Privacy policy'), path: '/privacidade' },
+  ];
+
+  const handleSaveAvatar = async () => {
+    if (!user || !avatarUrl.trim()) return;
+    setSavingAvatar(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ user_id: user.id, avatar_url: avatarUrl.trim() }, { onConflict: 'user_id' });
+      if (error) throw error;
+      toast.success(t('profile.avatarSaved', 'Profile photo updated!'));
+      setEditingAvatar(false);
+      setAvatarUrl('');
+      refetchProfile();
+    } catch (err) {
+      console.error('Error saving avatar:', err);
+      toast.error(t('profile.avatarError', 'Error updating profile photo'));
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -76,17 +104,27 @@ const PerfilPage = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <GlassCard className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-              {profile?.avatar_url || user?.avatar ? (
-                <img 
-                  src={profile?.avatar_url || user?.avatar} 
-                  alt={profile?.handle || user?.username} 
-                  className="w-full h-full rounded-full object-cover" 
-                />
-              ) : (
-                <span className="text-2xl font-bold text-primary-foreground">
-                  {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
-                </span>
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+                {profile?.avatar_url || user?.avatar ? (
+                  <img 
+                    src={profile?.avatar_url || user?.avatar} 
+                    alt={profile?.handle || user?.username} 
+                    className="w-full h-full rounded-full object-cover" 
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-primary-foreground">
+                    {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              {!isAdmin && !isCEO && (
+                <button
+                  onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                >
+                  <Camera className="w-3 h-3 text-primary-foreground" />
+                </button>
               )}
             </div>
             <div className="flex-1">
@@ -103,6 +141,24 @@ const PerfilPage = () => {
               <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
           </GlassCard>
+
+          {/* Avatar URL Editor for regular users */}
+          {editingAvatar && !isAdmin && !isCEO && (
+            <div className="mt-3 flex gap-2 items-center">
+              <Input
+                placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')}
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                className="flex-1 h-9 text-sm"
+              />
+              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}>
+                <Check className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Admin Dashboard Link */}
@@ -207,7 +263,7 @@ const PerfilPage = () => {
             className="w-full h-12 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-5 h-5" />
-            Sair da conta
+            {t('profile.logout', 'Log out')}
           </Button>
         </motion.div>
       </div>
