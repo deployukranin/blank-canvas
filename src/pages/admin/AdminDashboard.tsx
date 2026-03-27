@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video, AtSign } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -36,6 +37,8 @@ const AdminDashboard: React.FC = () => {
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
+  const [channelHandleInput, setChannelHandleInput] = useState(config.youtube?.channelHandle || '');
+  const [savingHandle, setSavingHandle] = useState(false);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
