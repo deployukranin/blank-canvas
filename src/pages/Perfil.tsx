@@ -104,17 +104,27 @@ const PerfilPage = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <GlassCard className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-              {profile?.avatar_url || user?.avatar ? (
-                <img 
-                  src={profile?.avatar_url || user?.avatar} 
-                  alt={profile?.handle || user?.username} 
-                  className="w-full h-full rounded-full object-cover" 
-                />
-              ) : (
-                <span className="text-2xl font-bold text-primary-foreground">
-                  {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
-                </span>
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+                {profile?.avatar_url || user?.avatar ? (
+                  <img 
+                    src={profile?.avatar_url || user?.avatar} 
+                    alt={profile?.handle || user?.username} 
+                    className="w-full h-full rounded-full object-cover" 
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-primary-foreground">
+                    {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              {!isAdmin && !isCEO && (
+                <button
+                  onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                >
+                  <Camera className="w-3 h-3 text-primary-foreground" />
+                </button>
               )}
             </div>
             <div className="flex-1">
