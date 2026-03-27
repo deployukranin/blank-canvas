@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Headphones, Clock, Music, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -118,37 +119,37 @@ const AdminAudios = () => {
     );
   }
 
+  const { t, i18n } = useTranslation();
+  const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
+
   return (
-    <AdminLayout title="Áudios">
+    <AdminLayout title={t('admin.audios')}>
       <div className="space-y-6">
-        {/* Header Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              Configure as categorias e durações de áudios personalizados
+              {t('audiosAdmin.subtitle', 'Configure custom audio categories and durations')}
             </p>
             {isSaving && (
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                Salvando...
+                {t('common.loading')}
               </span>
             )}
           </div>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Salvando...' : 'Salvar no servidor'}
+            {isSaving ? t('common.loading') : t('vipPricing.saveToServer')}
           </Button>
         </div>
 
-        {/* Audio Preview Section */}
         <GlassCard className="p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Music className="w-5 h-5 text-primary" />
-            Preview de Áudio
+            {t('audiosAdmin.audioPreview', 'Audio Preview')}
           </h3>
           
           <div className="space-y-4">
-            {/* Toggle: Show/Hide Preview */}
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
               <div className="flex items-center gap-3">
                 {config.audioPreviewEnabled ? (
@@ -157,9 +158,11 @@ const AdminAudios = () => {
                   <EyeOff className="w-5 h-5 text-muted-foreground" />
                 )}
                 <div>
-                  <span className="font-medium text-sm">Exibir Preview</span>
+                  <span className="font-medium text-sm">{t('audiosAdmin.showPreview', 'Show Preview')}</span>
                   <p className="text-xs text-muted-foreground">
-                    {config.audioPreviewEnabled ? 'Visível na página de pedidos' : 'Oculto da página de pedidos'}
+                    {config.audioPreviewEnabled 
+                      ? t('audiosAdmin.visibleOnOrders', 'Visible on orders page') 
+                      : t('audiosAdmin.hiddenFromOrders', 'Hidden from orders page')}
                   </p>
                 </div>
               </div>
@@ -171,42 +174,39 @@ const AdminAudios = () => {
               />
             </div>
 
-            {/* Audio URL */}
             <div>
-              <label className="text-sm font-medium mb-2 block">URL do Áudio (MP3)</label>
+              <label className="text-sm font-medium mb-2 block">{t('audiosAdmin.audioUrl', 'Audio URL (MP3)')}</label>
               <Input
-                placeholder="https://exemplo.com/audio-preview.mp3"
+                placeholder="https://example.com/audio-preview.mp3"
                 value={config.audioPreviewUrl}
                 onChange={e => setConfig({ ...config, audioPreviewUrl: e.target.value })}
                 disabled={!config.audioPreviewEnabled}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                URL de um arquivo MP3 para preview
+                {t('audiosAdmin.audioUrlHint', 'URL of an MP3 file for preview')}
               </p>
             </div>
 
-            {/* Audio Preview Player */}
             {config.audioPreviewEnabled && config.audioPreviewUrl && (
               <div className="p-3 bg-muted/30 rounded-lg">
-                <p className="text-sm font-medium mb-2">Pré-visualização:</p>
+                <p className="text-sm font-medium mb-2">{t('audiosAdmin.previewLabel', 'Preview:')}</p>
                 <audio controls className="w-full" src={config.audioPreviewUrl}>
-                  Seu navegador não suporta áudio.
+                  Your browser does not support audio.
                 </audio>
               </div>
             )}
           </div>
         </GlassCard>
 
-        {/* Durations Section */}
         <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
-              Durações e Preços
+              {t('audiosAdmin.durationsAndPrices', 'Durations & Prices')}
             </h3>
             <Button size="sm" variant="outline" onClick={addDuration}>
               <Plus className="w-4 h-4 mr-2" />
-              Adicionar
+              {t('vipPricing.add')}
             </Button>
           </div>
           
@@ -236,10 +236,10 @@ const AdminAudios = () => {
                   <span className="text-sm text-muted-foreground">min</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">R$</span>
+                  <span className="text-sm text-muted-foreground">{currencySymbol}</span>
                   <Input
                     className={`w-24 ${duration.price < MIN_PRICE ? 'border-destructive' : ''}`}
-                    placeholder="Preço"
+                    placeholder={t('vipPricing.price')}
                     type="number"
                     step="0.01"
                     min={MIN_PRICE}
@@ -261,26 +261,25 @@ const AdminAudios = () => {
             {config.audioDurations.length === 0 && (
               <div className="text-center py-6 text-muted-foreground">
                 <Clock className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Nenhuma duração cadastrada</p>
+                <p className="text-sm">{t('audiosAdmin.noDurations', 'No durations configured')}</p>
               </div>
             )}
           </div>
           
           <p className="text-xs text-muted-foreground mt-3">
-            * Preço mínimo de R$ {MIN_PRICE.toFixed(2)} por duração
+            * {t('audiosAdmin.minPrice', 'Minimum price: {{symbol}}{{price}}', { symbol: currencySymbol, price: MIN_PRICE.toFixed(2) })}
           </p>
         </GlassCard>
 
-        {/* Categories Section */}
         <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Headphones className="w-5 h-5 text-primary" />
-              Categorias de Áudios
+              {t('audiosAdmin.categories', 'Audio Categories')}
             </h3>
             <Button size="sm" variant="outline" onClick={addCategory}>
               <Plus className="w-4 h-4 mr-2" />
-              Adicionar
+              {t('vipPricing.add')}
             </Button>
           </div>
           
@@ -301,7 +300,7 @@ const AdminAudios = () => {
                   />
                   <Input
                     className="flex-1"
-                    placeholder="Nome da categoria"
+                    placeholder={t('audiosAdmin.categoryName', 'Category name')}
                     value={category.name}
                     onChange={e => updateCategory(index, 'name', e.target.value)}
                   />
@@ -315,7 +314,7 @@ const AdminAudios = () => {
                   </Button>
                 </div>
                 <Input
-                  placeholder="Descrição"
+                  placeholder={t('admin.description')}
                   value={category.description}
                   onChange={e => updateCategory(index, 'description', e.target.value)}
                 />
@@ -325,8 +324,8 @@ const AdminAudios = () => {
             {config.audioCategories.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Headphones className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Nenhuma categoria de áudio cadastrada</p>
-                <p className="text-sm">Clique em "Adicionar" para criar uma nova categoria</p>
+                <p>{t('audiosAdmin.noCategories', 'No audio categories configured')}</p>
+                <p className="text-sm">{t('audiosAdmin.clickAdd', 'Click "Add" to create a new category')}</p>
               </div>
             )}
           </div>
