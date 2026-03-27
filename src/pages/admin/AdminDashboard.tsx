@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
+const { t: _t, i18n: _i18n } = { t: null as any, i18n: null as any }; // placeholder removed below
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
@@ -183,13 +184,13 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   const chartData = [
-    { name: 'Mon', pedidos: 2, receita: 45 },
-    { name: 'Tue', pedidos: 5, receita: 120 },
-    { name: 'Wed', pedidos: 3, receita: 80 },
-    { name: 'Thu', pedidos: 7, receita: 200 },
-    { name: 'Fri', pedidos: 4, receita: 150 },
-    { name: 'Sat', pedidos: 8, receita: 280 },
-    { name: 'Sun', pedidos: 6, receita: 190 },
+    { name: 'Mon', orders: 2, revenue: 45 },
+    { name: 'Tue', orders: 5, revenue: 120 },
+    { name: 'Wed', orders: 3, revenue: 80 },
+    { name: 'Thu', orders: 7, revenue: 200 },
+    { name: 'Fri', orders: 4, revenue: 150 },
+    { name: 'Sat', orders: 8, revenue: 280 },
+    { name: 'Sun', orders: 6, revenue: 190 },
   ];
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
@@ -260,7 +261,7 @@ const AdminDashboard: React.FC = () => {
           <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
           <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
           <MetricCard label={t('admin.orders')} value={stats.totalOrders} sub={`${stats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
-          <MetricCard label={t('admin.revenue')} value={`R$ ${stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={DollarSign} />
+          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(stats.revenue)} icon={DollarSign} />
         </div>
 
         {/* YouTube Metrics */}
