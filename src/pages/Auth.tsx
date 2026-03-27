@@ -66,12 +66,34 @@ const Auth = () => {
     { icon: Sparkles, title: t("auth.featureYoutube"), desc: t("auth.featureYoutubeDesc") },
   ];
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated — find their store slug
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate("/admin", { replace: true });
+      redirectToAdminWithSlug();
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading]);
+
+  const getStoreSlug = async (userId: string): Promise<string | null> => {
+    // Check store_admins -> stores to find the creator's slug
+    const { data } = await supabase
+      .from('store_admins')
+      .select('store_id, stores(slug)')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+    return (data as any)?.stores?.slug || null;
+  };
+
+  const redirectToAdminWithSlug = async () => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return;
+    const slug = await getStoreSlug(authUser.id);
+    if (slug) {
+      navigate(`/${slug}/admin`, { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
+  };
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -125,7 +147,8 @@ const Auth = () => {
         const { isAdmin } = await checkUserRoles(user.id);
         if (isAdmin) {
           toast.success(t("auth.welcomeAdmin"));
-          navigate("/admin", { replace: true });
+          const slug = await getStoreSlug(user.id);
+          navigate(slug ? `/${slug}/admin` : '/', { replace: true });
         } else {
           toast.success(t("auth.enterButton") + "!");
           navigate("/", { replace: true });
@@ -229,7 +252,7 @@ const Auth = () => {
       }
 
       toast.success(t("auth.accountCreated"));
-      navigate("/admin", { replace: true });
+      navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {
       console.error('Signup error:', err);
       toast.error(t("auth.errorCreatingAccount"));
