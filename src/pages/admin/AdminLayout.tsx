@@ -39,7 +39,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: '/admin/personalizacao', icon: Palette, label: t('admin.personalization', 'Personalização') },
     { path: '/admin/planos', icon: Gem, label: t('admin.plans.title', 'Planos') },
     { path: '/admin/configuracoes', icon: Settings, label: t('admin.settings') },
-    { path: '/admin/suporte', icon: LifeBuoy, label: t('admin.support', 'Suporte') },
+    { path: '/admin/suporte', icon: LifeBuoy, label: t('admin.supportLabel') },
   ];
 
   const handleLogout = () => {
