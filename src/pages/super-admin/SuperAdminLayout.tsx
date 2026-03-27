@@ -81,16 +81,6 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
           })}
         </nav>
 
-        <div className="p-3 border-t border-purple-500/10 space-y-1 shrink-0">
-          <div className="px-3 py-1">
-            <LanguageSelector />
-          </div>
-          <Button variant="ghost" className="w-full justify-start gap-3 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-sm"
-            onClick={handleLogout}>
-            <LogOut className="w-4 h-4" />
-            <span>{t('common.logout')}</span>
-          </Button>
-        </div>
       </aside>
 
       {sidebarOpen && (
