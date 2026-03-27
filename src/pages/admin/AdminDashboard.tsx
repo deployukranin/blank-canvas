@@ -274,12 +274,41 @@ const AdminDashboard: React.FC = () => {
                     size="sm"
                     variant="outline"
                     className="h-8 text-xs"
-                    disabled={savingHandle || channelHandleInput === (config.youtube?.channelHandle || '')}
-                    onClick={() => {
+                    disabled={savingHandle || !channelHandleInput.trim()}
+                    onClick={async () => {
                       setSavingHandle(true);
-                      updateYouTube({ ...config.youtube, channelHandle: channelHandleInput.replace(/^@/, '') });
-                      toast.success(t('common.saved', 'Saved'));
-                      setSavingHandle(false);
+                      try {
+                        // Resolve handle to channel ID via edge function
+                        const handle = channelHandleInput.trim().replace(/^@/, '');
+                        const { data, error } = await supabase.functions.invoke('youtube-videos', {
+                          body: { channelId: `@${handle}`, action: 'verify' },
+                        });
+                        if (error || !data?.channelId) {
+                          toast.error(t('admin.ytHandleError', 'Could not resolve YouTube channel'));
+                          setSavingHandle(false);
+                          return;
+                        }
+                        // Save to youtube_channel config for this store
+                        if (storeId) {
+                          await supabase.functions.invoke('save-app-config', {
+                            body: {
+                              config_key: 'youtube_channel',
+                              config_value: { channelId: data.channelId, channelTitle: data.channelTitle || handle },
+                              store_id: storeId,
+                            },
+                          });
+                        }
+                        // Update local config
+                        updateYouTube({ ...config.youtube, channelId: data.channelId, channelHandle: handle, enabled: true });
+                        toast.success(t('admin.ytChannelUpdated', 'YouTube channel updated: {{name}}', { name: data.channelTitle || handle }));
+                        // Refresh metrics
+                        setTimeout(() => window.location.reload(), 1000);
+                      } catch (err) {
+                        console.error('Error saving YT handle:', err);
+                        toast.error(t('admin.ytHandleError', 'Could not resolve YouTube channel'));
+                      } finally {
+                        setSavingHandle(false);
+                      }
                     }}
                   >
                     {t('common.save', 'Save')}
