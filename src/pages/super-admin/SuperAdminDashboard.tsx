@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from 'react-i18next';
 
 const PURPLE = '#8b5cf6';
 const PURPLE_LIGHT = '#a78bfa';
