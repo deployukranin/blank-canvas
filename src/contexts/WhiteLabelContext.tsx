@@ -918,8 +918,14 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
         }
 
-        // Also load the youtube_channel config saved during registration
-        // This ALWAYS takes priority over global white_label_config channelId
+        // Strip youtube.channelId from global config — each store must use its own
+        if (dbConfig && !storeId) {
+          if ((dbConfig as any)?.youtube?.channelId) {
+            (dbConfig as any).youtube = { ...((dbConfig as any).youtube || {}), channelId: '', enabled: false };
+          }
+        }
+
+        // Load the youtube_channel config saved during registration (store-specific ONLY)
         if (storeId) {
           const ytChannelConfig = await loadConfig<{ channelId?: string; channelTitle?: string }>('youtube_channel' as any, storeId);
           if (ytChannelConfig?.channelId) {
