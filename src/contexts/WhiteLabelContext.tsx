@@ -674,6 +674,7 @@ export interface WhiteLabelConfig {
   youtube: {
     enabled: boolean;
     channelId: string;
+    channelHandle?: string;
     searchEnabled?: boolean;
     categoryPreviewLimit?: number | null;
     continueWatchingEnabled?: boolean;

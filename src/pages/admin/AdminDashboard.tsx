@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video, AtSign } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -25,7 +26,7 @@ interface YTMetrics {
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { config } = useWhiteLabel();
+  const { config, updateYouTube } = useWhiteLabel();
   const { session } = useAuth();
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
@@ -36,6 +37,8 @@ const AdminDashboard: React.FC = () => {
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
+  const [channelHandleInput, setChannelHandleInput] = useState(config.youtube?.channelHandle || '');
+  const [savingHandle, setSavingHandle] = useState(false);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
@@ -247,14 +250,39 @@ const AdminDashboard: React.FC = () => {
         {config.youtube?.channelId && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Youtube className="w-5 h-5 text-red-500" />
-                <h3 className="font-semibold text-sm text-foreground">YouTube — {t('admin.youtube30d', 'Últimos 30 dias')}</h3>
-                {ytMetrics?.fetched_at && (
-                  <span className="text-[10px] text-muted-foreground ml-auto">
-                    {t('admin.ytCachedAt', 'Atualizado')}: {new Date(ytMetrics.fetched_at).toLocaleDateString()}
-                  </span>
-                )}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                  <h3 className="font-semibold text-sm text-foreground">YouTube</h3>
+                  {config.youtube?.channelHandle && (
+                    <span className="text-xs text-muted-foreground">@{config.youtube.channelHandle.replace(/^@/, '')}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <AtSign className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={channelHandleInput}
+                      onChange={(e) => setChannelHandleInput(e.target.value)}
+                      placeholder={t('admin.ytHandlePlaceholder', 'channel_handle')}
+                      className="h-8 text-xs pl-8 w-44"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    disabled={savingHandle || channelHandleInput === (config.youtube?.channelHandle || '')}
+                    onClick={() => {
+                      setSavingHandle(true);
+                      updateYouTube({ ...config.youtube, channelHandle: channelHandleInput.replace(/^@/, '') });
+                      toast.success(t('common.saved', 'Saved'));
+                      setSavingHandle(false);
+                    }}
+                  >
+                    {t('common.save', 'Save')}
+                  </Button>
+                </div>
               </div>
 
               {ytLoading ? (
@@ -264,26 +292,21 @@ const AdminDashboard: React.FC = () => {
                 </div>
               ) : ytMetrics ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <UserPlus className="w-4 h-4 mx-auto text-primary mb-1" />
                       <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.subscriber_count)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Inscritos')}</p>
-                    </div>
-                    <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
-                      <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.views_last_30d)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytViews30d', 'Views (30d)')}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Subscribers')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Video className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{ytMetrics.videos_last_30d}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytVideos30d', 'Vídeos (30d)')}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_video_count)}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalVideos', 'Total Videos')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
                       <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_view_count)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Views Total')}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Total Views')}</p>
                     </div>
                   </div>
 
