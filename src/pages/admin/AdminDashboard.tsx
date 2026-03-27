@@ -25,7 +25,7 @@ interface YTMetrics {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { config } = useWhiteLabel();
   const { session } = useAuth();
