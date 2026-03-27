@@ -141,6 +141,24 @@ const PerfilPage = () => {
               <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
           </GlassCard>
+
+          {/* Avatar URL Editor for regular users */}
+          {editingAvatar && !isAdmin && !isCEO && (
+            <div className="mt-3 flex gap-2 items-center">
+              <Input
+                placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')}
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                className="flex-1 h-9 text-sm"
+              />
+              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}>
+                <Check className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Admin Dashboard Link */}
