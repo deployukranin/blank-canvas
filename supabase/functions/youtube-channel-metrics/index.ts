@@ -14,9 +14,9 @@ Deno.serve(async (req) => {
   try {
     const { channelId, storeId } = await req.json();
 
-    if (!channelId) {
+    if (!channelId || !storeId) {
       return new Response(
-        JSON.stringify({ error: "channelId required" }),
+        JSON.stringify({ error: "channelId and storeId required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -26,41 +26,61 @@ Deno.serve(async (req) => {
     const youtubeKey = Deno.env.get("YOUTUBE_API_KEY");
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Check if we have cached metrics less than 24h old
-    if (storeId) {
-      const { data: cached } = await supabase
-        .from("youtube_channel_metrics")
-        .select("*")
-        .eq("store_id", storeId)
-        .eq("channel_id", channelId)
-        .maybeSingle();
+    // Check if we already have metrics for TODAY
+    const today = new Date().toISOString().split("T")[0];
+    const { data: todaySnapshot } = await supabase
+      .from("youtube_metrics_history")
+      .select("*")
+      .eq("store_id", storeId)
+      .eq("channel_id", channelId)
+      .eq("recorded_at", today)
+      .maybeSingle();
 
-      if (cached) {
-        const age = Date.now() - new Date(cached.fetched_at).getTime();
-        const maxAge = 24 * 60 * 60 * 1000; // 24h
-        if (age < maxAge) {
-          console.log(`[yt-metrics] Returning cached metrics (age: ${Math.round(age / 60000)}min)`);
-          return new Response(JSON.stringify({ success: true, metrics: cached, fromCache: true }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+    if (todaySnapshot) {
+      console.log(`[yt-metrics] Already have today's snapshot, returning cached`);
+      // Also update the main metrics table
+      return new Response(JSON.stringify({ success: true, metrics: todaySnapshot, fromCache: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check main cache (less than 24h old)
+    const { data: cached } = await supabase
+      .from("youtube_channel_metrics")
+      .select("*")
+      .eq("store_id", storeId)
+      .eq("channel_id", channelId)
+      .maybeSingle();
+
+    if (cached) {
+      const age = Date.now() - new Date(cached.fetched_at).getTime();
+      const maxAge = 24 * 60 * 60 * 1000;
+      if (age < maxAge) {
+        console.log(`[yt-metrics] Returning cached metrics (age: ${Math.round(age / 60000)}min)`);
+        // Save daily snapshot if not exists
+        await supabase.from("youtube_metrics_history").upsert({
+          store_id: storeId,
+          channel_id: channelId,
+          subscriber_count: cached.subscriber_count,
+          total_view_count: cached.total_view_count,
+          total_video_count: cached.total_video_count,
+          views_last_30d: cached.views_last_30d,
+          videos_last_30d: cached.videos_last_30d,
+          recorded_at: today,
+        }, { onConflict: "store_id,channel_id,recorded_at" });
+
+        return new Response(JSON.stringify({ success: true, metrics: cached, fromCache: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
     if (!youtubeKey) {
-      // Return cached even if stale, or zeros
-      if (storeId) {
-        const { data: stale } = await supabase
-          .from("youtube_channel_metrics")
-          .select("*")
-          .eq("store_id", storeId)
-          .eq("channel_id", channelId)
-          .maybeSingle();
-        if (stale) {
-          return new Response(JSON.stringify({ success: true, metrics: stale, fromCache: true, stale: true }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+      // Return stale data if available
+      if (cached) {
+        return new Response(JSON.stringify({ success: true, metrics: cached, fromCache: true, stale: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       return new Response(
         JSON.stringify({ error: "YOUTUBE_API_KEY not configured" }),
@@ -85,9 +105,6 @@ Deno.serve(async (req) => {
     const totalViewCount = parseInt(channelStats.viewCount || "0");
     const totalVideoCount = parseInt(channelStats.videoCount || "0");
 
-    // Get uploads playlist ID
-    const uploadsPlaylistId = channelData.items[0]?.contentDetails?.playlistId;
-    
     // Fetch recent videos from cache to calculate 30-day metrics
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -101,7 +118,6 @@ Deno.serve(async (req) => {
 
     const videosLast30d = recentVideos?.length || 0;
 
-    // Fetch view counts for recent videos (batch of up to 50)
     let viewsLast30d = 0;
     const topVideos: Array<{ id: string; title: string; views: number; thumbnail: string }> = [];
 
@@ -115,15 +131,14 @@ Deno.serve(async (req) => {
         for (const item of statsData.items) {
           const views = parseInt(item.statistics?.viewCount || "0");
           viewsLast30d += views;
-          const cached = recentVideos.find(v => v.video_id === item.id);
+          const cachedVid = recentVideos.find(v => v.video_id === item.id);
           topVideos.push({
             id: item.id,
-            title: cached?.video_title || "",
+            title: cachedVid?.video_title || "",
             views,
-            thumbnail: cached?.thumbnail_url || "",
+            thumbnail: cachedVid?.thumbnail_url || "",
           });
         }
-        // Sort by views desc, keep top 5
         topVideos.sort((a, b) => b.views - a.views);
         topVideos.splice(5);
       }
@@ -131,7 +146,7 @@ Deno.serve(async (req) => {
 
     const metrics = {
       channel_id: channelId,
-      store_id: storeId || null,
+      store_id: storeId,
       subscriber_count: subscriberCount,
       total_view_count: totalViewCount,
       total_video_count: totalVideoCount,
@@ -142,12 +157,22 @@ Deno.serve(async (req) => {
       updated_at: new Date().toISOString(),
     };
 
-    // Upsert into cache
-    if (storeId) {
-      await supabase
-        .from("youtube_channel_metrics")
-        .upsert(metrics, { onConflict: "store_id,channel_id" });
-    }
+    // Upsert into main cache
+    await supabase
+      .from("youtube_channel_metrics")
+      .upsert(metrics, { onConflict: "store_id,channel_id" });
+
+    // Save daily snapshot
+    await supabase.from("youtube_metrics_history").upsert({
+      store_id: storeId,
+      channel_id: channelId,
+      subscriber_count: subscriberCount,
+      total_view_count: totalViewCount,
+      total_video_count: totalVideoCount,
+      views_last_30d: viewsLast30d,
+      videos_last_30d: videosLast30d,
+      recorded_at: today,
+    }, { onConflict: "store_id,channel_id,recorded_at" });
 
     console.log(`[yt-metrics] Fetched fresh metrics for ${channelId}: ${subscriberCount} subs, ${viewsLast30d} views (30d)`);
 
