@@ -249,11 +249,9 @@ const AdminDashboard: React.FC = () => {
             <GlassCard className="p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Youtube className="w-5 h-5 text-red-500" />
-                <h3 className="font-semibold text-sm text-foreground">YouTube — {t('admin.youtube30d', 'Últimos 30 dias')}</h3>
-                {ytMetrics?.fetched_at && (
-                  <span className="text-[10px] text-muted-foreground ml-auto">
-                    {t('admin.ytCachedAt', 'Atualizado')}: {new Date(ytMetrics.fetched_at).toLocaleDateString()}
-                  </span>
+                <h3 className="font-semibold text-sm text-foreground">YouTube</h3>
+                {config.youtube?.channelHandle && (
+                  <span className="text-xs text-muted-foreground">@{config.youtube.channelHandle.replace(/^@/, '')}</span>
                 )}
               </div>
 
@@ -264,26 +262,21 @@ const AdminDashboard: React.FC = () => {
                 </div>
               ) : ytMetrics ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <UserPlus className="w-4 h-4 mx-auto text-primary mb-1" />
                       <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.subscriber_count)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Inscritos')}</p>
-                    </div>
-                    <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
-                      <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.views_last_30d)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytViews30d', 'Views (30d)')}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Subscribers')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Video className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{ytMetrics.videos_last_30d}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytVideos30d', 'Vídeos (30d)')}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_video_count)}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalVideos', 'Total Videos')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
                       <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_view_count)}</p>
-                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Views Total')}</p>
+                      <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Total Views')}</p>
                     </div>
                   </div>
 
