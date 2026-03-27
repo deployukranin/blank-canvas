@@ -11,6 +11,7 @@ import { getPendingOrdersCount } from '@/lib/order-store';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useProfile } from '@/hooks/use-profile';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useTenant } from '@/contexts/TenantContext';
 
 const quickAccessItems = [
   { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -34,6 +35,7 @@ const PerfilPage = () => {
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
+  const { basePath } = useTenant();
 
   if (!isAuthenticated) {
     return (
