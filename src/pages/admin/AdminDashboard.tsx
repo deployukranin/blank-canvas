@@ -26,7 +26,7 @@ interface YTMetrics {
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { config } = useWhiteLabel();
+  const { config, updateYouTube } = useWhiteLabel();
   const { session } = useAuth();
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
