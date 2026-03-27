@@ -46,7 +46,6 @@ import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
-import AdminBanners from "./pages/admin/AdminBanners";
 import AdminPlanos from "./pages/admin/AdminPlanos";
 import AdminSuporte from "./pages/admin/AdminSuporte";
 
@@ -118,7 +117,6 @@ const App = () => (
                 <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
                 <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
                 <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
-                <Route path="/admin/banners" element={<AdminRoute requiredRole="admin"><AdminBanners /></AdminRoute>} />
                 <Route path="/admin/planos" element={<AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute>} />
                 <Route path="/admin/suporte" element={<AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute>} />
 
