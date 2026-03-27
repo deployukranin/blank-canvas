@@ -113,11 +113,10 @@ const AdminDashboard: React.FC = () => {
         // Read history for chart
         const { data: history } = await supabase
           .from('youtube_metrics_history')
-          .select('recorded_at, subscriber_count, views_last_30d, total_view_count')
+          .select('recorded_at, subscriber_count, views_last_30d, total_view_count, total_video_count')
           .eq('store_id', storeId)
           .eq('channel_id', channelId)
-          .order('recorded_at', { ascending: true })
-          .limit(30);
+          .order('recorded_at', { ascending: true });
 
         if (history?.length) {
           setYtHistory(history);
