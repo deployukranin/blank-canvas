@@ -153,23 +153,23 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <SuperAdminLayout title="Dashboard">
+    <SuperAdminLayout title={t('superAdmin.dashboard')}>
       <div className="space-y-6">
         {/* Row 1: Primary KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MetricCard label="Plataformas" value={g?.total_stores || 0} sub={`${g?.active_stores || 0} ativas · ${g?.suspended_stores || 0} suspensas`} icon={Store} />
-          <MetricCard label="Usuários Totais" value={g?.total_users || 0} sub={`${g?.total_store_users || 0} vinculados a lojas`} icon={Users} color="cyan" />
-          <MetricCard label="Faturamento Total" value={`R$ ${(g?.total_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} sub={`${g?.paid_orders || 0} pedidos pagos`} icon={DollarSign} color="green" />
-          <MetricCard label="Conversão Trial→Pago" value={`${g?.conversion_rate || 0}%`} sub={`${g?.trial_stores || 0} trial · ${g?.paid_stores || 0} pagos`} icon={Percent} color="amber" />
+          <MetricCard label={t('superAdmin.metrics.platforms')} value={g?.total_stores || 0} sub={`${g?.active_stores || 0} ${t('superAdmin.activePlatforms')} · ${g?.suspended_stores || 0} ${t('common.suspended').toLowerCase()}`} icon={Store} />
+          <MetricCard label={t('superAdmin.metrics.totalUsers')} value={g?.total_users || 0} sub={`${g?.total_store_users || 0} ${t('superAdmin.metrics.linkedToStores')}`} icon={Users} color="cyan" />
+          <MetricCard label={t('superAdmin.metrics.totalRevenue')} value={`R$ ${(g?.total_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} sub={`${g?.paid_orders || 0} ${t('superAdmin.metrics.paidOrders')}`} icon={DollarSign} color="green" />
+          <MetricCard label={t('superAdmin.metrics.trialToPaid')} value={`${g?.conversion_rate || 0}%`} sub={`${g?.trial_stores || 0} trial · ${g?.paid_stores || 0} ${t('superAdmin.paid')}`} icon={Percent} color="amber" />
         </div>
 
         {/* Row 2: Secondary KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <MetricCard label="VIP Ativos" value={g?.active_vip_subs || 0} sub={`MRR: R$ ${(g?.vip_mrr || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={Crown} color="amber" />
-          <MetricCard label="Pedidos" value={g?.total_orders || 0} sub={`${g?.paid_orders || 0} pagos`} icon={ShoppingBag} color="cyan" />
-          <MetricCard label="Tickets Abertos" value={g?.open_tickets || 0} sub={`${g?.total_tickets || 0} total`} icon={LifeBuoy} color="rose" />
-          <MetricCard label="Conteúdo VIP" value={g?.total_content || 0} icon={Eye} color="purple" />
-          <MetricCard label="Engajamento" value={g?.total_chat_messages || 0} sub={`${g?.total_ideas || 0} ideias de vídeo`} icon={MessageSquare} color="green" />
+          <MetricCard label={t('superAdmin.metrics.activeVIP')} value={g?.active_vip_subs || 0} sub={`MRR: R$ ${(g?.vip_mrr || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={Crown} color="amber" />
+          <MetricCard label={t('superAdmin.metrics.orders')} value={g?.total_orders || 0} sub={`${g?.paid_orders || 0} ${t('superAdmin.paid')}`} icon={ShoppingBag} color="cyan" />
+          <MetricCard label={t('superAdmin.metrics.openTickets')} value={g?.open_tickets || 0} sub={`${g?.total_tickets || 0} total`} icon={LifeBuoy} color="rose" />
+          <MetricCard label={t('superAdmin.metrics.vipContent')} value={g?.total_content || 0} icon={Eye} color="purple" />
+          <MetricCard label={t('superAdmin.metrics.engagement')} value={g?.total_chat_messages || 0} sub={`${g?.total_ideas || 0} ${t('superAdmin.metrics.videoIdeas')}`} icon={MessageSquare} color="green" />
         </div>
 
         {/* Row 3: Charts */}
@@ -178,11 +178,11 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="lg:col-span-2 bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <Tabs defaultValue="growth">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-white/70">Evolução</h3>
+                <h3 className="text-sm font-medium text-white/70">{t('superAdmin.metrics.evolution')}</h3>
                 <TabsList className="bg-white/5 h-7">
-                  <TabsTrigger value="growth" className="text-[11px] h-6 px-2.5">Crescimento</TabsTrigger>
-                  <TabsTrigger value="revenue" className="text-[11px] h-6 px-2.5">Receita</TabsTrigger>
-                  <TabsTrigger value="new" className="text-[11px] h-6 px-2.5">Novos</TabsTrigger>
+                  <TabsTrigger value="growth" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.growthTab')}</TabsTrigger>
+                  <TabsTrigger value="revenue" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.revenueTab')}</TabsTrigger>
+                  <TabsTrigger value="new" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.newTab')}</TabsTrigger>
                 </TabsList>
               </div>
 
