@@ -25,7 +25,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
     { path: '/admin-master/tenants', icon: Store, label: t('superAdmin.platforms') },
     { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
     { path: '/admin-master/configuracoes', icon: Settings, label: t('superAdmin.settings') },
-    { path: '/admin-master/suporte', icon: LifeBuoy, label: 'Suporte' },
+    { path: '/admin-master/suporte', icon: LifeBuoy, label: t('superAdmin.support') },
   ];
 
   const handleLogout = () => {
