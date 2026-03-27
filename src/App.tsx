@@ -32,7 +32,7 @@ import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
 
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin";
+// AdminLogin removed — admin is now under /:slug/admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
