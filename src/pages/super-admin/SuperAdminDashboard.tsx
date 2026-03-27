@@ -288,10 +288,10 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-400" />
-              Top Receita
+              {t('superAdmin.metrics.topRevenue')}
             </h3>
             {topStores.length === 0 ? (
-              <p className="text-white/30 text-sm">Sem dados</p>
+              <p className="text-white/30 text-sm">{t('common.noData')}</p>
             ) : (
               <div className="space-y-3">
                 {topStores.map((s, i) => {
@@ -326,10 +326,10 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
               <Activity className="w-4 h-4 text-cyan-400" />
-              Mais Ativas (30 dias)
+              {t('superAdmin.metrics.mostActive30d')}
             </h3>
             {mostActiveStores.length === 0 ? (
-              <p className="text-white/30 text-sm">Sem dados</p>
+              <p className="text-white/30 text-sm">{t('common.noData')}</p>
             ) : (
               <div className="space-y-3">
                 {mostActiveStores.map((s, i) => {
@@ -342,13 +342,13 @@ const SuperAdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm text-white/80 truncate">{s.name}</span>
                           <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-400 shrink-0 ml-2">
-                            {engagement} ações
+                            {engagement} {t('superAdmin.metrics.actions')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-3">
                           <Progress value={(engagement / maxEng) * 100} className="h-1 flex-1" />
                           <div className="flex items-center gap-2 text-[10px] text-white/40 shrink-0">
-                            <span>{s.recent_users_30d} novos 👥</span>
+                            <span>{s.recent_users_30d} {t('superAdmin.metrics.new')} 👥</span>
                             <span>{s.recent_messages_30d} 💬</span>
                             <span>{s.recent_orders_30d} 📦</span>
                           </div>
@@ -366,26 +366,26 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
           <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-purple-400" />
-            Métricas por Plataforma
-          </h3>
-          {isLoading ? (
-            <p className="text-white/30 text-sm">Carregando...</p>
-          ) : perStore.length === 0 ? (
-            <p className="text-white/30 text-sm">Nenhuma plataforma</p>
-          ) : (
+              {t('superAdmin.metrics.metricsPerPlatform')}
+            </h3>
+            {isLoading ? (
+              <p className="text-white/30 text-sm">{t('common.loading')}</p>
+            ) : perStore.length === 0 ? (
+              <p className="text-white/30 text-sm">{t('superAdmin.metrics.noPlatforms')}</p>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/5 text-left">
-                    <th className="pb-2 font-medium text-white/30 text-[11px]">Plataforma</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">Status</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Usuários</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Pedidos</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Receita</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">VIP</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Conteúdo</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Chat</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Tickets</th>
+                     <th className="pb-2 font-medium text-white/30 text-[11px]">{t('superAdmin.metrics.colPlatform')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">{t('superAdmin.metrics.colStatus')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colUsers')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colOrders')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colRevenue')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colVIP')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colContent')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colChat')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colTickets')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -400,7 +400,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <td className="py-2.5 text-center">
                         <span className={`inline-flex items-center gap-1 text-[11px] ${s.status === 'active' ? 'text-green-400' : 'text-white/30'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-green-400' : 'bg-white/20'}`} />
-                          {s.plan_type === 'trial' ? 'Trial' : 'Pago'}
+                          {s.plan_type === 'trial' ? 'Trial' : t('superAdmin.metrics.statusPaid')}
                         </span>
                       </td>
                       <td className="py-2.5 text-right text-white/70">
@@ -424,7 +424,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <td className="py-2.5 text-right">
                         {s.tickets_open > 0 ? (
                           <Badge variant="outline" className="text-[10px] border-rose-500/30 text-rose-400">
-                            {s.tickets_open} abertos
+                            {s.tickets_open} {t('superAdmin.metrics.open')}
                           </Badge>
                         ) : (
                           <span className="text-white/30">{s.tickets_total}</span>
