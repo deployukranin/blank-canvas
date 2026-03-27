@@ -203,8 +203,8 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} />
-                    <Area type="monotone" dataKey="stores" name="Plataformas" stroke={PURPLE} fill="url(#gPurple)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="users" name="Usuários" stroke={CYAN} fill="url(#gCyan)" strokeWidth={1.5} />
+                    <Area type="monotone" dataKey="stores" name={t('superAdmin.metrics.chartPlatforms')} stroke={PURPLE} fill="url(#gPurple)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="users" name={t('superAdmin.metrics.chartUsers')} stroke={CYAN} fill="url(#gCyan)" strokeWidth={1.5} />
                   </AreaChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -216,7 +216,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
-                    <Bar dataKey="revenue" name="Receita" fill={GREEN} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="revenue" name={t('superAdmin.metrics.chartRevenue')} fill={GREEN} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -228,8 +228,8 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} />
-                    <Bar dataKey="new_stores" name="Novas Lojas" fill={PURPLE} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="new_users" name="Novos Usuários" fill={CYAN} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="new_stores" name={t('superAdmin.metrics.chartNewStores')} fill={PURPLE} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="new_users" name={t('superAdmin.metrics.chartNewUsers')} fill={CYAN} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -238,7 +238,7 @@ const SuperAdminDashboard: React.FC = () => {
 
           {/* Plan distribution */}
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
-            <h3 className="text-sm font-medium text-white/70 mb-4">Distribuição de Planos</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">{t('superAdmin.metrics.planDistribution')}</h3>
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie data={planData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" strokeWidth={0}>
@@ -261,18 +261,18 @@ const SuperAdminDashboard: React.FC = () => {
 
             {/* Conversion funnel */}
             <div className="mt-5 space-y-2">
-              <p className="text-[11px] text-white/40 uppercase tracking-wider">Funil de Conversão</p>
+              <p className="text-[11px] text-white/40 uppercase tracking-wider">{t('superAdmin.metrics.conversionFunnel')}</p>
               <div className="space-y-1.5">
                 <div>
                   <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-white/50">Cadastros → Trial</span>
+                    <span className="text-white/50">{t('superAdmin.metrics.signupToTrial')}</span>
                     <span className="text-white/70">100%</span>
                   </div>
                   <Progress value={100} className="h-1.5" />
                 </div>
                 <div>
                   <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-white/50">Trial → Pago</span>
+                    <span className="text-white/50">{t('superAdmin.metrics.trialToPaidFunnel')}</span>
                     <span className="text-white/70">{g?.conversion_rate || 0}%</span>
                   </div>
                   <Progress value={g?.conversion_rate || 0} className="h-1.5" />
