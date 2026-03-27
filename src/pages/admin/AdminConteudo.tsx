@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit, Trash2, Pin, Megaphone, Newspaper, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { mockFeedPosts, FeedPost } from '@/lib/mock-data';
 
 const AdminConteudo: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [posts, setPosts] = useState<FeedPost[]>(mockFeedPosts);
   const [isCreating, setIsCreating] = useState(false);
   const [newPost, setNewPost] = useState({
@@ -19,6 +21,8 @@ const AdminConteudo: React.FC = () => {
     type: 'news' as FeedPost['type'],
     isPinned: false
   });
+
+  const isBR = i18n.language?.startsWith('pt');
 
   const handleCreate = () => {
     const post: FeedPost = {
@@ -46,11 +50,11 @@ const AdminConteudo: React.FC = () => {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'announcement':
-        return <Badge className="bg-blue-500/20 text-blue-400">Aviso</Badge>;
+        return <Badge className="bg-blue-500/20 text-blue-400">{t('contentAdmin.announcement')}</Badge>;
       case 'news':
-        return <Badge className="bg-green-500/20 text-green-400">Novidade</Badge>;
+        return <Badge className="bg-green-500/20 text-green-400">{t('contentAdmin.news')}</Badge>;
       case 'exclusive':
-        return <Badge className="bg-yellow-500/20 text-yellow-400">Exclusivo</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-400">{t('contentAdmin.exclusiveVip')}</Badge>;
       default:
         return null;
     }
@@ -70,7 +74,7 @@ const AdminConteudo: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
+    return new Date(dateString).toLocaleString(isBR ? 'pt-BR' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -80,48 +84,46 @@ const AdminConteudo: React.FC = () => {
   };
 
   return (
-    <AdminLayout title="Gerenciar Conteúdo">
+    <AdminLayout title={t('contentAdmin.title')}>
       <div className="space-y-6">
-        {/* Create Button */}
         <div className="flex justify-end">
           <Button onClick={() => setIsCreating(!isCreating)} className="gap-2">
             <Plus className="w-4 h-4" />
-            Novo Post
+            {t('contentAdmin.newPost')}
           </Button>
         </div>
 
-        {/* Create Form */}
         {isCreating && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <GlassCard className="p-6">
-              <h3 className="font-semibold mb-4">Criar Novo Post</h3>
+              <h3 className="font-semibold mb-4">{t('contentAdmin.createNewPost')}</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Título</label>
+                  <label className="text-sm font-medium mb-2 block">{t('contentAdmin.postTitle')}</label>
                   <Input
                     value={newPost.title}
                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                    placeholder="Título do post..."
+                    placeholder={t('contentAdmin.postTitlePlaceholder')}
                   />
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Conteúdo</label>
+                  <label className="text-sm font-medium mb-2 block">{t('contentAdmin.postContent')}</label>
                   <Textarea
                     value={newPost.content}
                     onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                    placeholder="Escreva o conteúdo do post..."
+                    placeholder={t('contentAdmin.postContentPlaceholder')}
                     rows={4}
                   />
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
-                    <label className="text-sm font-medium mb-2 block">Tipo</label>
+                    <label className="text-sm font-medium mb-2 block">{t('contentAdmin.type')}</label>
                     <Select 
                       value={newPost.type} 
                       onValueChange={(v) => setNewPost({ ...newPost, type: v as FeedPost['type'] })}
@@ -130,9 +132,9 @@ const AdminConteudo: React.FC = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="announcement">Aviso</SelectItem>
-                        <SelectItem value="news">Novidade</SelectItem>
-                        <SelectItem value="exclusive">Exclusivo VIP</SelectItem>
+                        <SelectItem value="announcement">{t('contentAdmin.announcement')}</SelectItem>
+                        <SelectItem value="news">{t('contentAdmin.news')}</SelectItem>
+                        <SelectItem value="exclusive">{t('contentAdmin.exclusiveVip')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -144,17 +146,17 @@ const AdminConteudo: React.FC = () => {
                       className="gap-2"
                     >
                       <Pin className="w-4 h-4" />
-                      {newPost.isPinned ? 'Fixado' : 'Fixar'}
+                      {newPost.isPinned ? t('contentAdmin.pinned') : t('contentAdmin.pin')}
                     </Button>
                   </div>
                 </div>
                 
                 <div className="flex gap-2 justify-end">
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleCreate} disabled={!newPost.title || !newPost.content}>
-                    Publicar
+                    {t('contentAdmin.publish')}
                   </Button>
                 </div>
               </div>
@@ -162,7 +164,6 @@ const AdminConteudo: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Posts List */}
         <div className="space-y-4">
           {posts.map((post, index) => (
             <motion.div
@@ -185,7 +186,7 @@ const AdminConteudo: React.FC = () => {
                         {post.isPinned && (
                           <Badge variant="outline" className="border-primary text-primary">
                             <Pin className="w-3 h-3 mr-1" />
-                            Fixado
+                            {t('contentAdmin.pinned')}
                           </Badge>
                         )}
                       </div>
@@ -223,7 +224,7 @@ const AdminConteudo: React.FC = () => {
 
         {posts.length === 0 && (
           <GlassCard className="p-8 text-center">
-            <p className="text-muted-foreground">Nenhum post encontrado</p>
+            <p className="text-muted-foreground">{t('contentAdmin.noPosts')}</p>
           </GlassCard>
         )}
       </div>
