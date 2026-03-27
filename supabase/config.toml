@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.super-admin-metrics]
 verify_jwt = false
+
+[functions.youtube-channel-metrics]
+verify_jwt = false
