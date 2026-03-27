@@ -17,22 +17,53 @@ import { useTenant } from '@/contexts/TenantContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const menuItems = [
-  { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '/ajuda' },
-  { icon: FileText, label: 'Termos de Uso', description: 'Leia nossos termos', path: '/termos' },
-  { icon: Shield, label: 'Privacidade', description: 'Política de privacidade', path: '/privacidade' },
-];
-
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useTranslation();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [savingAvatar, setSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile } = useProfile();
+  const { profile, refetch: refetchProfile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
   const { basePath } = useTenant();
+
+  const quickAccessItems = [
+    { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
+    { icon: Bell, label: t('profile.notifications', 'Notifications'), description: t('profile.commentsVotes', 'Comments and votes'), path: '/notificacoes', gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
+    { icon: Lightbulb, label: t('profile.videoIdeas', 'Video Ideas'), description: t('profile.suggestVote', 'Suggest and vote on ideas'), path: '/ideias', gradient: 'from-amber-400 to-orange-500' },
+    { icon: Crown, label: t('profile.vipCommunity', 'VIP Community'), description: t('profile.exclusiveAccess', 'Exclusive access'), path: '/vip', gradient: 'from-vip to-amber-500' },
+  ];
+
+  const menuItems = [
+    { icon: HelpCircle, label: t('profile.help', 'Help'), description: t('profile.faqSupport', 'FAQ and support'), path: '/ajuda' },
+    { icon: FileText, label: t('profile.terms', 'Terms of Use'), description: t('profile.readTerms', 'Read our terms'), path: '/termos' },
+    { icon: Shield, label: t('profile.privacy', 'Privacy'), description: t('profile.privacyPolicy', 'Privacy policy'), path: '/privacidade' },
+  ];
+
+  const handleSaveAvatar = async () => {
+    if (!user || !avatarUrl.trim()) return;
+    setSavingAvatar(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ user_id: user.id, avatar_url: avatarUrl.trim() }, { onConflict: 'user_id' });
+      if (error) throw error;
+      toast.success(t('profile.avatarSaved', 'Profile photo updated!'));
+      setEditingAvatar(false);
+      setAvatarUrl('');
+      refetchProfile();
+    } catch (err) {
+      console.error('Error saving avatar:', err);
+      toast.error(t('profile.avatarError', 'Error updating profile photo'));
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
