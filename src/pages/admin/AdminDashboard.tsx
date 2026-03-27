@@ -306,6 +306,38 @@ const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Evolution Chart */}
+                  {ytHistory.length > 1 && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytEvolution', 'Evolução do Canal')}</p>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={ytHistory.map(h => ({
+                          date: new Date(h.recorded_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+                          inscritos: h.subscriber_count,
+                          views30d: h.views_last_30d,
+                        }))}>
+                          <defs>
+                            <linearGradient id="ytSubsGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
+                              <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="ytViewsGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={chartColor} stopOpacity={0.3} />
+                              <stop offset="100%" stopColor={chartColor} stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke={isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'} />
+                          <XAxis dataKey="date" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis yAxisId="left" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatNumber(v)} />
+                          <YAxis yAxisId="right" orientation="right" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatNumber(v)} />
+                          <Tooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [formatNumber(value), name === 'inscritos' ? 'Inscritos' : 'Views (30d)']} />
+                          <Area yAxisId="left" type="monotone" dataKey="inscritos" stroke="#ef4444" fill="url(#ytSubsGrad)" strokeWidth={2} name="inscritos" />
+                          <Area yAxisId="right" type="monotone" dataKey="views30d" stroke={chartColor} fill="url(#ytViewsGrad)" strokeWidth={2} name="views30d" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">{t('admin.ytNoData', 'Sem dados disponíveis. Configure o canal do YouTube.')}</p>
