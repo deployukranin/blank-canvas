@@ -164,20 +164,43 @@ const AdminPersonalizacao: React.FC = () => {
     );
   };
 
+  // ── Preview state ──
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [previewSlide, setPreviewSlide] = useState(0);
+
+  const previewImages = (() => {
+    const enabled = banners.filter(b => b.enabled);
+    if (enabled.length === 0) return [];
+    return enabled.map(b => {
+      if (previewMode === 'mobile' && b.mobileUrl) return b.mobileUrl;
+      return b.desktopUrl || b.mobileUrl || '';
+    }).filter(Boolean);
+  })();
+
+  const previewNext = () => setPreviewSlide(p => (p + 1) % (previewImages.length || 1));
+  const previewPrev = () => setPreviewSlide(p => (p - 1 + (previewImages.length || 1)) % (previewImages.length || 1));
+
+  // Build preview colors
+  const previewBg = config.colors.mode === 'light' ? 'hsl(0 0% 98%)' : 'hsl(0 0% 4%)';
+  const previewPrimary = `hsl(${config.colors.primary})`;
+  const previewFg = config.colors.mode === 'light' ? 'hsl(0 0% 10%)' : 'hsl(0 0% 98%)';
+  const previewMuted = config.colors.mode === 'light' ? 'hsl(0 0% 40%)' : 'hsl(0 0% 60%)';
+
   return (
     <AdminLayout title={t('admin.personalization', 'Personalização')}>
       <div className="max-w-3xl mx-auto">
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="colors" className="gap-2"><Palette className="w-4 h-4" />{t('admin.settings.colorTheme', 'Cores')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="colors" className="gap-2"><Palette className="w-4 h-4" />{t('admin.settings.colorTheme', 'Colors')}</TabsTrigger>
             <TabsTrigger value="banners" className="gap-2"><Image className="w-4 h-4" />{t('admin.banners.title', 'Banners')}</TabsTrigger>
+            <TabsTrigger value="preview" className="gap-2"><Eye className="w-4 h-4" />Preview</TabsTrigger>
           </TabsList>
 
           {/* ── Colors Tab ── */}
           <TabsContent value="colors">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <GlassCard className="p-6">
-                <p className="text-sm text-muted-foreground mb-6">{t('admin.settings.colorThemeDesc', 'Escolha um template de cores para sua plataforma.')}</p>
+                <p className="text-sm text-muted-foreground mb-6">{t('admin.settings.colorThemeDesc', 'Choose a color template for your platform.')}</p>
 
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Dark</p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
@@ -213,9 +236,8 @@ const AdminPersonalizacao: React.FC = () => {
           {/* ── Banners Tab ── */}
           <TabsContent value="banners">
             <div className="space-y-5">
-              {/* Save + info */}
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{t('admin.banners.subtitle', 'Configure até 3 banners para a tela inicial.')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.banners.subtitle', 'Configure up to 3 banners for the home screen.')}</p>
                 <Button onClick={handleSaveBanners} size="sm">{t('common.save')}</Button>
               </div>
 
@@ -223,7 +245,7 @@ const AdminPersonalizacao: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                   <div className="text-sm space-y-1">
-                    <p className="font-medium text-foreground">{t('admin.banners.sizeGuide', 'Tamanhos recomendados')}</p>
+                    <p className="font-medium text-foreground">{t('admin.banners.sizeGuide', 'Recommended sizes')}</p>
                     <div className="flex flex-col sm:flex-row gap-4 text-muted-foreground">
                       <span className="flex items-center gap-1"><Monitor className="w-4 h-4 text-primary/70" /> Desktop: <strong className="text-foreground/80">1920×800px</strong></span>
                       <span className="flex items-center gap-1"><Smartphone className="w-4 h-4 text-primary/70" /> Mobile: <strong className="text-foreground/80">750×1000px</strong></span>
@@ -232,22 +254,20 @@ const AdminPersonalizacao: React.FC = () => {
                 </div>
               </GlassCard>
 
-              {/* Hero text */}
               <GlassCard className="p-5 space-y-4">
-                <h3 className="font-semibold text-foreground text-sm">{t('admin.banners.heroText', 'Texto do Banner')}</h3>
+                <h3 className="font-semibold text-foreground text-sm">{t('admin.banners.heroText', 'Banner Text')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <Label className="text-xs">{t('admin.banners.greeting', 'Título / Saudação')}</Label>
-                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder="Bem-vindo! 🤍" className="bg-background/50 border-border/30" />
+                    <Label className="text-xs">{t('admin.banners.greeting', 'Title / Greeting')}</Label>
+                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder="Welcome! 🤍" className="bg-background/50 border-border/30" />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">{t('admin.banners.subtitleLabel', 'Subtítulo')}</Label>
-                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Relaxe com ASMR de qualidade" className="bg-background/50 border-border/30" />
+                    <Label className="text-xs">{t('admin.banners.subtitleLabel', 'Subtitle')}</Label>
+                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Relax with quality content" className="bg-background/50 border-border/30" />
                   </div>
                 </div>
               </GlassCard>
 
-              {/* Banner cards */}
               {banners.map((banner, index) => (
                 <motion.div key={banner.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
                   <GlassCard className="p-5">
@@ -276,10 +296,132 @@ const AdminPersonalizacao: React.FC = () => {
 
               {canAdd && (
                 <Button variant="outline" className="w-full border-dashed border-primary/30 text-primary hover:bg-primary/5" onClick={addBanner}>
-                  <Plus className="w-4 h-4 mr-2" />{t('admin.banners.addBanner', 'Adicionar Banner')} ({banners.length}/3)
+                  <Plus className="w-4 h-4 mr-2" />{t('admin.banners.addBanner', 'Add Banner')} ({banners.length}/3)
                 </Button>
               )}
             </div>
+          </TabsContent>
+
+          {/* ── Preview Tab ── */}
+          <TabsContent value="preview">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="space-y-4">
+                {/* Device toggle */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{t('admin.preview.description', 'See how your platform looks with current settings.')}</p>
+                  <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+                    <Button
+                      variant={previewMode === 'desktop' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3 gap-1.5"
+                      onClick={() => { setPreviewMode('desktop'); setPreviewSlide(0); }}
+                    >
+                      <Monitor className="w-3.5 h-3.5" /> Desktop
+                    </Button>
+                    <Button
+                      variant={previewMode === 'mobile' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="h-7 px-3 gap-1.5"
+                      onClick={() => { setPreviewMode('mobile'); setPreviewSlide(0); }}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" /> Mobile
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Preview frame */}
+                <GlassCard className="p-0 overflow-hidden">
+                  <div
+                    className={`mx-auto transition-all duration-300 ${previewMode === 'mobile' ? 'max-w-[375px]' : 'w-full'}`}
+                    style={{ background: previewBg }}
+                  >
+                    {/* Mini hero banner preview */}
+                    <div className="relative overflow-hidden" style={{ height: previewMode === 'mobile' ? 280 : 220 }}>
+                      {previewImages.length > 0 ? (
+                        previewImages.map((src, i) => (
+                          <div
+                            key={`prev-${i}`}
+                            className="absolute inset-0 transition-opacity duration-500"
+                            style={{ opacity: i === previewSlide ? 1 : 0 }}
+                          >
+                            <img src={src} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${previewBg}, ${previewBg}99 30%, transparent)` }} />
+                            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${previewPrimary}08, transparent, ${previewPrimary}05)` }} />
+                          </div>
+                        ))
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${previewPrimary}20, ${previewBg})` }}>
+                          <Image className="w-10 h-10" style={{ color: previewMuted }} />
+                        </div>
+                      )}
+
+                      {/* Text overlay */}
+                      <div className="absolute bottom-6 left-5 right-5 z-10">
+                        <h2 className="font-bold text-lg leading-tight mb-1" style={{ color: previewFg }}>
+                          {heroGreeting || 'Welcome! 🤍'}
+                        </h2>
+                        <p className="text-sm" style={{ color: previewMuted }}>
+                          {heroSubtitle || 'Relax with quality content'}
+                        </p>
+                      </div>
+
+                      {/* Nav arrows */}
+                      {previewImages.length > 1 && (
+                        <>
+                          <button onClick={previewPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: `${previewBg}50`, color: previewFg }}>
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <button onClick={previewNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: `${previewBg}50`, color: previewFg }}>
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Dots */}
+                      {previewImages.length > 1 && (
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
+                          {previewImages.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setPreviewSlide(i)}
+                              className="rounded-full transition-all"
+                              style={{
+                                width: i === previewSlide ? 20 : 6,
+                                height: 6,
+                                background: i === previewSlide ? previewPrimary : `${previewFg}40`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Fake content cards */}
+                    <div className="px-4 pb-5 pt-2 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 rounded-full" style={{ width: 60, background: previewPrimary }} />
+                        <div className="h-1.5 rounded-full flex-1" style={{ background: `${previewFg}10` }} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[1, 2].map(i => (
+                          <div key={i} className="rounded-lg overflow-hidden" style={{ background: `${previewFg}08`, border: `1px solid ${previewFg}10` }}>
+                            <div className="w-full h-16" style={{ background: `linear-gradient(135deg, ${previewPrimary}15, ${previewPrimary}05)` }} />
+                            <div className="p-2.5 space-y-1.5">
+                              <div className="h-2 rounded-full w-3/4" style={{ background: `${previewFg}15` }} />
+                              <div className="h-1.5 rounded-full w-1/2" style={{ background: `${previewFg}08` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  {t('admin.preview.hint', 'This preview reflects your current color theme and banner settings.')}
+                </p>
+              </div>
+            </motion.div>
           </TabsContent>
         </Tabs>
 
