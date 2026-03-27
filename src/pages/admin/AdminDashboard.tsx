@@ -85,7 +85,7 @@ const AdminDashboard: React.FC = () => {
 
   const [ytHistory, setYtHistory] = useState<Array<{ recorded_at: string; subscriber_count: number; views_last_30d: number; total_view_count: number }>>([]);
 
-  // Fetch YouTube metrics from DB only (no API calls)
+  // Fetch YouTube metrics from DB, trigger edge function if no data exists
   useEffect(() => {
     const channelId = config.youtube?.channelId?.trim();
     if (!channelId || !storeId) return;
@@ -111,6 +111,23 @@ const AdminDashboard: React.FC = () => {
             top_videos: (cached.top_videos as any) || [],
             fetched_at: cached.fetched_at,
           });
+        } else {
+          // No metrics in DB yet — trigger one-time fetch via edge function
+          console.log('[AdminDashboard] No YT metrics cached, triggering initial fetch...');
+          const { data: fetchResult } = await supabase.functions.invoke('youtube-channel-metrics', {
+            body: { channelId, storeId },
+          });
+          if (fetchResult?.metrics) {
+            setYtMetrics({
+              subscriber_count: fetchResult.metrics.subscriber_count,
+              total_view_count: fetchResult.metrics.total_view_count,
+              total_video_count: fetchResult.metrics.total_video_count,
+              views_last_30d: fetchResult.metrics.views_last_30d || 0,
+              videos_last_30d: fetchResult.metrics.videos_last_30d || 0,
+              top_videos: fetchResult.metrics.top_videos || [],
+              fetched_at: fetchResult.metrics.fetched_at || new Date().toISOString(),
+            });
+          }
         }
 
         // Read history for chart
