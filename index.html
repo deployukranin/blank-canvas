@@ -74,6 +74,19 @@
           r.style.setProperty('--accent', isLight ? hue + ' 40% 92%' : (colors.accent || '263 50% 25%'));
           r.style.setProperty('--accent-foreground', isLight ? '0 0% 5%' : '0 0% 95%');
           r.style.setProperty('--ring', p);
+          r.style.setProperty('--sidebar-background', isLight ? '0 0% 98%' : '0 0% 6%');
+          r.style.setProperty('--sidebar-foreground', isLight ? '0 0% 8%' : '0 0% 90%');
+          r.style.setProperty('--sidebar-primary', p);
+          r.style.setProperty('--sidebar-primary-foreground', '0 0% 100%');
+          r.style.setProperty('--sidebar-accent', isLight ? hue + ' 40% 92%' : hue + ' 50% 15%');
+          r.style.setProperty('--sidebar-accent-foreground', isLight ? '0 0% 5%' : '0 0% 95%');
+          r.style.setProperty('--sidebar-border', isLight ? '0 0% 85%' : '0 0% 14%');
+          r.style.setProperty('--sidebar-ring', p);
+          r.style.setProperty('--gradient-primary', 'linear-gradient(135deg, hsl(' + p + '), hsl(' + hue + ' 50% 35%))');
+          r.style.setProperty('--gradient-accent', 'linear-gradient(135deg, hsl(' + hue + ' 60% 50%), hsl(' + hue + ' 40% 30%))');
+          r.style.setProperty('--shadow-glass', '0 8px 32px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(' + hue + ' 70% 58% / 0.05)');
+          r.style.setProperty('--shadow-glow', '0 0 40px hsl(' + hue + ' 70% 58% / 0.12)');
+          r.style.setProperty('--shadow-card', '0 4px 24px hsl(0 0% 0% / 0.6)');
           r.style.setProperty('--glass-border', 'hsl(' + hue + ' 70% 58% / 0.12)');
           r.style.setProperty('--glass-highlight', 'hsl(' + hue + ' 70% 58% / 0.06)');
         } catch(e) {}
