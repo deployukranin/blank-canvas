@@ -325,8 +325,8 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytEvolution', 'Evolução do Canal')}</p>
                       <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={ytHistory.map(h => ({
-                          date: new Date(h.recorded_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-                          inscritos: h.subscriber_count,
+                          date: new Date(h.recorded_at).toLocaleDateString(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { day: '2-digit', month: '2-digit' }),
+                          subscribers: h.subscriber_count,
                           views30d: h.views_last_30d,
                         }))}>
                           <defs>
@@ -343,8 +343,8 @@ const AdminDashboard: React.FC = () => {
                           <XAxis dataKey="date" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatNumber(v)} />
                           <YAxis yAxisId="right" orientation="right" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatNumber(v)} />
-                          <Tooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [formatNumber(value), name === 'inscritos' ? 'Inscritos' : 'Views (30d)']} />
-                          <Area yAxisId="left" type="monotone" dataKey="inscritos" stroke="#ef4444" fill="url(#ytSubsGrad)" strokeWidth={2} name="inscritos" />
+                          <Tooltip {...chartTooltipStyle} formatter={(value: number, name: string) => [formatNumber(value), name === 'subscribers' ? t('admin.ytSubs') : 'Views']} />
+                          <Area yAxisId="left" type="monotone" dataKey="subscribers" stroke="#ef4444" fill="url(#ytSubsGrad)" strokeWidth={2} name="subscribers" />
                           <Area yAxisId="right" type="monotone" dataKey="views30d" stroke={chartColor} fill="url(#ytViewsGrad)" strokeWidth={2} name="views30d" />
                         </AreaChart>
                       </ResponsiveContainer>
@@ -373,8 +373,8 @@ const AdminDashboard: React.FC = () => {
                 <XAxis dataKey="name" tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="receita" stroke={chartColor} fill="url(#adminThemeGrad)" strokeWidth={2} />
-                <Area type="monotone" dataKey="pedidos" stroke={chartColorLight} fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
+                <Area type="monotone" dataKey="revenue" stroke={chartColor} fill="url(#adminThemeGrad)" strokeWidth={2} />
+                <Area type="monotone" dataKey="orders" stroke={chartColorLight} fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -400,7 +400,7 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-[10px] text-foreground/30">{order.customer_name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-xs text-foreground/80">R$ {(order.amount_cents / 100).toFixed(2)}</p>
+                      <p className="font-medium text-xs text-foreground/80">{new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(order.amount_cents / 100)}</p>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{t('admin.pending')}</span>
                     </div>
                   </motion.div>
