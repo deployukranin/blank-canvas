@@ -83,6 +83,7 @@ interface MonthlyGrowth {
 }
 
 const SuperAdminDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [global, setGlobal] = useState<GlobalMetrics | null>(null);
   const [perStore, setPerStore] = useState<StoreMetrics[]>([]);
   const [monthlyGrowth, setMonthlyGrowth] = useState<MonthlyGrowth[]>([]);
