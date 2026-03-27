@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ThumbsUp, Trash2, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -20,11 +21,14 @@ interface VideoIdea {
 }
 
 const AdminIdeias: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'reported' | 'removed'>('all');
+
+  const isBR = i18n.language?.startsWith('pt');
 
   const fetchIdeas = useCallback(async () => {
     setIsLoading(true);
@@ -43,13 +47,13 @@ const AdminIdeias: React.FC = () => {
     } catch (err) {
       console.error('Error fetching ideas:', err);
       toast({
-        title: 'Erro ao carregar ideias',
+        title: t('ideasAdmin.loadError'),
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     fetchIdeas();
@@ -76,13 +80,13 @@ const AdminIdeias: React.FC = () => {
       ));
 
       toast({
-        title: 'Status atualizado',
-        description: `Ideia ${newStatus === 'active' ? 'aprovada' : newStatus === 'removed' ? 'removida' : 'marcada'}`,
+        title: t('ideasAdmin.statusUpdated'),
+        description: newStatus === 'active' ? t('ideasAdmin.approved') : newStatus === 'removed' ? t('ideasAdmin.removed2') : t('ideasAdmin.marked'),
       });
     } catch (err) {
       console.error('Error updating status:', err);
       toast({
-        title: 'Erro ao atualizar',
+        title: t('ideasAdmin.updateError'),
         variant: 'destructive',
       });
     }
@@ -100,12 +104,12 @@ const AdminIdeias: React.FC = () => {
       setIdeas(ideas.filter(idea => idea.id !== id));
 
       toast({
-        title: 'Ideia excluída',
+        title: t('ideasAdmin.ideaDeleted'),
       });
     } catch (err) {
       console.error('Error deleting idea:', err);
       toast({
-        title: 'Erro ao excluir',
+        title: t('ideasAdmin.deleteError'),
         variant: 'destructive',
       });
     }
@@ -114,26 +118,25 @@ const AdminIdeias: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-500/20 text-green-400">Ativa</Badge>;
+        return <Badge className="bg-green-500/20 text-green-400">{t('ideasAdmin.active')}</Badge>;
       case 'reported':
-        return <Badge className="bg-yellow-500/20 text-yellow-400">Denunciada</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-400">{t('ideasAdmin.reported')}</Badge>;
       case 'removed':
-        return <Badge className="bg-red-500/20 text-red-400">Removida</Badge>;
+        return <Badge className="bg-red-500/20 text-red-400">{t('ideasAdmin.removed')}</Badge>;
       default:
         return null;
     }
   };
 
   return (
-    <AdminLayout title="Gerenciar Ideias">
+    <AdminLayout title={t('ideasAdmin.title')}>
       <div className="space-y-6">
-        {/* Filters */}
         <GlassCard className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar ideias..."
+                placeholder={t('ideasAdmin.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -147,7 +150,7 @@ const AdminIdeias: React.FC = () => {
                   size="sm"
                   onClick={() => setFilter(f)}
                 >
-                  {f === 'all' ? 'Todas' : f === 'active' ? 'Ativas' : f === 'reported' ? 'Denunciadas' : 'Removidas'}
+                  {t(`ideasAdmin.${f}`)}
                 </Button>
               ))}
               <Button
@@ -162,14 +165,12 @@ const AdminIdeias: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         )}
 
-        {/* Ideas List */}
         {!isLoading && (
           <div className="space-y-4">
             {filteredIdeas.map((idea, index) => (
@@ -190,9 +191,9 @@ const AdminIdeias: React.FC = () => {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <ThumbsUp className="w-3 h-3" />
-                          {idea.votes} votos
+                          {idea.votes} {t('ideasAdmin.votes')}
                         </span>
-                        <span>{new Date(idea.created_at).toLocaleDateString('pt-BR')}</span>
+                        <span>{new Date(idea.created_at).toLocaleDateString(isBR ? 'pt-BR' : 'en-US')}</span>
                       </div>
                     </div>
                     
@@ -205,7 +206,7 @@ const AdminIdeias: React.FC = () => {
                           onClick={() => handleStatusChange(idea.id, 'active')}
                         >
                           <CheckCircle className="w-4 h-4" />
-                          Aprovar
+                          {t('ideasAdmin.approve')}
                         </Button>
                       )}
                       {idea.status === 'active' && (
@@ -215,7 +216,7 @@ const AdminIdeias: React.FC = () => {
                           className="gap-1"
                           onClick={() => handleStatusChange(idea.id, 'removed')}
                         >
-                          Ocultar
+                          {t('ideasAdmin.hide')}
                         </Button>
                       )}
                       <Button
@@ -225,7 +226,7 @@ const AdminIdeias: React.FC = () => {
                         onClick={() => handleDelete(idea.id)}
                       >
                         <Trash2 className="w-4 h-4" />
-                        Excluir
+                        {t('ideasAdmin.deleteBtn')}
                       </Button>
                     </div>
                   </div>
@@ -237,7 +238,7 @@ const AdminIdeias: React.FC = () => {
 
         {!isLoading && filteredIdeas.length === 0 && (
           <GlassCard className="p-8 text-center">
-            <p className="text-muted-foreground">Nenhuma ideia encontrada</p>
+            <p className="text-muted-foreground">{t('ideasAdmin.noIdeas')}</p>
           </GlassCard>
         )}
       </div>
