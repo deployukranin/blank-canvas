@@ -250,12 +250,39 @@ const AdminDashboard: React.FC = () => {
         {config.youtube?.channelId && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Youtube className="w-5 h-5 text-red-500" />
-                <h3 className="font-semibold text-sm text-foreground">YouTube</h3>
-                {config.youtube?.channelHandle && (
-                  <span className="text-xs text-muted-foreground">@{config.youtube.channelHandle.replace(/^@/, '')}</span>
-                )}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                  <h3 className="font-semibold text-sm text-foreground">YouTube</h3>
+                  {config.youtube?.channelHandle && (
+                    <span className="text-xs text-muted-foreground">@{config.youtube.channelHandle.replace(/^@/, '')}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <AtSign className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={channelHandleInput}
+                      onChange={(e) => setChannelHandleInput(e.target.value)}
+                      placeholder={t('admin.ytHandlePlaceholder', 'channel_handle')}
+                      className="h-8 text-xs pl-8 w-44"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    disabled={savingHandle || channelHandleInput === (config.youtube?.channelHandle || '')}
+                    onClick={() => {
+                      setSavingHandle(true);
+                      updateYouTube({ ...config.youtube, channelHandle: channelHandleInput.replace(/^@/, '') });
+                      toast.success(t('common.saved', 'Saved'));
+                      setSavingHandle(false);
+                    }}
+                  >
+                    {t('common.save', 'Save')}
+                  </Button>
+                </div>
               </div>
 
               {ytLoading ? (
