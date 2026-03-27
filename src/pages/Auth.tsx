@@ -241,13 +241,16 @@ const Auth = () => {
         if (adminResult.error) console.error('store_admins error:', adminResult.error);
         if (roleResult.error) console.error('user_roles error:', roleResult.error);
 
-        // Save youtube channel if verified
+        // Save youtube channel if verified - use edge function to bypass RLS timing issues
         if (youtubeVerified) {
-          await supabase.from('app_configurations').insert({
-            config_key: 'youtube_channel',
-            config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
-            store_id: store.id,
+          const { error: ytError } = await supabase.functions.invoke('save-app-config', {
+            body: {
+              config_key: 'youtube_channel',
+              config_value: { channelId: youtubeVerified.channelId, channelTitle: youtubeVerified.channelTitle },
+              store_id: store.id,
+            },
           });
+          if (ytError) console.error('youtube_channel save error:', ytError);
         }
       }
 
