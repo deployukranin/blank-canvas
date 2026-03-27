@@ -878,12 +878,21 @@ interface WhiteLabelContextType {
 const WhiteLabelContext = createContext<WhiteLabelContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'whitelabel_config';
-const CACHE_KEY = 'whitelabel_config_cache';
+
+// Build a slug-specific cache key so each store's theme is isolated
+const getSlugFromPath = () => {
+  try {
+    const seg = window.location.pathname.split('/').filter(Boolean)[0];
+    return seg || '__global';
+  } catch { return '__global'; }
+};
+
+const getCacheKey = (slug?: string) => `whitelabel_cache_${slug || getSlugFromPath()}`;
 
 // Try to get cached config synchronously to prevent theme flash on reload
 const getCachedConfig = (): WhiteLabelConfig => {
   try {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(getCacheKey());
     if (cached) {
       const parsed = JSON.parse(cached);
       return { ...defaultConfig, ...parsed, colors: { ...defaultConfig.colors, ...parsed.colors } };

@@ -28,7 +28,10 @@
       // Apply cached theme BEFORE React renders to prevent flash
       (function() {
         try {
-          var cached = localStorage.getItem('whitelabel_config_cache');
+          // Extract slug from URL path (e.g. /mystore/... → mystore)
+          var seg = location.pathname.split('/').filter(Boolean)[0] || '__global';
+          var cached = localStorage.getItem('whitelabel_cache_' + seg);
+          if (!cached) cached = localStorage.getItem('whitelabel_config_cache'); // legacy fallback
           if (!cached) return;
           var cfg = JSON.parse(cached);
           var colors = cfg && cfg.colors;
