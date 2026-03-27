@@ -3,8 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
-  Settings, LogOut, Menu, X, ArrowLeft, Shield, CreditCard,
-  Crown, Video, Headphones, Youtube, Palette, Image, Star, Gem, HeadphonesIcon, LifeBuoy
+  Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
+  Crown, Youtube, Palette, Star, Gem, LifeBuoy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,21 +28,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
-    { path: '/admin/ideias', icon: Lightbulb, label: t('admin.ideas') },
     { path: '/admin/pedidos', icon: ShoppingCart, label: t('admin.orders') },
     { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.payments') },
-    { path: '/admin/vip-precos', icon: Crown, label: t('admin.vipPricing') },
+    { path: '/admin/vip-precos', icon: Crown, label: 'VIP' },
     { path: '/admin/vip-conteudo', icon: Star, label: t('admin.vipContent', 'VIP Content') },
-    { path: '/admin/videos', icon: Video, label: t('admin.videos') },
-    { path: '/admin/audios', icon: Headphones, label: t('admin.audios') },
     { path: '/admin/youtube', icon: Youtube, label: t('admin.youtube') },
-    { path: '/admin/usuarios', icon: Users, label: t('admin.users') },
     { path: '/admin/conteudo', icon: FileText, label: t('admin.content') },
+    { path: '/admin/ideias', icon: Lightbulb, label: t('admin.ideas') },
+    { path: '/admin/usuarios', icon: Users, label: t('admin.users') },
     { path: '/admin/personalizacao', icon: Palette, label: t('admin.personalization', 'Personalização') },
-    { path: '/admin/banners', icon: Image, label: t('admin.banners.title', 'Banners') },
     { path: '/admin/planos', icon: Gem, label: t('admin.plans.title', 'Planos') },
     { path: '/admin/configuracoes', icon: Settings, label: t('admin.settings') },
-    { path: '/admin/suporte', icon: LifeBuoy, label: 'Suporte' },
+    { path: '/admin/suporte', icon: LifeBuoy, label: t('admin.support', 'Suporte') },
   ];
 
   const handleLogout = () => {
