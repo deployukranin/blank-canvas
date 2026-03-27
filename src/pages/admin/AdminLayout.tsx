@@ -39,8 +39,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: `${base}/conteudo`, icon: FileText, label: t('admin.content') },
     { path: `${base}/ideias`, icon: Lightbulb, label: t('admin.ideas') },
     { path: `${base}/usuarios`, icon: Users, label: t('admin.users') },
-    { path: `${base}/personalizacao`, icon: Palette, label: t('admin.personalization', 'Personalização') },
-    { path: `${base}/planos`, icon: Gem, label: t('admin.plans.title', 'Planos') },
+    { path: `${base}/personalizacao`, icon: Palette, label: t('admin.personalization') },
+    { path: `${base}/planos`, icon: Gem, label: t('admin.plans.title') },
     { path: `${base}/configuracoes`, icon: Settings, label: t('admin.settings') },
     { path: `${base}/suporte`, icon: LifeBuoy, label: t('admin.supportLabel') },
   ];

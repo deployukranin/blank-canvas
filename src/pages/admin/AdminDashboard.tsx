@@ -233,13 +233,13 @@ const AdminDashboard: React.FC = () => {
                 {isUrgent ? <AlertTriangle className="w-5 h-5 text-destructive shrink-0" /> : <Zap className="w-5 h-5 text-yellow-500 shrink-0" />}
                 <div>
                   <p className={`font-semibold text-sm ${isUrgent ? 'text-destructive' : 'text-yellow-500'}`}>
-                    {daysLeft <= 0 ? t('admin.trial.expired', 'Seu trial expirou!') : t('admin.trial.daysLeft', '{{days}} dias restantes de trial', { days: Math.max(0, daysLeft) })}
+                    {daysLeft <= 0 ? t('admin.trial.expired') : t('admin.trial.daysLeft', { days: Math.max(0, daysLeft) })}
                   </p>
-                  <p className="text-xs text-muted-foreground">{t('admin.trial.upgradeHint', 'Faça upgrade para manter sua plataforma ativa.')}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.trial.upgradeHint')}</p>
                 </div>
               </div>
               <Link to={`${base}/planos`}>
-                <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">{t('admin.trial.upgrade', 'Ver Planos')}</Button>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">{t('admin.trial.upgrade')}</Button>
               </Link>
             </motion.div>
           );
@@ -303,7 +303,7 @@ const AdminDashboard: React.FC = () => {
                   {/* Top videos */}
                   {ytMetrics.top_videos?.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytTopVideos', 'Top Vídeos (30 dias)')}</p>
+                      <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytTopVideos')}</p>
                       <div className="space-y-1.5">
                         {ytMetrics.top_videos.map((video, i) => (
                           <div key={video.id} className="flex items-center gap-3 p-2 rounded-lg bg-foreground/[0.02] border border-border/50">
@@ -322,7 +322,7 @@ const AdminDashboard: React.FC = () => {
                   {/* Evolution Chart */}
                   {ytHistory.length > 1 && (
                     <div>
-                      <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytEvolution', 'Evolução do Canal')}</p>
+                      <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytEvolution')}</p>
                       <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={ytHistory.map(h => ({
                           date: new Date(h.recorded_at).toLocaleDateString(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { day: '2-digit', month: '2-digit' }),
@@ -352,7 +352,7 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">{t('admin.ytNoData', 'Sem dados disponíveis. Configure o canal do YouTube.')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.ytNoData')}</p>
               )}
             </GlassCard>
           </motion.div>

@@ -63,7 +63,7 @@ const AdminPersonalizacao: React.FC = () => {
       background: template.mode === 'light' ? '0 0% 98%' : '0 0% 4%',
       mode: template.mode,
     });
-    toast({ title: t('admin.settings.themeSaved', 'Tema atualizado!'), description: `${template.label} (${template.mode})` });
+    toast({ title: t('admin.settings.themeSaved', 'Theme updated!'), description: `${template.label} (${template.mode})` });
   };
 
   // ── Banner state ──
@@ -92,9 +92,9 @@ const AdminPersonalizacao: React.FC = () => {
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
       updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl);
-      toast({ title: t('admin.banners.uploadSuccess', 'Imagem enviada!') });
+      toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
     } catch (err: any) {
-      toast({ title: t('admin.banners.uploadError', 'Falha no upload'), description: err.message, variant: 'destructive' });
+      toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
     } finally {
       setUploading(prev => ({ ...prev, [uploadKey]: false }));
     }
@@ -108,7 +108,7 @@ const AdminPersonalizacao: React.FC = () => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
-          toast({ title: t('admin.banners.fileTooLarge', 'Arquivo muito grande'), description: t('admin.banners.maxSize', 'Máximo 5MB.'), variant: 'destructive' });
+          toast({ title: t('admin.banners.fileTooLarge', 'File too large'), description: t('admin.banners.maxSize', 'Maximum 5MB.'), variant: 'destructive' });
           return;
         }
         uploadFile(file, bannerId, variant);
@@ -128,7 +128,7 @@ const AdminPersonalizacao: React.FC = () => {
       bannerImages: bannerImages.length > 0 ? bannerImages : config.bannerImages,
       bannerImage: bannerImages[0] || config.bannerImage,
     });
-    toast({ title: t('admin.banners.saved', 'Banners salvos!') });
+    toast({ title: t('admin.banners.saved', 'Banners saved!') });
   };
 
   const renderUploadArea = (banner: BannerConfig, variant: 'desktop' | 'mobile', index: number) => {
@@ -156,7 +156,7 @@ const AdminPersonalizacao: React.FC = () => {
           </div>
         ) : (
           <div onClick={() => !isUploading && handleFileSelect(banner.id, variant)} className={`rounded-lg border-2 border-dashed border-border/40 hover:border-primary/40 bg-background/20 hover:bg-primary/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${isDesktop ? 'w-full h-28' : 'w-32 h-40'}`}>
-            {isUploading ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : (<><Upload className="w-5 h-5 text-muted-foreground" /><span className="text-xs text-muted-foreground">{t('admin.banners.clickToUpload', 'Clique para enviar')}</span></>)}
+            {isUploading ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : (<><Upload className="w-5 h-5 text-muted-foreground" /><span className="text-xs text-muted-foreground">{t('admin.banners.clickToUpload', 'Click to upload')}</span></>)}
           </div>
         )}
         <Input placeholder={`URL ${isDesktop ? 'Desktop' : 'Mobile'}`} value={url} onChange={(e) => updateBanner(banner.id, field, e.target.value)} className="bg-background/50 border-border/30 text-xs h-8" />
@@ -187,7 +187,7 @@ const AdminPersonalizacao: React.FC = () => {
   const previewMuted = config.colors.mode === 'light' ? 'hsl(0 0% 40%)' : 'hsl(0 0% 60%)';
 
   return (
-    <AdminLayout title={t('admin.personalization', 'Personalização')}>
+    <AdminLayout title={t('admin.personalization')}>
       <div className="max-w-3xl mx-auto">
         <Tabs defaultValue="colors" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
