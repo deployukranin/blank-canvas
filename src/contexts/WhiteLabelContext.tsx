@@ -917,6 +917,26 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (!dbConfig) {
           dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
         }
+
+        // Also load the youtube_channel config saved during registration
+        if (storeId) {
+          const ytChannelConfig = await loadConfig<{ channelId?: string; channelTitle?: string }>('youtube_channel' as any, storeId);
+          if (ytChannelConfig?.channelId) {
+            if (!dbConfig) dbConfig = {} as WhiteLabelConfig;
+            // Only set channelId from registration if not already set in white_label_config
+            const existingChannelId = (dbConfig as any)?.youtube?.channelId;
+            if (!existingChannelId) {
+              (dbConfig as any) = {
+                ...dbConfig,
+                youtube: {
+                  ...((dbConfig as any)?.youtube || {}),
+                  channelId: ytChannelConfig.channelId,
+                  enabled: true,
+                },
+              };
+            }
+          }
+        }
         
         if (dbConfig) {
           const merged = mergeConfig(defaultConfig, dbConfig);
