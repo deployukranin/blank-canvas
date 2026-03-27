@@ -471,5 +471,37 @@
     "greeting": "Olá, ceo! 🖤",
     "subtitle": "Relaxe com ASMR de qualidade",
     "explore": "Explorar"
+  },
+  "reports": {
+    "title": "Gerenciar Denúncias",
+    "pending": "Pendente",
+    "reviewed": "Revisado",
+    "dismissed": "Descartado",
+    "actionTaken": "Ação Tomada",
+    "idea": "Ideia",
+    "comment": "Comentário",
+    "reason": "Motivo",
+    "author": "Autor",
+    "by": "Por",
+    "remove": "Remover",
+    "dismiss": "Descartar",
+    "noReports": "Nenhuma denúncia encontrada"
+  },
+  "audiosAdmin": {
+    "subtitle": "Configure as categorias e durações de áudios personalizados",
+    "audioPreview": "Preview de Áudio",
+    "showPreview": "Exibir Preview",
+    "visibleOnOrders": "Visível na página de pedidos",
+    "hiddenFromOrders": "Oculto da página de pedidos",
+    "audioUrl": "URL do Áudio (MP3)",
+    "audioUrlHint": "URL de um arquivo MP3 para preview",
+    "previewLabel": "Pré-visualização:",
+    "durationsAndPrices": "Durações e Preços",
+    "noDurations": "Nenhuma duração cadastrada",
+    "minPrice": "Preço mínimo: {{symbol}}{{price}}",
+    "categories": "Categorias de Áudios",
+    "categoryName": "Nome da categoria",
+    "noCategories": "Nenhuma categoria de áudio cadastrada",
+    "clickAdd": "Clique em \"Adicionar\" para criar uma nova categoria"
   }
 }
