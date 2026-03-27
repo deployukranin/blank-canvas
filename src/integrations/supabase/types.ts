@@ -871,6 +871,53 @@ export type Database = {
           },
         ]
       }
+      youtube_metrics_history: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          recorded_at: string
+          store_id: string
+          subscriber_count: number
+          total_video_count: number
+          total_view_count: number
+          videos_last_30d: number
+          views_last_30d: number
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          recorded_at?: string
+          store_id: string
+          subscriber_count?: number
+          total_video_count?: number
+          total_view_count?: number
+          videos_last_30d?: number
+          views_last_30d?: number
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          recorded_at?: string
+          store_id?: string
+          subscriber_count?: number
+          total_video_count?: number
+          total_view_count?: number
+          videos_last_30d?: number
+          views_last_30d?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_metrics_history_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       youtube_videos_cache: {
         Row: {
           channel_id: string
