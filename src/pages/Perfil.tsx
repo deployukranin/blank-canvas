@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
@@ -12,13 +14,8 @@ import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useProfile } from '@/hooks/use-profile';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useTenant } from '@/contexts/TenantContext';
-
-const quickAccessItems = [
-  { icon: Package, label: 'Meus Pedidos', description: 'Acompanhe seus vídeos', path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
-  { icon: Bell, label: 'Notificações', description: 'Comentários e votos', path: '/notificacoes', gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
-  { icon: Lightbulb, label: 'Ideias de Vídeos', description: 'Sugira e vote em ideias', path: '/ideias', gradient: 'from-amber-400 to-orange-500' },
-  { icon: Crown, label: 'Comunidade VIP', description: 'Acesso exclusivo', path: '/vip', gradient: 'from-vip to-amber-500' },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const menuItems = [
   { icon: HelpCircle, label: 'Ajuda', description: 'FAQ e suporte', path: '/ajuda' },
