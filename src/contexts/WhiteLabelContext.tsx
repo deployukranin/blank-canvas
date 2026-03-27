@@ -880,19 +880,31 @@ const WhiteLabelContext = createContext<WhiteLabelContextType | undefined>(undef
 const STORAGE_KEY = 'whitelabel_config';
 
 // Build a slug-specific cache key so each store's theme is isolated
+const normalizeSlug = (value?: string | null) => (value || '').trim().toLowerCase();
+
 const getSlugFromPath = () => {
   try {
     const seg = window.location.pathname.split('/').filter(Boolean)[0];
-    return seg || '__global';
+    return normalizeSlug(seg) || '__global';
   } catch { return '__global'; }
 };
 
-const getCacheKey = (slug?: string) => `whitelabel_cache_${slug || getSlugFromPath()}`;
+const getCacheKey = (slug?: string) => `whitelabel_cache_${normalizeSlug(slug) || getSlugFromPath()}`;
 
 // Try to get cached config synchronously to prevent theme flash on reload
 const getCachedConfig = (): WhiteLabelConfig => {
   try {
-    const cached = localStorage.getItem(getCacheKey());
+    const seg = getSlugFromPath();
+    const isTenantRoute = seg !== '__global' && !['admin', 'super-admin', 'entrar', 'auth', 'setup'].includes(seg);
+
+    // 1) New isolated key per store slug
+    let cached = localStorage.getItem(getCacheKey(seg));
+
+    // 2) Legacy fallback only for global routes (never for tenant routes)
+    if (!cached && !isTenantRoute) {
+      cached = localStorage.getItem('whitelabel_config_cache');
+    }
+
     if (cached) {
       const parsed = JSON.parse(cached);
       return { ...defaultConfig, ...parsed, colors: { ...defaultConfig.colors, ...parsed.colors } };
