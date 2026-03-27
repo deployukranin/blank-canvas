@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
-const { t: _t, i18n: _i18n } = { t: null as any, i18n: null as any }; // placeholder removed below
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
