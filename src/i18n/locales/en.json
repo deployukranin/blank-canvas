@@ -471,5 +471,37 @@
     "greeting": "Hello, ceo! 🖤",
     "subtitle": "Quality ASMR relaxation",
     "explore": "Explore"
+  },
+  "reports": {
+    "title": "Manage Reports",
+    "pending": "Pending",
+    "reviewed": "Reviewed",
+    "dismissed": "Dismissed",
+    "actionTaken": "Action Taken",
+    "idea": "Idea",
+    "comment": "Comment",
+    "reason": "Reason",
+    "author": "Author",
+    "by": "By",
+    "remove": "Remove",
+    "dismiss": "Dismiss",
+    "noReports": "No reports found"
+  },
+  "audiosAdmin": {
+    "subtitle": "Configure custom audio categories and durations",
+    "audioPreview": "Audio Preview",
+    "showPreview": "Show Preview",
+    "visibleOnOrders": "Visible on orders page",
+    "hiddenFromOrders": "Hidden from orders page",
+    "audioUrl": "Audio URL (MP3)",
+    "audioUrlHint": "URL of an MP3 file for preview",
+    "previewLabel": "Preview:",
+    "durationsAndPrices": "Durations & Prices",
+    "noDurations": "No durations configured",
+    "minPrice": "Minimum price: {{symbol}}{{price}}",
+    "categories": "Audio Categories",
+    "categoryName": "Category name",
+    "noCategories": "No audio categories configured",
+    "clickAdd": "Click \"Add\" to create a new category"
   }
 }
