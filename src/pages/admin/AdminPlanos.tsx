@@ -20,50 +20,50 @@ interface PlanConfig {
   discount?: string;
 }
 
-const defaultPlans: PlanConfig[] = [
+const getPlans = (t: any): PlanConfig[] => [
   {
     id: 'monthly',
-    name: 'Mensal',
+    name: t('admin.plans.monthly'),
     period: 'monthly',
     priceBRL: 49.90,
     priceUSD: 9.90,
     features: [
-      'Plataforma personalizada',
-      'Painel admin completo',
-      'Pagamentos PIX + Stripe',
-      'Até 500 usuários',
-      'Suporte por email',
+      t('admin.plans.features.customPlatform'),
+      t('admin.plans.features.fullAdminPanel'),
+      t('admin.plans.features.pixStripePayments'),
+      t('admin.plans.features.upTo500Users'),
+      t('admin.plans.features.emailSupport'),
     ],
   },
   {
     id: 'quarterly',
-    name: 'Trimestral',
+    name: t('admin.plans.quarterly'),
     period: 'quarterly',
     priceBRL: 129.90,
     priceUSD: 24.90,
     features: [
-      'Tudo do plano Mensal',
-      'Até 2.000 usuários',
-      'Domínio customizado',
-      'Suporte prioritário',
-      'Relatórios avançados',
+      t('admin.plans.features.allMonthly'),
+      t('admin.plans.features.upTo2000Users'),
+      t('admin.plans.features.customDomain'),
+      t('admin.plans.features.prioritySupport'),
+      t('admin.plans.features.advancedReports'),
     ],
     highlight: true,
     discount: '-13%',
   },
   {
     id: 'annual',
-    name: 'Anual',
+    name: t('admin.plans.annual'),
     period: 'annual',
     priceBRL: 449.90,
     priceUSD: 89.90,
     features: [
-      'Tudo do plano Trimestral',
-      'Usuários ilimitados',
-      'API personalizada',
-      'Suporte VIP dedicado',
-      'Analytics premium',
-      'Backup diário',
+      t('admin.plans.features.allQuarterly'),
+      t('admin.plans.features.unlimitedUsers'),
+      t('admin.plans.features.customAPI'),
+      t('admin.plans.features.vipSupport'),
+      t('admin.plans.features.premiumAnalytics'),
+      t('admin.plans.features.dailyBackup'),
     ],
     discount: '-25%',
   },
@@ -195,7 +195,7 @@ const AdminPlanos: React.FC = () => {
 
         {/* Plan cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {defaultPlans.map((plan, index) => (
+          {getPlans(t).map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
