@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video, AtSign } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -27,7 +27,7 @@ interface YTMetrics {
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
-  const { config, updateYouTube } = useWhiteLabel();
+  const { config } = useWhiteLabel();
   const { session } = useAuth();
   const base = slug ? `/${slug}/admin` : '/admin';
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
@@ -39,8 +39,6 @@ const AdminDashboard: React.FC = () => {
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
-  const [channelHandleInput, setChannelHandleInput] = useState(config.youtube?.channelHandle || '');
-  const [savingHandle, setSavingHandle] = useState(false);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
@@ -252,69 +250,13 @@ const AdminDashboard: React.FC = () => {
         {config.youtube?.channelId && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                   <Youtube className="w-5 h-5 text-red-500" />
                   <h3 className="font-semibold text-sm text-foreground">YouTube</h3>
                   {config.youtube?.channelHandle && (
                     <span className="text-xs text-muted-foreground">@{config.youtube.channelHandle.replace(/^@/, '')}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <AtSign className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={channelHandleInput}
-                      onChange={(e) => setChannelHandleInput(e.target.value)}
-                      placeholder={t('admin.ytHandlePlaceholder', 'channel_handle')}
-                      className="h-8 text-xs pl-8 w-44"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs"
-                    disabled={savingHandle || !channelHandleInput.trim()}
-                    onClick={async () => {
-                      setSavingHandle(true);
-                      try {
-                        // Resolve handle to channel ID via edge function
-                        const handle = channelHandleInput.trim().replace(/^@/, '');
-                        const { data, error } = await supabase.functions.invoke('youtube-videos', {
-                          body: { channelId: `@${handle}`, action: 'verify' },
-                        });
-                        if (error || !data?.channelId) {
-                          toast.error(t('admin.ytHandleError', 'Could not resolve YouTube channel'));
-                          setSavingHandle(false);
-                          return;
-                        }
-                        // Save to youtube_channel config for this store
-                        if (storeId) {
-                          await supabase.functions.invoke('save-app-config', {
-                            body: {
-                              config_key: 'youtube_channel',
-                              config_value: { channelId: data.channelId, channelTitle: data.channelTitle || handle },
-                              store_id: storeId,
-                            },
-                          });
-                        }
-                        // Update local config
-                        updateYouTube({ ...config.youtube, channelId: data.channelId, channelHandle: handle, enabled: true });
-                        toast.success(t('admin.ytChannelUpdated', 'YouTube channel updated: {{name}}', { name: data.channelTitle || handle }));
-                        // Refresh metrics
-                        setTimeout(() => window.location.reload(), 1000);
-                      } catch (err) {
-                        console.error('Error saving YT handle:', err);
-                        toast.error(t('admin.ytHandleError', 'Could not resolve YouTube channel'));
-                      } finally {
-                        setSavingHandle(false);
-                      }
-                    }}
-                  >
-                    {t('common.save', 'Save')}
-                  </Button>
-                </div>
-              </div>
 
               {ytLoading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
