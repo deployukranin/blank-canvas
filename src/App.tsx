@@ -32,7 +32,7 @@ import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
 
 // Admin Pages
-import AdminLogin from "./pages/admin/AdminLogin";
+// AdminLogin removed — admin is now under /:slug/admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
 import AdminPedidos from "./pages/admin/AdminPedidos";
@@ -102,23 +102,22 @@ const App = () => (
                 <Route path="/:slug/meus-pedidos" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/notificacoes" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
 
-                {/* 🛡️ Rotas ADMIN (Creator Panel) */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/ideias" element={<AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute>} />
-                <Route path="/admin/pedidos" element={<AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute>} />
-                <Route path="/admin/pagamentos-pix" element={<AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute>} />
-                <Route path="/admin/vip-precos" element={<AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute>} />
-                <Route path="/admin/vip-conteudo" element={<AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute>} />
-                <Route path="/admin/videos" element={<AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute>} />
-                <Route path="/admin/audios" element={<AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute>} />
-                <Route path="/admin/youtube" element={<AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute>} />
-                <Route path="/admin/usuarios" element={<AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute>} />
-                <Route path="/admin/conteudo" element={<AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute>} />
-                <Route path="/admin/configuracoes" element={<AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute>} />
-                <Route path="/admin/personalizacao" element={<AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute>} />
-                <Route path="/admin/planos" element={<AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute>} />
-                <Route path="/admin/suporte" element={<AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute>} />
+                {/* 🛡️ Rotas ADMIN (Creator Panel) — scoped by store slug */}
+                <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/ideias" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/pedidos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/pagamentos-pix" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/vip-precos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/vip-conteudo" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/videos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/audios" element={<TenantGate><AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/youtube" element={<TenantGate><AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/usuarios" element={<TenantGate><AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/conteudo" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/configuracoes" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/personalizacao" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/planos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/suporte" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />

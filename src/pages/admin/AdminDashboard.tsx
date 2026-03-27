@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video, AtSign } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -26,8 +26,10 @@ interface YTMetrics {
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const { slug } = useParams<{ slug: string }>();
   const { config, updateYouTube } = useWhiteLabel();
   const { session } = useAuth();
+  const base = slug ? `/${slug}/admin` : '/admin';
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -221,7 +223,7 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-xs text-muted-foreground">{t('admin.trial.upgradeHint', 'Faça upgrade para manter sua plataforma ativa.')}</p>
                 </div>
               </div>
-              <Link to="/admin/planos">
+              <Link to={`${base}/planos`}>
                 <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">{t('admin.trial.upgrade', 'Ver Planos')}</Button>
               </Link>
             </motion.div>
@@ -394,7 +396,7 @@ const AdminDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-foreground/70 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" />{t('admin.pending')}
               </h3>
-              <Link to="/admin/pedidos" className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
+              <Link to={`${base}/pedidos`} className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
             </div>
             {isLoading ? (
               <p className="text-foreground/30 text-sm">{t('common.loading')}</p>

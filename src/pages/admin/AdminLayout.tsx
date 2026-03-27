@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
@@ -22,29 +22,32 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
   const { user, logout } = useAuth();
   const { roles } = useUserRole();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
+  const base = slug ? `/${slug}/admin` : '/admin';
+
   const menuItems = [
-    { path: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
-    { path: '/admin/pedidos', icon: ShoppingCart, label: t('admin.orders') },
-    { path: '/admin/pagamentos-pix', icon: CreditCard, label: t('admin.payments') },
-    { path: '/admin/vip-precos', icon: Crown, label: 'VIP' },
-    { path: '/admin/vip-conteudo', icon: Star, label: t('admin.vipContent', 'VIP Content') },
-    { path: '/admin/youtube', icon: Youtube, label: t('admin.youtube') },
-    { path: '/admin/conteudo', icon: FileText, label: t('admin.content') },
-    { path: '/admin/ideias', icon: Lightbulb, label: t('admin.ideas') },
-    { path: '/admin/usuarios', icon: Users, label: t('admin.users') },
-    { path: '/admin/personalizacao', icon: Palette, label: t('admin.personalization', 'Personalização') },
-    { path: '/admin/planos', icon: Gem, label: t('admin.plans.title', 'Planos') },
-    { path: '/admin/configuracoes', icon: Settings, label: t('admin.settings') },
-    { path: '/admin/suporte', icon: LifeBuoy, label: t('admin.supportLabel') },
+    { path: base, icon: LayoutDashboard, label: t('admin.dashboard') },
+    { path: `${base}/pedidos`, icon: ShoppingCart, label: t('admin.orders') },
+    { path: `${base}/pagamentos-pix`, icon: CreditCard, label: t('admin.payments') },
+    { path: `${base}/vip-precos`, icon: Crown, label: 'VIP' },
+    { path: `${base}/vip-conteudo`, icon: Star, label: t('admin.vipContent', 'VIP Content') },
+    { path: `${base}/youtube`, icon: Youtube, label: t('admin.youtube') },
+    { path: `${base}/conteudo`, icon: FileText, label: t('admin.content') },
+    { path: `${base}/ideias`, icon: Lightbulb, label: t('admin.ideas') },
+    { path: `${base}/usuarios`, icon: Users, label: t('admin.users') },
+    { path: `${base}/personalizacao`, icon: Palette, label: t('admin.personalization', 'Personalização') },
+    { path: `${base}/planos`, icon: Gem, label: t('admin.plans.title', 'Planos') },
+    { path: `${base}/configuracoes`, icon: Settings, label: t('admin.settings') },
+    { path: `${base}/suporte`, icon: LifeBuoy, label: t('admin.supportLabel') },
   ];
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate('/auth');
   };
 
   return (
@@ -54,7 +57,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
         <h1 className="font-semibold text-foreground">{title}</h1>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-foreground/70 hover:text-foreground hover:bg-foreground/5">
+        <Button variant="ghost" size="icon" onClick={() => navigate(slug ? `/${slug}` : '/')} className="text-foreground/70 hover:text-foreground hover:bg-foreground/5">
           <ArrowLeft className="w-5 h-5" />
         </Button>
       </header>
@@ -106,7 +109,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           <div className="flex items-center gap-2">
             <LanguageSelector variant="minimal" />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/')}
+            <Button variant="ghost" size="sm" onClick={() => navigate(slug ? `/${slug}` : '/')}
               className="gap-2 text-foreground/40 hover:text-foreground/80 hover:bg-foreground/5 text-sm">
               <ArrowLeft className="w-4 h-4" />
               {t('common.back')}
