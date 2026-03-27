@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from 'react-i18next';
 
 const PURPLE = '#8b5cf6';
 const PURPLE_LIGHT = '#a78bfa';
@@ -82,6 +83,7 @@ interface MonthlyGrowth {
 }
 
 const SuperAdminDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [global, setGlobal] = useState<GlobalMetrics | null>(null);
   const [perStore, setPerStore] = useState<StoreMetrics[]>([]);
   const [monthlyGrowth, setMonthlyGrowth] = useState<MonthlyGrowth[]>([]);
@@ -151,23 +153,23 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <SuperAdminLayout title="Dashboard">
+    <SuperAdminLayout title={t('superAdmin.dashboard')}>
       <div className="space-y-6">
         {/* Row 1: Primary KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MetricCard label="Plataformas" value={g?.total_stores || 0} sub={`${g?.active_stores || 0} ativas · ${g?.suspended_stores || 0} suspensas`} icon={Store} />
-          <MetricCard label="Usuários Totais" value={g?.total_users || 0} sub={`${g?.total_store_users || 0} vinculados a lojas`} icon={Users} color="cyan" />
-          <MetricCard label="Faturamento Total" value={`R$ ${(g?.total_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} sub={`${g?.paid_orders || 0} pedidos pagos`} icon={DollarSign} color="green" />
-          <MetricCard label="Conversão Trial→Pago" value={`${g?.conversion_rate || 0}%`} sub={`${g?.trial_stores || 0} trial · ${g?.paid_stores || 0} pagos`} icon={Percent} color="amber" />
+          <MetricCard label={t('superAdmin.metrics.platforms')} value={g?.total_stores || 0} sub={`${g?.active_stores || 0} ${t('superAdmin.activePlatforms')} · ${g?.suspended_stores || 0} ${t('common.suspended').toLowerCase()}`} icon={Store} />
+          <MetricCard label={t('superAdmin.metrics.totalUsers')} value={g?.total_users || 0} sub={`${g?.total_store_users || 0} ${t('superAdmin.metrics.linkedToStores')}`} icon={Users} color="cyan" />
+          <MetricCard label={t('superAdmin.metrics.totalRevenue')} value={`R$ ${(g?.total_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} sub={`${g?.paid_orders || 0} ${t('superAdmin.metrics.paidOrders')}`} icon={DollarSign} color="green" />
+          <MetricCard label={t('superAdmin.metrics.trialToPaid')} value={`${g?.conversion_rate || 0}%`} sub={`${g?.trial_stores || 0} trial · ${g?.paid_stores || 0} ${t('superAdmin.paid')}`} icon={Percent} color="amber" />
         </div>
 
         {/* Row 2: Secondary KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <MetricCard label="VIP Ativos" value={g?.active_vip_subs || 0} sub={`MRR: R$ ${(g?.vip_mrr || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={Crown} color="amber" />
-          <MetricCard label="Pedidos" value={g?.total_orders || 0} sub={`${g?.paid_orders || 0} pagos`} icon={ShoppingBag} color="cyan" />
-          <MetricCard label="Tickets Abertos" value={g?.open_tickets || 0} sub={`${g?.total_tickets || 0} total`} icon={LifeBuoy} color="rose" />
-          <MetricCard label="Conteúdo VIP" value={g?.total_content || 0} icon={Eye} color="purple" />
-          <MetricCard label="Engajamento" value={g?.total_chat_messages || 0} sub={`${g?.total_ideas || 0} ideias de vídeo`} icon={MessageSquare} color="green" />
+          <MetricCard label={t('superAdmin.metrics.activeVIP')} value={g?.active_vip_subs || 0} sub={`MRR: R$ ${(g?.vip_mrr || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={Crown} color="amber" />
+          <MetricCard label={t('superAdmin.metrics.orders')} value={g?.total_orders || 0} sub={`${g?.paid_orders || 0} ${t('superAdmin.paid')}`} icon={ShoppingBag} color="cyan" />
+          <MetricCard label={t('superAdmin.metrics.openTickets')} value={g?.open_tickets || 0} sub={`${g?.total_tickets || 0} total`} icon={LifeBuoy} color="rose" />
+          <MetricCard label={t('superAdmin.metrics.vipContent')} value={g?.total_content || 0} icon={Eye} color="purple" />
+          <MetricCard label={t('superAdmin.metrics.engagement')} value={g?.total_chat_messages || 0} sub={`${g?.total_ideas || 0} ${t('superAdmin.metrics.videoIdeas')}`} icon={MessageSquare} color="green" />
         </div>
 
         {/* Row 3: Charts */}
@@ -176,11 +178,11 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="lg:col-span-2 bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <Tabs defaultValue="growth">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-white/70">Evolução</h3>
+                <h3 className="text-sm font-medium text-white/70">{t('superAdmin.metrics.evolution')}</h3>
                 <TabsList className="bg-white/5 h-7">
-                  <TabsTrigger value="growth" className="text-[11px] h-6 px-2.5">Crescimento</TabsTrigger>
-                  <TabsTrigger value="revenue" className="text-[11px] h-6 px-2.5">Receita</TabsTrigger>
-                  <TabsTrigger value="new" className="text-[11px] h-6 px-2.5">Novos</TabsTrigger>
+                  <TabsTrigger value="growth" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.growthTab')}</TabsTrigger>
+                  <TabsTrigger value="revenue" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.revenueTab')}</TabsTrigger>
+                  <TabsTrigger value="new" className="text-[11px] h-6 px-2.5">{t('superAdmin.metrics.newTab')}</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -201,8 +203,8 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} />
-                    <Area type="monotone" dataKey="stores" name="Plataformas" stroke={PURPLE} fill="url(#gPurple)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="users" name="Usuários" stroke={CYAN} fill="url(#gCyan)" strokeWidth={1.5} />
+                    <Area type="monotone" dataKey="stores" name={t('superAdmin.metrics.chartPlatforms')} stroke={PURPLE} fill="url(#gPurple)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="users" name={t('superAdmin.metrics.chartUsers')} stroke={CYAN} fill="url(#gCyan)" strokeWidth={1.5} />
                   </AreaChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -214,7 +216,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
-                    <Bar dataKey="revenue" name="Receita" fill={GREEN} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="revenue" name={t('superAdmin.metrics.chartRevenue')} fill={GREEN} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -226,8 +228,8 @@ const SuperAdminDashboard: React.FC = () => {
                     <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip {...chartTooltipStyle} />
-                    <Bar dataKey="new_stores" name="Novas Lojas" fill={PURPLE} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="new_users" name="Novos Usuários" fill={CYAN} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="new_stores" name={t('superAdmin.metrics.chartNewStores')} fill={PURPLE} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="new_users" name={t('superAdmin.metrics.chartNewUsers')} fill={CYAN} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -236,7 +238,7 @@ const SuperAdminDashboard: React.FC = () => {
 
           {/* Plan distribution */}
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
-            <h3 className="text-sm font-medium text-white/70 mb-4">Distribuição de Planos</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">{t('superAdmin.metrics.planDistribution')}</h3>
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie data={planData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" strokeWidth={0}>
@@ -259,18 +261,18 @@ const SuperAdminDashboard: React.FC = () => {
 
             {/* Conversion funnel */}
             <div className="mt-5 space-y-2">
-              <p className="text-[11px] text-white/40 uppercase tracking-wider">Funil de Conversão</p>
+              <p className="text-[11px] text-white/40 uppercase tracking-wider">{t('superAdmin.metrics.conversionFunnel')}</p>
               <div className="space-y-1.5">
                 <div>
                   <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-white/50">Cadastros → Trial</span>
+                    <span className="text-white/50">{t('superAdmin.metrics.signupToTrial')}</span>
                     <span className="text-white/70">100%</span>
                   </div>
                   <Progress value={100} className="h-1.5" />
                 </div>
                 <div>
                   <div className="flex justify-between text-[11px] mb-0.5">
-                    <span className="text-white/50">Trial → Pago</span>
+                    <span className="text-white/50">{t('superAdmin.metrics.trialToPaidFunnel')}</span>
                     <span className="text-white/70">{g?.conversion_rate || 0}%</span>
                   </div>
                   <Progress value={g?.conversion_rate || 0} className="h-1.5" />
@@ -286,10 +288,10 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-400" />
-              Top Receita
+              {t('superAdmin.metrics.topRevenue')}
             </h3>
             {topStores.length === 0 ? (
-              <p className="text-white/30 text-sm">Sem dados</p>
+              <p className="text-white/30 text-sm">{t('common.noData')}</p>
             ) : (
               <div className="space-y-3">
                 {topStores.map((s, i) => {
@@ -324,10 +326,10 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
               <Activity className="w-4 h-4 text-cyan-400" />
-              Mais Ativas (30 dias)
+              {t('superAdmin.metrics.mostActive30d')}
             </h3>
             {mostActiveStores.length === 0 ? (
-              <p className="text-white/30 text-sm">Sem dados</p>
+              <p className="text-white/30 text-sm">{t('common.noData')}</p>
             ) : (
               <div className="space-y-3">
                 {mostActiveStores.map((s, i) => {
@@ -340,13 +342,13 @@ const SuperAdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm text-white/80 truncate">{s.name}</span>
                           <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-400 shrink-0 ml-2">
-                            {engagement} ações
+                            {engagement} {t('superAdmin.metrics.actions')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-3">
                           <Progress value={(engagement / maxEng) * 100} className="h-1 flex-1" />
                           <div className="flex items-center gap-2 text-[10px] text-white/40 shrink-0">
-                            <span>{s.recent_users_30d} novos 👥</span>
+                            <span>{s.recent_users_30d} {t('superAdmin.metrics.new')} 👥</span>
                             <span>{s.recent_messages_30d} 💬</span>
                             <span>{s.recent_orders_30d} 📦</span>
                           </div>
@@ -364,26 +366,26 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="bg-white/[0.03] border border-purple-500/10 rounded-xl p-5">
           <h3 className="text-sm font-medium text-white/70 mb-4 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-purple-400" />
-            Métricas por Plataforma
-          </h3>
-          {isLoading ? (
-            <p className="text-white/30 text-sm">Carregando...</p>
-          ) : perStore.length === 0 ? (
-            <p className="text-white/30 text-sm">Nenhuma plataforma</p>
-          ) : (
+              {t('superAdmin.metrics.metricsPerPlatform')}
+            </h3>
+            {isLoading ? (
+              <p className="text-white/30 text-sm">{t('common.loading')}</p>
+            ) : perStore.length === 0 ? (
+              <p className="text-white/30 text-sm">{t('superAdmin.metrics.noPlatforms')}</p>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/5 text-left">
-                    <th className="pb-2 font-medium text-white/30 text-[11px]">Plataforma</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">Status</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Usuários</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Pedidos</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Receita</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">VIP</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Conteúdo</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Chat</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">Tickets</th>
+                     <th className="pb-2 font-medium text-white/30 text-[11px]">{t('superAdmin.metrics.colPlatform')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">{t('superAdmin.metrics.colStatus')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colUsers')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colOrders')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colRevenue')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colVIP')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colContent')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colChat')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colTickets')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -398,7 +400,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <td className="py-2.5 text-center">
                         <span className={`inline-flex items-center gap-1 text-[11px] ${s.status === 'active' ? 'text-green-400' : 'text-white/30'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-green-400' : 'bg-white/20'}`} />
-                          {s.plan_type === 'trial' ? 'Trial' : 'Pago'}
+                          {s.plan_type === 'trial' ? 'Trial' : t('superAdmin.metrics.statusPaid')}
                         </span>
                       </td>
                       <td className="py-2.5 text-right text-white/70">
@@ -422,7 +424,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <td className="py-2.5 text-right">
                         {s.tickets_open > 0 ? (
                           <Badge variant="outline" className="text-[10px] border-rose-500/30 text-rose-400">
-                            {s.tickets_open} abertos
+                            {s.tickets_open} {t('superAdmin.metrics.open')}
                           </Badge>
                         ) : (
                           <span className="text-white/30">{s.tickets_total}</span>

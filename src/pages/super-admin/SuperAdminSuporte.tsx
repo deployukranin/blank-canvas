@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, ArrowLeft, MessageCircle, Clock, CheckCircle2, Store, XCircle, Check, CheckCheck, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Ticket {
   id: string;
@@ -39,13 +39,14 @@ interface StoreInfo {
   slug: string | null;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  open: { label: 'Aberto', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
-  answered: { label: 'Respondido', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
-  closed: { label: 'Fechado', color: 'bg-white/10 text-white/50 border-white/10', icon: CheckCircle2 },
-};
+const getStatusConfig = (t: any) => ({
+  open: { label: t('admin.support.statusOpen'), color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
+  answered: { label: t('admin.support.statusAnswered'), color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
+  closed: { label: t('admin.support.statusClosed'), color: 'bg-white/10 text-white/50 border-white/10', icon: CheckCircle2 },
+});
 
 const SuperAdminSuporte = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -173,7 +174,7 @@ const SuperAdminSuporte = () => {
       queryClient.invalidateQueries({ queryKey: ['sa-support-tickets'] });
       setReplyText('');
     },
-    onError: () => toast.error('Erro ao enviar'),
+    onError: () => toast.error(t('superAdmin.support.sendError')),
   });
 
   // Close ticket
@@ -186,9 +187,11 @@ const SuperAdminSuporte = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sa-support-tickets'] });
       setSelectedTicket(prev => prev ? { ...prev, status: 'closed' } : null);
-      toast.success('Ticket encerrado');
+      toast.success(t('superAdmin.support.ticketClosed'));
     },
   });
+
+  const statusConfig = getStatusConfig(t);
 
   // Read receipt indicator
   const ReadReceipt = ({ msg }: { msg: Message }) => {
@@ -212,10 +215,10 @@ const SuperAdminSuporte = () => {
     const storeName = getStoreName(selectedTicket);
     const status = statusConfig[selectedTicket.status] || statusConfig.open;
     return (
-      <SuperAdminLayout title="Suporte - Chat">
+      <SuperAdminLayout title={t('superAdmin.support.chat')}>
         <div className="max-w-3xl mx-auto">
           <Button variant="ghost" size="sm" onClick={() => setSelectedTicket(null)} className="mb-4 gap-2 text-white/60 hover:text-white">
-            <ArrowLeft className="w-4 h-4" /> Voltar
+            <ArrowLeft className="w-4 h-4" /> {t('common.back')}
           </Button>
 
           <div className="rounded-xl border border-purple-500/20 bg-black/50 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 200px)' }}>
@@ -236,7 +239,7 @@ const SuperAdminSuporte = () => {
                       </span>
                     )}
                     <span className="text-xs text-white/30">
-                      {format(new Date(selectedTicket.created_at), "dd MMM yyyy", { locale: ptBR })}
+                      {format(new Date(selectedTicket.created_at), "dd MMM yyyy")}
                     </span>
                   </div>
                 </div>
@@ -244,7 +247,7 @@ const SuperAdminSuporte = () => {
                   <Badge variant="outline" className={status.color}>{status.label}</Badge>
                   {selectedTicket.status !== 'closed' && (
                     <Button variant="ghost" size="sm" onClick={() => closeTicket.mutate()} className="text-red-400/70 hover:text-red-400 text-xs">
-                      <XCircle className="w-4 h-4 mr-1" /> Fechar
+                      <XCircle className="w-4 h-4 mr-1" /> {t('superAdmin.support.close')}
                     </Button>
                   )}
                 </div>
@@ -264,10 +267,10 @@ const SuperAdminSuporte = () => {
                     }`}>
                       {!isMe && (
                         <p className="text-[10px] font-semibold text-purple-300 mb-1">
-                          {storeName ? `Criador (${storeName})` : 'Criador'}
+                          {storeName ? t('superAdmin.support.creatorFrom', { store: storeName }) : t('superAdmin.support.creator')}
                         </p>
                       )}
-                      {isMe && <p className="text-[10px] font-semibold text-purple-200 mb-1">Você</p>}
+                      {isMe && <p className="text-[10px] font-semibold text-purple-200 mb-1">{t('superAdmin.support.you')}</p>}
                       <p className="text-sm whitespace-pre-wrap">{m.message}</p>
                       <div className={`flex items-center gap-0.5 mt-1 ${isMe ? 'justify-end' : ''}`}>
                         <span className={`text-[10px] ${isMe ? 'text-white/50' : 'text-white/30'}`}>
@@ -288,7 +291,7 @@ const SuperAdminSuporte = () => {
                 <Input
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Responder..."
+                  placeholder={t('superAdmin.support.replyPlaceholder')}
                   className="bg-white/5 border-white/10 text-white"
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (replyText.trim()) sendReply.mutate(); } }}
                 />
@@ -298,7 +301,7 @@ const SuperAdminSuporte = () => {
               </div>
             ) : (
               <div className="p-3 border-t border-purple-500/10 text-center text-sm text-white/40">
-                Ticket encerrado.
+                {t('superAdmin.support.ticketClosedMsg')}
               </div>
             )}
           </div>
@@ -309,18 +312,18 @@ const SuperAdminSuporte = () => {
 
   // Ticket list
   return (
-    <SuperAdminLayout title="Suporte">
+    <SuperAdminLayout title={t('superAdmin.support.title')}>
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <p className="text-sm text-white/50">
-            {openCount > 0 ? `${openCount} ticket(s) aberto(s)` : 'Nenhum ticket aberto'}
+            {openCount > 0 ? t('superAdmin.support.openTickets', { count: openCount }) : t('superAdmin.support.noOpenTickets')}
           </p>
           <div className="flex gap-1">
             {(['all', 'open', 'answered', 'closed'] as const).map(f => (
               <Button key={f} variant={filter === f ? 'default' : 'ghost'} size="sm"
                 className={filter === f ? 'bg-purple-600' : 'text-white/50'}
                 onClick={() => setFilter(f)}>
-                {f === 'all' ? 'Todos' : statusConfig[f]?.label || f}
+                {f === 'all' ? t('superAdmin.support.filterAll') : statusConfig[f]?.label || f}
               </Button>
             ))}
           </div>
@@ -329,7 +332,7 @@ const SuperAdminSuporte = () => {
         {filteredTickets.length === 0 ? (
           <div className="rounded-xl border border-dashed border-purple-500/20 p-12 text-center">
             <MessageCircle className="w-10 h-10 text-white/20 mx-auto mb-3" />
-            <p className="text-white/40">Nenhum ticket encontrado.</p>
+            <p className="text-white/40">{t('superAdmin.support.noTicketsFound')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -358,7 +361,7 @@ const SuperAdminSuporte = () => {
                           </span>
                         )}
                         <span className="text-xs text-white/20">
-                          {format(new Date(t.updated_at), "dd MMM 'às' HH:mm", { locale: ptBR })}
+                        {format(new Date(t.updated_at), "dd MMM HH:mm")}
                         </span>
                       </div>
                     </div>

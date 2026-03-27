@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Ticket {
   id: string;
@@ -33,13 +33,14 @@ interface Message {
   read_at: string | null;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  open: { label: 'Aberto', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
-  answered: { label: 'Respondido', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
-  closed: { label: 'Fechado', color: 'bg-muted text-muted-foreground border-border', icon: CheckCircle2 },
-};
+const getStatusConfig = (t: any) => ({
+  open: { label: t('admin.support.statusOpen'), color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
+  answered: { label: t('admin.support.statusAnswered'), color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', icon: MessageCircle },
+  closed: { label: t('admin.support.statusClosed'), color: 'bg-muted text-muted-foreground border-border', icon: CheckCircle2 },
+});
 
 const AdminSuporte = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -173,9 +174,9 @@ const AdminSuporte = () => {
       setShowNewTicket(false);
       setNewSubject('');
       setNewMessage('');
-      toast.success('Ticket criado com sucesso!');
+      toast.success(t('admin.support.ticketCreated'));
     },
-    onError: () => toast.error('Erro ao criar ticket'),
+    onError: () => toast.error(t('admin.support.ticketError')),
   });
 
   // Send reply
@@ -197,7 +198,7 @@ const AdminSuporte = () => {
       queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
       setReplyText('');
     },
-    onError: () => toast.error('Erro ao enviar mensagem'),
+    onError: () => toast.error(t('admin.support.sendError')),
   });
 
   // Read receipt indicator
@@ -214,14 +215,16 @@ const AdminSuporte = () => {
     );
   };
 
+  const statusConfig = getStatusConfig(t);
+
   // Chat view
   if (selectedTicket) {
     const status = statusConfig[selectedTicket.status] || statusConfig.open;
     return (
-      <AdminLayout title="Suporte">
+      <AdminLayout title={t('admin.support.title')}>
         <div className="max-w-3xl mx-auto">
           <Button variant="ghost" size="sm" onClick={() => setSelectedTicket(null)} className="mb-4 gap-2">
-            <ArrowLeft className="w-4 h-4" /> Voltar
+            <ArrowLeft className="w-4 h-4" /> {t('common.back')}
           </Button>
 
           <div className="rounded-xl border border-border bg-card overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 200px)' }}>
@@ -229,7 +232,7 @@ const AdminSuporte = () => {
               <div>
                 <h3 className="font-semibold text-foreground">{selectedTicket.subject}</h3>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(selectedTicket.created_at), "dd MMM yyyy 'às' HH:mm", { locale: ptBR })}
+                  {format(new Date(selectedTicket.created_at), "dd MMM yyyy HH:mm")}
                 </p>
               </div>
               <Badge variant="outline" className={status.color}>{status.label}</Badge>
@@ -245,7 +248,7 @@ const AdminSuporte = () => {
                         ? 'bg-primary text-primary-foreground rounded-br-md'
                         : 'bg-muted text-foreground rounded-bl-md'
                     }`}>
-                      {!isMe && <p className="text-[10px] font-semibold text-accent mb-1">Equipe de Suporte</p>}
+                      {!isMe && <p className="text-[10px] font-semibold text-accent mb-1">{t('admin.support.supportTeam')}</p>}
                       <p className="text-sm whitespace-pre-wrap">{m.message}</p>
                       <div className={`flex items-center gap-0.5 mt-1 ${isMe ? 'justify-end' : ''}`}>
                         <span className={`text-[10px] ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
@@ -265,7 +268,7 @@ const AdminSuporte = () => {
                 <Input
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Digite sua mensagem..."
+                  placeholder={t('admin.support.replyPlaceholder')}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (replyText.trim()) sendReply.mutate(); } }}
                 />
                 <Button onClick={() => sendReply.mutate()} disabled={!replyText.trim() || sendReply.isPending} size="icon">
@@ -274,7 +277,7 @@ const AdminSuporte = () => {
               </div>
             ) : (
               <div className="p-3 border-t border-border text-center text-sm text-muted-foreground">
-                Este ticket foi encerrado.
+                {t('admin.support.ticketClosed')}
               </div>
             )}
           </div>
@@ -286,27 +289,27 @@ const AdminSuporte = () => {
   // New ticket form
   if (showNewTicket) {
     return (
-      <AdminLayout title="Novo Ticket">
+      <AdminLayout title={t('admin.support.newTicket')}>
         <div className="max-w-lg mx-auto space-y-4">
           <Button variant="ghost" size="sm" onClick={() => setShowNewTicket(false)} className="gap-2">
-            <ArrowLeft className="w-4 h-4" /> Voltar
+            <ArrowLeft className="w-4 h-4" /> {t('common.back')}
           </Button>
           <div className="rounded-xl border border-border bg-card p-6 space-y-4">
             {storeInfo && (
               <div className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
-                Plataforma: <span className="font-medium text-foreground">{storeInfo.name}</span>
+                {t('admin.support.platform')}: <span className="font-medium text-foreground">{storeInfo.name}</span>
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Assunto</label>
-              <Input value={newSubject} onChange={(e) => setNewSubject(e.target.value)} placeholder="Ex: Problema com pagamentos" />
+              <label className="text-sm font-medium">{t('admin.support.subject')}</label>
+              <Input value={newSubject} onChange={(e) => setNewSubject(e.target.value)} placeholder={t('admin.support.subjectPlaceholder')} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Mensagem</label>
-              <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Descreva o problema em detalhes..." rows={5} />
+              <label className="text-sm font-medium">{t('admin.support.message')}</label>
+              <Textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder={t('admin.support.messagePlaceholder')} rows={5} />
             </div>
             <Button className="w-full" onClick={() => createTicket.mutate()} disabled={!newSubject.trim() || !newMessage.trim() || createTicket.isPending}>
-              <Send className="w-4 h-4 mr-2" /> Enviar Ticket
+              <Send className="w-4 h-4 mr-2" /> {t('admin.support.sendTicket')}
             </Button>
           </div>
         </div>
@@ -316,38 +319,38 @@ const AdminSuporte = () => {
 
   // Ticket list
   return (
-    <AdminLayout title="Suporte">
+    <AdminLayout title={t('admin.support.title')}>
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Envie mensagens para a equipe de suporte.</p>
+          <p className="text-sm text-muted-foreground">{t('admin.support.sendMessage')}</p>
           <Button onClick={() => setShowNewTicket(true)} size="sm" className="gap-2">
-            <Plus className="w-4 h-4" /> Novo Ticket
+            <Plus className="w-4 h-4" /> {t('admin.support.newTicket')}
           </Button>
         </div>
 
         {tickets.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-12 text-center">
             <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">Nenhum ticket de suporte ainda.</p>
+            <p className="text-muted-foreground">{t('admin.support.noTickets')}</p>
             <Button onClick={() => setShowNewTicket(true)} variant="outline" size="sm" className="mt-4 gap-2">
-              <Plus className="w-4 h-4" /> Abrir Primeiro Ticket
+              <Plus className="w-4 h-4" /> {t('admin.support.openFirst')}
             </Button>
           </div>
         ) : (
           <div className="space-y-2">
-            {tickets.map((t) => {
-              const status = statusConfig[t.status] || statusConfig.open;
+            {tickets.map((ticket) => {
+              const status = statusConfig[ticket.status] || statusConfig.open;
               const StatusIcon = status.icon;
               return (
                 <button
-                  key={t.id}
-                  onClick={() => setSelectedTicket(t)}
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
                   className="w-full text-left rounded-xl border border-border bg-card p-4 hover:border-primary/30 transition-colors flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground truncate">{t.subject}</p>
+                    <p className="font-medium text-foreground truncate">{ticket.subject}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(t.updated_at), "dd MMM yyyy 'às' HH:mm", { locale: ptBR })}
+                      {format(new Date(ticket.updated_at), "dd MMM yyyy HH:mm")}
                     </p>
                   </div>
                   <Badge variant="outline" className={`${status.color} shrink-0 gap-1`}>
