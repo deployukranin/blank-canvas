@@ -892,11 +892,14 @@ const getCacheKey = (slug?: string) => `whitelabel_cache_${slug || getSlugFromPa
 // Try to get cached config synchronously to prevent theme flash on reload
 const getCachedConfig = (): WhiteLabelConfig => {
   try {
-    // 1) New isolated key per store slug
-    let cached = localStorage.getItem(getCacheKey());
+    const seg = getSlugFromPath();
+    const isTenantRoute = seg !== '__global' && !['admin', 'super-admin', 'entrar', 'auth', 'setup'].includes(seg);
 
-    // 2) Backward compatibility for older sessions that still have the legacy key
-    if (!cached) {
+    // 1) New isolated key per store slug
+    let cached = localStorage.getItem(getCacheKey(seg));
+
+    // 2) Legacy fallback only for global routes (never for tenant routes)
+    if (!cached && !isTenantRoute) {
       cached = localStorage.getItem('whitelabel_config_cache');
     }
 

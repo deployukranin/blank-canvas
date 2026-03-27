@@ -30,8 +30,9 @@
         try {
           // Extract slug from URL path (e.g. /mystore/... → mystore)
           var seg = location.pathname.split('/').filter(Boolean)[0] || '__global';
+          var isTenantRoute = seg !== '__global' && !['admin', 'super-admin', 'entrar', 'auth', 'setup'].includes(seg);
           var cached = localStorage.getItem('whitelabel_cache_' + seg);
-          if (!cached) cached = localStorage.getItem('whitelabel_config_cache'); // legacy fallback
+          if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_config_cache'); // legacy fallback only for global routes
           if (!cached) return;
           var cfg = JSON.parse(cached);
           var colors = cfg && cfg.colors;
