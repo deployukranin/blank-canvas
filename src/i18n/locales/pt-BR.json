@@ -773,6 +773,63 @@
     "audioOrderConfirmed": "Pedido Realizado! 🎧",
     "audioDeliveryTime": "Prazo: 3 dias úteis",
     "delivery3days": "Entrega: 3 dias",
-    "surcharge": "+{{amount}}"
+    "surcharge": "+{{amount}}",
+    "previewTitleDefault": "Como funcionam os vídeos personalizados?",
+    "previewDescDefault": "Assista este vídeo explicativo para entender como funciona o processo de compra, personalização e entrega do seu vídeo ASMR exclusivo.",
+    "categories": {
+      "roleplay": "Roleplay",
+      "roleplayDesc": "Situações imersivas e personagens",
+      "tapping": "Tapping",
+      "tappingDesc": "Sons de batidas em diferentes superfícies",
+      "mouth-sounds": "Sons de Boca",
+      "mouth-soundsDesc": "Kisses, tongue clicks, inaudible whispers",
+      "whispers": "Sussurros",
+      "whispersDesc": "Sussurros suaves e relaxantes",
+      "personal-attention": "Atenção Pessoal",
+      "personal-attentionDesc": "Cuidando de você com carinho",
+      "custom-name": "Com Seu Nome",
+      "custom-nameDesc": "Vídeo sussurrando seu nome"
+    },
+    "audioCategories": {
+      "sussurros": "Sussurros",
+      "sussurrosDesc": "Áudios com sussurros suaves",
+      "afirmacoes": "Afirmações",
+      "afirmacoesDesc": "Afirmações positivas para relaxar",
+      "para-dormir": "Para Dormir",
+      "para-dormirDesc": "Áudios relaxantes para ajudar a dormir",
+      "sons-especificos": "Sons Específicos",
+      "sons-especificosDesc": "Tapping, scratching e outros sons"
+    },
+    "durations": {
+      "5min": "5 minutos",
+      "10min": "10 minutos",
+      "15min": "15 minutos",
+      "20min": "20 minutos",
+      "30min": "30 minutos",
+      "audio-5min": "5 minutos",
+      "audio-10min": "10 minutos",
+      "audio-15min": "15 minutos",
+      "audio-20min": "20 minutos",
+      "audio-30min": "30 minutos"
+    }
+    },
+    "rules": {
+      "allowed_0": "Roleplay de cenários do cotidiano (spa, livraria, café, etc.)",
+      "allowed_1": "Tapping e scratching em objetos",
+      "allowed_2": "Sons de boca suaves",
+      "allowed_3": "Sussurros e inaudible whispers",
+      "allowed_4": "Atenção pessoal relaxante",
+      "allowed_5": "Uso do seu nome ou apelido",
+      "allowed_6": "Afirmações positivas",
+      "allowed_7": "Sons de chuva, natureza como fundo",
+      "allowed_8": "Pedidos de triggers específicos",
+      "notAllowed_0": "Conteúdo adulto ou sexual",
+      "notAllowed_1": "Linguagem ofensiva ou agressiva",
+      "notAllowed_2": "Roleplay de relacionamento romântico/íntimo",
+      "notAllowed_3": "Pedidos que envolvam outras pessoas",
+      "notAllowed_4": "Conteúdo que promova violência ou ódio",
+      "notAllowed_5": "Informações pessoais de terceiros",
+      "notAllowed_6": "Sons muito altos ou assustadores",
+      "notAllowed_7": "Qualquer coisa que me deixe desconfortável"
+    }
   }
-}

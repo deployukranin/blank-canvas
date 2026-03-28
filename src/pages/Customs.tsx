@@ -55,8 +55,20 @@ import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+
+  // Helpers to translate default category/duration names via i18n
+  const tCategoryName = (id: string, fallback: string) =>
+    t(`customs.categories.${id}`, { defaultValue: fallback });
+  const tCategoryDesc = (id: string, fallback: string) =>
+    t(`customs.categories.${id}Desc`, { defaultValue: fallback });
+  const tAudioCategoryName = (id: string, fallback: string) =>
+    t(`customs.audioCategories.${id}`, { defaultValue: fallback });
+  const tAudioCategoryDesc = (id: string, fallback: string) =>
+    t(`customs.audioCategories.${id}Desc`, { defaultValue: fallback });
+  const tDurationLabel = (id: string, fallback: string) =>
+    t(`customs.durations.${id}`, { defaultValue: fallback });
   const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
@@ -369,25 +381,29 @@ const CustomsPage = () => {
           {/* Videos Tab Content */}
           <TabsContent value="videos" className="mt-6 space-y-6">
             {/* Preview Section */}
-            {config.previewEnabled && (
+            {config.previewEnabled && (() => {
+              const previewTitle = config.previewTitle || t('customs.previewTitleDefault');
+              const previewDesc = config.previewDescription || t('customs.previewDescDefault');
+              return (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <GlassCard className="overflow-hidden p-0">
                   {config.previewType === 'video' && config.previewVideoUrl ? (
-                    <VideoPlayer videoUrl={config.previewVideoUrl} title={config.previewTitle} description={config.previewDescription} />
+                    <VideoPlayer videoUrl={config.previewVideoUrl} title={previewTitle} description={previewDesc} />
                   ) : config.previewType === 'image' && config.previewImageUrl ? (
                     <div className="aspect-video bg-black">
-                      <img src={config.previewImageUrl} alt={config.previewTitle} className="w-full h-full object-cover" />
+                      <img src={config.previewImageUrl} alt={previewTitle} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <VideoPlaceholder title={config.previewTitle} description={config.previewDescription} />
+                    <VideoPlaceholder title={previewTitle} description={previewDesc} />
                   )}
                   <div className="p-4">
-                    <h3 className="font-semibold text-sm mb-1">{config.previewTitle}</h3>
-                    <p className="text-xs text-muted-foreground">{config.previewDescription}</p>
+                    <h3 className="font-semibold text-sm mb-1">{previewTitle}</h3>
+                    <p className="text-xs text-muted-foreground">{previewDesc}</p>
                   </div>
                 </GlassCard>
               </motion.div>
-            )}
+              );
+            })()}
 
             {/* Rules Section */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -410,7 +426,7 @@ const CustomsPage = () => {
                           {config.rules.allowed.map((rule, idx) => (
                             <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
                               <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
-                              {rule}
+                              {t(`customs.rules.allowed_${idx}`, { defaultValue: rule })}
                             </li>
                           ))}
                         </ul>
@@ -425,7 +441,7 @@ const CustomsPage = () => {
                           {config.rules.notAllowed.map((rule, idx) => (
                             <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
                               <span className="w-3 h-3 text-red-500 mt-0.5 flex-shrink-0">✕</span>
-                              {rule}
+                              {t(`customs.rules.notAllowed_${idx}`, { defaultValue: rule })}
                             </li>
                           ))}
                         </ul>
@@ -452,8 +468,8 @@ const CustomsPage = () => {
                       onClick={() => handleSelectCategory(category)}
                     >
                       <div className="text-3xl mb-2">{category.icon}</div>
-                      <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      <h4 className="font-semibold text-sm mb-1">{tCategoryName(category.id, category.name)}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{tCategoryDesc(category.id, category.description)}</p>
                       {(category.surcharge || 0) > 0 && (
                         <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
                           +R$ {category.surcharge?.toFixed(2)}
@@ -489,7 +505,7 @@ const CustomsPage = () => {
                             }`}>
                               {selectedDuration?.id === duration.id && <Check className="w-3 h-3 text-white" />}
                             </div>
-                            <span className="font-medium text-sm">{duration.label}</span>
+                            <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
                             R$ {price.toFixed(2).replace('.', ',')}
@@ -561,8 +577,8 @@ const CustomsPage = () => {
                       onClick={() => handleSelectAudioCategory(category)}
                     >
                       <div className="text-3xl mb-2">{category.icon}</div>
-                      <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      <h4 className="font-semibold text-sm mb-1">{tAudioCategoryName(category.id, category.name)}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{tAudioCategoryDesc(category.id, category.description)}</p>
                     </GlassCard>
                   </motion.div>
                 ))}
@@ -593,7 +609,7 @@ const CustomsPage = () => {
                             }`}>
                               {selectedAudioDuration?.id === duration.id && <Check className="w-3 h-3 text-white" />}
                             </div>
-                            <span className="font-medium text-sm">{duration.label}</span>
+                            <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
                             R$ {price.toFixed(2).replace('.', ',')}
@@ -620,7 +636,7 @@ const CustomsPage = () => {
                     <span className="text-muted-foreground">{t('customs.total')}</span>
                     {selectedCategory && selectedDuration ? (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {selectedCategory.name} • {selectedDuration.label}
+                        {tCategoryName(selectedCategory.id, selectedCategory.name)} • {tDurationLabel(selectedDuration.id, selectedDuration.label)}
                       </div>
                     ) : (
                       <div className="text-xs text-muted-foreground mt-1">
@@ -656,7 +672,7 @@ const CustomsPage = () => {
                     <span className="text-muted-foreground">{t('customs.total')}</span>
                     {selectedAudioCategory && selectedAudioDuration ? (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {selectedAudioCategory.name} • {selectedAudioDuration.label}
+                        {tAudioCategoryName(selectedAudioCategory.id, selectedAudioCategory.name)} • {tDurationLabel(selectedAudioDuration.id, selectedAudioDuration.label)}
                       </div>
                     ) : (
                       <div className="text-xs text-muted-foreground mt-1">

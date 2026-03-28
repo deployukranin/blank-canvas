@@ -773,6 +773,63 @@
     "audioOrderConfirmed": "Order Placed! 🎧",
     "audioDeliveryTime": "Delivery: 3 business days",
     "delivery3days": "Delivery: 3 days",
-    "surcharge": "+{{amount}}"
+    "surcharge": "+{{amount}}",
+    "previewTitleDefault": "How do custom videos work?",
+    "previewDescDefault": "Watch this explainer video to understand the purchase, customization, and delivery process for your exclusive ASMR video.",
+    "categories": {
+      "roleplay": "Roleplay",
+      "roleplayDesc": "Immersive situations and characters",
+      "tapping": "Tapping",
+      "tappingDesc": "Tapping sounds on different surfaces",
+      "mouth-sounds": "Mouth Sounds",
+      "mouth-soundsDesc": "Kisses, tongue clicks, inaudible whispers",
+      "whispers": "Whispers",
+      "whispersDesc": "Soft and relaxing whispers",
+      "personal-attention": "Personal Attention",
+      "personal-attentionDesc": "Caring for you with love",
+      "custom-name": "With Your Name",
+      "custom-nameDesc": "Video whispering your name"
+    },
+    "audioCategories": {
+      "sussurros": "Whispers",
+      "sussurrosDesc": "Soft whisper audios",
+      "afirmacoes": "Affirmations",
+      "afirmacoesDesc": "Positive affirmations to relax",
+      "para-dormir": "Sleep Aid",
+      "para-dormirDesc": "Relaxing audios to help you sleep",
+      "sons-especificos": "Specific Sounds",
+      "sons-especificosDesc": "Tapping, scratching and other sounds"
+    },
+    "durations": {
+      "5min": "5 minutes",
+      "10min": "10 minutes",
+      "15min": "15 minutes",
+      "20min": "20 minutes",
+      "30min": "30 minutes",
+      "audio-5min": "5 minutes",
+      "audio-10min": "10 minutes",
+      "audio-15min": "15 minutes",
+      "audio-20min": "20 minutes",
+      "audio-30min": "30 minutes"
+    }
+    },
+    "rules": {
+      "allowed_0": "Roleplay of everyday scenarios (spa, bookstore, café, etc.)",
+      "allowed_1": "Tapping and scratching on objects",
+      "allowed_2": "Soft mouth sounds",
+      "allowed_3": "Whispers and inaudible whispers",
+      "allowed_4": "Relaxing personal attention",
+      "allowed_5": "Use of your name or nickname",
+      "allowed_6": "Positive affirmations",
+      "allowed_7": "Rain, nature sounds as background",
+      "allowed_8": "Specific trigger requests",
+      "notAllowed_0": "Adult or sexual content",
+      "notAllowed_1": "Offensive or aggressive language",
+      "notAllowed_2": "Romantic/intimate relationship roleplay",
+      "notAllowed_3": "Requests involving other people",
+      "notAllowed_4": "Content promoting violence or hate",
+      "notAllowed_5": "Third-party personal information",
+      "notAllowed_6": "Very loud or scary sounds",
+      "notAllowed_7": "Anything that makes me uncomfortable"
+    }
   }
-}
