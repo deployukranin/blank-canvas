@@ -119,6 +119,15 @@
     "revenue": "Revenue",
     "pendingOrders": "Pending Orders",
     "weeklyActivity": "Weekly Activity",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
     "pending": "Pending",
     "viewAll": "View all",
     "ideasLabel": "Ideas",

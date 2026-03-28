@@ -119,6 +119,15 @@
     "revenue": "Receita",
     "pendingOrders": "Pedidos Pendentes",
     "weeklyActivity": "Atividade da semana",
+    "days": {
+      "mon": "Seg",
+      "tue": "Ter",
+      "wed": "Qua",
+      "thu": "Qui",
+      "fri": "Sex",
+      "sat": "Sáb",
+      "sun": "Dom"
+    },
     "pending": "Pendentes",
     "viewAll": "Ver todos",
     "ideasLabel": "Ideias",

@@ -196,15 +196,12 @@ const AdminDashboard: React.FC = () => {
     fetchStats();
   }, []);
 
-  const chartData = [
-    { name: 'Mon', orders: 2, revenue: 45 },
-    { name: 'Tue', orders: 5, revenue: 120 },
-    { name: 'Wed', orders: 3, revenue: 80 },
-    { name: 'Thu', orders: 7, revenue: 200 },
-    { name: 'Fri', orders: 4, revenue: 150 },
-    { name: 'Sat', orders: 8, revenue: 280 },
-    { name: 'Sun', orders: 6, revenue: 190 },
-  ];
+  const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+  const chartData = dayKeys.map((key, i) => ({
+    name: t(`admin.days.${key}`),
+    orders: [2, 5, 3, 7, 4, 8, 6][i],
+    revenue: [45, 120, 80, 200, 150, 280, 190][i],
+  }));
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
     <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4">
