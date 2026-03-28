@@ -69,6 +69,15 @@ const CustomsPage = () => {
     t(`customs.audioCategories.${id}Desc`, { defaultValue: fallback });
   const tDurationLabel = (id: string, fallback: string) =>
     t(`customs.durations.${id}`, { defaultValue: fallback });
+
+  const formatCurrency = (value: number) => {
+    const isBR = i18n.language?.startsWith('pt');
+    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+      style: 'currency',
+      currency: isBR ? 'BRL' : 'USD',
+    }).format(value);
+  };
+
   const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
