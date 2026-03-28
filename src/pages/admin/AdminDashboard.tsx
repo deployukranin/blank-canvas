@@ -40,6 +40,8 @@ const AdminDashboard: React.FC = () => {
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [storeData, setStoreData] = useState<{ name: string; description: string; avatar_url: string } | null>(null);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
