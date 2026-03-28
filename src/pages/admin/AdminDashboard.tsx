@@ -75,11 +75,17 @@ const AdminDashboard: React.FC = () => {
         sid = any?.id ?? null;
       }
       if (!sid) { if (!cancelled) setStoreSlug(null); return; }
-      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at').eq('id', sid).maybeSingle();
+      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at, onboarding_completed, name, description, avatar_url').eq('id', sid).maybeSingle();
       if (!cancelled) {
         setStoreSlug(store?.slug ?? null);
         setStoreId(sid);
-        if (store) setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
+        if (store) {
+          setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
+          setStoreData({ name: store.name || '', description: store.description || '', avatar_url: store.avatar_url || '' });
+          if (!store.onboarding_completed) {
+            setShowOnboarding(true);
+          }
+        }
       }
     };
     resolve();
