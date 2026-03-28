@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video } from 'lucide-react';
+import { Users, Crown, ShoppingCart, DollarSign, Lightbulb, TrendingUp, Clock, Activity, ExternalLink, Copy, Check, AlertTriangle, Zap, Youtube, Eye, UserPlus, Video, CircleCheck, Circle, ChevronDown, ChevronUp } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -38,8 +38,10 @@ const AdminDashboard: React.FC = () => {
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
+  const [storeInfo, setStoreInfo] = useState<{ name: string; description: string | null; avatar_url: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(true);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
@@ -73,11 +75,14 @@ const AdminDashboard: React.FC = () => {
         sid = any?.id ?? null;
       }
       if (!sid) { if (!cancelled) setStoreSlug(null); return; }
-      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at').eq('id', sid).maybeSingle();
+      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at, name, description, avatar_url').eq('id', sid).maybeSingle();
       if (!cancelled) {
         setStoreSlug(store?.slug ?? null);
         setStoreId(sid);
-        if (store) setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
+        if (store) {
+          setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
+          setStoreInfo({ name: store.name, description: store.description, avatar_url: store.avatar_url });
+        }
       }
     };
     resolve();
