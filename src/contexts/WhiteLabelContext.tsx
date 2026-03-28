@@ -1063,6 +1063,10 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const hue = primary.split(' ')[0];
     const isLight = config.colors.mode === 'light';
 
+    // Keep mode class synchronized after runtime changes (initial paint is handled in index.html)
+    root.classList.remove('dark', 'light', 'theme-dark', 'theme-light');
+    root.classList.add(isLight ? 'light' : 'dark', isLight ? 'theme-light' : 'theme-dark');
+
     // Base tokens
     if (isLight) {
       root.style.setProperty('--background', '0 0% 98%');
