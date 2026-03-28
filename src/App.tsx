@@ -69,26 +69,12 @@ const App = () => (
               <Toaster />
               <Sonner />
               <Routes>
-                {/* Rotas Públicas (sem tenant) */}
-                <Route path="/" element={<Index />} />
+                {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
+                <Route path="/" element={<NotFound />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/entrar" element={<ClientAuth />} />
-                
-                <Route path="/assinaturas" element={<Assinaturas />} />
-                <Route path="/assinaturas/:id" element={<ProdutoAssinatura />} />
                 <Route path="/ajuda" element={<Ajuda />} />
                 <Route path="/termos" element={<TermosDeUso />} />
                 <Route path="/privacidade" element={<Privacidade />} />
-                
-                {/* Rotas Protegidas (Usuário Logado, sem tenant) */}
-                <Route path="/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
-                <Route path="/vip" element={<ProtectedRoute><VIP /></ProtectedRoute>} />
-                <Route path="/customs" element={<ProtectedRoute><Customs /></ProtectedRoute>} />
-                <Route path="/comunidade" element={<ProtectedRoute><Comunidade /></ProtectedRoute>} />
-                <Route path="/galeria" element={<ProtectedRoute><GaleriaVideos /></ProtectedRoute>} />
-                <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-                <Route path="/meus-pedidos" element={<ProtectedRoute><MeusPedidos /></ProtectedRoute>} />
-                <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
