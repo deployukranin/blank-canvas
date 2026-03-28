@@ -464,8 +464,8 @@ const CustomsPage = () => {
                       onClick={() => handleSelectCategory(category)}
                     >
                       <div className="text-3xl mb-2">{category.icon}</div>
-                      <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      <h4 className="font-semibold text-sm mb-1">{tCategoryName(category.id, category.name)}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{tCategoryDesc(category.id, category.description)}</p>
                       {(category.surcharge || 0) > 0 && (
                         <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
                           +R$ {category.surcharge?.toFixed(2)}
@@ -501,7 +501,7 @@ const CustomsPage = () => {
                             }`}>
                               {selectedDuration?.id === duration.id && <Check className="w-3 h-3 text-white" />}
                             </div>
-                            <span className="font-medium text-sm">{duration.label}</span>
+                            <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
                             R$ {price.toFixed(2).replace('.', ',')}
@@ -573,8 +573,8 @@ const CustomsPage = () => {
                       onClick={() => handleSelectAudioCategory(category)}
                     >
                       <div className="text-3xl mb-2">{category.icon}</div>
-                      <h4 className="font-semibold text-sm mb-1">{category.name}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{category.description}</p>
+                      <h4 className="font-semibold text-sm mb-1">{tAudioCategoryName(category.id, category.name)}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{tAudioCategoryDesc(category.id, category.description)}</p>
                     </GlassCard>
                   </motion.div>
                 ))}
@@ -605,7 +605,7 @@ const CustomsPage = () => {
                             }`}>
                               {selectedAudioDuration?.id === duration.id && <Check className="w-3 h-3 text-white" />}
                             </div>
-                            <span className="font-medium text-sm">{duration.label}</span>
+                            <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
                             R$ {price.toFixed(2).replace('.', ',')}
