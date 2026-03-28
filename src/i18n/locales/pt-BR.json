@@ -812,5 +812,24 @@
       "audio-20min": "20 minutos",
       "audio-30min": "30 minutos"
     }
+    },
+    "rules": {
+      "allowed_0": "Roleplay de cenários do cotidiano (spa, livraria, café, etc.)",
+      "allowed_1": "Tapping e scratching em objetos",
+      "allowed_2": "Sons de boca suaves",
+      "allowed_3": "Sussurros e inaudible whispers",
+      "allowed_4": "Atenção pessoal relaxante",
+      "allowed_5": "Uso do seu nome ou apelido",
+      "allowed_6": "Afirmações positivas",
+      "allowed_7": "Sons de chuva, natureza como fundo",
+      "allowed_8": "Pedidos de triggers específicos",
+      "notAllowed_0": "Conteúdo adulto ou sexual",
+      "notAllowed_1": "Linguagem ofensiva ou agressiva",
+      "notAllowed_2": "Roleplay de relacionamento romântico/íntimo",
+      "notAllowed_3": "Pedidos que envolvam outras pessoas",
+      "notAllowed_4": "Conteúdo que promova violência ou ódio",
+      "notAllowed_5": "Informações pessoais de terceiros",
+      "notAllowed_6": "Sons muito altos ou assustadores",
+      "notAllowed_7": "Qualquer coisa que me deixe desconfortável"
+    }
   }
-}
