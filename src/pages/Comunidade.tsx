@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Bell, Star, Lock, Pin, Lightbulb, MessageCircle, ThumbsUp, Users, Plus, 
@@ -36,14 +37,14 @@ import { PushNotificationToggle } from '@/components/notifications/PushNotificat
 import { UserHandle } from '@/components/profile/UserHandle';
 import { VideoGalleryPanel } from '@/components/video/VideoGalleryPanel';
 import { VIPAreaContent } from '@/components/vip/VIPAreaContent';
-const getPostTypeConfig = (type: FeedPost['type']) => {
+const getPostTypeConfig = (type: FeedPost['type'], t: (key: string) => string) => {
   switch (type) {
     case 'announcement':
-      return { icon: <Bell className="w-3 h-3" />, label: 'Aviso', color: 'bg-warning/20 text-warning' };
+      return { icon: <Bell className="w-3 h-3" />, label: t('storefront.announcement'), color: 'bg-warning/20 text-warning' };
     case 'news':
-      return { icon: <Star className="w-3 h-3" />, label: 'Novidade', color: 'bg-info/20 text-info' };
+      return { icon: <Star className="w-3 h-3" />, label: t('storefront.newsLabel'), color: 'bg-info/20 text-info' };
     case 'exclusive':
-      return { icon: <Lock className="w-3 h-3" />, label: 'VIP', color: 'bg-vip/20 text-vip' };
+      return { icon: <Lock className="w-3 h-3" />, label: t('storefront.exclusive'), color: 'bg-vip/20 text-vip' };
   }
 };
 
@@ -187,7 +188,8 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
 };
 
 const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
-  const typeConfig = getPostTypeConfig(post.type);
+  const { t } = useTranslation();
+  const typeConfig = getPostTypeConfig(post.type, t);
 
   return (
     <motion.div
@@ -199,8 +201,8 @@ const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
         {post.isPinned && (
           <div className="absolute -top-2 left-4">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
-              <Pin className="w-3 h-3" />
-              Fixado
+             <Pin className="w-3 h-3" />
+              {t('storefront.pinned')}
             </span>
           </div>
         )}
@@ -230,7 +232,7 @@ const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
             {post.type === 'exclusive' && (
               <div className="mt-3 p-3 rounded-lg bg-vip/5 border border-vip/20 text-center">
                 <Lock className="w-4 h-4 mx-auto mb-1 text-vip" />
-                <p className="text-xs text-vip">Conteúdo exclusivo VIP</p>
+                <p className="text-xs text-vip">{t('storefront.exclusiveVipContent')}</p>
               </div>
             )}
           </div>
