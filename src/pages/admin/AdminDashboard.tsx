@@ -85,6 +85,12 @@ const AdminDashboard: React.FC = () => {
           setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
           setStoreInfo({ name: store.name, description: store.description, avatar_url: store.avatar_url });
         }
+        // Load payment config for checklist
+        const payConf = await loadConfig<any>('payment_config', sid);
+        if (!cancelled && payConf) {
+          const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
+          setPaymentConfigured(hasPayment);
+        }
       }
     };
     resolve();
