@@ -832,4 +832,30 @@
       "notAllowed_6": "Sons muito altos ou assustadores",
       "notAllowed_7": "Qualquer coisa que me deixe desconfortável"
     }
+  },
+  "onboarding": {
+    "profileTitle": "Configure seu perfil",
+    "profileDesc": "Conte-nos sobre sua plataforma para que seu público possa te encontrar.",
+    "storeName": "Nome da Plataforma",
+    "storeNamePlaceholder": "Meu Canal ASMR",
+    "storeDescription": "Descrição",
+    "storeDescPlaceholder": "Uma breve descrição do seu conteúdo...",
+    "avatarUrl": "Foto de Perfil (URL)",
+    "visualTitle": "Identidade Visual",
+    "visualDesc": "Escolha um tema de cores e configure o texto do banner.",
+    "heroTitle": "Título do Banner",
+    "heroSubtitle": "Subtítulo do Banner",
+    "settingsTitle": "Configurações da Plataforma",
+    "settingsDesc": "Escolha quais funcionalidades ativar na sua plataforma.",
+    "enableVip": "Área VIP",
+    "enableVipDesc": "Conteúdo exclusivo para assinantes pagantes.",
+    "enableCustoms": "Pedidos Personalizados",
+    "enableCustomsDesc": "Permita que fãs solicitem conteúdo personalizado.",
+    "enableCommunity": "Comunidade",
+    "enableCommunityDesc": "Fórum para discussões e ideias.",
+    "next": "Próximo",
+    "finish": "Finalizar Configuração",
+    "complete": "Configuração concluída! Bem-vindo ao seu painel.",
+    "saveError": "Erro ao salvar. Tente novamente."
   }
+}

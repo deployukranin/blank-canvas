@@ -351,6 +351,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          onboarding_completed: boolean
           plan_expires_at: string | null
           plan_type: string
           slug: string | null
@@ -368,6 +369,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          onboarding_completed?: boolean
           plan_expires_at?: string | null
           plan_type?: string
           slug?: string | null
@@ -385,6 +387,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          onboarding_completed?: boolean
           plan_expires_at?: string | null
           plan_type?: string
           slug?: string | null
