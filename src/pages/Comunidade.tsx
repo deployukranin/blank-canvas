@@ -445,6 +445,7 @@ const NotificationItem = ({
 );
 
 const ComunidadePage = () => {
+  const { t, i18n } = useTranslation();
   const { config } = useWhiteLabel();
   const videosTabEnabled = config.community.videosTabEnabled;
 
@@ -551,7 +552,7 @@ const ComunidadePage = () => {
           ideaTitle: idea.title,
           fromUsername: user.username || 'user',
           fromAvatar: '👍',
-          message: 'votou na sua ideia',
+         message: t('storefront.votedOnIdea'),
         });
 
         // Send push notification to idea author
@@ -570,8 +571,8 @@ const ComunidadePage = () => {
     const moderation = moderateContent(content);
     if (moderation.isBlocked) {
       toast({
-        title: 'Conteúdo não permitido',
-        description: `Seu comentário contém palavras não permitidas: ${moderation.blockedWords.join(', ')}`,
+        title: t('storefront.contentNotAllowed'),
+        description: t('storefront.contentBlockedWords', { words: moderation.blockedWords.join(', ') }),
         variant: 'destructive',
       });
       return;
@@ -608,7 +609,7 @@ const ComunidadePage = () => {
         ideaTitle: idea.title,
         fromUsername: user.username || 'user',
         fromAvatar: '💬',
-        message: 'comentou na sua ideia',
+         message: t('storefront.commentedOnIdea'),
       });
 
       // Send push notification to idea author
@@ -616,8 +617,8 @@ const ComunidadePage = () => {
     }
 
     toast({
-      title: 'Comentário adicionado!',
-      description: 'Seu comentário foi publicado.',
+      title: t('storefront.commentAdded'),
+      description: t('storefront.commentAddedDesc'),
     });
   };
 
@@ -664,12 +665,12 @@ const ComunidadePage = () => {
       });
 
       toast({
-        title: 'Denúncia enviada',
-        description: 'Sua denúncia será analisada pela nossa equipe. Obrigado por ajudar a manter a comunidade saudável.',
+        title: t('storefront.reportSubmitted'),
+        description: t('storefront.reportSubmittedDesc'),
       });
     } catch (error) {
       toast({
-        title: 'Erro',
+        title: t('storefront.reportError'),
         description: error instanceof Error ? error.message : 'Não foi possível enviar a denúncia',
         variant: 'destructive',
       });
@@ -686,8 +687,8 @@ const ComunidadePage = () => {
 
     if (!newIdea.title.trim() || !newIdea.description.trim()) {
       toast({
-        title: 'Campos obrigatórios',
-        description: 'Preencha o título e a descrição da ideia.',
+        title: t('storefront.requiredFields'),
+        description: t('storefront.requiredFieldsDesc'),
         variant: 'destructive',
       });
       return;
@@ -700,8 +701,8 @@ const ComunidadePage = () => {
     if (titleModeration.isBlocked || descModeration.isBlocked) {
       const blockedWords = [...titleModeration.blockedWords, ...descModeration.blockedWords];
       toast({
-        title: 'Conteúdo não permitido',
-        description: `Sua ideia contém palavras não permitidas: ${[...new Set(blockedWords)].join(', ')}`,
+        title: t('storefront.contentNotAllowed'),
+        description: t('storefront.contentBlockedWords', { words: [...new Set(blockedWords)].join(', ') }),
         variant: 'destructive',
       });
       return;
@@ -727,8 +728,8 @@ const ComunidadePage = () => {
     addPoints('idea_created', idea.id);
 
     toast({
-      title: 'Ideia criada!',
-      description: 'Sua ideia foi publicada na comunidade.',
+      title: t('storefront.ideaCreated'),
+      description: t('storefront.ideaCreatedDesc'),
     });
   };
 
@@ -769,11 +770,11 @@ const ComunidadePage = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
                   <div className="p-3 border-b border-border flex items-center justify-between">
-                    <h4 className="font-semibold text-sm">Notificações</h4>
+                    <h4 className="font-semibold text-sm">{t('storefront.notifications')}</h4>
                     {unreadCount > 0 && (
                       <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-7">
-                        <Check className="w-3 h-3 mr-1" />
-                        Marcar todas
+                         <Check className="w-3 h-3 mr-1" />
+                        {t('storefront.markAll')}
                       </Button>
                     )}
                   </div>
@@ -787,8 +788,8 @@ const ComunidadePage = () => {
                         />
                       ))
                     ) : (
-                      <p className="text-xs text-muted-foreground text-center py-4">
-                        Nenhuma notificação ainda
+                       <p className="text-xs text-muted-foreground text-center py-4">
+                        {t('storefront.noNotificationsYet')}
                       </p>
                     )}
                   </div>
@@ -818,7 +819,7 @@ const ComunidadePage = () => {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{reputation.totalPoints} pts</span>
                     <span>•</span>
-                    <span>{reputation.badges.length} conquistas</span>
+                    <span>{reputation.badges.length} {t('storefront.achievements')}</span>
                   </div>
                 </div>
                 <Button 
@@ -827,7 +828,7 @@ const ComunidadePage = () => {
                   onClick={() => setShowRanking(true)}
                   className="text-xs"
                 >
-                  Ver ranking
+                  {t('storefront.viewRanking')}
                 </Button>
               </div>
             </GlassCard>
@@ -876,41 +877,41 @@ const ComunidadePage = () => {
               <DialogTrigger asChild>
                 <Button className="w-full gap-2" variant="outline">
                   <Plus className="w-4 h-4" />
-                  Compartilhar uma ideia
+                  {t('storefront.shareIdea')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-accent" />
-                    Nova Ideia
+                     <Lightbulb className="w-5 h-5 text-accent" />
+                    {t('storefront.newIdea')}
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">Título</label>
+                   <div>
+                    <label className="text-sm font-medium mb-1.5 block">{t('storefront.title')}</label>
                     <Input
                       value={newIdea.title}
                       onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })}
-                      placeholder="Ex: ASMR de chuva com..."
+                      placeholder={t('storefront.ideaPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1.5 block">Descrição</label>
+                    <label className="text-sm font-medium mb-1.5 block">{t('storefront.description')}</label>
                     <Textarea
                       value={newIdea.description}
                       onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })}
-                      placeholder="Descreva sua ideia em detalhes..."
+                      placeholder={t('storefront.descPlaceholder')}
                       rows={4}
                     />
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => setIsCreateOpen(false)} className="flex-1">
-                      Cancelar
+                       {t('common.cancel')}
                     </Button>
                     <Button onClick={handleCreateIdea} className="flex-1 gap-2">
-                      <Send className="w-4 h-4" />
-                      Publicar
+                       <Send className="w-4 h-4" />
+                      {t('storefront.publish')}
                     </Button>
                   </div>
                 </div>
@@ -927,14 +928,14 @@ const ComunidadePage = () => {
                 <SelectContent>
                   <SelectItem value="votes">
                     <span className="flex items-center gap-2">
-                      <Trophy className="w-3 h-3" />
-                      Mais Votadas
+                       <Trophy className="w-3 h-3" />
+                      {t('storefront.mostVoted')}
                     </span>
                   </SelectItem>
                   <SelectItem value="recent">
                     <span className="flex items-center gap-2">
-                      <TrendingUp className="w-3 h-3" />
-                      Mais Recentes
+                       <TrendingUp className="w-3 h-3" />
+                      {t('storefront.mostRecent')}
                     </span>
                   </SelectItem>
                 </SelectContent>
@@ -947,12 +948,12 @@ const ComunidadePage = () => {
                   onClick={() => setMyIdeasOnly(!myIdeasOnly)}
                   className="h-8 text-xs"
                 >
-                  {myIdeasOnly ? 'Todas' : 'Minhas Ideias'}
+                  {myIdeasOnly ? t('storefront.allIdeas') : t('storefront.myIdeas')}
                 </Button>
               )}
 
               <Badge variant="secondary" className="text-xs">
-                {sortedIdeas.length} {sortedIdeas.length === 1 ? 'ideia' : 'ideias'}
+                {sortedIdeas.length} {sortedIdeas.length === 1 ? t('storefront.idea') : t('storefront.ideas')}
               </Badge>
             </div>
 
@@ -960,8 +961,8 @@ const ComunidadePage = () => {
             {sortBy === 'votes' && !myIdeasOnly && sortedIdeas.length >= 3 && (
               <GlassCard className="p-3 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border-amber-500/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-semibold text-amber-300">Ranking das Ideias</span>
+                   <Trophy className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-300">{t('storefront.ideasRanking')}</span>
                 </div>
                 <div className="space-y-1.5">
                   {sortedIdeas.slice(0, 3).map((idea, idx) => (
@@ -996,7 +997,7 @@ const ComunidadePage = () => {
               <GlassCard className="p-8 text-center">
                 <Lightbulb className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-muted-foreground text-sm">
-                  {myIdeasOnly ? 'Você ainda não criou nenhuma ideia' : 'Nenhuma ideia encontrada'}
+                  {myIdeasOnly ? t('storefront.noIdeasCreated') : t('storefront.noIdeasFound')}
                 </p>
               </GlassCard>
             )}
@@ -1031,11 +1032,11 @@ const ComunidadePage = () => {
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
-              Ranking da Comunidade
+             <Trophy className="w-5 h-5 text-amber-400" />
+              {t('storefront.communityRanking')}
             </DialogTitle>
             <DialogDescription>
-              Veja sua posição e as maiores contribuições da comunidade
+              {t('storefront.communityRankingDesc')}
             </DialogDescription>
           </DialogHeader>
           
@@ -1043,7 +1044,7 @@ const ComunidadePage = () => {
             {/* User's reputation card if logged in */}
             {user && reputation && (
               <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">Sua Reputação</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">{t('storefront.yourReputation')}</h3>
                 <ReputationCard 
                   reputation={reputation} 
                   showBadges={true} 
@@ -1054,7 +1055,7 @@ const ComunidadePage = () => {
             
             {/* Full leaderboard */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Top 15 da Comunidade</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">{t('storefront.topCommunity')}</h3>
               <LeaderboardCard 
                 leaderboard={leaderboard} 
                 currentUsername={user?.username}
