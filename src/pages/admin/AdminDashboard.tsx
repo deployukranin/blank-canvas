@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import AdminOnboardingWizard from '@/components/admin/AdminOnboardingWizard';
 
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
