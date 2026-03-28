@@ -126,6 +126,16 @@
     "viewPlatform": "Visualizar Plataforma",
     "copyLink": "Copiar Link",
     "linkCopied": "Link copiado!",
+    "checklist": {
+      "title": "Checklist de Configuração",
+      "completed": "concluídos",
+      "storeName": "Defina o nome da plataforma",
+      "description": "Adicione uma descrição",
+      "avatar": "Adicione uma foto de perfil",
+      "colors": "Personalize o tema de cores",
+      "youtube": "Conecte seu canal do YouTube",
+      "banners": "Adicione pelo menos um banner"
+    },
     "videoCategories": "Categorias de Vídeo",
     "categoriesOrganized": "{{count}} categorias • {{videos}} vídeos organizados",
     "autoCategorize": "Auto-categorizar por palavras-chave",
