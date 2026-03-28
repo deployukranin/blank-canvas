@@ -264,14 +264,12 @@ const AdminDashboard: React.FC = () => {
 
         {/* Setup Checklist */}
         {(() => {
-          const checks = [
+           const checks = [
             { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/personalizacao` },
-            { key: 'description', done: !!storeInfo?.description, label: t('admin.checklist.description'), path: `${base}/personalizacao` },
-            { key: 'avatar', done: !!storeInfo?.avatar_url, label: t('admin.checklist.avatar'), path: `${base}/personalizacao` },
             { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/personalizacao` },
-            { key: 'youtube', done: !!config.youtube?.channelId, label: t('admin.checklist.youtube'), path: `${base}/youtube` },
             { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/personalizacao` },
-          ];
+            { key: 'payments', done: !!(config as any).payment?.stripeSecretKey || !!(config as any).payment?.pixKeys?.length, label: t('admin.checklist.payments'), path: `${base}/pagamentos` },
+           ];
           const doneCount = checks.filter(c => c.done).length;
           const allDone = doneCount === checks.length;
           if (allDone) return null;

@@ -130,11 +130,9 @@
       "title": "Checklist de Configuração",
       "completed": "concluídos",
       "storeName": "Defina o nome da plataforma",
-      "description": "Adicione uma descrição",
-      "avatar": "Adicione uma foto de perfil",
       "colors": "Personalize o tema de cores",
-      "youtube": "Conecte seu canal do YouTube",
-      "banners": "Adicione pelo menos um banner"
+      "banners": "Adicione pelo menos um banner",
+      "payments": "Configure os meios de pagamento"
     },
     "videoCategories": "Categorias de Vídeo",
     "categoriesOrganized": "{{count}} categorias • {{videos}} vídeos organizados",
