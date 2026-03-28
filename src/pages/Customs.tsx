@@ -55,8 +55,20 @@ import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+
+  // Helpers to translate default category/duration names via i18n
+  const tCategoryName = (id: string, fallback: string) =>
+    t(`customs.categories.${id}`, { defaultValue: fallback });
+  const tCategoryDesc = (id: string, fallback: string) =>
+    t(`customs.categories.${id}Desc`, { defaultValue: fallback });
+  const tAudioCategoryName = (id: string, fallback: string) =>
+    t(`customs.audioCategories.${id}`, { defaultValue: fallback });
+  const tAudioCategoryDesc = (id: string, fallback: string) =>
+    t(`customs.audioCategories.${id}Desc`, { defaultValue: fallback });
+  const tDurationLabel = (id: string, fallback: string) =>
+    t(`customs.durations.${id}`, { defaultValue: fallback });
   const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
