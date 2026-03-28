@@ -1,25 +1,38 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 
+// Map nav paths to i18n keys
+const pathToI18nKey: Record<string, string> = {
+  '/': 'nav.home',
+  '/customs': 'nav.customs',
+  '/vip': 'nav.vip',
+  '/comunidade': 'nav.community',
+  '/perfil': 'nav.profile',
+  '/videos': 'nav.videos',
+  '/ideias': 'nav.ideas',
+  '/ajuda': 'nav.help',
+  '/notificacoes': 'nav.notifications',
+  '/meus-pedidos': 'nav.myOrders',
+  '/assinaturas': 'nav.subscriptions',
+};
+
 export const BottomNav = () => {
   const location = useLocation();
+  const { t } = useTranslation();
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope } = useTenant();
 
-  // Use navigation tabs from config, filtered by enabled and sorted by order
   const navItems = config.navigationTabs
     .filter(tab => tab.enabled && tab.path !== '/loja')
     .sort((a, b) => a.order - b.order);
 
-  // Resolve path with tenant basePath
   const resolvePath = (path: string) => {
     if (!isTenantScope) return path;
-    // Home path maps to basePath itself
     if (path === '/') return basePath;
-    // Other paths get prefixed: /customs -> /slug/customs
     return `${basePath}${path}`;
   };
 
@@ -31,6 +44,8 @@ export const BottomNav = () => {
             const resolvedPath = resolvePath(item.path);
             const isActive = location.pathname === resolvedPath || 
               (item.path === '/' && location.pathname === basePath);
+            const i18nKey = pathToI18nKey[item.path];
+            const label = i18nKey ? t(i18nKey) : item.label;
 
             return (
               <Link
@@ -57,7 +72,7 @@ export const BottomNav = () => {
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
-                  {item.label}
+                  {label}
                 </span>
               </Link>
             );
