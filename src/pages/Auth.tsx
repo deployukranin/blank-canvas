@@ -90,9 +90,8 @@ const Auth = () => {
     const slug = await getStoreSlug(authUser.id);
     if (slug) {
       navigate(`/${slug}/admin`, { replace: true });
-    } else {
-      navigate('/', { replace: true });
     }
+    // If no store found, stay on /auth page (don't redirect to / which is 404)
   };
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
