@@ -914,7 +914,7 @@ const getCachedConfig = (): WhiteLabelConfig => {
 };
 
 export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { store } = useTenant();
+  const { store, isTenantScope, isLoading: isTenantLoading } = useTenant();
   const storeId = store?.id || null;
   const [config, setConfig] = useState<WhiteLabelConfig>(getCachedConfig);
   const [isDbLoaded, setIsDbLoaded] = useState(false);
@@ -924,23 +924,29 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Load from database on mount and when store changes
   useEffect(() => {
+    // On tenant routes, wait until store resolution to avoid loading global theme first (FOUC)
+    if (isTenantScope && isTenantLoading && !storeId) {
+      return;
+    }
+
     // Avoid reloading if storeId hasn't changed
     if (lastStoreIdRef.current === storeId && initialLoadRef.current) return;
     lastStoreIdRef.current = storeId;
 
     const loadFromDb = async () => {
       try {
-        // Try store-specific config first, then fall back to global
-        let dbConfig = storeId 
+        // Try store-specific config first
+        let dbConfig = storeId
           ? await loadConfig<WhiteLabelConfig>('white_label_config', storeId)
           : null;
-        
-        if (!dbConfig) {
+
+        // Global fallback only for non-tenant routes
+        if (!dbConfig && !isTenantScope) {
           dbConfig = await loadConfig<WhiteLabelConfig>('white_label_config');
         }
 
         // Strip youtube.channelId from global config — each store must use its own
-        if (dbConfig && !storeId) {
+        if (dbConfig && !storeId && !isTenantScope) {
           if ((dbConfig as any)?.youtube?.channelId) {
             (dbConfig as any).youtube = { ...((dbConfig as any).youtube || {}), channelId: '', enabled: false };
           }
@@ -993,7 +999,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     loadFromDb();
-  }, [storeId]);
+  }, [storeId, isTenantScope, isTenantLoading]);
 
   // Helper function to merge config with defaults
   const mergeConfig = (defaults: WhiteLabelConfig, parsed: Partial<WhiteLabelConfig>): WhiteLabelConfig => {
