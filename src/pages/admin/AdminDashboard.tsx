@@ -6,6 +6,7 @@ import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { loadConfig } from '@/lib/config-storage';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const AdminDashboard: React.FC = () => {
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(true);
+  const [paymentConfigured, setPaymentConfigured] = useState(false);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
@@ -82,6 +84,12 @@ const AdminDashboard: React.FC = () => {
         if (store) {
           setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
           setStoreInfo({ name: store.name, description: store.description, avatar_url: store.avatar_url });
+        }
+        // Load payment config for checklist
+        const payConf = await loadConfig<any>('payment_config', sid);
+        if (!cancelled && payConf) {
+          const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
+          setPaymentConfigured(hasPayment);
         }
       }
     };
@@ -264,14 +272,12 @@ const AdminDashboard: React.FC = () => {
 
         {/* Setup Checklist */}
         {(() => {
-          const checks = [
+           const checks = [
             { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/personalizacao` },
-            { key: 'description', done: !!storeInfo?.description, label: t('admin.checklist.description'), path: `${base}/personalizacao` },
-            { key: 'avatar', done: !!storeInfo?.avatar_url, label: t('admin.checklist.avatar'), path: `${base}/personalizacao` },
             { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/personalizacao` },
-            { key: 'youtube', done: !!config.youtube?.channelId, label: t('admin.checklist.youtube'), path: `${base}/youtube` },
             { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/personalizacao` },
-          ];
+            { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/pagamentos` },
+           ];
           const doneCount = checks.filter(c => c.done).length;
           const allDone = doneCount === checks.length;
           if (allDone) return null;

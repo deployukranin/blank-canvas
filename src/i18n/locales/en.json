@@ -130,11 +130,9 @@
       "title": "Setup Checklist",
       "completed": "completed",
       "storeName": "Set your platform name",
-      "description": "Add a description",
-      "avatar": "Upload a profile picture",
       "colors": "Customize your color theme",
-      "youtube": "Connect your YouTube channel",
-      "banners": "Add at least one banner"
+      "banners": "Add at least one banner",
+      "payments": "Configure payment methods"
     },
     "videoCategories": "Video Categories",
     "categoriesOrganized": "{{count}} categories • {{videos}} videos organized",
