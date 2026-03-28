@@ -773,6 +773,44 @@
     "audioOrderConfirmed": "Pedido Realizado! 🎧",
     "audioDeliveryTime": "Prazo: 3 dias úteis",
     "delivery3days": "Entrega: 3 dias",
-    "surcharge": "+{{amount}}"
+    "surcharge": "+{{amount}}",
+    "previewTitleDefault": "Como funcionam os vídeos personalizados?",
+    "previewDescDefault": "Assista este vídeo explicativo para entender como funciona o processo de compra, personalização e entrega do seu vídeo ASMR exclusivo.",
+    "categories": {
+      "roleplay": "Roleplay",
+      "roleplayDesc": "Situações imersivas e personagens",
+      "tapping": "Tapping",
+      "tappingDesc": "Sons de batidas em diferentes superfícies",
+      "mouth-sounds": "Sons de Boca",
+      "mouth-soundsDesc": "Kisses, tongue clicks, inaudible whispers",
+      "whispers": "Sussurros",
+      "whispersDesc": "Sussurros suaves e relaxantes",
+      "personal-attention": "Atenção Pessoal",
+      "personal-attentionDesc": "Cuidando de você com carinho",
+      "custom-name": "Com Seu Nome",
+      "custom-nameDesc": "Vídeo sussurrando seu nome"
+    },
+    "audioCategories": {
+      "sussurros": "Sussurros",
+      "sussurrosDesc": "Áudios com sussurros suaves",
+      "afirmacoes": "Afirmações",
+      "afirmacoesDesc": "Afirmações positivas para relaxar",
+      "para-dormir": "Para Dormir",
+      "para-dormirDesc": "Áudios relaxantes para ajudar a dormir",
+      "sons-especificos": "Sons Específicos",
+      "sons-especificosDesc": "Tapping, scratching e outros sons"
+    },
+    "durations": {
+      "5min": "5 minutos",
+      "10min": "10 minutos",
+      "15min": "15 minutos",
+      "20min": "20 minutos",
+      "30min": "30 minutos",
+      "audio-5min": "5 minutos",
+      "audio-10min": "10 minutos",
+      "audio-15min": "15 minutos",
+      "audio-20min": "20 minutos",
+      "audio-30min": "30 minutos"
+    }
   }
 }
