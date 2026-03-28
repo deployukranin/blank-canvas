@@ -831,30 +831,5 @@
       "notAllowed_6": "Very loud or scary sounds",
       "notAllowed_7": "Anything that makes me uncomfortable"
     }
-  },
-  "onboarding": {
-    "profileTitle": "Set up your profile",
-    "profileDesc": "Tell us about your platform so your audience can find you.",
-    "storeName": "Platform Name",
-    "storeNamePlaceholder": "My ASMR Channel",
-    "storeDescription": "Description",
-    "storeDescPlaceholder": "A brief description of your content...",
-    "avatarUrl": "Profile Picture (URL)",
-    "visualTitle": "Visual Identity",
-    "visualDesc": "Choose a color theme and set your banner text.",
-    "heroTitle": "Banner Title",
-    "heroSubtitle": "Banner Subtitle",
-    "settingsTitle": "Platform Settings",
-    "settingsDesc": "Choose which features to enable on your platform.",
-    "enableVip": "VIP Area",
-    "enableVipDesc": "Exclusive content for paying subscribers.",
-    "enableCustoms": "Custom Orders",
-    "enableCustomsDesc": "Let fans request personalized content.",
-    "enableCommunity": "Community",
-    "enableCommunityDesc": "Forum for discussions and ideas.",
-    "next": "Next",
-    "finish": "Finish Setup",
-    "complete": "Setup complete! Welcome to your dashboard.",
-    "saveError": "Failed to save. Please try again."
   }
 }
