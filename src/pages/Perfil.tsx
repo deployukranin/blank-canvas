@@ -67,28 +67,18 @@ const PerfilPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <MobileLayout title="Perfil" hideHeader>
+      <MobileLayout title={t('nav.profile')} hideHeader>
         <div className="px-4 py-6 flex flex-col items-center justify-center min-h-[60vh]">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
               <span className="text-4xl">👤</span>
             </div>
-            <h2 className="font-display text-xl font-bold mb-2">Entre na sua conta</h2>
-            <p className="text-muted-foreground text-sm mb-6 max-w-xs">
-              Faça login para salvar suas preferências, votar em ideias e fazer compras
-            </p>
-            <Button
-              onClick={() => setShowAuthModal(true)}
-              className="font-medium h-12 px-8"
-            >
-              Entrar ou Criar Conta
+            <h2 className="font-display text-xl font-bold mb-2">{t('storefront.enterAccount')}</h2>
+            <p className="text-muted-foreground text-sm mb-6 max-w-xs">{t('storefront.enterAccountDesc')}</p>
+            <Button onClick={() => setShowAuthModal(true)} className="font-medium h-12 px-8">
+              {t('storefront.enterOrCreate')}
             </Button>
           </motion.div>
-
           <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
         </div>
       </MobileLayout>
@@ -96,22 +86,14 @@ const PerfilPage = () => {
   }
 
   return (
-    <MobileLayout title="Perfil" hideHeader>
+    <MobileLayout title={t('nav.profile')} hideHeader>
       <div className="px-4 py-6 space-y-6">
-        {/* User Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <GlassCard className="flex items-center gap-4">
             <div className="relative">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
                 {profile?.avatar_url || user?.avatar ? (
-                  <img 
-                    src={profile?.avatar_url || user?.avatar} 
-                    alt={profile?.handle || user?.username} 
-                    className="w-full h-full rounded-full object-cover" 
-                  />
+                  <img src={profile?.avatar_url || user?.avatar} alt={profile?.handle || user?.username} className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <span className="text-2xl font-bold text-primary-foreground">
                     {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
@@ -119,10 +101,8 @@ const PerfilPage = () => {
                 )}
               </div>
               {!isAdmin && !isCEO && (
-                <button
-                  onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-                >
+                <button onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                   <Camera className="w-3 h-3 text-primary-foreground" />
                 </button>
               )}
@@ -133,41 +113,24 @@ const PerfilPage = () => {
                   {profile?.handle ? `@${profile.handle}` : user?.username}
                 </h2>
                 {user?.isVIP && (
-                  <span className="px-2 py-0.5 rounded-full bg-vip/20 text-vip text-xs font-medium">
-                    VIP 👑
-                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-vip/20 text-vip text-xs font-medium">VIP 👑</span>
                 )}
               </div>
               <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
           </GlassCard>
 
-          {/* Avatar URL Editor for regular users */}
           {editingAvatar && !isAdmin && !isCEO && (
             <div className="mt-3 flex gap-2 items-center">
-              <Input
-                placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')}
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                className="flex-1 h-9 text-sm"
-              />
-              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}>
-                <Check className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}>
-                <X className="w-4 h-4" />
-              </Button>
+              <Input placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="flex-1 h-9 text-sm" />
+              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}><Check className="w-4 h-4" /></Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}><X className="w-4 h-4" /></Button>
             </div>
           )}
         </motion.div>
 
-        {/* Admin Dashboard Link */}
         {(isAdmin || isCEO) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Link to={`${basePath}/admin`}>
               <GlassCard className="p-4" hover>
                 <div className="flex items-center gap-4">
@@ -177,7 +140,7 @@ const PerfilPage = () => {
                   <div className="flex-1">
                     <p className="font-medium text-sm">Dashboard</p>
                     <p className="text-xs text-muted-foreground">
-                      {isCEO ? 'Painel CEO' : 'Painel Admin'}
+                      {isCEO ? t('storefront.dashboardCEO') : t('storefront.dashboardAdmin')}
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -187,19 +150,10 @@ const PerfilPage = () => {
           </motion.div>
         )}
 
-        {/* Quick Access - Ideias & VIP */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
-          className="space-y-2"
-        >
-          <h3 className="text-sm font-medium text-muted-foreground px-1">Acesso Rápido</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground px-1">{t('storefront.quickAccess')}</h3>
           {quickAccessItems.map((item) => {
-            const badgeCount = item.badge === 'orders' ? pendingOrdersCount 
-              : item.badge === 'notifications' ? unreadCount 
-              : 0;
-            
+            const badgeCount = item.badge === 'orders' ? pendingOrdersCount : item.badge === 'notifications' ? unreadCount : 0;
             return (
               <Link key={item.path} to={item.path}>
                 <GlassCard className="p-4" hover>
@@ -224,15 +178,9 @@ const PerfilPage = () => {
           })}
         </motion.div>
 
-        {/* Menu Items */}
         <div className="space-y-2">
           {menuItems.map((item, index) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 + 0.15 }}
-            >
+            <motion.div key={item.label} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 + 0.15 }}>
               <Link to={item.path}>
                 <GlassCard className="p-4" hover>
                   <div className="flex items-center gap-4">
@@ -251,17 +199,8 @@ const PerfilPage = () => {
           ))}
         </div>
 
-        {/* Logout */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Button
-            variant="ghost"
-            onClick={logout}
-            className="w-full h-12 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          <Button variant="ghost" onClick={logout} className="w-full h-12 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10">
             <LogOut className="w-5 h-5" />
             {t('profile.logout', 'Log out')}
           </Button>

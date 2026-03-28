@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -8,16 +9,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 
 export default function AjudaPage() {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = "Ajuda | ASMR Luna";
-  }, []);
+    document.title = `${t('storefront.helpTitle')} | ASMR Luna`;
+  }, [t]);
 
   return (
-    <MobileLayout title="Ajuda" showBack>
+    <MobileLayout title={t('storefront.helpTitle')} showBack>
       <main className="px-4 py-6 space-y-6">
         <header className="space-y-2">
-          <h1 className="font-display text-2xl font-bold">Ajuda</h1>
-          <p className="text-sm text-muted-foreground">Dúvidas rápidas e suporte.</p>
+          <h1 className="font-display text-2xl font-bold">{t('storefront.helpTitle')}</h1>
+          <p className="text-sm text-muted-foreground">{t('storefront.helpSubtitle')}</p>
         </header>
 
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -27,31 +30,31 @@ export default function AjudaPage() {
                 <HelpCircle className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h2 className="font-medium">FAQ</h2>
-                <p className="text-xs text-muted-foreground">Respostas para as dúvidas mais comuns.</p>
+                <h2 className="font-medium">{t('storefront.faq')}</h2>
+                <p className="text-xs text-muted-foreground">{t('storefront.faqSubtitle')}</p>
               </div>
             </div>
 
             <div className="mt-4">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
-                  <AccordionTrigger>Como faço login?</AccordionTrigger>
+                  <AccordionTrigger>{t('storefront.faqLogin')}</AccordionTrigger>
                   <AccordionContent>
-                    Vá em <strong>Perfil</strong> e toque em <strong>Continuar com Google</strong>.
+                    <span dangerouslySetInnerHTML={{ __html: t('storefront.faqLoginAnswer') }} />
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
-                  <AccordionTrigger>Como ativar notificações?</AccordionTrigger>
+                  <AccordionTrigger>{t('storefront.faqNotifications')}</AccordionTrigger>
                   <AccordionContent>
-                    Em <strong>Perfil → Configurações</strong>, ative <strong>Notificações Push</strong>.
+                    <span dangerouslySetInnerHTML={{ __html: t('storefront.faqNotificationsAnswer') }} />
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
-                  <AccordionTrigger>Não estou vendo meus pedidos / vídeos</AccordionTrigger>
+                  <AccordionTrigger>{t('storefront.faqOrders')}</AccordionTrigger>
                   <AccordionContent>
-                    Verifique se você está logado na mesma conta. Se ainda assim não aparecer, tente sair e entrar novamente.
+                    {t('storefront.faqOrdersAnswer')}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -59,12 +62,7 @@ export default function AjudaPage() {
           </GlassCard>
         </motion.section>
 
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          aria-label="Contato"
-        >
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} aria-label="Contact">
           <GlassCard className="p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-start gap-3">
@@ -72,13 +70,13 @@ export default function AjudaPage() {
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="font-medium">Suporte</h2>
-                  <p className="text-xs text-muted-foreground">Precisa de ajuda? Fale com a gente.</p>
+                  <h2 className="font-medium">{t('storefront.support')}</h2>
+                  <p className="text-xs text-muted-foreground">{t('storefront.supportDesc')}</p>
                 </div>
               </div>
 
               <Button asChild variant="outline" size="sm">
-                <a href="mailto:suporte@asmrluna.com">Enviar e-mail</a>
+                <a href="mailto:suporte@asmrluna.com">{t('storefront.sendEmail')}</a>
               </Button>
             </div>
           </GlassCard>
