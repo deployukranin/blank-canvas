@@ -69,6 +69,15 @@ const CustomsPage = () => {
     t(`customs.audioCategories.${id}Desc`, { defaultValue: fallback });
   const tDurationLabel = (id: string, fallback: string) =>
     t(`customs.durations.${id}`, { defaultValue: fallback });
+
+  const formatCurrency = (value: number) => {
+    const isBR = i18n.language?.startsWith('pt');
+    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+      style: 'currency',
+      currency: isBR ? 'BRL' : 'USD',
+    }).format(value);
+  };
+
   const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
   
   // Video state
@@ -472,7 +481,7 @@ const CustomsPage = () => {
                       <p className="text-xs text-muted-foreground line-clamp-2">{tCategoryDesc(category.id, category.description)}</p>
                       {(category.surcharge || 0) > 0 && (
                         <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                          +R$ {category.surcharge?.toFixed(2)}
+                          +{formatCurrency(category.surcharge || 0)}
                         </div>
                       )}
                     </GlassCard>
@@ -508,7 +517,7 @@ const CustomsPage = () => {
                             <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
-                            R$ {price.toFixed(2).replace('.', ',')}
+                            {formatCurrency(price)}
                           </span>
                         </div>
                       </GlassCard>
@@ -612,7 +621,7 @@ const CustomsPage = () => {
                             <span className="font-medium text-sm">{tDurationLabel(duration.id, duration.label)}</span>
                           </div>
                           <span className="font-bold text-primary">
-                            R$ {price.toFixed(2).replace('.', ',')}
+                            {formatCurrency(price)}
                           </span>
                         </div>
                       </GlassCard>
@@ -646,7 +655,7 @@ const CustomsPage = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                      R$ {finalPrice.toFixed(2).replace('.', ',')}
+                      {formatCurrency(finalPrice)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {t('customs.delivery')}: {t('customs.deliveryDays', { days: config.deliveryDays })}
@@ -682,7 +691,7 @@ const CustomsPage = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                      R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
+                      {formatCurrency(audioFinalPrice)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {t('customs.delivery3days')}
@@ -727,7 +736,7 @@ const CustomsPage = () => {
               <div className="flex justify-between">
                 <span className="font-semibold">{t('customs.total')}</span>
                 <span className="font-bold text-lg text-primary">
-                  R$ {finalPrice.toFixed(2).replace('.', ',')}
+                  {formatCurrency(finalPrice)}
                 </span>
               </div>
             </div>
@@ -812,7 +821,7 @@ const CustomsPage = () => {
           <DialogHeader>
             <DialogTitle>{t('customs.orderCustomAudio')}</DialogTitle>
             <DialogDescription>
-              {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - R$ {audioFinalPrice.toFixed(2).replace('.', ',')}
+              {selectedAudioCategory?.name} • {selectedAudioDuration?.label} - {formatCurrency(audioFinalPrice)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
