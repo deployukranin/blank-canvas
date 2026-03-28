@@ -32,5 +32,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/i18n/locales"
   ]
 }
