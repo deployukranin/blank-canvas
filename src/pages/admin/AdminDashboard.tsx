@@ -229,6 +229,16 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
+    <>
+      {showOnboarding && storeId && storeData && (
+        <AdminOnboardingWizard
+          storeId={storeId}
+          storeName={storeData.name}
+          storeDescription={storeData.description}
+          storeAvatarUrl={storeData.avatar_url}
+          onComplete={() => setShowOnboarding(false)}
+        />
+      )}
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
         {/* Trial banner */}
