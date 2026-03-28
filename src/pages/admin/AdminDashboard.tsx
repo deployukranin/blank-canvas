@@ -40,8 +40,6 @@ const AdminDashboard: React.FC = () => {
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [storeData, setStoreData] = useState<{ name: string; description: string; avatar_url: string } | null>(null);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
@@ -75,17 +73,11 @@ const AdminDashboard: React.FC = () => {
         sid = any?.id ?? null;
       }
       if (!sid) { if (!cancelled) setStoreSlug(null); return; }
-      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at, onboarding_completed, name, description, avatar_url').eq('id', sid).maybeSingle();
+      const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at').eq('id', sid).maybeSingle();
       if (!cancelled) {
         setStoreSlug(store?.slug ?? null);
         setStoreId(sid);
-        if (store) {
-          setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
-          setStoreData({ name: store.name || '', description: store.description || '', avatar_url: store.avatar_url || '' });
-          if (!store.onboarding_completed) {
-            setShowOnboarding(true);
-          }
-        }
+        if (store) setStorePlan({ type: store.plan_type, expiresAt: store.plan_expires_at });
       }
     };
     resolve();
@@ -229,16 +221,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <>
-      {showOnboarding && storeId && storeData && (
-        <AdminOnboardingWizard
-          storeId={storeId}
-          storeName={storeData.name}
-          storeDescription={storeData.description}
-          storeAvatarUrl={storeData.avatar_url}
-          onComplete={() => setShowOnboarding(false)}
-        />
-      )}
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
         {/* Trial banner */}
