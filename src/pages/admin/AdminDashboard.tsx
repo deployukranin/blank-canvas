@@ -43,6 +43,7 @@ const AdminDashboard: React.FC = () => {
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(true);
+  const [paymentConfigured, setPaymentConfigured] = useState(false);
 
   const getPublishedOrigin = () => {
     const host = window.location.hostname;
