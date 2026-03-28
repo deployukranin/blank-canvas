@@ -262,6 +262,56 @@ const AdminDashboard: React.FC = () => {
           </Button>
         </div>
 
+        {/* Setup Checklist */}
+        {(() => {
+          const checks = [
+            { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/personalizacao` },
+            { key: 'description', done: !!storeInfo?.description, label: t('admin.checklist.description'), path: `${base}/personalizacao` },
+            { key: 'avatar', done: !!storeInfo?.avatar_url, label: t('admin.checklist.avatar'), path: `${base}/personalizacao` },
+            { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/personalizacao` },
+            { key: 'youtube', done: !!config.youtube?.channelId, label: t('admin.checklist.youtube'), path: `${base}/youtube` },
+            { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/personalizacao` },
+          ];
+          const doneCount = checks.filter(c => c.done).length;
+          const allDone = doneCount === checks.length;
+          if (allDone) return null;
+          const pct = Math.round((doneCount / checks.length) * 100);
+          return (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <GlassCard className="p-4">
+                <button onClick={() => setChecklistOpen(o => !o)} className="w-full flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
+                      <CircleCheck className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-foreground">{t('admin.checklist.title')}</p>
+                      <p className="text-xs text-muted-foreground">{doneCount}/{checks.length} {t('admin.checklist.completed')}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
+                      <motion.div className="h-full rounded-full bg-primary" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">{pct}%</span>
+                    {checklistOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                </button>
+                {checklistOpen && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-1.5">
+                    {checks.map(c => (
+                      <Link key={c.key} to={c.path} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c.done ? 'opacity-60' : 'hover:bg-primary/5'}`}>
+                        {c.done ? <CircleCheck className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
+                        <span className={`text-sm ${c.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{c.label}</span>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </GlassCard>
+            </motion.div>
+          );
+        })()}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
           <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
