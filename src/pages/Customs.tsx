@@ -426,7 +426,7 @@ const CustomsPage = () => {
                           {config.rules.allowed.map((rule, idx) => (
                             <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
                               <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
-                              {rule}
+                              {t(`customs.rules.allowed_${idx}`, { defaultValue: rule })}
                             </li>
                           ))}
                         </ul>
@@ -441,7 +441,7 @@ const CustomsPage = () => {
                           {config.rules.notAllowed.map((rule, idx) => (
                             <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
                               <span className="w-3 h-3 text-red-500 mt-0.5 flex-shrink-0">✕</span>
-                              {rule}
+                              {t(`customs.rules.notAllowed_${idx}`, { defaultValue: rule })}
                             </li>
                           ))}
                         </ul>
