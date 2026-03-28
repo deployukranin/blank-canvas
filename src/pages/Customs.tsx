@@ -632,7 +632,7 @@ const CustomsPage = () => {
                     <span className="text-muted-foreground">{t('customs.total')}</span>
                     {selectedCategory && selectedDuration ? (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {selectedCategory.name} • {selectedDuration.label}
+                        {tCategoryName(selectedCategory.id, selectedCategory.name)} • {tDurationLabel(selectedDuration.id, selectedDuration.label)}
                       </div>
                     ) : (
                       <div className="text-xs text-muted-foreground mt-1">
@@ -668,7 +668,7 @@ const CustomsPage = () => {
                     <span className="text-muted-foreground">{t('customs.total')}</span>
                     {selectedAudioCategory && selectedAudioDuration ? (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {selectedAudioCategory.name} • {selectedAudioDuration.label}
+                        {tAudioCategoryName(selectedAudioCategory.id, selectedAudioCategory.name)} • {tDurationLabel(selectedAudioDuration.id, selectedAudioDuration.label)}
                       </div>
                     ) : (
                       <div className="text-xs text-muted-foreground mt-1">
