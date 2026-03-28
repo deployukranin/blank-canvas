@@ -1,7 +1,5 @@
-const CACHE_NAME = 'asmr-luna-v2';
+const CACHE_NAME = 'asmr-luna-v3';
 const urlsToCache = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/icon-192.png'
 ];
@@ -17,6 +15,15 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache with network fallback
 self.addEventListener('fetch', (event) => {
+  // Always fetch HTML documents from network first to avoid stale theme scripts
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
