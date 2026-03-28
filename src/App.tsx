@@ -11,6 +11,7 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
 
+import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
 import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
