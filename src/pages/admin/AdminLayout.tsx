@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useProfile } from '@/hooks/use-profile';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
@@ -25,6 +26,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { slug } = useParams<{ slug: string }>();
   const { user, logout } = useAuth();
   const { roles } = useUserRole();
+  const { profile } = useProfile();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const base = slug ? `/${slug}/admin` : '/admin';
@@ -68,11 +70,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       )}>
         <div className="p-6 border-b border-primary/10 shrink-0">
           <div className="flex items-center gap-2 mt-1">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-xs text-primary font-bold">
-                {user?.username?.charAt(0)?.toUpperCase() || 'A'}
-              </span>
-            </div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-xs text-primary font-bold">
+                  {user?.username?.charAt(0)?.toUpperCase() || 'A'}
+                </span>
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium text-foreground/90">{user?.username}</p>
               <p className="text-[11px] text-foreground/40">{user?.email}</p>
