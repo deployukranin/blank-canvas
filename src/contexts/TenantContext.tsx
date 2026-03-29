@@ -59,8 +59,9 @@ function resolveSlugFromPath(pathname: string): string | null {
 
 export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const slug = resolveSlugFromPath(location.pathname);
   const [store, setStore] = useState<StoreInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!slug);
   const [error, setError] = useState<string | null>(null);
 
   const slug = resolveSlugFromPath(location.pathname);
