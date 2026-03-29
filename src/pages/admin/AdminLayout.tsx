@@ -26,6 +26,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { slug } = useParams<{ slug: string }>();
   const { user, logout } = useAuth();
   const { roles } = useUserRole();
+  const { profile } = useProfile();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const base = slug ? `/${slug}/admin` : '/admin';
