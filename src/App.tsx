@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
+import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 
 import Index from "./pages/Index";
 import Ideias from "./pages/Ideias";
@@ -72,6 +73,7 @@ const App = () => (
                 <Route path="/ajuda" element={<Ajuda />} />
                 <Route path="/termos" element={<TermosDeUso />} />
                 <Route path="/privacidade" element={<Privacidade />} />
+                <Route path="/meus-pedidos" element={<MyOrdersRedirect />} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
