@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,9 +65,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check account status on Stripe
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
-    const account = await stripe.accounts.retrieve(store.stripe_account_id);
+    // Check account status on Stripe using fetch API directly
+    const accountRes = await fetch(
+      `https://api.stripe.com/v1/accounts/${store.stripe_account_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+        },
+      }
+    );
+
+    if (!accountRes.ok) {
+      const errBody = await accountRes.text();
+      console.error("Stripe API error:", errBody);
+      return new Response(
+        JSON.stringify({ connected: false, error: "Failed to check Stripe account" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const account = await accountRes.json();
 
     return new Response(
       JSON.stringify({
