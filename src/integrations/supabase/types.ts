@@ -356,6 +356,7 @@ export type Database = {
           plan_type: string
           slug: string | null
           status: string
+          stripe_account_id: string | null
           suspended_at: string | null
           updated_at: string
           url: string
@@ -374,6 +375,7 @@ export type Database = {
           plan_type?: string
           slug?: string | null
           status?: string
+          stripe_account_id?: string | null
           suspended_at?: string | null
           updated_at?: string
           url?: string
@@ -392,6 +394,7 @@ export type Database = {
           plan_type?: string
           slug?: string | null
           status?: string
+          stripe_account_id?: string | null
           suspended_at?: string | null
           updated_at?: string
           url?: string
