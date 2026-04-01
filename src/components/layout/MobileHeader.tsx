@@ -13,7 +13,7 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { basePath, isTenantScope } = useTenant();
-  const loginPath = isTenantScope ? `${basePath}/entrar` : '/entrar';
+  const loginPath = isTenantScope ? `${basePath}/login` : '/login';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 safe-area-top">

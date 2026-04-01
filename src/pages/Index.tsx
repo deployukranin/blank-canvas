@@ -70,13 +70,13 @@ const Index = () => {
             <h3 className="font-display font-semibold text-foreground mb-1">{t('storefront.joinCommunity')}</h3>
             <p className="text-sm text-muted-foreground mb-4">{t('storefront.joinCommunityDesc')}</p>
             <div className="flex gap-3">
-              <Link to={`${isTenantScope ? basePath : ''}/entrar?tab=signup`} className="flex-1">
+              <Link to={`${isTenantScope ? basePath : ''}/login?tab=signup`} className="flex-1">
                 <Button className="w-full gap-2 h-10" size="sm">
                   <UserPlus className="w-4 h-4" />
                   {t('storefront.signUp')}
                 </Button>
               </Link>
-              <Link to={`${isTenantScope ? basePath : ''}/entrar`} className="flex-1">
+              <Link to={`${isTenantScope ? basePath : ''}/login`} className="flex-1">
                 <Button variant="outline" className="w-full gap-2 h-10" size="sm">
                   <LogIn className="w-4 h-4" />
                   {t('storefront.signIn')}
@@ -111,7 +111,7 @@ const Index = () => {
                 <Heart className="w-4 h-4 fill-primary text-primary" />
                 {t('storefront.myFavorites')}
               </h3>
-              <Link to="/galeria-videos" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+              <Link to="/gallery" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 {t('storefront.viewAll')}
               </Link>
             </div>
@@ -123,7 +123,7 @@ const Index = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-semibold text-foreground">{t('storefront.recentVideos')}</h3>
-              <Link to="/galeria-videos" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+              <Link to="/gallery" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 {t('storefront.viewAll')}
               </Link>
             </div>
@@ -134,7 +134,7 @@ const Index = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display font-semibold text-foreground">{t('storefront.news')}</h3>
-            <Link to="/comunidade" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+            <Link to="/community" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
               {t('storefront.viewAllNews')}
             </Link>
           </div>

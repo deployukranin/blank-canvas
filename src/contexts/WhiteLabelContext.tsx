@@ -542,22 +542,22 @@ export const defaultNavigationTabs: NavTabConfig[] = [
   { id: 'home', label: 'Início', path: '/', icon: { type: 'lucide', value: 'Home' }, enabled: true, order: 0 },
   { id: 'customs', label: "Custom's", path: '/customs', icon: { type: 'lucide', value: 'Video' }, enabled: true, order: 1 },
   { id: 'vip', label: 'VIP', path: '/vip', icon: { type: 'lucide', value: 'Crown' }, enabled: true, order: 2 },
-  { id: 'comunidade', label: 'Comunidade', path: '/comunidade', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
-  { id: 'perfil', label: 'Perfil', path: '/perfil', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
+  { id: 'comunidade', label: 'Comunidade', path: '/community', icon: { type: 'lucide', value: 'Users' }, enabled: true, order: 3 },
+  { id: 'perfil', label: 'Perfil', path: '/profile', icon: { type: 'lucide', value: 'User' }, enabled: true, order: 4 },
 ];
 
 export const defaultQuickActions: QuickActionItem[] = [
   {
     icon: { type: 'lucide', value: 'GalleryVertical' },
     label: 'Vídeos',
-    path: '/galeria-videos',
+    path: '/gallery',
     color: 'from-sky-500 to-blue-500',
     enabled: true,
   },
   {
     icon: { type: 'lucide', value: 'Lightbulb' },
     label: 'Ideias',
-    path: '/ideias',
+    path: '/ideas',
     color: 'from-violet-500 to-purple-500',
     enabled: true,
   },
@@ -578,7 +578,7 @@ export const defaultQuickActions: QuickActionItem[] = [
   {
     icon: { type: 'lucide', value: 'Users' },
     label: 'Comunidade',
-    path: '/comunidade',
+    path: '/community',
     color: 'from-indigo-500 to-purple-500',
     enabled: true,
   },
@@ -637,14 +637,14 @@ export const availableGradientColors = [
 ];
 
 export const availableRoutes = [
-  { path: '/ideias', label: 'Ideias' },
+  { path: '/ideas', label: 'Ideias' },
   { path: '/vip', label: 'VIP' },
   { path: '/customs', label: "Custom's" },
   
-  { path: '/comunidade', label: 'Comunidade' },
-  { path: '/assinaturas', label: 'Assinaturas' },
-  { path: '/perfil', label: 'Perfil' },
-  { path: '/meus-pedidos', label: 'Meus Pedidos' },
+  { path: '/community', label: 'Comunidade' },
+  { path: '/subscriptions', label: 'Assinaturas' },
+  { path: '/profile', label: 'Perfil' },
+  { path: '/orders', label: 'Meus Pedidos' },
 ];
 
 export interface BannerConfig {

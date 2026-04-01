@@ -16,7 +16,7 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
 
   const handleGoToAuth = () => {
     onClose();
-    navigate(isTenantScope ? `${basePath}/entrar` : '/entrar');
+    navigate(isTenantScope ? `${basePath}/login` : '/login');
   };
 
   return (
@@ -68,11 +68,11 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
 
               <p className="text-center text-xs text-muted-foreground mt-4">
                 Ao continuar, você concorda com nossos{' '}
-                <Link to="/termos" className="underline underline-offset-2 hover:text-foreground">
+                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
                   Termos de Uso
                 </Link>{' '}
                 e{' '}
-                <Link to="/privacidade" className="underline underline-offset-2 hover:text-foreground">
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
                   Política de Privacidade
                 </Link>
               </p>

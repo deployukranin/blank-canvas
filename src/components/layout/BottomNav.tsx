@@ -10,14 +10,14 @@ const pathToI18nKey: Record<string, string> = {
   '/': 'nav.home',
   '/customs': 'nav.customs',
   '/vip': 'nav.vip',
-  '/comunidade': 'nav.community',
-  '/perfil': 'nav.profile',
+  '/community': 'nav.community',
+  '/profile': 'nav.profile',
   '/videos': 'nav.videos',
-  '/ideias': 'nav.ideas',
-  '/ajuda': 'nav.help',
-  '/notificacoes': 'nav.notifications',
-  '/meus-pedidos': 'nav.myOrders',
-  '/assinaturas': 'nav.subscriptions',
+  '/ideas': 'nav.ideas',
+  '/help': 'nav.help',
+  '/notifications': 'nav.notifications',
+  '/orders': 'nav.myOrders',
+  '/subscriptions': 'nav.subscriptions',
 };
 
 export const BottomNav = () => {

@@ -249,7 +249,7 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-xs text-muted-foreground">{t('admin.trial.upgradeHint')}</p>
                 </div>
               </div>
-              <Link to={`${base}/planos`}>
+              <Link to={`${base}/plans`}>
                 <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">{t('admin.trial.upgrade')}</Button>
               </Link>
             </motion.div>
@@ -270,10 +270,10 @@ const AdminDashboard: React.FC = () => {
         {/* Setup Checklist */}
         {(() => {
            const checks = [
-            { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/personalizacao` },
-            { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/personalizacao` },
-            { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/personalizacao` },
-            { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/pagamentos-pix` },
+            { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/customize` },
+            { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
+            { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/customize` },
+            { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/payments` },
            ];
           const doneCount = checks.filter(c => c.done).length;
           const allDone = doneCount === checks.length;
@@ -412,7 +412,7 @@ const AdminDashboard: React.FC = () => {
               <h3 className="text-sm font-medium text-foreground/70 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" />{t('admin.pending')}
               </h3>
-              <Link to={`${base}/pedidos`} className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
+              <Link to={`${base}/orders`} className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
             </div>
             {isLoading ? (
               <p className="text-foreground/30 text-sm">{t('common.loading')}</p>

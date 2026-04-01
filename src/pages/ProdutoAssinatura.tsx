@@ -98,7 +98,7 @@ const ProdutoAssinatura = () => {
     toast.success('Pedido realizado com sucesso!', {
       description: 'Você receberá os dados de acesso por email em até 24h.',
     });
-    navigate('/meus-pedidos');
+    navigate('/orders');
   };
 
   return (

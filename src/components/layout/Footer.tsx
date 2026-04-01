@@ -48,12 +48,12 @@ export const Footer = () => {
             <h4 className="font-display font-semibold mb-4">Navegação</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/ideias" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/ideas" className="text-muted-foreground hover:text-foreground transition-colors">
                   Ideias de Vídeos
                 </Link>
               </li>
               <li>
-                <Link to="/assinaturas" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/subscriptions" className="text-muted-foreground hover:text-foreground transition-colors">
                   Assinaturas
                 </Link>
               </li>
@@ -80,17 +80,17 @@ export const Footer = () => {
             <h4 className="font-display font-semibold mb-4">Suporte</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/ajuda" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">
                   Ajuda & FAQ
                 </Link>
               </li>
               <li>
-                <Link to="/termos" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
                   Termos de Uso
                 </Link>
               </li>
               <li>
-                <Link to="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
                   Política de Privacidade
                 </Link>
               </li>

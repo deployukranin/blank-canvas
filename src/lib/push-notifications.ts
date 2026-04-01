@@ -203,7 +203,7 @@ export const notifyCommentOnIdea = async (
   const data: PushNotificationData = {
     title: 'Novo comentário 💬',
     body: `@${commenterUsername} comentou na sua ideia: "${ideaTitle}"`,
-    url: '/comunidade',
+    url: '/community',
     tag: `comment_${Date.now()}`,
   };
   
@@ -217,7 +217,7 @@ export const notifyVoteOnIdea = async (
   const data: PushNotificationData = {
     title: 'Novo voto! 👍',
     body: `@${voterUsername} votou na sua ideia: "${ideaTitle}"`,
-    url: '/comunidade',
+    url: '/community',
     tag: `vote_${Date.now()}`,
   };
   
@@ -231,7 +231,7 @@ export const notifyLevelUp = async (
   const data: PushNotificationData = {
     title: 'Subiu de nível! 🎉',
     body: `Você alcançou o nível ${newLevel}: ${levelTitle}!`,
-    url: '/perfil',
+    url: '/profile',
     tag: `levelup_${newLevel}`,
   };
   
@@ -245,7 +245,7 @@ export const notifyNewBadge = async (
   const data: PushNotificationData = {
     title: 'Nova conquista! 🏆',
     body: `Você desbloqueou: ${badgeIcon} ${badgeName}`,
-    url: '/perfil',
+    url: '/profile',
     tag: `badge_${badgeName}`,
   };
   
@@ -260,7 +260,7 @@ export const notifyOrderUpdate = async (
   const data: PushNotificationData = {
     title: `Pedido ${status} 📦`,
     body: message,
-    url: '/meus-pedidos',
+    url: '/orders',
     tag: `order_${orderId}`,
     actions: [
       { action: 'view', title: 'Ver pedido' },

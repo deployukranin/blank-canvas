@@ -647,9 +647,9 @@ const Auth = () => {
 
             <p className="text-center text-xs text-gray-600 mt-6">
               {t("auth.terms")}{" "}
-              <a href="/termos" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
+              <a href="/terms" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
               {t("auth.and")}{" "}
-              <a href="/privacidade" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
+              <a href="/privacy" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
             </p>
           </div>
         </motion.div>
