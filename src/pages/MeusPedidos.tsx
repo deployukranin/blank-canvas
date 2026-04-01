@@ -53,7 +53,7 @@ const MeusPedidosPage = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'delivered'>('all');
-  const profilePath = isTenantScope ? `${basePath}/perfil` : '/perfil';
+  const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
   useEffect(() => {
     setOrders(getOrders());
@@ -62,7 +62,7 @@ const MeusPedidosPage = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate(isTenantScope ? `${basePath}/entrar` : '/auth', { replace: true });
+      navigate(isTenantScope ? `${basePath}/login` : '/auth', { replace: true });
     }
   }, [isAuthenticated, navigate, basePath, isTenantScope]);
 

@@ -79,7 +79,7 @@ export const MyOrdersRedirect = () => {
       if (cancelled) return;
 
       if (store?.slug) {
-        navigate(`/${store.slug}/meus-pedidos`, { replace: true });
+        navigate(`/${store.slug}/orders`, { replace: true });
       } else {
         navigate('/auth', { replace: true });
       }

@@ -49,7 +49,7 @@ export default function TermosDeUsoPage() {
             <section className="space-y-2">
               <h3 className="font-medium">3. Compras e assinaturas</h3>
               <p className="text-sm text-muted-foreground">
-                Caso existam produtos/assinaturas, as condições serão exibidas no momento da contratação.
+                Caso existam produtos/subscriptions, as condições serão exibidas no momento da contratação.
               </p>
             </section>
           </GlassCard>

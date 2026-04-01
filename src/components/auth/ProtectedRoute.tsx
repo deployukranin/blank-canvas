@@ -15,7 +15,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      const authPath = isTenantScope ? `${basePath}/entrar` : "/entrar";
+      const authPath = isTenantScope ? `${basePath}/login` : "/login";
       navigate(authPath, { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate, basePath, isTenantScope]);

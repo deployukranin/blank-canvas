@@ -70,47 +70,47 @@ const App = () => (
                 {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
                 <Route path="/" element={<NotFound />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/ajuda" element={<Ajuda />} />
-                <Route path="/termos" element={<TermosDeUso />} />
-                <Route path="/privacidade" element={<Privacidade />} />
-                <Route path="/meus-pedidos" element={<MyOrdersRedirect />} />
+                <Route path="/help" element={<Ajuda />} />
+                <Route path="/terms" element={<TermosDeUso />} />
+                <Route path="/privacy" element={<Privacidade />} />
+                <Route path="/orders" element={<MyOrdersRedirect />} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
-                <Route path="/:slug/entrar" element={<TenantGate><ClientAuth /></TenantGate>} />
+                <Route path="/:slug/login" element={<TenantGate><ClientAuth /></TenantGate>} />
                 <Route path="/:slug/customs" element={<TenantGate><ProtectedRoute><Customs /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/comunidade" element={<TenantGate><ProtectedRoute><Comunidade /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/ideias" element={<TenantGate><ProtectedRoute><Ideias /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/community" element={<TenantGate><ProtectedRoute><Comunidade /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/ideas" element={<TenantGate><ProtectedRoute><Ideias /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/vip" element={<TenantGate><ProtectedRoute><VIP /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/galeria" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/perfil" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/meus-pedidos" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/notificacoes" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/gallery" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
 
                 {/* 🛡️ Rotas ADMIN (Creator Panel) — scoped by store slug */}
                 <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/ideias" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/pedidos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/pagamentos-pix" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/vip-precos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/vip-conteudo" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/ideas" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/orders" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/payments" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/vip" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/vipcontent" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/videos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/audios" element={<TenantGate><AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/youtube" element={<TenantGate><AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/usuarios" element={<TenantGate><AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/conteudo" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/configuracoes" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/personalizacao" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/planos" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></TenantGate>} />
-                <Route path="/:slug/admin/suporte" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/users" element={<TenantGate><AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/content" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/settings" element={<TenantGate><AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/customize" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/plans" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/support" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
                 <Route path="/admin-master" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
-                <Route path="/admin-master/configuracoes" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
-                <Route path="/admin-master/suporte" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
+                <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
+                <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -15,11 +15,11 @@ import {
 
 const navItems = [
   { path: '/', label: 'Início' },
-  { path: '/ideias', label: 'Ideias' },
+  { path: '/ideas', label: 'Ideias' },
   
   { path: '/vip', label: 'VIP', isVIP: true },
   { path: '/customs', label: "Custom's" },
-  { path: '/comunidade', label: 'Comunidade' },
+  { path: '/community', label: 'Comunidade' },
 ];
 
 export const Header = () => {

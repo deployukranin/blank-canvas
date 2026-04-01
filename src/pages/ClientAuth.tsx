@@ -309,9 +309,9 @@ const ClientAuth = () => {
 
                 <p className="text-center text-xs text-muted-foreground">
                   Ao criar sua conta, você concorda com nossos{" "}
-                  <a href="/termos" className="text-primary hover:underline">Termos de Uso</a>{" "}
+                  <a href="/terms" className="text-primary hover:underline">Termos de Uso</a>{" "}
                   e{" "}
-                  <a href="/privacidade" className="text-primary hover:underline">Política de Privacidade</a>
+                  <a href="/privacy" className="text-primary hover:underline">Política de Privacidade</a>
                 </p>
               </form>
             </TabsContent>

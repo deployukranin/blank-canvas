@@ -37,7 +37,7 @@ const Auth = () => {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [slugChecking, setSlugChecking] = useState(false);
 
-  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'perfil', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'comunidade', 'galeria-videos', 'ideias', 'notificacoes', 'ajuda', 'audios', 'videos', 'termos', 'privacidade', 'assinaturas', 'meus-pedidos', 'client-auth'];
+  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'profile', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'community', 'gallery', 'ideas', 'notifications', 'help', 'audios', 'videos', 'terms', 'privacy', 'subscriptions', 'orders', 'client-auth'];
 
   const generateSlug = (name: string) => {
     return name
@@ -647,9 +647,9 @@ const Auth = () => {
 
             <p className="text-center text-xs text-gray-600 mt-6">
               {t("auth.terms")}{" "}
-              <a href="/termos" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
+              <a href="/terms" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
               {t("auth.and")}{" "}
-              <a href="/privacidade" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
+              <a href="/privacy" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
             </p>
           </div>
         </motion.div>

@@ -136,7 +136,7 @@ const NotificacoesPage = () => {
                   <GlassCard 
                     className={`p-4 cursor-pointer transition-all ${!notification.read ? 'ring-1 ring-accent/50 bg-accent/5' : 'opacity-80'}`}
                     hover
-                    onClick={() => { if (!notification.read) markAsRead(notification.id); navigate('/comunidade'); }}
+                    onClick={() => { if (!notification.read) markAsRead(notification.id); navigate('/community'); }}
                   >
                     <div className="flex gap-3">
                       <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getNotificationColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
@@ -172,7 +172,7 @@ const NotificacoesPage = () => {
                 <p className="text-sm text-muted-foreground">
                   {filter === 'unread' ? t('storefront.noUnreadDesc') : t('storefront.noNotificationsDesc')}
                 </p>
-                <Link to="/comunidade">
+                <Link to="/community">
                   <Button variant="outline" className="mt-4">{t('storefront.exploreCommunity')}</Button>
                 </Link>
               </GlassCard>

@@ -33,18 +33,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const menuItems = [
     { path: base, icon: LayoutDashboard, label: t('admin.dashboard') },
-    { path: `${base}/pedidos`, icon: ShoppingCart, label: t('admin.orders') },
-    { path: `${base}/pagamentos-pix`, icon: CreditCard, label: t('admin.payments') },
-    { path: `${base}/vip-precos`, icon: Crown, label: 'VIP' },
-    { path: `${base}/vip-conteudo`, icon: Star, label: t('admin.vipContent', 'VIP Content') },
+    { path: `${base}/orders`, icon: ShoppingCart, label: t('admin.orders') },
+    { path: `${base}/payments`, icon: CreditCard, label: t('admin.payments') },
+    { path: `${base}/vip`, icon: Crown, label: 'VIP' },
+    { path: `${base}/vipcontent`, icon: Star, label: t('admin.vipContent', 'VIP Content') },
     { path: `${base}/youtube`, icon: Youtube, label: t('admin.youtube') },
-    { path: `${base}/conteudo`, icon: FileText, label: t('admin.content') },
-    { path: `${base}/ideias`, icon: Lightbulb, label: t('admin.ideas') },
-    { path: `${base}/usuarios`, icon: Users, label: t('admin.users') },
-    { path: `${base}/personalizacao`, icon: Palette, label: t('admin.personalization') },
-    { path: `${base}/planos`, icon: Gem, label: t('admin.plans.title') },
-    { path: `${base}/configuracoes`, icon: Settings, label: t('admin.settings') },
-    { path: `${base}/suporte`, icon: LifeBuoy, label: t('admin.supportLabel') },
+    { path: `${base}/content`, icon: FileText, label: t('admin.content') },
+    { path: `${base}/ideas`, icon: Lightbulb, label: t('admin.ideas') },
+    { path: `${base}/users`, icon: Users, label: t('admin.users') },
+    { path: `${base}/customize`, icon: Palette, label: t('admin.personalization') },
+    { path: `${base}/plans`, icon: Gem, label: t('admin.plans.title') },
+    { path: `${base}/settings`, icon: Settings, label: t('admin.settings') },
+    { path: `${base}/support`, icon: LifeBuoy, label: t('admin.supportLabel') },
   ];
 
   const handleLogout = () => {
