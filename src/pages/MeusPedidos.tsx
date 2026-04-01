@@ -18,6 +18,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { 
   getOrders, 
@@ -46,11 +47,13 @@ const statusIcons: Record<OrderStatus, React.ReactNode> = {
 const MeusPedidosPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { basePath, isTenantScope } = useTenant();
   const { permission, isSupported, requestPermission } = useNotifications();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'delivered'>('all');
+  const profilePath = isTenantScope ? `${basePath}/perfil` : '/perfil';
 
   useEffect(() => {
     setOrders(getOrders());
@@ -59,9 +62,9 @@ const MeusPedidosPage = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/perfil');
+      navigate(isTenantScope ? `${basePath}/entrar` : '/auth', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, basePath, isTenantScope]);
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'all') return true;
@@ -108,7 +111,7 @@ const MeusPedidosPage = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Link to="/perfil" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to={profilePath} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Voltar ao Perfil</span>
           </Link>

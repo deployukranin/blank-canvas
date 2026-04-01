@@ -31,9 +31,10 @@ const PerfilPage = () => {
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
   const { basePath } = useTenant();
+  const myOrdersPath = basePath === '/' ? '/meus-pedidos' : `${basePath}/meus-pedidos`;
 
   const quickAccessItems = [
-    { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: '/meus-pedidos', gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
+    { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: myOrdersPath, gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
     { icon: Bell, label: t('profile.notifications', 'Notifications'), description: t('profile.commentsVotes', 'Comments and votes'), path: '/notificacoes', gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
     { icon: Lightbulb, label: t('profile.videoIdeas', 'Video Ideas'), description: t('profile.suggestVote', 'Suggest and vote on ideas'), path: '/ideias', gradient: 'from-amber-400 to-orange-500' },
     { icon: Crown, label: t('profile.vipCommunity', 'VIP Community'), description: t('profile.exclusiveAccess', 'Exclusive access'), path: '/vip', gradient: 'from-vip to-amber-500' },
