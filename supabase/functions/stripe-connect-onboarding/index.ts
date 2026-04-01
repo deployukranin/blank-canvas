@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,20 +82,31 @@ Deno.serve(async (req) => {
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
-
     let accountId = store.stripe_account_id;
 
     // Create Stripe account if doesn't exist
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: "standard",
-        email: user.email,
-        metadata: {
-          store_id: store_id,
-          store_name: store.name,
+      const createRes = await fetch("https://api.stripe.com/v1/accounts", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
+        body: new URLSearchParams({
+          type: "standard",
+          email: user.email || "",
+          "metadata[store_id]": store_id,
+          "metadata[store_name]": store.name || "",
+        }),
       });
+
+      if (!createRes.ok) {
+        const errBody = await createRes.text();
+        console.error("Stripe create account error:", errBody);
+        throw new Error("Failed to create Stripe account");
+      }
+
+      const account = await createRes.json();
       accountId = account.id;
 
       // Save stripe_account_id to the store
@@ -107,12 +117,27 @@ Deno.serve(async (req) => {
     }
 
     // Create Account Link for Connect Onboarding
-    const accountLink = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: return_url,
-      return_url: return_url,
-      type: "account_onboarding",
+    const linkRes = await fetch("https://api.stripe.com/v1/account_links", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        account: accountId!,
+        refresh_url: return_url,
+        return_url: return_url,
+        type: "account_onboarding",
+      }),
     });
+
+    if (!linkRes.ok) {
+      const errBody = await linkRes.text();
+      console.error("Stripe account link error:", errBody);
+      throw new Error("Failed to create onboarding link");
+    }
+
+    const accountLink = await linkRes.json();
 
     return new Response(
       JSON.stringify({

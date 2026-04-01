@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,39 +55,42 @@ Deno.serve(async (req) => {
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
+    // Build form data for Stripe Checkout Session (Direct Charge)
+    const params = new URLSearchParams({
+      mode: "payment",
+      "line_items[0][price_data][currency]": currency,
+      "line_items[0][price_data][product_data][name]": product_name,
+      "line_items[0][price_data][unit_amount]": String(amount_cents),
+      "line_items[0][quantity]": "1",
+      success_url,
+      cancel_url,
+      "metadata[store_id]": store_id,
+      "payment_intent_data[metadata][store_id]": store_id,
+    });
 
-    // Direct Charge — 100% goes to the connected account
-    const session = await stripe.checkout.sessions.create(
-      {
-        mode: "payment",
-        line_items: [
-          {
-            price_data: {
-              currency,
-              product_data: { name: product_name },
-              unit_amount: amount_cents,
-            },
-            quantity: 1,
-          },
-        ],
-        payment_intent_data: {
-          metadata: {
-            store_id,
-            ...metadata,
-          },
-        },
-        success_url,
-        cancel_url,
-        metadata: {
-          store_id,
-          ...metadata,
-        },
+    // Add custom metadata
+    for (const [key, value] of Object.entries(metadata)) {
+      params.append(`metadata[${key}]`, String(value));
+      params.append(`payment_intent_data[metadata][${key}]`, String(value));
+    }
+
+    const sessionRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Stripe-Account": store.stripe_account_id,
       },
-      {
-        stripeAccount: store.stripe_account_id,
-      }
-    );
+      body: params,
+    });
+
+    if (!sessionRes.ok) {
+      const errBody = await sessionRes.text();
+      console.error("Stripe checkout error:", errBody);
+      throw new Error("Failed to create checkout session");
+    }
+
+    const session = await sessionRes.json();
 
     return new Response(
       JSON.stringify({ url: session.url, session_id: session.id }),
