@@ -3,14 +3,14 @@ import {
   CreditCard, 
   QrCode,
   Zap,
-  ExternalLink,
-  Eye,
-  EyeOff,
   Check,
   Clock,
-  AlertCircle,
   Save,
-  Loader2
+  Loader2,
+  ExternalLink,
+  Link2,
+  Link2Off,
+  ShieldCheck,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -22,13 +22,10 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface PaymentConfig {
   activeGateway: 'stripe' | 'pix_manual' | null;
-  stripe: {
-    publishableKey: string;
-    secretKey: string;
-  };
   pixManual: {
     keyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
     key: string;
@@ -39,13 +36,25 @@ export interface PaymentConfig {
 
 const defaultPaymentConfig: PaymentConfig = {
   activeGateway: null,
-  stripe: { publishableKey: '', secretKey: '' },
   pixManual: { keyType: 'cpf', key: '', receiverName: '', city: '' },
 };
+
+interface StripeConnectStatus {
+  connected: boolean;
+  charges_enabled?: boolean;
+  payouts_enabled?: boolean;
+  details_submitted?: boolean;
+  stripe_account_id?: string;
+  email?: string;
+}
 
 const AdminPagamentosPix = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [storeId, setStoreId] = useState<string | null>(null);
+  const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
+  const [stripeLoading, setStripeLoading] = useState(true);
+  const [connectingStripe, setConnectingStripe] = useState(false);
 
   const {
     config,
@@ -60,66 +69,134 @@ const AdminPagamentosPix = () => {
     debounceMs: 3000,
   });
 
-  const [showStripeSecret, setShowStripeSecret] = useState(false);
+  // Resolve store_id
+  useEffect(() => {
+    const resolve = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const handleSaveStripe = async () => {
-    if (!config.stripe.publishableKey || !config.stripe.secretKey) {
-      toast({ title: 'Fill in all Stripe fields', variant: 'destructive' });
+      const { data: adminStore } = await supabase
+        .from('store_admins')
+        .select('store_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      
+      let sid = adminStore?.store_id ?? null;
+      if (!sid) {
+        const { data: owned } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('created_by', user.id)
+          .limit(1)
+          .maybeSingle();
+        sid = owned?.id ?? null;
+      }
+      setStoreId(sid);
+    };
+    resolve();
+  }, []);
+
+  // Check Stripe Connect status
+  useEffect(() => {
+    if (!storeId) return;
+    const checkStatus = async () => {
+      setStripeLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('stripe-connect-status', {
+          body: { store_id: storeId },
+        });
+        if (!error && data) {
+          setStripeStatus(data);
+          // If connected and charges enabled, auto-set gateway
+          if (data.connected && data.charges_enabled && config.activeGateway !== 'stripe') {
+            setConfig(prev => ({ ...prev, activeGateway: 'stripe' as const }));
+          }
+        }
+      } catch (err) {
+        console.error('Error checking Stripe status:', err);
+      } finally {
+        setStripeLoading(false);
+      }
+    };
+    checkStatus();
+  }, [storeId]);
+
+  const handleConnectStripe = async () => {
+    if (!storeId) {
+      toast({ title: 'Loja não encontrada', variant: 'destructive' });
       return;
     }
-    setConfig(prev => ({ ...prev, activeGateway: 'stripe' as const }));
-    await saveNow();
-    toast({ title: 'Stripe configured and activated!' });
+    setConnectingStripe(true);
+    try {
+      const returnUrl = window.location.href;
+      const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
+        body: { store_id: storeId, return_url: returnUrl },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Stripe connect error:', err);
+      toast({
+        title: 'Erro ao conectar Stripe',
+        description: err instanceof Error ? err.message : 'Tente novamente',
+        variant: 'destructive',
+      });
+    } finally {
+      setConnectingStripe(false);
+    }
   };
 
   const handleSavePix = async () => {
     if (!config.pixManual.key || !config.pixManual.receiverName || !config.pixManual.city) {
-      toast({ title: 'Fill in all PIX fields', variant: 'destructive' });
+      toast({ title: 'Preencha todos os campos do PIX', variant: 'destructive' });
       return;
     }
     setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
     await saveNow();
-    toast({ title: 'Manual PIX configured and activated!' });
+    toast({ title: 'PIX Manual configurado e ativado!' });
   };
 
   const pixKeyLabels: Record<string, string> = {
     cpf: 'CPF',
     cnpj: 'CNPJ',
     email: 'E-mail',
-    phone: 'Phone',
-    random: 'Random Key',
+    phone: 'Telefone',
+    random: 'Chave Aleatória',
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title={t('admin.payments', 'Payments')}>
+      <AdminLayout title={t('admin.payments', 'Pagamentos')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Loading payment settings...</span>
+          <span className="text-muted-foreground">Carregando configurações...</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title={t('admin.payments', 'Payments')}>
+    <AdminLayout title={t('admin.payments', 'Pagamentos')}>
       <div className="space-y-6 max-w-4xl">
 
         {/* Active gateway indicator */}
         <GlassCard className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Active Payment Method</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">Método de Pagamento Ativo</h3>
               <p className="text-lg font-semibold mt-1">
-                {config.activeGateway === 'stripe' && '💳 Stripe'}
-                {config.activeGateway === 'pix_manual' && '📱 Manual PIX'}
-                {!config.activeGateway && 'Not configured'}
+                {config.activeGateway === 'stripe' && '💳 Stripe Connect'}
+                {config.activeGateway === 'pix_manual' && '📱 PIX Manual'}
+                {!config.activeGateway && 'Não configurado'}
               </p>
             </div>
             <div className="flex items-center gap-2">
               {isSaving && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+                  <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
                 </span>
               )}
               <div className={`w-3 h-3 rounded-full ${config.activeGateway ? 'bg-green-500' : 'bg-muted'}`} />
@@ -132,103 +209,134 @@ const AdminPagamentosPix = () => {
           <TabsList className="w-full">
             <TabsTrigger value="stripe" className="flex-1 gap-2">
               <CreditCard className="w-4 h-4" />
-              Stripe
+              Stripe Connect
             </TabsTrigger>
             <TabsTrigger value="pix_manual" className="flex-1 gap-2">
               <QrCode className="w-4 h-4" />
-              Manual PIX
+              PIX Manual
             </TabsTrigger>
             <TabsTrigger value="pix_auto" disabled className="flex-1 gap-2 opacity-40 cursor-not-allowed">
               <Zap className="w-4 h-4" />
-              Auto PIX
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">Soon</Badge>
+              PIX Automático
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">Em breve</Badge>
             </TabsTrigger>
           </TabsList>
 
-          {/* STRIPE TAB */}
+          {/* STRIPE CONNECT TAB */}
           <TabsContent value="stripe" className="mt-6">
             <GlassCard className="p-6 space-y-6">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-primary" />
-                    Stripe Integration
+                    Stripe Connect
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Accept credit cards, debit cards, and international payments. Funds go directly to your Stripe account.
+                    Conecte sua conta Stripe e receba pagamentos diretamente. 100% do valor vai para você.
                   </p>
                 </div>
-                {config.activeGateway === 'stripe' && (
+                {stripeStatus.connected && stripeStatus.charges_enabled && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                    <Check className="w-3 h-3 mr-1" /> Active
+                    <Check className="w-3 h-3 mr-1" /> Conectado
                   </Badge>
                 )}
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label>Publishable Key</Label>
-                  <Input
-                    placeholder="pk_live_..."
-                    value={config.stripe.publishableKey}
-                    onChange={(e) => setConfig(prev => ({
-                      ...prev,
-                      stripe: { ...prev.stripe, publishableKey: e.target.value }
-                    }))}
-                    className="mt-1.5"
-                  />
+              {stripeLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-sm text-muted-foreground">Verificando status...</span>
                 </div>
+              ) : stripeStatus.connected ? (
+                <div className="space-y-4">
+                  {/* Connected status */}
+                  <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                        <Link2 className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-green-600">Conta Stripe Conectada</p>
+                        {stripeStatus.email && (
+                          <p className="text-xs text-muted-foreground">{stripeStatus.email}</p>
+                        )}
+                      </div>
+                    </div>
 
-                <div>
-                  <Label>Secret Key</Label>
-                  <div className="relative mt-1.5">
-                    <Input
-                      type={showStripeSecret ? 'text' : 'password'}
-                      placeholder="sk_live_..."
-                      value={config.stripe.secretKey}
-                      onChange={(e) => setConfig(prev => ({
-                        ...prev,
-                        stripe: { ...prev.stripe, secretKey: e.target.value }
-                      }))}
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowStripeSecret(!showStripeSecret)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showStripeSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className={`text-xs font-medium ${stripeStatus.charges_enabled ? 'text-green-600' : 'text-amber-500'}`}>
+                          {stripeStatus.charges_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Cobranças</div>
+                      </div>
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className={`text-xs font-medium ${stripeStatus.payouts_enabled ? 'text-green-600' : 'text-amber-500'}`}>
+                          {stripeStatus.payouts_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Saques</div>
+                      </div>
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className={`text-xs font-medium ${stripeStatus.details_submitted ? 'text-green-600' : 'text-amber-500'}`}>
+                          {stripeStatus.details_submitted ? '✓ Completo' : '⏳ Pendente'}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Cadastro</div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Your secret key is stored securely in the database.
-                  </p>
+
+                  {!stripeStatus.details_submitted && (
+                    <Button onClick={handleConnectStripe} disabled={connectingStripe} className="w-full">
+                      {connectingStripe ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                      )}
+                      Completar Cadastro no Stripe
+                    </Button>
+                  )}
+
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Pagamentos são processados diretamente na sua conta Stripe (Direct Charges). Nenhuma taxa de plataforma é cobrada.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Not connected */}
+                  <div className="p-6 rounded-lg border-2 border-dashed border-border flex flex-col items-center text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                      <Link2Off className="w-7 h-7 text-primary/60" />
+                    </div>
+                    <h4 className="font-medium">Conecte sua conta Stripe</h4>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                      Ao conectar, você poderá aceitar cartões de crédito, débito e pagamentos internacionais. O dinheiro vai direto para sua conta.
+                    </p>
+                    <Button
+                      onClick={handleConnectStripe}
+                      disabled={connectingStripe}
+                      className="mt-4"
+                      size="lg"
+                    >
+                      {connectingStripe ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <CreditCard className="w-4 h-4 mr-2" />
+                      )}
+                      {connectingStripe ? 'Redirecionando...' : 'Conectar Stripe'}
+                    </Button>
+                  </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <a
-                  href="https://dashboard.stripe.com/apikeys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline flex items-center gap-1"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Get your keys from Stripe Dashboard
-                </a>
-                <Button onClick={handleSaveStripe} disabled={isSaving}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save & Activate'}
-                </Button>
-              </div>
-
-              <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  Stripe checkout integration coming soon. Configuration will be ready when Stripe payments go live.
-                </p>
-              </div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Suas credenciais nunca são armazenadas na plataforma. A conexão é feita via OAuth seguro do Stripe.
+                    </p>
+                  </div>
+                </div>
+              )}
             </GlassCard>
           </TabsContent>
 
@@ -239,22 +347,22 @@ const AdminPagamentosPix = () => {
                 <div>
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <QrCode className="w-5 h-5 text-primary" />
-                    Manual PIX
+                    PIX Manual
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    A QR code with the sale amount is generated for the customer. Payment goes directly to your PIX key. You confirm payment manually.
+                    Um QR code com o valor da venda é gerado para o cliente. O pagamento vai direto para sua chave PIX. Você confirma manualmente.
                   </p>
                 </div>
                 {config.activeGateway === 'pix_manual' && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                    <Check className="w-3 h-3 mr-1" /> Active
+                    <Check className="w-3 h-3 mr-1" /> Ativo
                   </Badge>
                 )}
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label>PIX Key Type</Label>
+                  <Label>Tipo de Chave PIX</Label>
                   <div className="flex flex-wrap gap-2 mt-1.5">
                     {Object.entries(pixKeyLabels).map(([key, label]) => (
                       <button
@@ -276,12 +384,12 @@ const AdminPagamentosPix = () => {
                 </div>
 
                 <div>
-                  <Label>PIX Key</Label>
+                  <Label>Chave PIX</Label>
                   <Input
                     placeholder={
-                      config.pixManual.keyType === 'email' ? 'your@email.com' :
+                      config.pixManual.keyType === 'email' ? 'seu@email.com' :
                       config.pixManual.keyType === 'phone' ? '+5511999999999' :
-                      'Enter your PIX key'
+                      'Digite sua chave PIX'
                     }
                     value={config.pixManual.key}
                     onChange={(e) => setConfig(prev => ({
@@ -294,9 +402,9 @@ const AdminPagamentosPix = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Receiver Name</Label>
+                    <Label>Nome do Recebedor</Label>
                     <Input
-                      placeholder="Full name"
+                      placeholder="Nome completo"
                       value={config.pixManual.receiverName}
                       onChange={(e) => setConfig(prev => ({
                         ...prev,
@@ -307,7 +415,7 @@ const AdminPagamentosPix = () => {
                     />
                   </div>
                   <div>
-                    <Label>City</Label>
+                    <Label>Cidade</Label>
                     <Input
                       placeholder="São Paulo"
                       value={config.pixManual.city}
@@ -324,7 +432,7 @@ const AdminPagamentosPix = () => {
               <div className="flex justify-end pt-2">
                 <Button onClick={handleSavePix} disabled={isSaving}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save & Activate'}
+                  {isSaving ? 'Salvando...' : 'Salvar e Ativar'}
                 </Button>
               </div>
             </GlassCard>
@@ -337,12 +445,12 @@ const AdminPagamentosPix = () => {
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <Zap className="w-8 h-8 text-primary/50" />
                 </div>
-                <h3 className="text-lg font-semibold text-muted-foreground">Automatic PIX</h3>
+                <h3 className="text-lg font-semibold text-muted-foreground">PIX Automático</h3>
                 <p className="text-sm text-muted-foreground/60 mt-2 max-w-sm">
-                  Automatic PIX payment confirmation with instant webhook notifications. Coming soon.
+                  Confirmação automática de pagamento PIX com notificações instantâneas via webhook. Em breve.
                 </p>
                 <Badge variant="outline" className="mt-4">
-                  <Clock className="w-3 h-3 mr-1" /> Coming Soon
+                  <Clock className="w-3 h-3 mr-1" /> Em Breve
                 </Badge>
               </div>
             </GlassCard>

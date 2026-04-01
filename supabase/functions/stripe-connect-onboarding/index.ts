@@ -1,0 +1,131 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) {
+      return new Response(
+        JSON.stringify({ error: "Stripe not configured on the platform" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid session" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { store_id, return_url } = await req.json();
+    if (!store_id || !return_url) {
+      return new Response(
+        JSON.stringify({ error: "store_id and return_url are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify user is admin of this store
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: store } = await supabaseAdmin
+      .from("stores")
+      .select("id, stripe_account_id, created_by, name")
+      .eq("id", store_id)
+      .single();
+
+    if (!store) {
+      return new Response(
+        JSON.stringify({ error: "Store not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if user is the store creator or an admin
+    const { data: storeAdmin } = await supabaseAdmin
+      .from("store_admins")
+      .select("id")
+      .eq("store_id", store_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (store.created_by !== user.id && !storeAdmin) {
+      return new Response(
+        JSON.stringify({ error: "Not authorized for this store" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
+
+    let accountId = store.stripe_account_id;
+
+    // Create Stripe account if doesn't exist
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: "standard",
+        email: user.email,
+        metadata: {
+          store_id: store_id,
+          store_name: store.name,
+        },
+      });
+      accountId = account.id;
+
+      // Save stripe_account_id to the store
+      await supabaseAdmin
+        .from("stores")
+        .update({ stripe_account_id: accountId })
+        .eq("id", store_id);
+    }
+
+    // Create Account Link for Connect Onboarding
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: return_url,
+      return_url: return_url,
+      type: "account_onboarding",
+    });
+
+    return new Response(
+      JSON.stringify({
+        url: accountLink.url,
+        stripe_account_id: accountId,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Stripe Connect onboarding error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
