@@ -1,49 +1,45 @@
 
 
-## Admin Onboarding Wizard — Plan
+## Diagnóstico: Problemas na Página de Pagamentos Stripe
 
-### Overview
-Create a mandatory setup wizard that appears as a full-screen overlay the first time a creator accesses `/:slug/admin`. The wizard guides through 3 steps: **Profile**, **Visual Identity**, and **Platform Settings**. It cannot be dismissed until completed. Data is saved per step via the existing `save-app-config` edge function.
+### Problemas Encontrados
 
-### Completion Tracking
-- Add an `onboarding_completed` boolean column to the `stores` table (default `false`).
-- When the wizard finishes, update `stores.onboarding_completed = true`.
-- On admin load, check this flag — if `false`, show the wizard overlay.
+1. **Store ID nunca é encontrado (bug principal)** — A página tenta buscar o `store_id` via `store_admins` e `stores.created_by`, mas ambas retornam vazio para o usuário logado. O **TenantContext** já tem o `store` carregado (via slug da URL `/teste321`), mas a página não o utiliza. Resultado: fica eternamente em "Verificando status...".
 
-### Steps
+2. **Warning de ref no GlassCard** — O componente `GlassCard` é um function component sem `forwardRef`, mas o Radix `TabsContent` tenta passar ref para ele. Precisa usar `React.forwardRef`.
 
-**Step 1 — Profile**
-- Store name, description, avatar URL (pre-filled from YouTube if available)
-- Updates the `stores` table directly
+3. **CORS headers incompletos** — As edge functions usam headers CORS antigos sem os headers extras do Supabase SDK (`x-supabase-client-platform`, etc.), o que pode causar falhas silenciosas em certos browsers.
 
-**Step 2 — Visual Identity**
-- Color template selector (reuse existing dark/light templates from `AdminPersonalizacao`)
-- Banner text configuration
-- Saves via `save-app-config` (white_label_config)
+### Plano de Correção
 
-**Step 3 — Platform Settings**
-- Toggle features: VIP area, custom orders, community
-- Welcome message for the storefront
-- Saves via `save-app-config`
+#### 1. Usar TenantContext para resolver store_id
+- **Arquivo**: `src/pages/admin/AdminPagamentosPix.tsx`
+- Importar `useTenant` e usar `store?.id` do contexto em vez de fazer queries separadas
+- Remover o `useEffect` que busca `store_id` manualmente
+- Se `store` do tenant for `null`, mostrar mensagem de erro em vez de loading infinito
 
-### Design
-- Full-screen dark overlay (`bg-[#0a0a0a]`) with centered card
-- Progress bar at top with gradient (magenta → purple)
-- Step indicators (numbered circles)
-- Smooth framer-motion transitions between steps
-- "Next" button saves current step data before advancing
-- No close/skip button until final step
+#### 2. Corrigir GlassCard com forwardRef
+- **Arquivo**: `src/components/ui/GlassCard.tsx`
+- Envolver com `React.forwardRef` para eliminar o warning
 
-### Files to Create/Edit
+#### 3. Atualizar CORS headers nas Edge Functions
+- **Arquivos**: `stripe-connect-status`, `stripe-connect-onboarding`, `stripe-create-checkout`, `stripe-webhook`
+- Adicionar headers completos do Supabase SDK
 
-1. **Migration**: Add `onboarding_completed` column to `stores`
-2. **`src/components/admin/AdminOnboardingWizard.tsx`** — New component with all 3 steps
-3. **`src/pages/admin/AdminDashboard.tsx`** — Import and render the wizard overlay when `onboarding_completed` is false
-4. **`src/i18n/locales/en.json`** + **`pt-BR.json`** — Add onboarding translation keys
+#### 4. Re-deploy das Edge Functions
+- Deploy de todas as funções Stripe após as correções
 
-### Technical Notes
-- The wizard fetches `stores.onboarding_completed` on mount via the store ID already available in AdminDashboard
-- Each step's "Next" button triggers an async save, shows a loading spinner, then advances
-- Final step sets `onboarding_completed = true` on the `stores` table and dismisses the overlay
-- Uses existing `updateColors`, `setConfig` from WhiteLabelContext for visual identity step
+### Detalhes Técnicos
+
+**Store ID resolution (antes → depois)**:
+```text
+ANTES: useEffect → query store_admins → query stores → setStoreId
+DEPOIS: const { store } = useTenant(); // store.id já disponível
+```
+
+**GlassCard forwardRef**:
+```text
+ANTES: export const GlassCard = ({ ... }: GlassCardProps) => { ... }
+DEPOIS: export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(...)
+```
 
