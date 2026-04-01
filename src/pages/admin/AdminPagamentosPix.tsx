@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 
 export interface PaymentConfig {
   activeGateway: 'stripe' | 'pix_manual' | null;
@@ -51,7 +52,8 @@ interface StripeConnectStatus {
 const AdminPagamentosPix = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [storeId, setStoreId] = useState<string | null>(null);
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
@@ -68,34 +70,6 @@ const AdminPagamentosPix = () => {
     localStorageKey: 'paymentConfig',
     debounceMs: 3000,
   });
-
-  // Resolve store_id
-  useEffect(() => {
-    const resolve = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: adminStore } = await supabase
-        .from('store_admins')
-        .select('store_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
-      
-      let sid = adminStore?.store_id ?? null;
-      if (!sid) {
-        const { data: owned } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('created_by', user.id)
-          .limit(1)
-          .maybeSingle();
-        sid = owned?.id ?? null;
-      }
-      setStoreId(sid);
-    };
-    resolve();
-  }, []);
 
   // Check Stripe Connect status
   useEffect(() => {
