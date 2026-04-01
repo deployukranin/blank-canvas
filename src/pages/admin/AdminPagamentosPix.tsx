@@ -52,7 +52,8 @@ interface StripeConnectStatus {
 const AdminPagamentosPix = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [storeId, setStoreId] = useState<string | null>(null);
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
