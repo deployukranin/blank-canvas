@@ -71,34 +71,6 @@ const AdminPagamentosPix = () => {
     debounceMs: 3000,
   });
 
-  // Resolve store_id
-  useEffect(() => {
-    const resolve = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: adminStore } = await supabase
-        .from('store_admins')
-        .select('store_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
-      
-      let sid = adminStore?.store_id ?? null;
-      if (!sid) {
-        const { data: owned } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('created_by', user.id)
-          .limit(1)
-          .maybeSingle();
-        sid = owned?.id ?? null;
-      }
-      setStoreId(sid);
-    };
-    resolve();
-  }, []);
-
   // Check Stripe Connect status
   useEffect(() => {
     if (!storeId) return;
