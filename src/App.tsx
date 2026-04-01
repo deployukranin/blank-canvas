@@ -82,7 +82,7 @@ const App = () => (
                 <Route path="/:slug/community" element={<TenantGate><ProtectedRoute><Comunidade /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/ideas" element={<TenantGate><ProtectedRoute><Ideias /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/vip" element={<TenantGate><ProtectedRoute><VIP /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/galeria" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/gallery" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />

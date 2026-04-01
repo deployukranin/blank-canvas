@@ -37,7 +37,7 @@ const Auth = () => {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [slugChecking, setSlugChecking] = useState(false);
 
-  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'perfil', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'comunidade', 'galeria-videos', 'ideias', 'notificacoes', 'ajuda', 'audios', 'videos', 'termos', 'privacidade', 'assinaturas', 'meus-pedidos', 'client-auth'];
+  const RESERVED_SLUGS = ['admin', 'ceo', 'auth', 'profile', 'api', 'setup', 'login', 'signup', 'vip', 'customs', 'community', 'gallery', 'ideas', 'notifications', 'help', 'audios', 'videos', 'terms', 'privacy', 'subscriptions', 'orders', 'client-auth'];
 
   const generateSlug = (name: string) => {
     return name
