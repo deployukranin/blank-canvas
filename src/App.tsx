@@ -48,6 +48,7 @@ import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 import AdminPlanos from "./pages/admin/AdminPlanos";
 import AdminSuporte from "./pages/admin/AdminSuporte";
 import AdminSocialLinks from "./pages/admin/AdminSocialLinks";
+import AdminDominio from "./pages/admin/AdminDominio";
 
 // Super Admin Pages
 import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
