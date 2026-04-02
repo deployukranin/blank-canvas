@@ -27,25 +27,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 2. Validate JWT and get user
+    // 2. Validate JWT using getClaims (local validation, no server roundtrip)
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
-    if (userError || !user) {
-      console.error("Invalid token or user not found:", userError?.message);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      console.error("Invalid token:", claimsError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Token inválido ou expirado" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    const userId = claimsData.claims.sub as string;
+
     // 3. Check user role from user_roles table (admin or ceo required)
-    const { data: roles, error: rolesError } = await userClient
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roles, error: rolesError } = await serviceClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (rolesError) {
       console.error("Error fetching user roles:", rolesError.message);
