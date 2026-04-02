@@ -72,6 +72,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'd
         {variant === 'minimal' ? (
           <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-white/50 hover:text-white/80 hover:bg-white/5 text-xs">
             <current.Flag className="w-4 h-3 rounded-sm overflow-hidden" />
+            <span>{current.short}</span>
           </Button>
         ) : (
           <Button variant="ghost" size="sm" className="h-8 gap-2 text-white/50 hover:text-white/80 hover:bg-white/5 text-sm">
