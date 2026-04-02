@@ -101,8 +101,8 @@ const Auth = () => {
     if (slug) {
       navigate(`/${slug}/admin`, { replace: true });
     } else {
-      // User has no store — redirect to setup
-      navigate('/setup', { replace: true });
+      // User has no store — stay on auth page and show message
+      toast.error('Nenhuma loja encontrada para esta conta. Crie uma nova loja ou entre com outra conta.');
     }
   };
 
