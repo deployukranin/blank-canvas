@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Config ${config_key} saved successfully by user ${user.id}`);
+    console.log(`Config ${config_key} saved successfully by user ${userId}`);
 
     return new Response(
       JSON.stringify({ success: true }),
