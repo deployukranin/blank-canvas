@@ -88,6 +88,8 @@
     "heroTitle2": "de conteúdo ASMR",
     "heroDesc": "Tenha sua própria plataforma personalizada com painel admin, gestão de fãs e integração com YouTube.",
     "trialBadge": "7 dias grátis — sem precisar de cartão de crédito",
+    "featureNoFee": "0% de taxa nas vendas",
+    "featureNoFeeDesc": "Não cobramos comissão. O dinheiro cai direto na sua conta Stripe.",
     "featureCustom": "Plataforma personalizada",
     "featureCustomDesc": "Tema, cores e layout 100% customizáveis",
     "featureAdmin": "Painel administrativo",
