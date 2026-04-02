@@ -42,6 +42,7 @@ const defaultPaymentConfig: PaymentConfig = {
 
 interface StripeConnectStatus {
   connected: boolean;
+  onboarding_started?: boolean;
   charges_enabled?: boolean;
   payouts_enabled?: boolean;
   details_submitted?: boolean;
