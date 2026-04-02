@@ -45,8 +45,16 @@ const BRFlag = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const ESFlag = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 640 480" className={className}>
+    <rect width="640" height="480" fill="#c60b1e"/>
+    <rect width="640" height="240" y="120" fill="#ffc400"/>
+  </svg>
+);
+
 const languages = [
   { code: 'en', label: 'English', Flag: USFlag },
+  { code: 'es', label: 'Español', Flag: ESFlag },
   { code: 'pt-BR', label: 'Português', Flag: BRFlag },
 ];
 
