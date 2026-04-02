@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Save, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Save, Link2, QrCode } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '@/contexts/TenantContext';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
+import QRCodeGenerator from '@/components/admin/QRCodeGenerator';
 
 export interface SocialLink {
   id: string;
@@ -82,7 +84,7 @@ const AdminSocialLinks: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout title={t('admin.socialLinks.title', 'Social Links')}>
+      <AdminLayout title={t('admin.socialLinks.title', 'Social Links & QR Code')}>
         <div className="flex items-center justify-center h-40">
           <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
         </div>
@@ -91,69 +93,88 @@ const AdminSocialLinks: React.FC = () => {
   }
 
   return (
-    <AdminLayout title={t('admin.socialLinks.title', 'Social Links')}>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <GlassCard className="p-5">
-          <p className="text-sm text-muted-foreground">
-            {t('admin.socialLinks.description', 'Add your social media links so your fans can find you easily. These will be displayed on your storefront.')}
-          </p>
-        </GlassCard>
+    <AdminLayout title={t('admin.socialLinks.title', 'Social Links & QR Code')}>
+      <Tabs defaultValue="social" className="w-full">
+        <TabsList className="w-full mb-6">
+          <TabsTrigger value="social" className="flex-1 gap-2">
+            <Link2 className="w-4 h-4" />
+            {t('admin.socialLinks.tabSocial', 'Social Links')}
+          </TabsTrigger>
+          <TabsTrigger value="qrcode" className="flex-1 gap-2">
+            <QrCode className="w-4 h-4" />
+            QR Code
+          </TabsTrigger>
+        </TabsList>
 
-        {links.map((link, index) => {
-          const platform = getPlatformInfo(link.platform);
-          return (
-            <motion.div key={link.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-              <GlassCard className="p-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{platform.icon}</span>
-                      <Select value={link.platform} onValueChange={(v) => updateLink(link.id, 'platform', v)}>
-                        <SelectTrigger className="w-48 bg-background/50 border-border/30">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PLATFORMS.map(p => (
-                            <SelectItem key={p.value} value={p.value}>
-                              <span className="flex items-center gap-2">
-                                <span>{p.icon}</span> {p.label}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+        <TabsContent value="social">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <GlassCard className="p-5">
+              <p className="text-sm text-muted-foreground">
+                {t('admin.socialLinks.description', 'Add your social media links so your fans can find you easily. These will be displayed on your storefront.')}
+              </p>
+            </GlassCard>
+
+            {links.map((link, index) => {
+              const platform = getPlatformInfo(link.platform);
+              return (
+                <motion.div key={link.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+                  <GlassCard className="p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{platform.icon}</span>
+                          <Select value={link.platform} onValueChange={(v) => updateLink(link.id, 'platform', v)}>
+                            <SelectTrigger className="w-48 bg-background/50 border-border/30">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PLATFORMS.map(p => (
+                                <SelectItem key={p.value} value={p.value}>
+                                  <span className="flex items-center gap-2">
+                                    <span>{p.icon}</span> {p.label}
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">URL</Label>
+                          <Input
+                            value={link.url}
+                            onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                            placeholder={`https://${link.platform}.com/...`}
+                            className="bg-background/50 border-border/30"
+                          />
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 mt-1" onClick={() => removeLink(link.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">URL</Label>
-                      <Input
-                        value={link.url}
-                        onChange={(e) => updateLink(link.id, 'url', e.target.value)}
-                        placeholder={`https://${link.platform}.com/...`}
-                        className="bg-background/50 border-border/30"
-                      />
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 mt-1" onClick={() => removeLink(link.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </GlassCard>
-            </motion.div>
-          );
-        })}
+                  </GlassCard>
+                </motion.div>
+              );
+            })}
 
-        <Button variant="outline" className="w-full border-dashed border-primary/30 text-primary hover:bg-primary/5" onClick={addLink}>
-          <Plus className="w-4 h-4 mr-2" />
-          {t('admin.socialLinks.add', 'Add Social Link')}
-        </Button>
+            <Button variant="outline" className="w-full border-dashed border-primary/30 text-primary hover:bg-primary/5" onClick={addLink}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('admin.socialLinks.add', 'Add Social Link')}
+            </Button>
 
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {saving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
-          </Button>
-        </div>
-      </div>
+            <div className="flex justify-end">
+              <Button onClick={handleSave} disabled={saving} className="gap-2">
+                <Save className="w-4 h-4" />
+                {saving ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="qrcode">
+          <QRCodeGenerator />
+        </TabsContent>
+      </Tabs>
     </AdminLayout>
   );
 };
