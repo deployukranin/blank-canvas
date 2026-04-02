@@ -247,8 +247,8 @@ const AdminDominio: React.FC = () => {
               </div>
 
               {domainState.domainVerified && (
-                <div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <p className="text-sm text-green-400 flex items-center gap-2">
+                <div className="mt-3 rounded-lg border border-primary/20 bg-primary/10 p-3">
+                  <p className="flex items-center gap-2 text-sm text-primary">
                     <CheckCircle2 className="w-4 h-4" />
                     {t('admin.domain.liveMessage', 'Your domain is live and serving your platform!')}
                   </p>
