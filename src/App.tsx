@@ -48,6 +48,7 @@ import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 import AdminPlanos from "./pages/admin/AdminPlanos";
 import AdminSuporte from "./pages/admin/AdminSuporte";
 import AdminSocialLinks from "./pages/admin/AdminSocialLinks";
+import AdminDominio from "./pages/admin/AdminDominio";
 
 // Super Admin Pages
 import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
@@ -107,6 +108,7 @@ const App = () => (
                 <Route path="/:slug/admin/plans" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/support" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/social-links" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/domain" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
