@@ -266,8 +266,8 @@ const AdminDominio: React.FC = () => {
 
             {!domainState.domainVerified && (
               <GlassCard className="p-5 space-y-4">
-                <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-yellow-400" />
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <AlertCircle className="w-4 h-4 text-primary" />
                   {t('admin.domain.dnsInstructions', 'DNS Configuration Required')}
                 </h3>
 
