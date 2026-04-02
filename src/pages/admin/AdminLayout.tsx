@@ -43,6 +43,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: `${base}/users`, icon: Users, label: t('admin.users') },
     { path: `${base}/customize`, icon: Palette, label: t('admin.personalization') },
     { path: `${base}/social-links`, icon: Share2, label: t('admin.socialLinks.title', 'Social Links') },
+    { path: `${base}/domain`, icon: Globe, label: t('admin.domain.title', 'Custom Domain') },
     { path: `${base}/plans`, icon: Gem, label: t('admin.plans.title') },
     { path: `${base}/settings`, icon: Settings, label: t('admin.settings') },
     { path: `${base}/support`, icon: LifeBuoy, label: t('admin.supportLabel') },
