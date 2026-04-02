@@ -71,6 +71,59 @@ const AdminDominio: React.FC = () => {
     setNameservers(Array.isArray(result?.nameservers) && result.nameservers.length > 0 ? result.nameservers : VERCEL_NAMESERVERS);
   };
 
+  const silentVerify = useCallback(async () => {
+    if (!store?.id) return;
+    try {
+      const result = await callDomainFunction('verify');
+      if (result?.success) {
+        setDomainState((prev) => ({ ...prev, domainVerified: Boolean(result.verified) }));
+        applyDomainResponse(result);
+        setLastAutoCheck(new Date());
+        setNextAutoCheck(new Date(Date.now() + AUTO_CHECK_INTERVAL_MS));
+
+        if (result.verified) {
+          toast({ title: '🎉 ' + t('admin.domain.verified', 'Domain verified! ✅') });
+          setVerification(null);
+          // Stop polling once verified
+          if (autoCheckRef.current) {
+            clearInterval(autoCheckRef.current);
+            autoCheckRef.current = null;
+            setNextAutoCheck(null);
+          }
+        }
+      }
+    } catch {
+      // silent fail for auto-check
+    }
+  }, [store?.id]);
+
+  // Auto-check every 5 minutes while domain is pending
+  useEffect(() => {
+    if (domainState.customDomain && !domainState.domainVerified) {
+      // Initial check after 10s
+      const initialTimeout = setTimeout(() => {
+        silentVerify();
+      }, 10_000);
+
+      autoCheckRef.current = setInterval(silentVerify, AUTO_CHECK_INTERVAL_MS);
+      setNextAutoCheck(new Date(Date.now() + 10_000));
+
+      return () => {
+        clearTimeout(initialTimeout);
+        if (autoCheckRef.current) {
+          clearInterval(autoCheckRef.current);
+          autoCheckRef.current = null;
+        }
+      };
+    } else {
+      if (autoCheckRef.current) {
+        clearInterval(autoCheckRef.current);
+        autoCheckRef.current = null;
+      }
+      setNextAutoCheck(null);
+    }
+  }, [domainState.customDomain, domainState.domainVerified, silentVerify]);
+
   const loadDomainState = async () => {
     if (!store?.id) return;
 
