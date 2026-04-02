@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Globe, CheckCircle2, AlertCircle, Loader2, Trash2, RefreshCw, ExternalLink } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const PRODUCTION_DOMAIN = 'www.mytinglebox.com';
 const VERCEL_NAMESERVERS = ['ns1.vercel-dns.com', 'ns2.vercel-dns.com'];
+const AUTO_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface DomainState {
   customDomain: string | null;
@@ -55,6 +56,9 @@ const AdminDominio: React.FC = () => {
   const [nameservers, setNameservers] = useState<string[]>(VERCEL_NAMESERVERS);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [lastAutoCheck, setLastAutoCheck] = useState<Date | null>(null);
+  const [nextAutoCheck, setNextAutoCheck] = useState<Date | null>(null);
+  const autoCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (store?.id) loadDomainState();
