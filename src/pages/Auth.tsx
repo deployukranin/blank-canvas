@@ -295,7 +295,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a] relative">
+    <div className="min-h-screen flex bg-[#0a0a0a] relative" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
       {/* Language selector — top right */}
       <div className="absolute top-4 right-4 z-20">
         <LanguageSelector variant="minimal" />
