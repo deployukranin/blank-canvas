@@ -10,7 +10,8 @@ export type ConfigKey =
   | 'vip_config' 
   | 'white_label_config'
   | 'global_default_categories'
-  | 'payment_config';
+  | 'payment_config'
+  | 'social_links';
 
 /**
  * Load configuration from database.

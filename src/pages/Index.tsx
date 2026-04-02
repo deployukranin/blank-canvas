@@ -8,6 +8,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { HeroBanner } from '@/components/layout/HeroBanner';
+import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
@@ -64,6 +65,8 @@ const Index = () => {
       </motion.div>
 
       <div className="px-4 py-6 space-y-6">
+        {/* Social Links */}
+        <SocialLinksBar />
         {!user && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="glass rounded-2xl p-5 border border-primary/20">
