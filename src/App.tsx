@@ -13,6 +13,7 @@ import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 
 import Index from "./pages/Index";
+import Setup from "./pages/Setup";
 import Ideias from "./pages/Ideias";
 import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
@@ -70,6 +71,7 @@ const App = () => (
                 {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
                 <Route path="/" element={<NotFound />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/setup" element={<ProtectedRoute><Setup /></ProtectedRoute>} />
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />
