@@ -210,9 +210,14 @@ const AdminPagamentosPix = () => {
                     Conecte sua conta Stripe e receba pagamentos diretamente. 100% do valor vai para você.
                   </p>
                 </div>
-                {stripeStatus.connected && stripeStatus.charges_enabled && (
+                {stripeStatus.connected && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> Conectado
+                  </Badge>
+                )}
+                {stripeStatus.onboarding_started && !stripeStatus.connected && (
+                  <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" /> Pendente
                   </Badge>
                 )}
               </div>
