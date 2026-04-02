@@ -47,6 +47,7 @@ import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminPersonalizacao from "./pages/admin/AdminPersonalizacao";
 import AdminPlanos from "./pages/admin/AdminPlanos";
 import AdminSuporte from "./pages/admin/AdminSuporte";
+import AdminSocialLinks from "./pages/admin/AdminSocialLinks";
 
 // Super Admin Pages
 import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
