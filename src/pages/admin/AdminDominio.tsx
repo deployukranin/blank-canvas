@@ -219,12 +219,12 @@ const AdminDominio: React.FC = () => {
                     <p className="font-semibold text-lg">{domainState.customDomain}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {domainState.domainVerified ? (
-                        <Badge className="bg-green-500/20 text-green-400 gap-1">
+                        <Badge variant="outline" className="gap-1 border-primary/20 bg-primary/10 text-primary">
                           <CheckCircle2 className="w-3 h-3" />
                           {t('admin.domain.active', 'Active')}
                         </Badge>
                       ) : (
-                        <Badge className="bg-yellow-500/20 text-yellow-400 gap-1">
+                        <Badge variant="outline" className="gap-1 border-border bg-muted text-muted-foreground">
                           <AlertCircle className="w-3 h-3" />
                           {t('admin.domain.pendingVerification', 'Pending DNS')}
                         </Badge>
