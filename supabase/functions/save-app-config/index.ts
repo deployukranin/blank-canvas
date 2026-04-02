@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. Use service role to save config (bypasses RLS for the actual save operation)
-    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    // serviceClient already created above for role check
 
     // Build query based on whether store_id is provided
     let existingQuery = serviceClient
