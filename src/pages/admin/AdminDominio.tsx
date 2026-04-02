@@ -35,6 +35,8 @@ interface DomainFunctionResult {
   verification?: VerificationRecord[] | null;
   misconfigured?: boolean;
   existing?: boolean;
+  dnsMode?: 'nameservers' | 'records';
+  nameservers?: string[];
 }
 
 const AdminDominio: React.FC = () => {
@@ -49,6 +51,8 @@ const AdminDominio: React.FC = () => {
   });
   const [verification, setVerification] = useState<VerificationRecord[] | null>(null);
   const [misconfigured, setMisconfigured] = useState(false);
+  const [dnsMode, setDnsMode] = useState<'nameservers' | 'records'>('nameservers');
+  const [nameservers, setNameservers] = useState<string[]>(VERCEL_NAMESERVERS);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -59,6 +63,8 @@ const AdminDominio: React.FC = () => {
   const applyDomainResponse = (result: DomainFunctionResult | null) => {
     setVerification(Array.isArray(result?.verification) ? result.verification : null);
     setMisconfigured(Boolean(result?.misconfigured));
+    setDnsMode(result?.dnsMode === 'records' ? 'records' : 'nameservers');
+    setNameservers(Array.isArray(result?.nameservers) && result.nameservers.length > 0 ? result.nameservers : VERCEL_NAMESERVERS);
   };
 
   const loadDomainState = async () => {
@@ -124,8 +130,8 @@ const AdminDominio: React.FC = () => {
     if (result?.success) {
       toast({
         title: result.existing
-          ? t('admin.domain.addedExisting', 'Domain linked. It was already added in Vercel.')
-          : t('admin.domain.added', 'Domain added successfully!'),
+          ? t('admin.domain.addedExisting', 'Domínio vinculado. Agora configure o DNS para concluir.')
+          : t('admin.domain.added', 'Domínio adicionado. Agora configure o DNS para concluir.'),
       });
 
       setDomainState({
@@ -272,7 +278,7 @@ const AdminDominio: React.FC = () => {
                 </h3>
 
                 <p className="text-xs text-muted-foreground">
-                  {t('admin.domain.dnsDescription', 'Use only one method. If the domain already appears inside Vercel, the fastest path is changing the nameservers to Vercel DNS.')}
+                  {t('admin.domain.dnsDescription', 'O domínio foi vinculado, mas só ficará ativo depois que o DNS estiver configurado corretamente.')}
                 </p>
 
                 {misconfigured && (
@@ -284,13 +290,13 @@ const AdminDominio: React.FC = () => {
                 <div className="space-y-3">
                   <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
                     <div>
-                      <p className="text-sm font-semibold">{t('admin.domain.vercelDnsTitle', 'Option 1 — Vercel DNS (recommended)')}</p>
+                      <p className="text-sm font-semibold">{t('admin.domain.vercelDnsTitle', dnsMode === 'nameservers' ? 'Método recomendado — Nameservers da Vercel' : 'Opção 1 — Nameservers da Vercel')}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {t('admin.domain.vercelDnsDescription', 'If the domain is already added in Vercel, update the nameservers at your registrar to these values:')}
+                        {t('admin.domain.vercelDnsDescription', 'Troque os nameservers no registrador para estes valores se quiser usar DNS gerenciado pela Vercel:')}
                       </p>
                     </div>
 
-                    {VERCEL_NAMESERVERS.map((nameserver, index) => (
+                    {nameservers.map((nameserver, index) => (
                       <div key={nameserver} className="rounded-lg border border-border/30 bg-background/50 p-3">
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
@@ -308,9 +314,9 @@ const AdminDominio: React.FC = () => {
 
                   <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
                     <div>
-                      <p className="text-sm font-semibold">{t('admin.domain.recordsTitle', 'Option 2 — Keep DNS at your registrar')}</p>
+                      <p className="text-sm font-semibold">{t('admin.domain.recordsTitle', dnsMode === 'records' ? 'Método recomendado — Registros DNS' : 'Opção 2 — Registros DNS')}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {t('admin.domain.recordsDescription', 'If you do not want to use Vercel DNS, keep your current provider and add these records instead:')}
+                        {t('admin.domain.recordsDescription', 'Se preferir manter o DNS no seu provedor atual, crie estes registros:')}
                       </p>
                     </div>
 
