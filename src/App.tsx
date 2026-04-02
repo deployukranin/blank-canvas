@@ -13,6 +13,7 @@ import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 
 import Index from "./pages/Index";
+import Setup from "./pages/Setup";
 import Ideias from "./pages/Ideias";
 import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";
