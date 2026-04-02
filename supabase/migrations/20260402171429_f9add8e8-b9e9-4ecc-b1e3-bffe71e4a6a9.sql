@@ -1,0 +1,1 @@
+UPDATE public.stores SET domain_verified = false WHERE custom_domain = 'cerena.store';
