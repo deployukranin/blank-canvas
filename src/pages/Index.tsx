@@ -8,6 +8,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { HeroBanner } from '@/components/layout/HeroBanner';
+import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
