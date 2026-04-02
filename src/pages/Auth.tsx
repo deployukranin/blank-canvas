@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users, Youtube, CheckCircle2, XCircle, Search } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Palette, BarChart3, Users, Youtube, CheckCircle2, XCircle, Search, DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
