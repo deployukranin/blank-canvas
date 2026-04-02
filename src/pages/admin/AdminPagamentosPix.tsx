@@ -42,6 +42,7 @@ const defaultPaymentConfig: PaymentConfig = {
 
 interface StripeConnectStatus {
   connected: boolean;
+  onboarding_started?: boolean;
   charges_enabled?: boolean;
   payouts_enabled?: boolean;
   details_submitted?: boolean;
@@ -209,9 +210,14 @@ const AdminPagamentosPix = () => {
                     Conecte sua conta Stripe e receba pagamentos diretamente. 100% do valor vai para você.
                   </p>
                 </div>
-                {stripeStatus.connected && stripeStatus.charges_enabled && (
+                {stripeStatus.connected && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> Conectado
+                  </Badge>
+                )}
+                {stripeStatus.onboarding_started && !stripeStatus.connected && (
+                  <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" /> Pendente
                   </Badge>
                 )}
               </div>
@@ -223,20 +229,58 @@ const AdminPagamentosPix = () => {
                 </div>
               ) : stripeStatus.connected ? (
                 <div className="space-y-4">
-                  {/* Connected status */}
+                  {/* Fully connected status */}
                   <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
                         <Link2 className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-green-600">Conta Stripe Conectada</p>
+                        <p className="font-medium text-green-600">Conta Stripe Ativa</p>
                         {stripeStatus.email && (
                           <p className="text-xs text-muted-foreground">{stripeStatus.email}</p>
                         )}
                       </div>
                     </div>
-
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className="text-xs font-medium text-green-600">✓ Ativo</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Cobranças</div>
+                      </div>
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className={`text-xs font-medium ${stripeStatus.payouts_enabled ? 'text-green-600' : 'text-amber-500'}`}>
+                          {stripeStatus.payouts_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Saques</div>
+                      </div>
+                      <div className="p-2 rounded bg-background/50 text-center">
+                        <div className="text-xs font-medium text-green-600">✓ Completo</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">Cadastro</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      Pagamentos são processados diretamente na sua conta Stripe (Direct Charges). Nenhuma taxa de plataforma é cobrada.
+                    </p>
+                  </div>
+                </div>
+              ) : stripeStatus.onboarding_started ? (
+                <div className="space-y-4">
+                  {/* Onboarding started but not complete */}
+                  <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-500">Cadastro Pendente</p>
+                        {stripeStatus.email && (
+                          <p className="text-xs text-muted-foreground">{stripeStatus.email}</p>
+                        )}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div className="p-2 rounded bg-background/50 text-center">
                         <div className={`text-xs font-medium ${stripeStatus.charges_enabled ? 'text-green-600' : 'text-amber-500'}`}>
@@ -258,22 +302,18 @@ const AdminPagamentosPix = () => {
                       </div>
                     </div>
                   </div>
-
-                  {!stripeStatus.details_submitted && (
-                    <Button onClick={handleConnectStripe} disabled={connectingStripe} className="w-full">
-                      {connectingStripe ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                      )}
-                      Completar Cadastro no Stripe
-                    </Button>
-                  )}
-
+                  <Button onClick={handleConnectStripe} disabled={connectingStripe} className="w-full">
+                    {connectingStripe ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                    )}
+                    Completar Cadastro no Stripe
+                  </Button>
                   <div className="p-3 rounded-lg bg-muted/50 border border-border">
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      Pagamentos são processados diretamente na sua conta Stripe (Direct Charges). Nenhuma taxa de plataforma é cobrada.
+                      Complete seu cadastro no Stripe para começar a receber pagamentos.
                     </p>
                   </div>
                 </div>
