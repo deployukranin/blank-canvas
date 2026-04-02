@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Globe, CheckCircle2, AlertCircle, Loader2, Trash2, RefreshCw, ExternalLink } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const PRODUCTION_DOMAIN = 'www.mytinglebox.com';
 const VERCEL_NAMESERVERS = ['ns1.vercel-dns.com', 'ns2.vercel-dns.com'];
+const AUTO_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface DomainState {
   customDomain: string | null;
@@ -55,6 +56,9 @@ const AdminDominio: React.FC = () => {
   const [nameservers, setNameservers] = useState<string[]>(VERCEL_NAMESERVERS);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [lastAutoCheck, setLastAutoCheck] = useState<Date | null>(null);
+  const [nextAutoCheck, setNextAutoCheck] = useState<Date | null>(null);
+  const autoCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (store?.id) loadDomainState();
@@ -66,6 +70,59 @@ const AdminDominio: React.FC = () => {
     setDnsMode(result?.dnsMode === 'records' ? 'records' : 'nameservers');
     setNameservers(Array.isArray(result?.nameservers) && result.nameservers.length > 0 ? result.nameservers : VERCEL_NAMESERVERS);
   };
+
+  const silentVerify = useCallback(async () => {
+    if (!store?.id) return;
+    try {
+      const result = await callDomainFunction('verify');
+      if (result?.success) {
+        setDomainState((prev) => ({ ...prev, domainVerified: Boolean(result.verified) }));
+        applyDomainResponse(result);
+        setLastAutoCheck(new Date());
+        setNextAutoCheck(new Date(Date.now() + AUTO_CHECK_INTERVAL_MS));
+
+        if (result.verified) {
+          toast({ title: '🎉 ' + t('admin.domain.verified', 'Domain verified! ✅') });
+          setVerification(null);
+          // Stop polling once verified
+          if (autoCheckRef.current) {
+            clearInterval(autoCheckRef.current);
+            autoCheckRef.current = null;
+            setNextAutoCheck(null);
+          }
+        }
+      }
+    } catch {
+      // silent fail for auto-check
+    }
+  }, [store?.id]);
+
+  // Auto-check every 5 minutes while domain is pending
+  useEffect(() => {
+    if (domainState.customDomain && !domainState.domainVerified) {
+      // Initial check after 10s
+      const initialTimeout = setTimeout(() => {
+        silentVerify();
+      }, 10_000);
+
+      autoCheckRef.current = setInterval(silentVerify, AUTO_CHECK_INTERVAL_MS);
+      setNextAutoCheck(new Date(Date.now() + 10_000));
+
+      return () => {
+        clearTimeout(initialTimeout);
+        if (autoCheckRef.current) {
+          clearInterval(autoCheckRef.current);
+          autoCheckRef.current = null;
+        }
+      };
+    } else {
+      if (autoCheckRef.current) {
+        clearInterval(autoCheckRef.current);
+        autoCheckRef.current = null;
+      }
+      setNextAutoCheck(null);
+    }
+  }, [domainState.customDomain, domainState.domainVerified, silentVerify]);
 
   const loadDomainState = async () => {
     if (!store?.id) return;
@@ -383,9 +440,20 @@ const AdminDominio: React.FC = () => {
                   )}
                 </div>
 
-                <p className="text-xs text-muted-foreground">
-                  ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
-                </p>
+                <div className="rounded-lg border border-border/30 bg-muted/20 p-3 space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
+                  </p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    {t('admin.domain.autoCheckEnabled', 'Verificação automática a cada 5 minutos está ativa. Você será notificado quando o domínio estiver funcionando.')}
+                  </p>
+                  {lastAutoCheck && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('admin.domain.lastCheck', 'Última verificação')}: {lastAutoCheck.toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
               </GlassCard>
             )}
           </>
