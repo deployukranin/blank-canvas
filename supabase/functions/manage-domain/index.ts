@@ -56,6 +56,17 @@ const getProjectDomain = async (domain: string) => {
   return { response, data };
 };
 
+const getDomainConfig = async (domain: string) => {
+  const response = await fetch(`https://api.vercel.com/v6/domains/${domain}/config?projectIdOrName=${VERCEL_PROJECT_ID}`, {
+    headers: {
+      Authorization: `Bearer ${VERCEL_TOKEN}`,
+    },
+  });
+
+  const data = await response.json().catch(() => null);
+  return { response, data };
+};
+
 const getDnsMode = (vercelDomain: Record<string, unknown> | null, existingDomain: boolean) => {
   if (existingDomain) {
     return "nameservers";
@@ -66,6 +77,42 @@ const getDnsMode = (vercelDomain: Record<string, unknown> | null, existingDomain
   }
 
   return "records";
+};
+
+const getDomainStatus = async (domain: string, vercelDomain: Record<string, unknown> | null, existingDomain: boolean) => {
+  const { response: configResponse, data: configData } = await getDomainConfig(domain);
+
+  const config = configResponse.ok && configData && typeof configData === "object"
+    ? (configData as Record<string, unknown>)
+    : null;
+
+  const intendedNameservers = Array.isArray(config?.intendedNameservers) && config.intendedNameservers.length > 0
+    ? config.intendedNameservers
+    : null;
+
+  const projectNameservers = Array.isArray(vercelDomain?.nameservers) && vercelDomain.nameservers.length > 0
+    ? vercelDomain.nameservers
+    : null;
+
+  const configuredBy = typeof config?.configuredBy === "string" ? config.configuredBy : null;
+  const misconfigured = typeof config?.misconfigured === "boolean"
+    ? config.misconfigured
+    : Boolean(vercelDomain?.misconfigured);
+
+  const isConfigured = config ? misconfigured === false : false;
+
+  const dnsMode = configuredBy === "A" || configuredBy === "CNAME"
+    ? "records"
+    : Array.isArray(config?.nameservers) && config.nameservers.length > 0
+      ? "nameservers"
+      : getDnsMode(vercelDomain, existingDomain);
+
+  return {
+    isConfigured,
+    misconfigured,
+    dnsMode,
+    nameservers: intendedNameservers ?? projectNameservers ?? VERCEL_NAMESERVERS,
+  };
 };
 
 Deno.serve(async (req: Request) => {
@@ -183,11 +230,13 @@ Deno.serve(async (req: Request) => {
           existingDomain = true;
         }
 
+        const domainStatus = await getDomainStatus(cleanDomain, vercelDomain, existingDomain);
+
         await supabaseAdmin
           .from("stores")
           .update({
             custom_domain: cleanDomain,
-            domain_verified: vercelDomain?.verified === true,
+            domain_verified: domainStatus.isConfigured,
             domain_added_at: new Date().toISOString(),
           })
           .eq("id", store_id);
@@ -195,15 +244,12 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({
           success: true,
           domain: cleanDomain,
-          verified: vercelDomain?.verified === true,
+          verified: domainStatus.isConfigured,
           existing: existingDomain,
           verification: normalizeVerification(vercelDomain?.verification),
-          dnsMode: getDnsMode(vercelDomain, existingDomain),
-          nameservers:
-            Array.isArray(vercelDomain?.nameservers) && vercelDomain.nameservers.length > 0
-              ? vercelDomain.nameservers
-              : VERCEL_NAMESERVERS,
-          misconfigured: Boolean(vercelDomain?.misconfigured),
+          dnsMode: domainStatus.dnsMode,
+          nameservers: domainStatus.nameservers,
+          misconfigured: domainStatus.misconfigured,
         });
       }
 
@@ -225,7 +271,8 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ success: false, error: errorMessage, vercel_error: vercelData }, 400);
         }
 
-        const isVerified = vercelData?.verified === true;
+        const domainStatus = await getDomainStatus(store.custom_domain, vercelData as Record<string, unknown> | null, false);
+        const isVerified = domainStatus.isConfigured;
 
         await supabaseAdmin.from("stores").update({ domain_verified: isVerified }).eq("id", store_id);
 
@@ -234,12 +281,9 @@ Deno.serve(async (req: Request) => {
           verified: isVerified,
           domain: store.custom_domain,
           verification: normalizeVerification(vercelData?.verification),
-          dnsMode: getDnsMode(vercelData as Record<string, unknown>, false),
-          nameservers:
-            Array.isArray(vercelData?.nameservers) && vercelData.nameservers.length > 0
-              ? vercelData.nameservers
-              : VERCEL_NAMESERVERS,
-          misconfigured: Boolean(vercelData?.misconfigured),
+          dnsMode: domainStatus.dnsMode,
+          nameservers: domainStatus.nameservers,
+          misconfigured: domainStatus.misconfigured,
         });
       }
 
