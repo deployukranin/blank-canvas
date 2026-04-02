@@ -75,14 +75,23 @@ const Auth = () => {
   }, [isAuthenticated, authLoading]);
 
   const getStoreSlug = async (userId: string): Promise<string | null> => {
-    // Check store_admins -> stores to find the creator's slug
-    const { data } = await supabase
+    // First check store_admins
+    const { data: adminData } = await supabase
       .from('store_admins')
       .select('store_id, stores(slug)')
       .eq('user_id', userId)
       .limit(1)
       .maybeSingle();
-    return (data as any)?.stores?.slug || null;
+    if ((adminData as any)?.stores?.slug) return (adminData as any).stores.slug;
+
+    // Fallback: check stores.created_by
+    const { data: storeData } = await supabase
+      .from('stores')
+      .select('slug')
+      .eq('created_by', userId)
+      .limit(1)
+      .maybeSingle();
+    return storeData?.slug || null;
   };
 
   const redirectToAdminWithSlug = async () => {
