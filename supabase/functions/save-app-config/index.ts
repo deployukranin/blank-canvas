@@ -63,14 +63,14 @@ Deno.serve(async (req) => {
     const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
 
     if (!hasPermission) {
-      console.error(`Access denied for user ${user.id} - required roles: ${allowedRoles.join(", ")}`);
+      console.error(`Access denied for user ${userId} - required roles: ${allowedRoles.join(", ")}`);
       return new Response(
         JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias (admin, creator, ceo ou super_admin)" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Authorized config update by user ${user.id} with roles: ${roles?.map(r => r.role).join(", ")}`);
+    console.log(`Authorized config update by user ${userId} with roles: ${roles?.map(r => r.role).join(", ")}`);
 
     // 4. Parse request body
     const { config_key, config_value, store_id } = await req.json();
