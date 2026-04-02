@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
-  Crown, Youtube, Palette, Star, Gem, LifeBuoy
+  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
