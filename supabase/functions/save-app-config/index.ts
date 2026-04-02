@@ -27,25 +27,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 2. Validate JWT and get user
+    // 2. Validate JWT using getClaims (local validation, no server roundtrip)
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
-    if (userError || !user) {
-      console.error("Invalid token or user not found:", userError?.message);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      console.error("Invalid token:", claimsError?.message);
       return new Response(
         JSON.stringify({ success: false, error: "Token inválido ou expirado" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    const userId = claimsData.claims.sub as string;
+
     // 3. Check user role from user_roles table (admin or ceo required)
-    const { data: roles, error: rolesError } = await userClient
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roles, error: rolesError } = await serviceClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (rolesError) {
       console.error("Error fetching user roles:", rolesError.message);
@@ -59,14 +63,14 @@ Deno.serve(async (req) => {
     const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
 
     if (!hasPermission) {
-      console.error(`Access denied for user ${user.id} - required roles: ${allowedRoles.join(", ")}`);
+      console.error(`Access denied for user ${userId} - required roles: ${allowedRoles.join(", ")}`);
       return new Response(
         JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias (admin, creator, ceo ou super_admin)" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Authorized config update by user ${user.id} with roles: ${roles?.map(r => r.role).join(", ")}`);
+    console.log(`Authorized config update by user ${userId} with roles: ${roles?.map(r => r.role).join(", ")}`);
 
     // 4. Parse request body
     const { config_key, config_value, store_id } = await req.json();
@@ -88,7 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. Use service role to save config (bypasses RLS for the actual save operation)
-    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    // serviceClient already created above for role check
 
     // Build query based on whether store_id is provided
     let existingQuery = serviceClient
@@ -143,7 +147,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Config ${config_key} saved successfully by user ${user.id}`);
+    console.log(`Config ${config_key} saved successfully by user ${userId}`);
 
     return new Response(
       JSON.stringify({ success: true }),
