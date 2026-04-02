@@ -440,9 +440,20 @@ const AdminDominio: React.FC = () => {
                   )}
                 </div>
 
-                <p className="text-xs text-muted-foreground">
-                  ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
-                </p>
+                <div className="rounded-lg border border-border/30 bg-muted/20 p-3 space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
+                  </p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    {t('admin.domain.autoCheckEnabled', 'Verificação automática a cada 5 minutos está ativa. Você será notificado quando o domínio estiver funcionando.')}
+                  </p>
+                  {lastAutoCheck && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('admin.domain.lastCheck', 'Última verificação')}: {lastAutoCheck.toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
               </GlassCard>
             )}
           </>
