@@ -102,7 +102,7 @@ const SuperAdminLogin = () => {
                   placeholder="admin@plataforma.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-purple-500 focus:ring-purple-500/20"
+                  className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                   required
                 />
               </div>
@@ -118,7 +118,7 @@ const SuperAdminLogin = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus:border-purple-500 focus:ring-purple-500/20"
+                  className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                   required
                 />
                 <button

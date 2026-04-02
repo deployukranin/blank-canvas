@@ -403,7 +403,7 @@ const Auth = () => {
                         placeholder={t("auth.emailPlaceholder")}
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
-                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                     </div>
@@ -419,7 +419,7 @@ const Auth = () => {
                         placeholder="••••••••"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                       <button
@@ -463,7 +463,7 @@ const Auth = () => {
                         setSlugAvailable(null);
                         if (slug.length >= 3) checkSlugAvailability(slug);
                       }}
-                      className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                      className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                       required
                     />
                   </div>
@@ -486,7 +486,7 @@ const Auth = () => {
                           setSlugAvailable(null);
                           if (slug.length >= 3) checkSlugAvailability(slug);
                         }}
-                        className="pl-7 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-7 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                       {slugChecking && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-gray-400" />}
@@ -511,7 +511,7 @@ const Auth = () => {
                         placeholder={t("auth.emailPlaceholder")}
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
-                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                     </div>
@@ -527,7 +527,7 @@ const Auth = () => {
                         placeholder="••••••••"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-10 pr-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                       <button
@@ -550,7 +550,7 @@ const Auth = () => {
                         placeholder="••••••••"
                         value={signupConfirmPassword}
                         onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                        className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         required
                       />
                     </div>
@@ -573,7 +573,7 @@ const Auth = () => {
                             setYoutubeVerified(null);
                             setYoutubeError("");
                           }}
-                          className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-purple-500 focus:ring-purple-500/20"
+                          className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500 focus:ring-0"
                         />
                       </div>
                       <Button
