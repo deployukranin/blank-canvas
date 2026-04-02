@@ -106,6 +106,7 @@ const App = () => (
                 <Route path="/:slug/admin/customize" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/plans" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/support" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/social-links" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
