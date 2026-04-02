@@ -53,9 +53,9 @@ const ESFlag = ({ className }: { className?: string }) => (
 );
 
 const languages = [
-  { code: 'en', label: 'English', Flag: USFlag },
-  { code: 'es', label: 'Español', Flag: ESFlag },
-  { code: 'pt-BR', label: 'Português', Flag: BRFlag },
+  { code: 'en', label: 'English', short: 'EN', Flag: USFlag },
+  { code: 'es', label: 'Español', short: 'ES', Flag: ESFlag },
+  { code: 'pt-BR', label: 'Português', short: 'PT', Flag: BRFlag },
 ];
 
 interface LanguageSelectorProps {
