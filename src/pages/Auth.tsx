@@ -60,6 +60,7 @@ const Auth = () => {
   };
 
   const features = [
+    { icon: DollarSign, title: t("auth.featureNoFee"), desc: t("auth.featureNoFeeDesc") },
     { icon: Palette, title: t("auth.featureCustom"), desc: t("auth.featureCustomDesc") },
     { icon: BarChart3, title: t("auth.featureAdmin"), desc: t("auth.featureAdminDesc") },
     { icon: Users, title: t("auth.featureFans"), desc: t("auth.featureFansDesc") },
