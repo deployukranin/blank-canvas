@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface UserProfile {
   id: string;
@@ -23,22 +24,44 @@ interface UserProfile {
 
 const AdminUsuarios: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { store } = useTenant();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'vip' | 'regular'>('all');
 
   const isBR = i18n.language?.startsWith('pt');
+  const storeId = store?.id;
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (storeId) {
+      fetchUsers();
+    }
+  }, [storeId]);
 
   const fetchUsers = async () => {
+    if (!storeId) return;
     try {
+      // Get user IDs that belong to this store
+      const { data: storeUsers, error: storeUsersError } = await supabase
+        .from('store_users')
+        .select('user_id')
+        .eq('store_id', storeId);
+
+      if (storeUsersError) throw storeUsersError;
+
+      const userIds = (storeUsers || []).map(su => su.user_id);
+
+      if (userIds.length === 0) {
+        setUsers([]);
+        setIsLoading(false);
+        return;
+      }
+
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
+        .in('user_id', userIds)
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
@@ -46,7 +69,8 @@ const AdminUsuarios: React.FC = () => {
       const { data: vipSubs, error: vipError } = await supabase
         .from('vip_subscriptions')
         .select('user_id')
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .eq('store_id', storeId);
 
       if (vipError) throw vipError;
 
