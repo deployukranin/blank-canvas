@@ -328,131 +328,51 @@ const AdminDominio: React.FC = () => {
             </GlassCard>
 
             {!domainState.domainVerified && (
-              <GlassCard className="p-5 space-y-4">
+              <GlassCard className="p-5 space-y-3">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
                   <AlertCircle className="w-4 h-4 text-primary" />
-                  {t('admin.domain.dnsInstructions', 'DNS Configuration Required')}
+                  {t('admin.domain.dnsInstructions', 'Configuração DNS pendente')}
                 </h3>
 
-                <p className="text-xs text-muted-foreground">
-                  {t('admin.domain.dnsDescription', 'O domínio foi vinculado, mas só ficará ativo depois que o DNS estiver configurado corretamente.')}
+                <p className="text-sm text-muted-foreground">
+                  {t('admin.domain.dnsSimple', 'Acesse o painel da Vercel para ver os registros DNS necessários e configure no seu provedor de domínio.')}
                 </p>
 
-                {misconfigured && (
-                  <div className="rounded-lg border border-border/30 bg-muted/30 p-3 text-xs text-muted-foreground">
-                    {t('admin.domain.misconfiguredHelp', 'Vercel detected an invalid configuration. If your domain is already registered there, switch your registrar nameservers to the Vercel servers below and wait for propagation.')}
-                  </div>
-                )}
-
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
-                    <div>
-                      <p className="text-sm font-semibold">{t('admin.domain.vercelDnsTitle', dnsMode === 'nameservers' ? 'Método recomendado — Nameservers da Vercel' : 'Opção 1 — Nameservers da Vercel')}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('admin.domain.vercelDnsDescription', 'Troque os nameservers no registrador para estes valores se quiser usar DNS gerenciado pela Vercel:')}
-                      </p>
-                    </div>
-
-                    {nameservers.map((nameserver, index) => (
-                      <div key={nameserver} className="rounded-lg border border-border/30 bg-background/50 p-3">
-                        <div className="grid grid-cols-2 gap-2 text-xs">
+                {verification && verification.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      {t('admin.domain.verificationRecords', 'Registros de verificação pendentes:')}
+                    </p>
+                    {verification.map((item, index) => (
+                      <div key={`${item.type}-${item.domain}-${index}`} className="rounded-lg border border-border/30 bg-background/50 p-3">
+                        <div className="grid grid-cols-3 gap-2 text-xs">
                           <div>
-                            <p className="text-muted-foreground">{t('admin.domain.server', 'Server')}</p>
-                            <p className="font-mono font-semibold">NS{index + 1}</p>
+                            <p className="text-muted-foreground">Type</p>
+                            <p className="font-mono font-semibold">{item.type}</p>
                           </div>
                           <div>
-                            <p className="text-muted-foreground">{t('admin.domain.value', 'Value')}</p>
-                            <p className="font-mono font-semibold break-all">{nameserver}</p>
+                            <p className="text-muted-foreground">Name</p>
+                            <p className="font-mono font-semibold break-all">{item.domain}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Value</p>
+                            <p className="font-mono font-semibold break-all">{item.value}</p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
+                )}
 
-                  <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
-                    <div>
-                      <p className="text-sm font-semibold">{t('admin.domain.recordsTitle', dnsMode === 'records' ? 'Método recomendado — Registros DNS' : 'Opção 2 — Registros DNS')}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('admin.domain.recordsDescription', 'Se preferir manter o DNS no seu provedor atual, crie estes registros:')}
-                      </p>
-                    </div>
-
-                    <div className="bg-background/50 rounded-lg p-3 border border-border/30">
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div>
-                          <p className="text-muted-foreground">Type</p>
-                          <p className="font-mono font-semibold">A</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Name</p>
-                          <p className="font-mono font-semibold">@</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Value</p>
-                          <p className="font-mono font-semibold">76.76.21.21</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-background/50 rounded-lg p-3 border border-border/30">
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div>
-                          <p className="text-muted-foreground">Type</p>
-                          <p className="font-mono font-semibold">CNAME</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Name</p>
-                          <p className="font-mono font-semibold">www</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Value</p>
-                          <p className="font-mono font-semibold">cname.vercel-dns.com</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {verification && verification.length > 0 && (
-                    <>
-                      <p className="text-xs font-semibold text-muted-foreground mt-2">
-                        {t('admin.domain.verificationRecords', 'Verification records returned by Vercel:')}
-                      </p>
-                      {verification.map((item, index) => (
-                        <div key={`${item.type}-${item.domain}-${index}`} className="rounded-lg border border-border/30 bg-background/50 p-3">
-                          <div className="grid grid-cols-3 gap-2 text-xs">
-                            <div>
-                              <p className="text-muted-foreground">Type</p>
-                              <p className="font-mono font-semibold">{item.type}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Name</p>
-                              <p className="font-mono font-semibold break-all">{item.domain}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Value</p>
-                              <p className="font-mono font-semibold break-all">{item.value}</p>
-                            </div>
-                          </div>
-                          {item.reason && <p className="mt-2 text-xs text-muted-foreground">{item.reason}</p>}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-
-                <div className="rounded-lg border border-border/30 bg-muted/20 p-3 space-y-1">
+                <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">
-                    ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
+                    ⏳ {t('admin.domain.autoCheckNote', 'Verificação automática a cada 5 minutos. Você será notificado quando o domínio estiver ativo.')}
+                    {lastAutoCheck && (
+                      <span className="ml-1 text-foreground/50">
+                        — {t('admin.domain.lastCheck', 'Última verificação')}: {lastAutoCheck.toLocaleTimeString()}
+                      </span>
+                    )}
                   </p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <RefreshCw className="w-3 h-3 animate-spin" />
-                    {t('admin.domain.autoCheckEnabled', 'Verificação automática a cada 5 minutos está ativa. Você será notificado quando o domínio estiver funcionando.')}
-                  </p>
-                  {lastAutoCheck && (
-                    <p className="text-xs text-muted-foreground">
-                      {t('admin.domain.lastCheck', 'Última verificação')}: {lastAutoCheck.toLocaleTimeString()}
-                    </p>
-                  )}
                 </div>
               </GlassCard>
             )}
