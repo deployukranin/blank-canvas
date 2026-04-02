@@ -65,6 +65,8 @@ const Index = () => {
       </motion.div>
 
       <div className="px-4 py-6 space-y-6">
+        {/* Social Links */}
+        <SocialLinksBar />
         {!user && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="glass rounded-2xl p-5 border border-primary/20">
