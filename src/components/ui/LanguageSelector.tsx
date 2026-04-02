@@ -38,15 +38,10 @@ const USFlag = ({ className }: { className?: string }) => (
 
 const BRFlag = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 640 480" className={className}>
-    <g strokeWidth="1pt">
-      <rect width="640" height="480" fill="#229e45" rx="0" ry="0"/>
-      <path fill="#f8e509" d="M323.4 42L583.9 240 323.4 438 63 240z"/>
-      <circle cx="323.4" cy="240" r="112" fill="#2b49a3"/>
-      <path fill="#ffffef" d="M195.4 240c0-70.7 57.3-128 128-128s128 57.3 128 128" opacity="0"/>
-      <clipPath id="br-a"><circle cx="323.4" cy="240" r="112"/></clipPath>
-      <path clipPath="url(#br-a)" fill="#fff" d="M199 225.4c36.2-23.8 92.1-39.2 152.9-36.3 49.7 2.4 95.5 15.8 127.5 35.1l-7 13.2c-30.6-18.3-74.4-31-122.1-33.3-58.4-2.8-112 11.2-146.5 33.7z"/>
-    </path>
-    </g>
+    <rect width="640" height="480" fill="#229e45"/>
+    <path fill="#f8e509" d="M323.4 42L583.9 240 323.4 438 63 240z"/>
+    <circle cx="323.4" cy="240" r="112" fill="#2b49a3"/>
+    <path fill="#fff" d="M199 225.4c36.2-23.8 92.1-39.2 152.9-36.3 49.7 2.4 95.5 15.8 127.5 35.1l-7 13.2c-30.6-18.3-74.4-31-122.1-33.3-58.4-2.8-112 11.2-146.5 33.7z"/>
   </svg>
 );
 
