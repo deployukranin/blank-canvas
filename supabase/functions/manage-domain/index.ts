@@ -1,13 +1,72 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const VERCEL_TOKEN = Deno.env.get("VERCEL_TOKEN");
 const VERCEL_PROJECT_ID = Deno.env.get("VERCEL_PROJECT_ID");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const VERCEL_NAMESERVERS = ["ns1.vercel-dns.com", "ns2.vercel-dns.com"];
+
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
+
+const normalizeVerification = (verification: unknown) => {
+  if (!Array.isArray(verification)) {
+    return null;
+  }
+
+  return verification.map((record: Record<string, unknown>) => ({
+    type: typeof record.type === "string" ? record.type : "DNS",
+    domain: typeof record.domain === "string" ? record.domain : "@",
+    value:
+      typeof record.value === "string"
+        ? record.value
+        : typeof record.reason === "string"
+          ? record.reason
+          : "",
+    reason: typeof record.reason === "string" ? record.reason : "",
+  }));
+};
+
+const looksLikeExistingDomainError = (status: number, errorMessage: string) => {
+  const normalizedMessage = errorMessage.toLowerCase();
+
+  return [400, 409].includes(status) && ["already", "exists", "in use", "assigned", "taken"].some((snippet) => normalizedMessage.includes(snippet));
+};
+
+const getProjectDomain = async (domain: string) => {
+  const response = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain}`, {
+    headers: {
+      Authorization: `Bearer ${VERCEL_TOKEN}`,
+    },
+  });
+
+  const data = await response.json().catch(() => null);
+  return { response, data };
+};
+
+const getDnsMode = (vercelDomain: Record<string, unknown> | null, existingDomain: boolean) => {
+  if (existingDomain) {
+    return "nameservers";
+  }
+
+  if (Array.isArray(vercelDomain?.nameservers) && vercelDomain.nameservers.length > 0) {
+    return "nameservers";
+  }
+
+  return "records";
+};
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -15,72 +74,49 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Vercel credentials not configured" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ success: false, error: "Vercel credentials not configured" }, 500);
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Not authenticated" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Not authenticated" }, 401);
     }
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const supabaseUser = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const supabaseUser = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseUser.auth.getUser();
+
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Invalid token" }, 401);
     }
 
-    // Check admin/creator role
-    const { data: roles } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
+    const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", user.id);
 
-    const userRoles = (roles || []).map((r: { role: string }) => r.role);
-    const isAdmin = ["admin", "creator", "ceo", "super_admin"].some((r) => userRoles.includes(r));
+    const userRoles = (roles || []).map((roleRow: { role: string }) => roleRow.role);
+    const isAdmin = ["admin", "creator", "ceo", "super_admin"].some((role) => userRoles.includes(role));
+
     if (!isAdmin) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Access denied" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Access denied" }, 403);
     }
 
     const body = await req.json();
     const { action, store_id, domain } = body;
 
     if (!store_id) {
-      return new Response(
-        JSON.stringify({ success: false, error: "store_id required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "store_id required" }, 400);
     }
 
-    // Verify user owns or admins this store
-    const { data: storeCheck } = await supabaseAdmin
-      .from("stores")
-      .select("id, created_by")
-      .eq("id", store_id)
-      .single();
+    const { data: storeCheck } = await supabaseAdmin.from("stores").select("id, created_by").eq("id", store_id).single();
 
     if (!storeCheck) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Store not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Store not found" }, 404);
     }
 
     const { data: storeAdminCheck } = await supabaseAdmin
@@ -91,146 +127,138 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (storeCheck.created_by !== user.id && !storeAdminCheck && !userRoles.includes("super_admin")) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Not authorized for this store" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Not authorized for this store" }, 403);
     }
 
     switch (action) {
       case "add": {
         if (!domain || typeof domain !== "string") {
-          return new Response(
-            JSON.stringify({ success: false, error: "Domain is required" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({ success: false, error: "Domain is required" }, 400);
         }
 
         const cleanDomain = domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
-
-        // Validate domain format
         const domainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/;
+
         if (!domainRegex.test(cleanDomain)) {
-          return new Response(
-            JSON.stringify({ success: false, error: "Invalid domain format" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({ success: false, error: "Invalid domain format" }, 400);
         }
 
-        // Add domain to Vercel
-        const vercelRes = await fetch(
-          `https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${VERCEL_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name: cleanDomain }),
+        const createDomainResponse = await fetch(`https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/domains`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${VERCEL_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: cleanDomain }),
+        });
+
+        const createDomainData = await createDomainResponse.json().catch(() => null);
+        let vercelDomain = createDomainData as Record<string, unknown> | null;
+        let existingDomain = false;
+
+        if (!createDomainResponse.ok) {
+          const errorMessage =
+            typeof createDomainData?.error?.message === "string"
+              ? createDomainData.error.message
+              : "Failed to add domain to Vercel";
+
+          if (!looksLikeExistingDomainError(createDomainResponse.status, errorMessage)) {
+            return jsonResponse({ success: false, error: errorMessage, vercel_error: createDomainData }, 400);
           }
-        );
 
-        const vercelData = await vercelRes.json();
+          const { response: existingDomainResponse, data: existingDomainData } = await getProjectDomain(cleanDomain);
 
-        if (!vercelRes.ok) {
-          const errorMsg = vercelData?.error?.message || "Failed to add domain to Vercel";
-          return new Response(
-            JSON.stringify({ success: false, error: errorMsg, vercel_error: vercelData }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          if (!existingDomainResponse.ok) {
+            return jsonResponse(
+              {
+                success: false,
+                error: errorMessage,
+                vercel_error: createDomainData,
+              },
+              400,
+            );
+          }
+
+          vercelDomain = existingDomainData as Record<string, unknown> | null;
+          existingDomain = true;
         }
 
-        // Save to database
         await supabaseAdmin
           .from("stores")
           .update({
             custom_domain: cleanDomain,
-            domain_verified: false,
+            domain_verified: vercelDomain?.verified === true,
             domain_added_at: new Date().toISOString(),
           })
           .eq("id", store_id);
 
-        return new Response(
-          JSON.stringify({
-            success: true,
-            domain: cleanDomain,
-            verification: vercelData.verification || null,
-          }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({
+          success: true,
+          domain: cleanDomain,
+          verified: vercelDomain?.verified === true,
+          existing: existingDomain,
+          verification: normalizeVerification(vercelDomain?.verification),
+          dnsMode: getDnsMode(vercelDomain, existingDomain),
+          nameservers:
+            Array.isArray(vercelDomain?.nameservers) && vercelDomain.nameservers.length > 0
+              ? vercelDomain.nameservers
+              : VERCEL_NAMESERVERS,
+          misconfigured: Boolean(vercelDomain?.misconfigured),
+        });
       }
 
       case "verify": {
-        // Check domain config on Vercel
-        const { data: store } = await supabaseAdmin
-          .from("stores")
-          .select("custom_domain")
-          .eq("id", store_id)
-          .single();
+        const { data: store } = await supabaseAdmin.from("stores").select("custom_domain").eq("id", store_id).single();
 
         if (!store?.custom_domain) {
-          return new Response(
-            JSON.stringify({ success: false, error: "No domain configured" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({ success: false, error: "No domain configured" }, 400);
         }
 
-        const vercelRes = await fetch(
-          `https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${store.custom_domain}`,
-          {
-            headers: { Authorization: `Bearer ${VERCEL_TOKEN}` },
-          }
-        );
+        const { response: domainResponse, data: vercelData } = await getProjectDomain(store.custom_domain);
 
-        const vercelData = await vercelRes.json();
+        if (!domainResponse.ok) {
+          const errorMessage =
+            typeof vercelData?.error?.message === "string"
+              ? vercelData.error.message
+              : "Failed to fetch domain status from Vercel";
+
+          return jsonResponse({ success: false, error: errorMessage, vercel_error: vercelData }, 400);
+        }
 
         const isVerified = vercelData?.verified === true;
 
-        if (isVerified) {
-          await supabaseAdmin
-            .from("stores")
-            .update({ domain_verified: true })
-            .eq("id", store_id);
-        }
+        await supabaseAdmin.from("stores").update({ domain_verified: isVerified }).eq("id", store_id);
 
-        return new Response(
-          JSON.stringify({
-            success: true,
-            verified: isVerified,
-            domain: store.custom_domain,
-            verification: vercelData.verification || null,
-            misconfigured: vercelData?.misconfigured || false,
-          }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({
+          success: true,
+          verified: isVerified,
+          domain: store.custom_domain,
+          verification: normalizeVerification(vercelData?.verification),
+          dnsMode: getDnsMode(vercelData as Record<string, unknown>, false),
+          nameservers:
+            Array.isArray(vercelData?.nameservers) && vercelData.nameservers.length > 0
+              ? vercelData.nameservers
+              : VERCEL_NAMESERVERS,
+          misconfigured: Boolean(vercelData?.misconfigured),
+        });
       }
 
       case "remove": {
-        const { data: store } = await supabaseAdmin
-          .from("stores")
-          .select("custom_domain")
-          .eq("id", store_id)
-          .single();
+        const { data: store } = await supabaseAdmin.from("stores").select("custom_domain").eq("id", store_id).single();
 
         if (!store?.custom_domain) {
-          return new Response(
-            JSON.stringify({ success: true }),
-            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({ success: true });
         }
 
-        // Remove from Vercel
-        const vercelRes = await fetch(
-          `https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${store.custom_domain}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${VERCEL_TOKEN}` },
-          }
-        );
+        const vercelResponse = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${store.custom_domain}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${VERCEL_TOKEN}`,
+          },
+        });
 
-        await vercelRes.text(); // consume body
+        await vercelResponse.text();
 
-        // Clear from database
         await supabaseAdmin
           .from("stores")
           .update({
@@ -240,22 +268,14 @@ Deno.serve(async (req: Request) => {
           })
           .eq("id", store_id);
 
-        return new Response(
-          JSON.stringify({ success: true }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({ success: true });
       }
 
       default:
-        return new Response(
-          JSON.stringify({ success: false, error: "Invalid action. Use: add, verify, remove" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({ success: false, error: "Invalid action. Use: add, verify, remove" }, 400);
     }
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ success: false, error: err.message || "Internal error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal error";
+    return jsonResponse({ success: false, error: message }, 500);
   }
 });

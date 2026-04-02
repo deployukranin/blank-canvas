@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Globe, CheckCircle2, AlertCircle, Loader2, Trash2, RefreshCw, ExternalLink } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -12,6 +12,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { supabase } from '@/integrations/supabase/client';
 
 const PRODUCTION_DOMAIN = 'www.mytinglebox.com';
+const VERCEL_NAMESERVERS = ['ns1.vercel-dns.com', 'ns2.vercel-dns.com'];
 
 interface DomainState {
   customDomain: string | null;
@@ -26,6 +27,16 @@ interface VerificationRecord {
   reason: string;
 }
 
+interface DomainFunctionResult {
+  success?: boolean;
+  error?: string;
+  domain?: string;
+  verified?: boolean;
+  verification?: VerificationRecord[] | null;
+  misconfigured?: boolean;
+  existing?: boolean;
+}
+
 const AdminDominio: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -37,6 +48,7 @@ const AdminDominio: React.FC = () => {
     domainAddedAt: null,
   });
   const [verification, setVerification] = useState<VerificationRecord[] | null>(null);
+  const [misconfigured, setMisconfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -44,8 +56,14 @@ const AdminDominio: React.FC = () => {
     if (store?.id) loadDomainState();
   }, [store?.id]);
 
+  const applyDomainResponse = (result: DomainFunctionResult | null) => {
+    setVerification(Array.isArray(result?.verification) ? result.verification : null);
+    setMisconfigured(Boolean(result?.misconfigured));
+  };
+
   const loadDomainState = async () => {
     if (!store?.id) return;
+
     const { data } = await supabase
       .from('stores')
       .select('custom_domain, domain_verified, domain_added_at')
@@ -58,39 +76,39 @@ const AdminDominio: React.FC = () => {
         domainVerified: (data as any).domain_verified,
         domainAddedAt: (data as any).domain_added_at,
       });
+
       if ((data as any).custom_domain) {
         setDomain((data as any).custom_domain);
       }
     }
+
     setLoading(false);
   };
 
   const callDomainFunction = async (action: string, domainValue?: string) => {
     const { data: { session } } = await supabase.auth.getSession();
+
     if (!session) {
       toast({ title: 'Not authenticated', variant: 'destructive' });
       return null;
     }
 
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const res = await fetch(
-      `https://${projectId}.supabase.co/functions/v1/manage-domain`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          action,
-          store_id: store?.id,
-          domain: domainValue,
-        }),
-      }
-    );
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/manage-domain`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        action,
+        store_id: store?.id,
+        domain: domainValue,
+      }),
+    });
 
     const result = await res.json();
-    return result;
+    return result as DomainFunctionResult;
   };
 
   const handleAddDomain = async () => {
@@ -104,18 +122,22 @@ const AdminDominio: React.FC = () => {
     setActionLoading(false);
 
     if (result?.success) {
-      toast({ title: t('admin.domain.added', 'Domain added successfully!') });
+      toast({
+        title: result.existing
+          ? t('admin.domain.addedExisting', 'Domain linked. It was already added in Vercel.')
+          : t('admin.domain.added', 'Domain added successfully!'),
+      });
+
       setDomainState({
-        customDomain: result.domain,
-        domainVerified: false,
+        customDomain: result.domain ?? domain.trim(),
+        domainVerified: Boolean(result.verified),
         domainAddedAt: new Date().toISOString(),
       });
-      if (result.verification) {
-        setVerification(result.verification);
-      }
-    } else {
-      toast({ title: result?.error || 'Error adding domain', variant: 'destructive' });
+      applyDomainResponse(result);
+      return;
     }
+
+    toast({ title: result?.error || 'Error adding domain', variant: 'destructive' });
   };
 
   const handleVerify = async () => {
@@ -124,19 +146,19 @@ const AdminDominio: React.FC = () => {
     setActionLoading(false);
 
     if (result?.success) {
-      setDomainState(prev => ({ ...prev, domainVerified: result.verified }));
-      if (result.verification) {
-        setVerification(result.verification);
-      }
+      setDomainState((prev) => ({ ...prev, domainVerified: Boolean(result.verified) }));
+      applyDomainResponse(result);
+
       if (result.verified) {
         toast({ title: t('admin.domain.verified', 'Domain verified! ✅') });
         setVerification(null);
       } else {
         toast({ title: t('admin.domain.notYetVerified', 'Domain not verified yet. Check DNS settings.'), variant: 'destructive' });
       }
-    } else {
-      toast({ title: result?.error || 'Error verifying', variant: 'destructive' });
+      return;
     }
+
+    toast({ title: result?.error || 'Error verifying', variant: 'destructive' });
   };
 
   const handleRemove = async () => {
@@ -151,9 +173,11 @@ const AdminDominio: React.FC = () => {
       setDomainState({ customDomain: null, domainVerified: false, domainAddedAt: null });
       setDomain('');
       setVerification(null);
-    } else {
-      toast({ title: result?.error || 'Error removing', variant: 'destructive' });
+      setMisconfigured(false);
+      return;
     }
+
+    toast({ title: result?.error || 'Error removing', variant: 'destructive' });
   };
 
   if (loading) {
@@ -171,7 +195,6 @@ const AdminDominio: React.FC = () => {
   return (
     <AdminLayout title={t('admin.domain.title', 'Custom Domain')}>
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Info */}
         <GlassCard className="p-5">
           <div className="flex items-start gap-3">
             <Globe className="w-5 h-5 text-primary mt-0.5" />
@@ -186,7 +209,6 @@ const AdminDominio: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* Domain status */}
         {hasDomain ? (
           <>
             <GlassCard className="p-6">
@@ -197,12 +219,12 @@ const AdminDominio: React.FC = () => {
                     <p className="font-semibold text-lg">{domainState.customDomain}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {domainState.domainVerified ? (
-                        <Badge className="bg-green-500/20 text-green-400 gap-1">
+                        <Badge variant="outline" className="gap-1 border-primary/20 bg-primary/10 text-primary">
                           <CheckCircle2 className="w-3 h-3" />
                           {t('admin.domain.active', 'Active')}
                         </Badge>
                       ) : (
-                        <Badge className="bg-yellow-500/20 text-yellow-400 gap-1">
+                        <Badge variant="outline" className="gap-1 border-border bg-muted text-muted-foreground">
                           <AlertCircle className="w-3 h-3" />
                           {t('admin.domain.pendingVerification', 'Pending DNS')}
                         </Badge>
@@ -225,8 +247,8 @@ const AdminDominio: React.FC = () => {
               </div>
 
               {domainState.domainVerified && (
-                <div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <p className="text-sm text-green-400 flex items-center gap-2">
+                <div className="mt-3 rounded-lg border border-primary/20 bg-primary/10 p-3">
+                  <p className="flex items-center gap-2 text-sm text-primary">
                     <CheckCircle2 className="w-4 h-4" />
                     {t('admin.domain.liveMessage', 'Your domain is live and serving your platform!')}
                   </p>
@@ -242,73 +264,113 @@ const AdminDominio: React.FC = () => {
               )}
             </GlassCard>
 
-            {/* DNS Instructions */}
             {!domainState.domainVerified && (
               <GlassCard className="p-5 space-y-4">
-                <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-yellow-400" />
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <AlertCircle className="w-4 h-4 text-primary" />
                   {t('admin.domain.dnsInstructions', 'DNS Configuration Required')}
                 </h3>
+
                 <p className="text-xs text-muted-foreground">
-                  {t('admin.domain.dnsDescription', 'Add these DNS records at your domain registrar (GoDaddy, Namecheap, Cloudflare, etc):')}
+                  {t('admin.domain.dnsDescription', 'Use only one method. If the domain already appears inside Vercel, the fastest path is changing the nameservers to Vercel DNS.')}
                 </p>
 
+                {misconfigured && (
+                  <div className="rounded-lg border border-border/30 bg-muted/30 p-3 text-xs text-muted-foreground">
+                    {t('admin.domain.misconfiguredHelp', 'Vercel detected an invalid configuration. If your domain is already registered there, switch your registrar nameservers to the Vercel servers below and wait for propagation.')}
+                  </div>
+                )}
+
                 <div className="space-y-3">
-                  <div className="bg-background/50 rounded-lg p-3 border border-border/30">
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Type</p>
-                        <p className="font-mono font-semibold">A</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Name</p>
-                        <p className="font-mono font-semibold">@</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Value</p>
-                        <p className="font-mono font-semibold">76.76.21.21</p>
-                      </div>
+                  <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold">{t('admin.domain.vercelDnsTitle', 'Option 1 — Vercel DNS (recommended)')}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('admin.domain.vercelDnsDescription', 'If the domain is already added in Vercel, update the nameservers at your registrar to these values:')}
+                      </p>
                     </div>
+
+                    {VERCEL_NAMESERVERS.map((nameserver, index) => (
+                      <div key={nameserver} className="rounded-lg border border-border/30 bg-background/50 p-3">
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <p className="text-muted-foreground">{t('admin.domain.server', 'Server')}</p>
+                            <p className="font-mono font-semibold">NS{index + 1}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">{t('admin.domain.value', 'Value')}</p>
+                            <p className="font-mono font-semibold break-all">{nameserver}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="bg-background/50 rounded-lg p-3 border border-border/30">
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Type</p>
-                        <p className="font-mono font-semibold">CNAME</p>
+                  <div className="rounded-lg border border-border/30 bg-background/50 p-4 space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold">{t('admin.domain.recordsTitle', 'Option 2 — Keep DNS at your registrar')}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('admin.domain.recordsDescription', 'If you do not want to use Vercel DNS, keep your current provider and add these records instead:')}
+                      </p>
+                    </div>
+
+                    <div className="bg-background/50 rounded-lg p-3 border border-border/30">
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <p className="text-muted-foreground">Type</p>
+                          <p className="font-mono font-semibold">A</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Name</p>
+                          <p className="font-mono font-semibold">@</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Value</p>
+                          <p className="font-mono font-semibold">76.76.21.21</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-muted-foreground">Name</p>
-                        <p className="font-mono font-semibold">www</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Value</p>
-                        <p className="font-mono font-semibold">cname.vercel-dns.com</p>
+                    </div>
+
+                    <div className="bg-background/50 rounded-lg p-3 border border-border/30">
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <p className="text-muted-foreground">Type</p>
+                          <p className="font-mono font-semibold">CNAME</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Name</p>
+                          <p className="font-mono font-semibold">www</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Value</p>
+                          <p className="font-mono font-semibold">cname.vercel-dns.com</p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {verification && verification.length > 0 && (
                     <>
-                      <p className="text-xs text-muted-foreground font-semibold mt-2">
-                        {t('admin.domain.verificationRecords', 'Verification records:')}
+                      <p className="text-xs font-semibold text-muted-foreground mt-2">
+                        {t('admin.domain.verificationRecords', 'Verification records returned by Vercel:')}
                       </p>
-                      {verification.map((v, i) => (
-                        <div key={i} className="bg-background/50 rounded-lg p-3 border border-border/30">
+                      {verification.map((item, index) => (
+                        <div key={`${item.type}-${item.domain}-${index}`} className="rounded-lg border border-border/30 bg-background/50 p-3">
                           <div className="grid grid-cols-3 gap-2 text-xs">
                             <div>
                               <p className="text-muted-foreground">Type</p>
-                              <p className="font-mono font-semibold">{v.type}</p>
+                              <p className="font-mono font-semibold">{item.type}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Name</p>
-                              <p className="font-mono font-semibold break-all">{v.domain}</p>
+                              <p className="font-mono font-semibold break-all">{item.domain}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Value</p>
-                              <p className="font-mono font-semibold break-all">{v.value}</p>
+                              <p className="font-mono font-semibold break-all">{item.value}</p>
                             </div>
                           </div>
+                          {item.reason && <p className="mt-2 text-xs text-muted-foreground">{item.reason}</p>}
                         </div>
                       ))}
                     </>
@@ -316,13 +378,12 @@ const AdminDominio: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-muted-foreground">
-                  ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. Click "Check DNS" to verify.')}
+                  ⏳ {t('admin.domain.propagationNote', 'DNS changes can take up to 48 hours to propagate. After updating, click "Check DNS" again.')}
                 </p>
               </GlassCard>
             )}
           </>
         ) : (
-          /* Add domain form */
           <GlassCard className="p-6 space-y-4">
             <Label className="text-sm font-medium">{t('admin.domain.yourDomain', 'Your Domain')}</Label>
             <div className="flex gap-3">
