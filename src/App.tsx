@@ -71,6 +71,7 @@ const App = () => (
                 {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
                 <Route path="/" element={<NotFound />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/setup" element={<ProtectedRoute><Setup /></ProtectedRoute>} />
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />
