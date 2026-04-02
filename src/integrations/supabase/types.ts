@@ -348,7 +348,10 @@ export type Database = {
           banner_url: string | null
           created_at: string
           created_by: string | null
+          custom_domain: string | null
           description: string | null
+          domain_added_at: string | null
+          domain_verified: boolean | null
           id: string
           name: string
           onboarding_completed: boolean
@@ -367,7 +370,10 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           created_by?: string | null
+          custom_domain?: string | null
           description?: string | null
+          domain_added_at?: string | null
+          domain_verified?: boolean | null
           id?: string
           name: string
           onboarding_completed?: boolean
@@ -386,7 +392,10 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           created_by?: string | null
+          custom_domain?: string | null
           description?: string | null
+          domain_added_at?: string | null
+          domain_verified?: boolean | null
           id?: string
           name?: string
           onboarding_completed?: boolean
