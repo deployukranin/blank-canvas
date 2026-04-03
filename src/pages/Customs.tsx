@@ -668,9 +668,9 @@ const CustomsPage = () => {
       {/* Auth Modal */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={t('customs.loginToOrder')} />
 
-      {/* Video Payment Dialog */}
+      {/* Video Payment Dialog - includes personalization */}
       <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowPaymentDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('customs.confirmPurchase')}</DialogTitle>
             <DialogDescription>{t('customs.reviewOrder')}</DialogDescription>
@@ -685,54 +685,16 @@ const CustomsPage = () => {
                 <span className="text-muted-foreground">{t('customs.duration')}</span>
                 <span className="font-medium">{selectedDuration?.label}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('customs.delivery')}:</span>
-                <span className="font-medium">{t('customs.deliveryBusinessDays', { days: config.deliveryDays })}</span>
-              </div>
               <div className="border-t border-white/10 my-2" />
               <div className="flex justify-between">
                 <span className="font-semibold">{t('customs.total')}</span>
-                <span className="font-bold text-lg text-primary">
-                  {formatCurrency(finalPrice)}
-                </span>
+                <span className="font-bold text-lg text-primary">{formatCurrency(finalPrice)}</span>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing || isPixLoading}>
-                {t('common.cancel')}
-              </Button>
-              <Button className="flex-1 bg-gradient-to-r from-primary to-accent gap-2" onClick={handlePayment} disabled={isProcessing || isPixLoading}>
-                {isProcessing || isPixLoading ? t('customs.generatingPix') : t('customs.confirmPayment')}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* PIX Payment Modal for Videos */}
-      {chargeData?.success && (
-        <PixPaymentModal
-          isOpen={showPixModal}
-          onClose={() => { setShowPixModal(false); resetCharge(); }}
-          onPaymentConfirmed={handlePixPaymentConfirmed}
-          qrCodeImage={chargeData.qrCodeImage!}
-          brCode={chargeData.brCode!}
-          correlationId={chargeData.correlationId!}
-          expiresAt={chargeData.expiresAt!}
-          amount={finalPrice}
-        />
-      )}
-
-      {/* Video Personalization Dialog */}
-      <Dialog open={showPersonalizationDialog} onOpenChange={() => !isProcessing && setShowPersonalizationDialog(false)}>
-        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('customs.personalizeVideo')}</DialogTitle>
-            <DialogDescription>{t('customs.fillDetailsExclusive')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
+            {/* Personalization fields inline */}
             <div>
-              <label className="text-sm font-medium mb-1 block">{t('customs.yourName')}</label>
+              <label className="text-sm font-medium mb-1 block">{t('customs.yourName')} *</label>
               <Input placeholder={t('customs.nameInVideo')} value={personalizationData.name} onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))} className="glass border-white/10" />
             </div>
             <div>
@@ -747,10 +709,15 @@ const CustomsPage = () => {
               <label className="text-sm font-medium mb-1 block">{t('customs.observations')}</label>
               <Textarea placeholder={t('customs.observationsPlaceholder')} value={personalizationData.observations} onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))} className="glass border-white/10" />
             </div>
-            <Button className="w-full bg-gradient-to-r from-primary to-accent gap-2" onClick={handleSubmitPersonalization} disabled={isProcessing}>
-              <Send className="w-4 h-4" />
-              {isProcessing ? t('customs.sending') : t('customs.submitOrder')}
-            </Button>
+
+            <div className="flex gap-2">
+              <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing || isPixLoading}>
+                {t('common.cancel')}
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-primary to-accent gap-2" onClick={handlePayment} disabled={isProcessing || isPixLoading || !personalizationData.name.trim()}>
+                {isProcessing || isPixLoading ? t('customs.generatingPix') : t('customs.confirmPayment')}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
