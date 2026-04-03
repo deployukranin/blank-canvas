@@ -878,5 +878,29 @@
     "section3Text": "If products or subscriptions exist, the conditions will be displayed at the time of purchase. Refunds follow the applicable consumer protection laws.",
     "section4Title": "4. Account termination",
     "section4Text": "We reserve the right to suspend or terminate accounts that violate these terms, without prior notice."
+  },
+  "customsAdmin": {
+    "subtitle": "Configure categories, prices, rules and previews for custom orders",
+    "howItWorks": "\"How It Works\" Section",
+    "showSection": "Show Section",
+    "visibleOnPage": "Visible on orders page",
+    "hiddenFromPage": "Hidden from orders page",
+    "mediaType": "Media Type",
+    "image": "Image",
+    "videoLabel": "Video",
+    "imageUrl": "Image URL",
+    "titleLabel": "Title",
+    "descLabel": "Description",
+    "deliveryDays": "Delivery Time (days)",
+    "videoCategories": "Video Categories",
+    "categoryName": "Category name",
+    "surcharge": "Fixed surcharge",
+    "noCategories": "No categories registered",
+    "videoPrices": "Prices by Duration",
+    "noDurations": "No durations registered",
+    "rulesTitle": "Content Rules",
+    "preview": "Preview",
+    "rulesPreview": "Rules Preview",
+    "rulesPreviewDesc": "How users will see the rules"
   }
 }

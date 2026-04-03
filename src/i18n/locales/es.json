@@ -878,5 +878,29 @@
     "section3Text": "Si existen productos o suscripciones, las condiciones se mostrarán al momento de la contratación. Los reembolsos siguen las leyes de protección al consumidor aplicables.",
     "section4Title": "4. Cierre de cuenta",
     "section4Text": "Nos reservamos el derecho de suspender o cerrar cuentas que violen estos términos, sin previo aviso."
+  },
+  "customsAdmin": {
+    "subtitle": "Configura categorías, precios, reglas y vistas previas de pedidos personalizados",
+    "howItWorks": "Sección \"Cómo Funciona\"",
+    "showSection": "Mostrar Sección",
+    "visibleOnPage": "Visible en la página de pedidos",
+    "hiddenFromPage": "Oculto de la página de pedidos",
+    "mediaType": "Tipo de Medio",
+    "image": "Imagen",
+    "videoLabel": "Video",
+    "imageUrl": "URL de la Imagen",
+    "titleLabel": "Título",
+    "descLabel": "Descripción",
+    "deliveryDays": "Plazo de Entrega (días)",
+    "videoCategories": "Categorías de Videos",
+    "categoryName": "Nombre de la categoría",
+    "surcharge": "Tarifa fija",
+    "noCategories": "No hay categorías registradas",
+    "videoPrices": "Precios por Duración",
+    "noDurations": "No hay duraciones registradas",
+    "rulesTitle": "Reglas de Contenido",
+    "preview": "Vista previa",
+    "rulesPreview": "Vista Previa de Reglas",
+    "rulesPreviewDesc": "Cómo los usuarios verán las reglas"
   }
 }
