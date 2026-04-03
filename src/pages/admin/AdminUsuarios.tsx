@@ -63,7 +63,8 @@ const AdminUsuarios: React.FC = () => {
 
       if (storeUsersError) throw storeUsersError;
 
-      const userIds = (storeUsers || []).map(su => su.user_id);
+      const storeUsersMap = new Map((storeUsersData || []).map(su => [su.user_id, su]));
+      const userIds = Array.from(storeUsersMap.keys());
 
       if (userIds.length === 0) {
         setUsers([]);
