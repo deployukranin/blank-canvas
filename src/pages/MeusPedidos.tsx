@@ -440,9 +440,32 @@ const MeusPedidosPage = () => {
                             <span className="text-muted-foreground">{t('orders.observations', 'Observações')}:</span>
                             <p className="mt-1 text-muted-foreground/80">{selectedOrder.observations}</p>
                           </div>
-                        )}
-                      </div>
-                    </GlassCard>
+                  )}
+
+                  {/* Chat Section - only visible when admin started conversation */}
+                  {hasChatMessages && (
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => setShowChat(!showChat)}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {showChat 
+                          ? t('orders.hideChat', 'Fechar Chat') 
+                          : t('orders.openChat', 'Abrir Chat com Criador')
+                        }
+                      </Button>
+                      {showChat && selectedOrder && (
+                        <GlassCard className="p-0 overflow-hidden">
+                          <OrderChat
+                            orderId={selectedOrder.id}
+                            customerName={selectedOrder.customer_name}
+                            senderRole="client"
+                          />
+                        </GlassCard>
+                      )}
+                    </div>
                   )}
                 </div>
               </>
