@@ -101,6 +101,9 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setStore(data as StoreInfo);
         setError(null);
 
+        // Dynamically set page title to the store name
+        document.title = data.name;
+
         // Dynamically set favicon to the store's avatar
         if (data.avatar_url) {
           let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
