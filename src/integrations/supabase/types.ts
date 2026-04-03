@@ -353,18 +353,21 @@ export type Database = {
       }
       store_users: {
         Row: {
+          banned_at: string | null
           created_at: string
           id: string
           store_id: string
           user_id: string
         }
         Insert: {
+          banned_at?: string | null
           created_at?: string
           id?: string
           store_id: string
           user_id: string
         }
         Update: {
+          banned_at?: string | null
           created_at?: string
           id?: string
           store_id?: string
