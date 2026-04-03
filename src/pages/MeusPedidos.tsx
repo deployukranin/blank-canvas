@@ -440,6 +440,9 @@ const MeusPedidosPage = () => {
                             <span className="text-muted-foreground">{t('orders.observations', 'Observações')}:</span>
                             <p className="mt-1 text-muted-foreground/80">{selectedOrder.observations}</p>
                           </div>
+                        )}
+                      </div>
+                    </GlassCard>
                   )}
 
                   {/* Chat Section - only visible when admin started conversation */}
