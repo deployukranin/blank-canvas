@@ -48,6 +48,7 @@ const AdminPedidos: React.FC = () => {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [chatOrder, setChatOrder] = useState<Order | null>(null);
 
   const isBR = i18n.language?.startsWith('pt');
   const currencySymbol = isBR ? 'R$' : '$';
