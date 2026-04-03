@@ -20,7 +20,7 @@ interface OrderChatProps {
   customerName: string;
 }
 
-export const OrderChat: React.FC<OrderChatProps> = ({ orderId, customerName }) => {
+export const OrderChat = React.forwardRef<HTMLDivElement, OrderChatProps>(({ orderId, customerName }, ref) => {
   const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
