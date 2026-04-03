@@ -251,9 +251,12 @@ const AdminUsuarios: React.FC = () => {
                       
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-semibold">{displayName}</h3>
+                          <h3 className={`font-semibold ${user.banned_at ? 'line-through text-muted-foreground' : ''}`}>{displayName}</h3>
                           {user.isVIP && (
                             <Badge className="bg-yellow-500/20 text-yellow-400">VIP</Badge>
+                          )}
+                          {user.banned_at && (
+                            <Badge variant="destructive">{t('usersAdmin.banned')}</Badge>
                           )}
                         </div>
                         
