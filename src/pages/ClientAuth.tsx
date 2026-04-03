@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Sparkles } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/contexts/TenantContext";
+import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +19,7 @@ const ClientAuth = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const { store, basePath, isTenantScope } = useTenant();
+  const { config } = useWhiteLabel();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
@@ -179,11 +182,15 @@ const ClientAuth = () => {
         <div className="flex flex-col items-center mb-8">
           {store?.avatar_url ? (
             <img src={store.avatar_url} alt={store.name} className="w-14 h-14 rounded-2xl mb-4 object-cover" />
-          ) : (
-            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-              <Sparkles className="w-7 h-7 text-primary" />
-            </div>
-          )}
+          ) : (() => {
+            const logoIconValue = config.icons?.logoIcon?.value || 'Sparkles';
+            const IconComp = (LucideIcons as any)[logoIconValue] || LucideIcons.Sparkles;
+            return (
+              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+                <IconComp className="w-7 h-7 text-primary" />
+              </div>
+            );
+          })()}
           <h1 className="text-2xl font-bold text-foreground font-['Space_Grotesk']">
             {store?.name || "Bem-vindo"}
           </h1>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
 interface ColorTemplate {
@@ -49,6 +52,7 @@ const BUCKET = 'banners';
 const AdminPersonalizacao: React.FC = () => {
   const { toast } = useToast();
   const { config, setConfig, updateColors } = useWhiteLabel();
+  const { store } = useTenant();
   const { t } = useTranslation();
 
   // ── Color state ──
@@ -75,6 +79,77 @@ const AdminPersonalizacao: React.FC = () => {
   const [previewBanner, setPreviewBanner] = useState<{ url: string; type: string } | null>(null);
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const canAdd = banners.length < 3;
+
+  // ── Platform Icon state ──
+  const [iconMode, setIconMode] = useState<'upload' | 'lucide'>(store?.avatar_url ? 'upload' : 'lucide');
+  const [iconUploading, setIconUploading] = useState(false);
+  const [iconSearch, setIconSearch] = useState('');
+  const selectedLogoIcon = config.icons?.logoIcon || { type: 'lucide' as const, value: 'Sparkles' };
+
+  const predefinedIcons = [
+    'Sparkles', 'Star', 'Crown', 'Heart', 'Gem', 'Diamond', 'Flame', 'Zap',
+    'Moon', 'Sun', 'Music', 'Headphones', 'Video', 'Camera', 'Palette',
+    'Rocket', 'Award', 'Trophy', 'Shield', 'Coffee', 'Leaf', 'Flower',
+    'Bird', 'Cat', 'Dog', 'Fish', 'Globe', 'Lightning', 'Wand2',
+    'BadgeCheck', 'ShoppingBag', 'Gift', 'Key', 'Bell', 'MessageCircle',
+  ];
+
+  const filteredIcons = iconSearch
+    ? predefinedIcons.filter(name => name.toLowerCase().includes(iconSearch.toLowerCase()))
+    : predefinedIcons;
+
+  const handleIconUpload = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 2MB'), variant: 'destructive' });
+        return;
+      }
+      setIconUploading(true);
+      try {
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+        const path = `platform-icon/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+        // Update store avatar_url
+        if (store?.id) {
+          await supabase.from('stores').update({ avatar_url: publicUrl }).eq('id', store.id);
+        }
+        toast({ title: t('admin.platformIcon.uploaded', 'Icon uploaded!') });
+        // Force reload to pick up new avatar
+        window.location.reload();
+      } catch (err: any) {
+        toast({ title: t('admin.platformIcon.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+      } finally {
+        setIconUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleRemoveUploadedIcon = async () => {
+    if (store?.id) {
+      await supabase.from('stores').update({ avatar_url: null }).eq('id', store.id);
+      toast({ title: t('admin.platformIcon.removed', 'Icon removed') });
+      window.location.reload();
+    }
+  };
+
+  const handleSelectLucideIcon = (iconName: string) => {
+    setConfig({
+      ...config,
+      icons: {
+        ...config.icons,
+        logoIcon: { type: 'lucide', value: iconName },
+      },
+    });
+    toast({ title: t('admin.platformIcon.saved', 'Icon saved!') });
+  };
 
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
   const removeBanner = (id: string) => setBanners(prev => prev.filter(b => b.id !== id));
@@ -190,8 +265,9 @@ const AdminPersonalizacao: React.FC = () => {
     <AdminLayout title={t('admin.personalization')}>
       <div className="max-w-3xl mx-auto">
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="colors" className="gap-2"><Palette className="w-4 h-4" />{t('admin.settings.colorTheme', 'Colors')}</TabsTrigger>
+            <TabsTrigger value="icon" className="gap-2"><ImageIcon className="w-4 h-4" />{t('admin.platformIcon.tab', 'Icon')}</TabsTrigger>
             <TabsTrigger value="banners" className="gap-2"><Image className="w-4 h-4" />{t('admin.banners.title', 'Banners')}</TabsTrigger>
             <TabsTrigger value="preview" className="gap-2"><Eye className="w-4 h-4" />Preview</TabsTrigger>
           </TabsList>
@@ -230,6 +306,85 @@ const AdminPersonalizacao: React.FC = () => {
                   })}
                 </div>
               </GlassCard>
+            </motion.div>
+          </TabsContent>
+
+          {/* ── Icon Tab ── */}
+          <TabsContent value="icon">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="space-y-5">
+                <p className="text-sm text-muted-foreground">
+                  {t('admin.platformIcon.description', 'Choose the icon that appears on the login/signup page for your clients.')}
+                </p>
+
+                {/* Current icon preview */}
+                <GlassCard className="p-6 flex flex-col items-center gap-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.platformIcon.current', 'Current Icon')}</p>
+                  <div className="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                    {store?.avatar_url ? (
+                      <img src={store.avatar_url} alt="Platform icon" className="w-full h-full rounded-2xl object-cover" />
+                    ) : (() => {
+                      const IconComp = (LucideIcons as any)[selectedLogoIcon.value] || LucideIcons.Sparkles;
+                      return <IconComp className="w-10 h-10 text-primary" />;
+                    })()}
+                  </div>
+                </GlassCard>
+
+                {/* Upload PNG */}
+                <GlassCard className="p-5 space-y-4">
+                  <h3 className="font-semibold text-sm flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-primary" />
+                    {t('admin.platformIcon.uploadTitle', 'Upload Custom Icon')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.uploadHint', 'PNG, JPG or WebP. Recommended: 512×512px, max 2MB.')}</p>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handleIconUpload} variant="outline" size="sm" disabled={iconUploading} className="gap-2">
+                      {iconUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      {t('admin.platformIcon.upload', 'Upload PNG')}
+                    </Button>
+                    {store?.avatar_url && (
+                      <Button onClick={handleRemoveUploadedIcon} variant="ghost" size="sm" className="gap-2 text-destructive hover:text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                        {t('admin.platformIcon.remove', 'Remove')}
+                      </Button>
+                    )}
+                  </div>
+                </GlassCard>
+
+                {/* Predefined Lucide Icons */}
+                <GlassCard className="p-5 space-y-4">
+                  <h3 className="font-semibold text-sm flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    {t('admin.platformIcon.predefinedTitle', 'Predefined Icons')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.predefinedHint', 'Choose an icon from the library. This is used when no custom image is uploaded.')}</p>
+                  <Input
+                    placeholder={t('admin.platformIcon.searchIcons', 'Search icons...')}
+                    value={iconSearch}
+                    onChange={(e) => setIconSearch(e.target.value)}
+                    className="bg-background/50 border-border/30"
+                  />
+                  <ScrollArea className="h-48">
+                    <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                      {filteredIcons.map((iconName) => {
+                        const IconComp = (LucideIcons as any)[iconName];
+                        if (!IconComp) return null;
+                        const isActive = selectedLogoIcon.value === iconName && !store?.avatar_url;
+                        return (
+                          <button
+                            key={iconName}
+                            onClick={() => handleSelectLucideIcon(iconName)}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${isActive ? 'border-primary bg-primary/10 scale-105' : 'border-border/30 hover:border-primary/50 hover:bg-primary/5'}`}
+                            title={iconName}
+                          >
+                            <IconComp className="w-5 h-5 text-foreground/80" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                </GlassCard>
+              </div>
             </motion.div>
           </TabsContent>
 
