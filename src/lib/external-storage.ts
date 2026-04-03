@@ -15,19 +15,60 @@ export async function uploadVipMedia(file: File, storeId: string): Promise<strin
 
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  const { data: urlData } = supabase.storage
-    .from(VIP_MEDIA_BUCKET)
-    .getPublicUrl(fileName);
+  // Return the file path (not a public URL) since bucket is now private
+  return fileName;
+}
 
-  return urlData.publicUrl;
+/**
+ * Get a signed URL for a VIP media file (valid for 1 hour).
+ * Works with both legacy public URLs and new file paths.
+ */
+export async function getVipMediaSignedUrl(pathOrUrl: string): Promise<string | null> {
+  const filePath = extractFilePath(pathOrUrl);
+  if (!filePath) return pathOrUrl; // fallback for external URLs
+
+  const { data, error } = await supabase.storage
+    .from(VIP_MEDIA_BUCKET)
+    .createSignedUrl(filePath, 3600); // 1 hour
+
+  if (error || !data?.signedUrl) {
+    console.warn('Could not create signed URL:', error?.message);
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
+/**
+ * Extract file path from either a public URL or a raw path.
+ */
+function extractFilePath(pathOrUrl: string): string | null {
+  // If it's already a plain path (new format)
+  if (!pathOrUrl.startsWith('http')) {
+    return pathOrUrl;
+  }
+
+  // Legacy: extract from public URL
+  const marker = `/storage/v1/object/public/${VIP_MEDIA_BUCKET}/`;
+  const idx = pathOrUrl.indexOf(marker);
+  if (idx !== -1) {
+    return pathOrUrl.substring(idx + marker.length);
+  }
+
+  // Also handle signed URL format
+  const signedMarker = `/storage/v1/object/sign/${VIP_MEDIA_BUCKET}/`;
+  const signedIdx = pathOrUrl.indexOf(signedMarker);
+  if (signedIdx !== -1) {
+    const path = pathOrUrl.substring(signedIdx + signedMarker.length);
+    return path.split('?')[0]; // remove query params
+  }
+
+  return null; // external URL, not from our bucket
 }
 
 export async function deleteVipMedia(url: string): Promise<void> {
-  // Extract file path from the public URL
-  const marker = `/storage/v1/object/public/${VIP_MEDIA_BUCKET}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return;
+  const filePath = extractFilePath(url);
+  if (!filePath) return;
 
-  const filePath = url.substring(idx + marker.length);
   await supabase.storage.from(VIP_MEDIA_BUCKET).remove([filePath]);
 }

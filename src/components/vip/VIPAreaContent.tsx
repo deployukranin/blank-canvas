@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { getVipMediaSignedUrl } from "@/lib/external-storage";
 
 interface VipContent {
   id: string;
@@ -126,7 +127,10 @@ export const VIPAreaContent = () => {
               {item.description}
             </p>
             {item.video_url && (
-              <Button className="w-full" onClick={() => window.open(item.video_url, '_blank')}>
+              <Button className="w-full" onClick={async () => {
+                const url = await getVipMediaSignedUrl(item.video_url);
+                if (url) window.open(url, '_blank');
+              }}>
                 Assistir Agora
               </Button>
             )}

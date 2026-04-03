@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getVipMediaSignedUrl } from '@/lib/external-storage';
 import {
   Dialog,
   DialogContent,
@@ -472,7 +473,10 @@ const VIPPage = () => {
                             size="sm"
                             variant="outline"
                             className="mt-2 h-7 text-xs"
-                            onClick={() => window.open(item.media_url!, '_blank')}
+                            onClick={async () => {
+                              const url = await getVipMediaSignedUrl(item.media_url!);
+                              if (url) window.open(url, '_blank');
+                            }}
                           >
                             <Play className="w-3 h-3 mr-1" />
                             View Media
