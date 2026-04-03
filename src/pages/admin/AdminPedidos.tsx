@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
+import { OrderChat } from '@/components/orders/OrderChat';
 import { toast } from 'sonner';
 
 interface Order {
