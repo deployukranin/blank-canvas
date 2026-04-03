@@ -33,6 +33,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const menuItems = [
     { path: base, icon: LayoutDashboard, label: t('admin.dashboard') },
+    { path: `${base}/customs`, icon: Sparkles, label: "Custom's" },
     { path: `${base}/orders`, icon: ShoppingCart, label: t('admin.orders') },
     { path: `${base}/payments`, icon: CreditCard, label: t('admin.payments') },
     { path: `${base}/vip`, icon: Crown, label: 'VIP' },
