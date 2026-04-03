@@ -122,6 +122,40 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           }
         }
 
+        // Resolve theme color from cached whitelabel config
+        let themeColorHex = '#8b5cf6';
+        let bgColorHex = '#0a0612';
+        try {
+          const cachedConfig = localStorage.getItem('whitelabel_cache_' + data.slug) 
+            || localStorage.getItem('whitelabel_config_cache');
+          if (cachedConfig) {
+            const parsed = JSON.parse(cachedConfig);
+            if (parsed?.colors?.primary) {
+              // Convert HSL string "H S% L%" to hex
+              const parts = parsed.colors.primary.split(/\s+/);
+              const h = parseFloat(parts[0]) || 263;
+              const s = parseFloat(parts[1]) || 70;
+              const l = parseFloat(parts[2]) || 58;
+              const hslToHex = (h: number, s: number, l: number) => {
+                s /= 100; l /= 100;
+                const a = s * Math.min(l, 1 - l);
+                const f = (n: number) => { const k = (n + h / 30) % 12; const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1); return Math.round(255 * c).toString(16).padStart(2, '0'); };
+                return `#${f(0)}${f(8)}${f(4)}`;
+              };
+              themeColorHex = hslToHex(h, s, l);
+            }
+            if (parsed?.colors?.mode === 'light') {
+              bgColorHex = '#f9f9f9';
+            }
+          }
+        } catch {}
+
+        // Update meta theme-color tag
+        let metaTheme = document.querySelector("meta[name='theme-color']") as HTMLMetaElement | null;
+        if (metaTheme) {
+          metaTheme.content = themeColorHex;
+        }
+
         // Dynamically update manifest.json for PWA with store name and icon
         const dynamicManifest = {
           name: data.name,
@@ -129,8 +163,8 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           description: data.description || `${data.name} - Conteúdo exclusivo`,
           start_url: `/${data.slug}`,
           display: 'standalone' as const,
-          background_color: '#0a0612',
-          theme_color: '#8b5cf6',
+          background_color: bgColorHex,
+          theme_color: themeColorHex,
           orientation: 'portrait-primary' as const,
           icons: data.avatar_url
             ? [
