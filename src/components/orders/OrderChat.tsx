@@ -18,9 +18,10 @@ interface Message {
 interface OrderChatProps {
   orderId: string;
   customerName: string;
+  senderRole?: 'admin' | 'client';
 }
 
-const OrderChatInner = ({ orderId, customerName }: OrderChatProps) => {
+const OrderChatInner = ({ orderId, customerName, senderRole = 'admin' }: OrderChatProps) => {
   const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
