@@ -139,6 +139,26 @@ const VIPPage = () => {
     resolve();
   }, [tenantStoreId, userId]);
 
+  // Check adult content setting
+  useEffect(() => {
+    if (!resolvedStoreId) return;
+    const checkAdult = async () => {
+      const { data } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_adult_content')
+        .eq('store_id', resolvedStoreId)
+        .maybeSingle();
+      if (data?.config_value && (data.config_value as any).enabled === true) {
+        setIsAdultContent(true);
+        if (!adultAccepted) {
+          setShowAdultWarning(true);
+        }
+      }
+    };
+    checkAdult();
+  }, [resolvedStoreId, adultAccepted]);
+
   // Load VIP plans from store config or global
   useEffect(() => {
     const loadPlans = async () => {
