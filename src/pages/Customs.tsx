@@ -298,6 +298,7 @@ const CustomsPage = () => {
       customerName: audioFormData.name,
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
+      storeId: store?.id,
     });
 
     setIsProcessing(false);
