@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, Upload, X } from 'lucide-react';
+import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, Upload, X, ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
