@@ -279,6 +279,15 @@ const AdminPedidos: React.FC = () => {
                     </p>
                     
                     <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        onClick={() => setChatOrder(order)}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Chat
+                      </Button>
                       {order.status === 'pending' && (
                         <>
                           <Button
