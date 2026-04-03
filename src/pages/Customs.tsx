@@ -155,6 +155,7 @@ const CustomsPage = () => {
       durationMinutes: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
       customerName: personalizationData.name || 'Cliente',
+      storeId: store?.id,
     });
 
     setIsProcessing(false);
