@@ -115,7 +115,8 @@ const AdminUsuarios: React.FC = () => {
                          (user.handle || '').toLowerCase().includes(search.toLowerCase());
     let matchesFilter = true;
     if (filter === 'vip') matchesFilter = user.isVIP;
-    if (filter === 'regular') matchesFilter = !user.isVIP;
+    if (filter === 'regular') matchesFilter = !user.isVIP && !user.banned_at;
+    if (filter === 'banned') matchesFilter = !!user.banned_at;
     return matchesSearch && matchesFilter;
   });
 
