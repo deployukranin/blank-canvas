@@ -14,6 +14,7 @@ export interface CreateChargeParams {
   script?: string;
   preferences?: string;
   observations?: string;
+  storeId?: string;
 }
 
 export interface PixChargeResult {
