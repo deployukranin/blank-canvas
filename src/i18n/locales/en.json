@@ -321,6 +321,21 @@
     "trialExpiringAlertDesc": "Notify 2 days before trial expires",
     "saveSettings": "Save Settings",
     "settingsSaved": "Settings saved successfully",
+    "planConfig": {
+      "navLabel": "Plans",
+      "title": "Configure Plans",
+      "description": "Configure the subscription plans that creators can purchase.",
+      "planName": "Plan name",
+      "priceBRL": "Price BRL (R$)",
+      "priceUSD": "Price USD ($)",
+      "discount": "Discount (badge)",
+      "highlight": "Highlight as popular",
+      "features": "Features",
+      "feature": "Feature",
+      "addFeature": "Add feature",
+      "saved": "Plans saved successfully!",
+      "error": "Error saving plans"
+    },
     "metrics": {
       "platforms": "Platforms",
       "totalUsers": "Total Users",
