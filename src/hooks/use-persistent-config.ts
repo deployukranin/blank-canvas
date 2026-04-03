@@ -116,7 +116,7 @@ export function usePersistentConfig<T>({
         pendingConfigRef.current = null;
       }
     }, debounceMs);
-  }, [configKey, debounceMs]);
+  }, [configKey, debounceMs, storeId]);
 
   // Update config and trigger debounced save
   const setConfig = useCallback((updater: T | ((prev: T) => T)) => {
