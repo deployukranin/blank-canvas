@@ -266,6 +266,13 @@ Deno.serve(async (req) => {
       brCode = charge.brCode;
       openpixChargeId = charge.identifier;
     }
+    // ─── No payment configured ───
+    else {
+      return new Response(
+        JSON.stringify({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // ─── Sanitize text fields ───
     const MAX_TEXT = 1000;
