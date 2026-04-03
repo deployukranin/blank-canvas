@@ -23,6 +23,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
   const menuItems = [
     { path: '/admin-master', icon: LayoutDashboard, label: t('superAdmin.dashboard') },
     { path: '/admin-master/tenants', icon: Store, label: t('superAdmin.platforms') },
+    { path: '/admin-master/plans', icon: Crown, label: t('superAdmin.planConfig.navLabel', 'Planos') },
     { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
     { path: '/admin-master/settings', icon: Settings, label: t('superAdmin.settings') },
     { path: '/admin-master/support', icon: LifeBuoy, label: t('superAdmin.supportNav') },

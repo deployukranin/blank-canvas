@@ -118,6 +118,7 @@ const App = () => (
                 <Route path="/admin-master" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
+                <Route path="/admin-master/plans" element={<SuperAdminRoute><SuperAdminPlanos /></SuperAdminRoute>} />
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
