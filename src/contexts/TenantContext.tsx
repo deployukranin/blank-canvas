@@ -100,6 +100,24 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       } else {
         setStore(data as StoreInfo);
         setError(null);
+
+        // Dynamically set favicon to the store's avatar
+        if (data.avatar_url) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = data.avatar_url;
+          link.type = 'image/png';
+
+          // Also update apple-touch-icon
+          let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null;
+          if (appleLink) {
+            appleLink.href = data.avatar_url;
+          }
+        }
       }
 
       setIsLoading(false);
