@@ -1,286 +1,324 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// 🛡️ CONFIGURAÇÃO DE SEGURANÇA
-const ALLOWED_ORIGINS = [
-  "https://4c756ab8-43f8-4073-a220-22b13086195b.lovableproject.com",
-  "https://id-preview--4c756ab8-43f8-4073-a220-22b13086195b.lovable.app",
-  "https://cozy-corner-seed.lovable.app",
-  "http://localhost:8080",
-  "http://localhost:5173",
-];
-
-const MAX_REQUESTS_PER_MINUTE = 5;
-const MAX_TEXT_LENGTH = 1000;
-const ALLOWED_DURATIONS = [5, 10, 15] as const;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+};
 
 type ProductType = "video" | "audio";
 
-// Helper de CORS dinâmico
-const corsHeaders = (origin: string) => ({
-  "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "null",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Vary": "Origin",
-});
+// ─── BRCode Generator (PIX Manual) ───
+function generatePixBrCode(
+  pixKey: string,
+  receiverName: string,
+  city: string,
+  amountBRL: number,
+  txId: string
+): string {
+  const cleanKey = pixKey.replace(/[.\-\/\s]/g, '');
+  const cleanName = receiverName.substring(0, 25).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const cleanCity = city.substring(0, 15).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const cleanTxId = txId.substring(0, 25);
+  const amountStr = amountBRL.toFixed(2);
 
-const getPriceInCents = (type: ProductType, minutes?: number): number => {
-  if (type === "audio") return 3000;
-  if (type === "video") {
-    if (minutes === 5) return 4000;
-    if (minutes === 10) return 6000;
-    if (minutes === 15) return 8000;
+  const tlv = (id: string, value: string) => `${id}${value.length.toString().padStart(2, '0')}${value}`;
+
+  const gui = tlv('00', 'br.gov.bcb.pix');
+  const key = tlv('01', cleanKey);
+  const mai = tlv('26', gui + key);
+
+  let payload = '';
+  payload += tlv('00', '01');
+  payload += mai;
+  payload += tlv('52', '0000');
+  payload += tlv('53', '986');
+  payload += tlv('54', amountStr);
+  payload += tlv('58', 'BR');
+  payload += tlv('59', cleanName);
+  payload += tlv('60', cleanCity);
+  payload += tlv('62', tlv('05', cleanTxId));
+  payload += '6304';
+
+  const crc = crc16CCITT(payload);
+  return payload + crc;
+}
+
+function crc16CCITT(str: string): string {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if (crc & 0x8000) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc <<= 1;
+      }
+      crc &= 0xFFFF;
+    }
   }
-  return 5000; // fallback seguro
-};
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
 
-serve(async (req) => {
-  const origin = req.headers.get("Origin") || "";
+// ─── Resolve price from store's video_config ───
+function resolvePrice(
+  videoConfig: any,
+  productType: ProductType,
+  category: string,
+  durationMinutes: number
+): number | null {
+  if (!videoConfig) return null;
 
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders(origin) });
+  if (productType === 'video') {
+    const durations = videoConfig.durations || [];
+    const categories = videoConfig.categories || [];
+    const dur = durations.find((d: any) => d.minutes === durationMinutes);
+    if (!dur) return null;
+    let price = dur.price;
+    const cat = categories.find((c: any) => c.id === category);
+    if (cat?.surcharge) price += cat.surcharge;
+    return price;
   }
 
-  // 1) 🛡️ Bloqueio REAL por Origin (para browsers). Sem Origin (server-to-server) passa.
-  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
-    console.error(`Blocked CORS attempt from: ${origin}`);
-    return new Response(JSON.stringify({ error: "Forbidden Origin" }), {
-      status: 403,
-      headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-    });
+  if (productType === 'audio') {
+    const audioDurations = videoConfig.audioDurations || [];
+    const dur = audioDurations.find((d: any) => d.minutes === durationMinutes);
+    if (!dur) return null;
+    return dur.price;
+  }
+
+  return null;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const OPENPIX_APP_ID = Deno.env.get("OPENPIX_APP_ID");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    if (!OPENPIX_APP_ID) {
-      // não vazar detalhes pro cliente
-      console.error("OPENPIX_APP_ID missing");
-      return new Response(JSON.stringify({ error: "Server config error" }), {
-        status: 500,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+    // ─── Auth ───
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // 2) 🛡️ Auth
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Auth required" }), {
-        status: 401,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData.user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const userId = userData.user.id;
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
-
-    // 3) 🛡️ Rate limit (fail-closed)
-    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
-    const { count: recentOrders, error: rateLimitError } = await supabase
-      .from("custom_orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gt("created_at", oneMinuteAgo);
-
-    if (rateLimitError) {
-      console.error("Rate limit check failed:", rateLimitError);
-      return new Response(JSON.stringify({ error: "System busy, try again." }), {
-        status: 500,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
-
-    if (recentOrders !== null && recentOrders >= MAX_REQUESTS_PER_MINUTE) {
-      return new Response(JSON.stringify({ error: "Too many requests" }), {
-        status: 429,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
-
-    // 4) 🛡️ Body parse seguro
+    // ─── Parse body ───
     let rawBody: any;
     try {
       rawBody = await req.json();
     } catch {
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid JSON' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // 5) 🛡️ Normalização + validação estrita
-    const productTypeRaw = String(rawBody.productType || "");
-    if (productTypeRaw !== "video" && productTypeRaw !== "audio") {
-      return new Response(JSON.stringify({ error: "Invalid productType" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+    const productType = String(rawBody.productType || '') as ProductType;
+    if (productType !== 'video' && productType !== 'audio') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid productType' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-    const productType = productTypeRaw as ProductType;
 
-    const category = String(rawBody.category || "").trim();
-    const customerName = String(rawBody.customerName || "").trim();
-    const durationMinutes = Number(rawBody.durationMinutes);
+    const category = String(rawBody.category || '').trim();
+    const customerName = String(rawBody.customerName || '').trim();
+    const durationMinutes = Number(rawBody.durationMinutes) || 0;
+    const storeId = rawBody.storeId || null;
 
     if (!category || !customerName) {
-      return new Response(JSON.stringify({ error: "Missing fields" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    if (productType === "video") {
-      // duration precisa ser um número válido e permitido
-      if (!Number.isFinite(durationMinutes) || !ALLOWED_DURATIONS.includes(durationMinutes as any)) {
-        return new Response(JSON.stringify({ error: "Invalid duration" }), {
-          status: 400,
-          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-        });
-      }
+    // ─── Rate limit ───
+    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+    const { count: recentOrders } = await supabase
+      .from('custom_orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gt('created_at', oneMinuteAgo);
+
+    if (recentOrders !== null && recentOrders >= 5) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Too many requests, try again later' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Limite de texto (evita payload DoS). Use rawBody para não quebrar se vier tipo diferente.
-    const script = typeof rawBody.script === "string" ? rawBody.script : "";
-    const observationsClient = typeof rawBody.observations === "string" ? rawBody.observations : "";
+    // ─── Load store configs (video_config + payment_config) ───
+    let videoConfig: any = null;
+    let paymentConfig: any = null;
 
-    if (script.length > MAX_TEXT_LENGTH || observationsClient.length > MAX_TEXT_LENGTH) {
-      return new Response(JSON.stringify({ error: "Text too long" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
+    if (storeId) {
+      const [videoCfgRes, payCfgRes] = await Promise.all([
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'video_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'payment_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+      ]);
+      videoConfig = videoCfgRes.data?.config_value;
+      paymentConfig = payCfgRes.data?.config_value;
     }
 
-    // 6) 🛡️ Preço seguro
-    const amountCents = getPriceInCents(productType, productType === "video" ? durationMinutes : undefined);
+    // ─── Resolve price from config ───
+    const resolvedPrice = resolvePrice(videoConfig, productType, category, durationMinutes);
+    if (!resolvedPrice || resolvedPrice <= 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Could not determine price for this product. Please contact the creator.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const amountCents = Math.round(resolvedPrice * 100);
     const correlationID = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const chargeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    // ─── Determine payment gateway ───
+    const activeGateway = paymentConfig?.activeGateway || null;
 
-    // 7) 🛡️ Draft -> Charge -> Update
-    const { data: draftOrder, error: draftError } = await supabase
-      .from("custom_orders")
+    let qrCodeImage: string | null = null;
+    let brCode: string | null = null;
+    let openpixChargeId: string | null = null;
+
+    // ─── PIX Manual ───
+    if (activeGateway === 'pix_manual') {
+      const pix = paymentConfig.pixManual;
+      if (!pix?.key || !pix?.receiverName || !pix?.city) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Store PIX payment not fully configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const txId = correlationID.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '');
+      brCode = generatePixBrCode(pix.key, pix.receiverName, pix.city, amountCents / 100, txId);
+      qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(brCode)}`;
+    }
+    // ─── OpenPix ───
+    else {
+      const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
+      if (!OPENPIX_APP_ID) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'No payment method configured. Ask the creator to set up payments.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const openPixResponse = await fetch('https://api.openpix.com.br/api/v1/charge', {
+        method: 'POST',
+        headers: { 'Authorization': OPENPIX_APP_ID, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correlationID,
+          value: amountCents,
+          comment: `Custom ${productType} order`,
+          expiresIn: 900,
+        }),
+      });
+
+      let openPixData: any;
+      try { openPixData = await openPixResponse.json(); } catch { openPixData = null; }
+
+      const charge = openPixData?.charge;
+      if (!openPixResponse.ok || !charge?.identifier || !charge?.brCode || !charge?.qrCodeImage) {
+        console.error('OpenPix failure:', { status: openPixResponse.status, error: openPixData?.error });
+        return new Response(
+          JSON.stringify({ success: false, error: 'Payment provider error' }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      qrCodeImage = charge.qrCodeImage;
+      brCode = charge.brCode;
+      openpixChargeId = charge.identifier;
+    }
+
+    // ─── Sanitize text fields ───
+    const MAX_TEXT = 1000;
+    const script = typeof rawBody.script === 'string' ? rawBody.script.substring(0, MAX_TEXT) : '';
+    const observations = typeof rawBody.observations === 'string' ? rawBody.observations.substring(0, MAX_TEXT) : '';
+    const preferences = typeof rawBody.preferences === 'string' ? rawBody.preferences.substring(0, MAX_TEXT) : '';
+    const triggers = typeof rawBody.triggers === 'string' ? rawBody.triggers.substring(0, MAX_TEXT) : '';
+
+    // ─── Insert order ───
+    const { data: order, error: dbError } = await supabase
+      .from('custom_orders')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         product_type: productType,
         category,
-        category_name: String(rawBody.categoryName || "").substring(0, 100),
+        category_name: String(rawBody.categoryName || '').substring(0, 100),
         customer_name: customerName.substring(0, 100),
-        duration_minutes: productType === "video" ? durationMinutes : 0,
+        duration_minutes: durationMinutes,
+        duration_label: String(rawBody.durationLabel || '').substring(0, 50),
         amount_cents: amountCents,
         correlation_id: correlationID,
-        status: "draft",
-        expires_at: expiresAt.toISOString(),
-        // mantém o campo do cliente como cliente, se você quiser salvar:
-        script: script.substring(0, MAX_TEXT_LENGTH),
-        observations: observationsClient.substring(0, MAX_TEXT_LENGTH),
+        qr_code_image: qrCodeImage,
+        br_code: brCode,
+        openpix_charge_id: openpixChargeId,
+        expires_at: chargeExpiresAt.toISOString(),
+        status: 'pending',
+        store_id: storeId,
+        script,
+        observations,
+        preferences,
+        triggers,
       })
       .select()
       .single();
 
-    if (draftError || !draftOrder) {
-      console.error("Draft insert error:", draftError);
-      return new Response(JSON.stringify({ error: "Failed to initialize order" }), {
-        status: 500,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
-
-    const openPixResponse = await fetch("https://api.openpix.com.br/api/v1/charge", {
-      method: "POST",
-      headers: { "Authorization": OPENPIX_APP_ID, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        correlationID,
-        value: amountCents,
-        comment: `Order ${draftOrder.id} - User ${user.id}`, // ok, sem dados sensíveis
-        expiresIn: 900,
-      }),
-    });
-
-    let openPixData: any;
-    try {
-      openPixData = await openPixResponse.json();
-    } catch {
-      openPixData = null;
-    }
-
-    // 8) 🛡️ Validação do retorno do provedor
-    const charge = openPixData?.charge;
-    const okCharge =
-      openPixResponse.ok &&
-      !openPixData?.error &&
-      charge?.identifier &&
-      charge?.brCode &&
-      charge?.qrCodeImage;
-
-    if (!okCharge) {
-      console.error("OpenPix failure:", {
-        status: openPixResponse.status,
-        error: openPixData?.error ?? "invalid_response",
-      });
-
-      // Auditoria: NÃO salvar o erro cru do provedor em campo do cliente
-      await supabase
-        .from("custom_orders")
-        .update({
-          status: "failed",
-          // se você não tem coluna específica, grave um marcador curto:
-          // (ideal seria ter failure_reason/provider_error_code em colunas separadas)
-          observations: "openpix_failed",
-        })
-        .eq("id", draftOrder.id)
-        .eq("user_id", user.id);
-
-      return new Response(JSON.stringify({ error: "Payment provider error" }), {
-        status: 502,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
-
-    // 9) 🛡️ Update seguro (id + user_id)
-    const { error: updateError } = await supabase
-      .from("custom_orders")
-      .update({
-        openpix_charge_id: charge.identifier,
-        qr_code_image: charge.qrCodeImage,
-        br_code: charge.brCode,
-        status: "pending",
-      })
-      .eq("id", draftOrder.id)
-      .eq("user_id", user.id);
-
-    if (updateError) {
-      // Situação rara: charge criada mas update falhou.
-      console.error("Critical update error:", updateError);
-      // Aqui você pode: tentar retry, ou registrar em logs/monitoramento.
+    if (dbError || !order) {
+      console.error('DB insert error:', dbError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to create order' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        order_id: draftOrder.id,
+        order_id: order.id,
         correlation_id: correlationID,
-        qr_code_image: charge.qrCodeImage,
-        br_code: charge.brCode,
-        expires_at: expiresAt.toISOString(),
+        qr_code_image: qrCodeImage,
+        br_code: brCode,
+        expires_at: chargeExpiresAt.toISOString(),
+        amount_cents: amountCents,
       }),
-      { status: 200, headers: { ...corsHeaders(origin), "Content-Type": "application/json" } },
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error("Internal error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-    });
+    console.error('Internal error:', error);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });
