@@ -214,14 +214,15 @@ const AdminUsuarios: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'vip', 'regular'] as const).map((f) => (
+              {(['all', 'vip', 'regular', 'banned'] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setFilter(f)}
+                  className={f === 'banned' && filter === f ? 'bg-destructive hover:bg-destructive/90' : ''}
                 >
-                  {f === 'all' ? t('usersAdmin.all') : f === 'vip' ? 'VIP' : t('usersAdmin.regular')}
+                  {f === 'all' ? t('usersAdmin.all') : f === 'vip' ? 'VIP' : f === 'regular' ? t('usersAdmin.regular') : t('usersAdmin.banned')}
                 </Button>
               ))}
             </div>
