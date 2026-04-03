@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
 interface ColorTemplate {
