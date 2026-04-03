@@ -850,5 +850,33 @@
       "notAllowed_6": "Sons muito altos ou assustadores",
       "notAllowed_7": "Qualquer coisa que me deixe desconfortável"
     }
+  },
+  "privacy": {
+    "title": "Política de Privacidade",
+    "lastUpdate": "Última atualização: Abril de 2026",
+    "summary": "Resumo",
+    "summaryDesc": "Este documento descreve como coletamos, usamos e protegemos seus dados pessoais.",
+    "section1Title": "1. Dados que coletamos",
+    "section1Text": "Coletamos dados necessários para login e funcionamento do app, como endereço de e-mail e identificadores de conta.",
+    "section2Title": "2. Como usamos",
+    "section2Text": "Usamos os dados para autenticação, personalização e melhoria da experiência. Não vendemos dados pessoais a terceiros.",
+    "section3Title": "3. Armazenamento de dados",
+    "section3Text": "Seus dados são armazenados em servidores seguros com criptografia. Mantemos os dados apenas pelo tempo necessário para prestar nossos serviços.",
+    "section4Title": "4. Seus direitos",
+    "section4Text": "Você pode solicitar acesso, correção ou exclusão de seus dados pessoais a qualquer momento entrando em contato com nosso suporte."
+  },
+  "terms": {
+    "title": "Termos de Serviço",
+    "lastUpdate": "Última atualização: Abril de 2026",
+    "summary": "Resumo",
+    "summaryDesc": "Estes termos regem o uso da plataforma. Ao usar o app, você concorda com estas condições.",
+    "section1Title": "1. Uso do app",
+    "section1Text": "Você concorda em utilizar o app de forma responsável e em conformidade com as leis aplicáveis. O uso indevido pode resultar na suspensão da conta.",
+    "section2Title": "2. Conteúdo",
+    "section2Text": "O conteúdo pode ser atualizado, removido ou modificado a qualquer momento. A plataforma não se responsabiliza por conteúdo gerado por usuários.",
+    "section3Title": "3. Compras e assinaturas",
+    "section3Text": "Caso existam produtos ou assinaturas, as condições serão exibidas no momento da contratação. Reembolsos seguem as leis de proteção ao consumidor aplicáveis.",
+    "section4Title": "4. Encerramento de conta",
+    "section4Text": "Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos, sem aviso prévio."
   }
 }

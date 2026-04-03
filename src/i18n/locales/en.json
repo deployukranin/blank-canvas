@@ -850,5 +850,33 @@
       "notAllowed_6": "Very loud or scary sounds",
       "notAllowed_7": "Anything that makes me uncomfortable"
     }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdate": "Last updated: April 2026",
+    "summary": "Summary",
+    "summaryDesc": "This document describes how we collect, use and protect your personal data.",
+    "section1Title": "1. Data we collect",
+    "section1Text": "We collect data necessary for login and app operation, such as email address and account identifiers.",
+    "section2Title": "2. How we use it",
+    "section2Text": "We use data for authentication, personalization and experience improvement. We do not sell personal data to third parties.",
+    "section3Title": "3. Data storage",
+    "section3Text": "Your data is stored on secure servers with encryption. We retain data only for as long as necessary to provide our services.",
+    "section4Title": "4. Your rights",
+    "section4Text": "You can request access, correction or deletion of your personal data at any time by contacting our support."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdate": "Last updated: April 2026",
+    "summary": "Summary",
+    "summaryDesc": "These terms govern the use of the platform. By using the app, you agree to these conditions.",
+    "section1Title": "1. App usage",
+    "section1Text": "You agree to use the app responsibly and in compliance with applicable laws. Misuse may result in account suspension.",
+    "section2Title": "2. Content",
+    "section2Text": "Content may be updated, removed or modified at any time. The platform is not responsible for user-generated content.",
+    "section3Title": "3. Purchases and subscriptions",
+    "section3Text": "If products or subscriptions exist, the conditions will be displayed at the time of purchase. Refunds follow the applicable consumer protection laws.",
+    "section4Title": "4. Account termination",
+    "section4Text": "We reserve the right to suspend or terminate accounts that violate these terms, without prior notice."
   }
 }

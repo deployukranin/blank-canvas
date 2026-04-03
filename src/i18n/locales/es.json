@@ -850,5 +850,33 @@
       "notAllowed_6": "Sonidos muy fuertes o aterradores",
       "notAllowed_7": "Cualquier cosa que me haga sentir incómoda"
     }
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdate": "Última actualización: Abril de 2026",
+    "summary": "Resumen",
+    "summaryDesc": "Este documento describe cómo recopilamos, usamos y protegemos sus datos personales.",
+    "section1Title": "1. Datos que recopilamos",
+    "section1Text": "Recopilamos datos necesarios para el inicio de sesión y el funcionamiento de la app, como dirección de correo electrónico e identificadores de cuenta.",
+    "section2Title": "2. Cómo los usamos",
+    "section2Text": "Usamos los datos para autenticación, personalización y mejora de la experiencia. No vendemos datos personales a terceros.",
+    "section3Title": "3. Almacenamiento de datos",
+    "section3Text": "Sus datos se almacenan en servidores seguros con cifrado. Conservamos los datos solo el tiempo necesario para prestar nuestros servicios.",
+    "section4Title": "4. Sus derechos",
+    "section4Text": "Puede solicitar acceso, corrección o eliminación de sus datos personales en cualquier momento contactando a nuestro soporte."
+  },
+  "terms": {
+    "title": "Términos de Servicio",
+    "lastUpdate": "Última actualización: Abril de 2026",
+    "summary": "Resumen",
+    "summaryDesc": "Estos términos rigen el uso de la plataforma. Al usar la app, usted acepta estas condiciones.",
+    "section1Title": "1. Uso de la app",
+    "section1Text": "Usted acepta usar la app de forma responsable y conforme a las leyes aplicables. El uso indebido puede resultar en la suspensión de la cuenta.",
+    "section2Title": "2. Contenido",
+    "section2Text": "El contenido puede ser actualizado, eliminado o modificado en cualquier momento. La plataforma no se responsabiliza por el contenido generado por usuarios.",
+    "section3Title": "3. Compras y suscripciones",
+    "section3Text": "Si existen productos o suscripciones, las condiciones se mostrarán al momento de la contratación. Los reembolsos siguen las leyes de protección al consumidor aplicables.",
+    "section4Title": "4. Cierre de cuenta",
+    "section4Text": "Nos reservamos el derecho de suspender o cerrar cuentas que violen estos términos, sin previo aviso."
   }
 }
