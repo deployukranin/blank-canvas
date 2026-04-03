@@ -22,6 +22,7 @@ const MIN_PRICE = 10;
 
 const AdminAudios = () => {
   const { toast } = useToast();
+  const { store } = useTenant();
   const { 
     config, 
     setConfig, 
@@ -33,6 +34,7 @@ const AdminAudios = () => {
     defaultValue: defaultVideoConfig,
     localStorageKey: 'videoConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
 
   // Keep local cache updated

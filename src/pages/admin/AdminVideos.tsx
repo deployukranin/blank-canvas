@@ -28,6 +28,7 @@ import {
 
 const AdminVideos = () => {
   const { toast } = useToast();
+  const { store } = useTenant();
   const { 
     config, 
     setConfig, 
@@ -37,8 +38,9 @@ const AdminVideos = () => {
   } = usePersistentConfig<VideoConfig>({
     configKey: 'video_config',
     defaultValue: defaultVideoConfig,
-    localStorageKey: 'videoConfig', // Migrate from old localStorage
+    localStorageKey: 'videoConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
   
   const [showPreview, setShowPreview] = useState(false);

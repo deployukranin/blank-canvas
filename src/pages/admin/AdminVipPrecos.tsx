@@ -31,6 +31,7 @@ const AdminVipPrecos = () => {
   const isBR = i18n.language?.startsWith('pt');
   const currency = isBR ? 'BRL' : 'USD';
   const locale = isBR ? 'pt-BR' : 'en-US';
+  const { store } = useTenant();
 
   const {
     config,
@@ -43,6 +44,7 @@ const AdminVipPrecos = () => {
     defaultValue: defaultVipConfig,
     localStorageKey: 'vipConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
 
   useEffect(() => {
