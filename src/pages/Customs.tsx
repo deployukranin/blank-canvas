@@ -722,7 +722,21 @@ const CustomsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Video Success Dialog */}
+      {/* PIX Payment Modal for Videos */}
+      {chargeData?.success && (
+        <PixPaymentModal
+          isOpen={showPixModal}
+          onClose={() => { setShowPixModal(false); resetCharge(); }}
+          onPaymentConfirmed={handlePixPaymentConfirmed}
+          qrCodeImage={chargeData.qrCodeImage!}
+          brCode={chargeData.brCode!}
+          correlationId={chargeData.correlationId!}
+          expiresAt={chargeData.expiresAt!}
+          amount={finalPrice}
+          isManualPix
+        />
+      )}
+
       <Dialog open={showSuccessDialog} onOpenChange={resetVideoOrder}>
         <DialogContent className="glass mx-4 text-center">
           <div className="py-6">
