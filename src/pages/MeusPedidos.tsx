@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
+import { OrderChat } from '@/components/orders/OrderChat';
 import {
   Dialog,
   DialogContent,
