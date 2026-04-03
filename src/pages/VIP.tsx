@@ -504,6 +504,7 @@ const VIPPage = () => {
             </Button>
           </GlassCard>
         </div>
+      {adultWarningDialog}
       </MobileLayout>
     );
   }
