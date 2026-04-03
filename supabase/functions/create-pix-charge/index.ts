@@ -229,12 +229,12 @@ Deno.serve(async (req) => {
       brCode = generatePixBrCode(pix.key, pix.receiverName, pix.city, amountCents / 100, txId);
       qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(brCode)}`;
     }
-    // ─── OpenPix ───
-    else {
+    // ─── OpenPix (only if explicitly configured) ───
+    else if (activeGateway === 'openpix') {
       const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
       if (!OPENPIX_APP_ID) {
         return new Response(
-          JSON.stringify({ success: false, error: 'No payment method configured. Ask the creator to set up payments.' }),
+          JSON.stringify({ success: false, error: 'OpenPix not configured. Ask the creator to set up payments.' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
