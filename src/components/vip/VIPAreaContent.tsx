@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { getVipMediaSignedUrl } from "@/lib/external-storage";
 
 interface VipContent {
   id: string;
