@@ -285,6 +285,39 @@ const AdminUsuarios: React.FC = () => {
                           <Crown className="w-4 h-4 mr-1" />
                           {user.isVIP ? 'VIP' : t('usersAdmin.makeVip')}
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant={user.banned_at ? 'outline' : 'destructive'}
+                            >
+                              {user.banned_at ? <ShieldCheck className="w-4 h-4 mr-1" /> : <ShieldBan className="w-4 h-4 mr-1" />}
+                              {user.banned_at ? t('usersAdmin.unban') : t('usersAdmin.ban')}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {user.banned_at ? t('usersAdmin.confirmUnban') : t('usersAdmin.confirmBan')}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {user.banned_at
+                                  ? t('usersAdmin.confirmUnbanDesc', { name: displayName })
+                                  : t('usersAdmin.confirmBanDesc', { name: displayName })
+                                }
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => toggleBan(user)}
+                                className={!user.banned_at ? 'bg-destructive hover:bg-destructive/90' : ''}
+                              >
+                                {user.banned_at ? t('usersAdmin.unban') : t('usersAdmin.ban')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </div>
