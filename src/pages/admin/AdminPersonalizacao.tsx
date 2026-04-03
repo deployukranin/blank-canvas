@@ -80,6 +80,77 @@ const AdminPersonalizacao: React.FC = () => {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const canAdd = banners.length < 3;
 
+  // ── Platform Icon state ──
+  const [iconMode, setIconMode] = useState<'upload' | 'lucide'>(store?.avatar_url ? 'upload' : 'lucide');
+  const [iconUploading, setIconUploading] = useState(false);
+  const [iconSearch, setIconSearch] = useState('');
+  const selectedLogoIcon = config.icons?.logoIcon || { type: 'lucide' as const, value: 'Sparkles' };
+
+  const predefinedIcons = [
+    'Sparkles', 'Star', 'Crown', 'Heart', 'Gem', 'Diamond', 'Flame', 'Zap',
+    'Moon', 'Sun', 'Music', 'Headphones', 'Video', 'Camera', 'Palette',
+    'Rocket', 'Award', 'Trophy', 'Shield', 'Coffee', 'Leaf', 'Flower',
+    'Bird', 'Cat', 'Dog', 'Fish', 'Globe', 'Lightning', 'Wand2',
+    'BadgeCheck', 'ShoppingBag', 'Gift', 'Key', 'Bell', 'MessageCircle',
+  ];
+
+  const filteredIcons = iconSearch
+    ? predefinedIcons.filter(name => name.toLowerCase().includes(iconSearch.toLowerCase()))
+    : predefinedIcons;
+
+  const handleIconUpload = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 2MB'), variant: 'destructive' });
+        return;
+      }
+      setIconUploading(true);
+      try {
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+        const path = `platform-icon/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+        // Update store avatar_url
+        if (store?.id) {
+          await supabase.from('stores').update({ avatar_url: publicUrl }).eq('id', store.id);
+        }
+        toast({ title: t('admin.platformIcon.uploaded', 'Icon uploaded!') });
+        // Force reload to pick up new avatar
+        window.location.reload();
+      } catch (err: any) {
+        toast({ title: t('admin.platformIcon.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+      } finally {
+        setIconUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleRemoveUploadedIcon = async () => {
+    if (store?.id) {
+      await supabase.from('stores').update({ avatar_url: null }).eq('id', store.id);
+      toast({ title: t('admin.platformIcon.removed', 'Icon removed') });
+      window.location.reload();
+    }
+  };
+
+  const handleSelectLucideIcon = (iconName: string) => {
+    setConfig({
+      ...config,
+      icons: {
+        ...config.icons,
+        logoIcon: { type: 'lucide', value: iconName },
+      },
+    });
+    toast({ title: t('admin.platformIcon.saved', 'Icon saved!') });
+  };
+
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
   const removeBanner = (id: string) => setBanners(prev => prev.filter(b => b.id !== id));
   const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean) => {
