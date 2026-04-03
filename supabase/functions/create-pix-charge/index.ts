@@ -188,13 +188,20 @@ Deno.serve(async (req) => {
       paymentConfig = payCfgRes.data?.config_value;
     }
 
-    // ─── Resolve price from config ───
-    const resolvedPrice = resolvePrice(videoConfig, productType, category, durationMinutes);
+    // ─── Resolve price from config (fallback to client-sent amount if config not saved yet) ───
+    const MAX_ALLOWED_PRICE = 10000; // R$ 10.000 safety cap
+    let resolvedPrice = resolvePrice(videoConfig, productType, category, durationMinutes);
     if (!resolvedPrice || resolvedPrice <= 0) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Could not determine price for this product. Please contact the creator.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      // Fallback: use client-sent amount (for stores that haven't saved config to DB yet)
+      const clientAmount = Number(rawBody.amount);
+      if (clientAmount > 0 && clientAmount <= MAX_ALLOWED_PRICE) {
+        resolvedPrice = clientAmount;
+      } else {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Could not determine price for this product. Please contact the creator.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const amountCents = Math.round(resolvedPrice * 100);
