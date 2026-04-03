@@ -459,18 +459,25 @@ const AdminPagamentosPix = () => {
                 <div>
                   <Label>Chave PIX</Label>
                   <Input
-                    placeholder={
-                      config.pixManual.keyType === 'email' ? 'seu@email.com' :
-                      config.pixManual.keyType === 'phone' ? '+5511999999999' :
-                      'Digite sua chave PIX'
-                    }
+                    placeholder={pixKeyPlaceholders[config.pixManual.keyType] || 'Digite sua chave PIX'}
                     value={config.pixManual.key}
-                    onChange={(e) => setConfig(prev => ({
-                      ...prev,
-                      pixManual: { ...prev.pixManual, key: e.target.value }
-                    }))}
-                    className="mt-1.5"
+                    maxLength={pixKeyMaxLength[config.pixManual.keyType] || 77}
+                    onChange={(e) => {
+                      setPixKeyError(null);
+                      let value = e.target.value;
+                      if (config.pixManual.keyType === 'cpf' || config.pixManual.keyType === 'cnpj') {
+                        value = value.replace(/\D/g, '');
+                      }
+                      setConfig(prev => ({
+                        ...prev,
+                        pixManual: { ...prev.pixManual, key: value }
+                      }));
+                    }}
+                    className={`mt-1.5 ${pixKeyError ? 'border-destructive' : ''}`}
                   />
+                  <p className={`text-xs mt-1 ${pixKeyError ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {pixKeyError || pixKeyHints[config.pixManual.keyType]}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
