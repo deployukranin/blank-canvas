@@ -131,6 +131,12 @@ const AdminPagamentosPix = () => {
       toast({ title: 'Preencha todos os campos do PIX', variant: 'destructive' });
       return;
     }
+    const error = validatePixKey(config.pixManual.key, config.pixManual.keyType);
+    if (error) {
+      setPixKeyError(error);
+      toast({ title: error, variant: 'destructive' });
+      return;
+    }
     setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
     await saveNow();
     toast({ title: 'PIX Manual configurado e ativado!' });
