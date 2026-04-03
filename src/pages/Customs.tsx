@@ -58,6 +58,7 @@ const CustomsPage = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const { store } = useTenant();
 
   // Helpers to translate default category/duration names via i18n
   const tCategoryName = (id: string, fallback: string) =>
