@@ -90,10 +90,15 @@ const AdminUsuarios: React.FC = () => {
 
       const vipUserIds = new Set(vipSubs?.map(s => s.user_id) || []);
 
-      const usersWithVIP = (profiles || []).map(profile => ({
-        ...profile,
-        isVIP: vipUserIds.has(profile.user_id),
-      }));
+      const usersWithVIP = (profiles || []).map(profile => {
+        const storeUser = storeUsersMap.get(profile.user_id);
+        return {
+          ...profile,
+          isVIP: vipUserIds.has(profile.user_id),
+          banned_at: (storeUser as any)?.banned_at || null,
+          store_user_id: (storeUser as any)?.id || '',
+        };
+      });
 
       setUsers(usersWithVIP);
     } catch (error) {
