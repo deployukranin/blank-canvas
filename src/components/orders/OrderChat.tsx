@@ -173,7 +173,9 @@ const OrderChatInner = ({ orderId, customerName, senderRole = 'admin' }: OrderCh
                     }`}
                   >
                     {!isMe && (
-                      <p className="text-xs font-medium mb-0.5 opacity-70">{customerName}</p>
+                      <p className="text-xs font-medium mb-0.5 opacity-70">
+                        {msg.sender_role === 'admin' ? 'Criador' : customerName}
+                      </p>
                     )}
                     <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
                     <div className={`flex items-center gap-1 justify-end mt-0.5 ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
