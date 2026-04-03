@@ -32,6 +32,7 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
+  user_id: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
