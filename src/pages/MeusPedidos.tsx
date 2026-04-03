@@ -153,9 +153,22 @@ const MeusPedidosPage = () => {
     await requestPermission();
   };
 
-  const handleViewDetails = (order: DBOrder) => {
+  const handleViewDetails = async (order: DBOrder) => {
     setSelectedOrder(order);
+    setShowChat(false);
+    setHasChatMessages(false);
     setShowDetailsDialog(true);
+
+    // Check if admin has started a conversation
+    const { data } = await supabase
+      .from('order_messages')
+      .select('id')
+      .eq('order_id', order.id)
+      .limit(1);
+    
+    if (data && data.length > 0) {
+      setHasChatMessages(true);
+    }
   };
 
   const formatDate = (dateString: string) => {
