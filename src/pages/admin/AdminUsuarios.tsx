@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Crown, User, Mail, Calendar } from 'lucide-react';
+import { Search, Crown, User, Calendar, ShieldBan, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -8,6 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTenant } from '@/contexts/TenantContext';
@@ -20,6 +31,8 @@ interface UserProfile {
   avatar_url: string | null;
   created_at: string;
   isVIP: boolean;
+  banned_at: string | null;
+  store_user_id: string;
 }
 
 const AdminUsuarios: React.FC = () => {
@@ -28,7 +41,7 @@ const AdminUsuarios: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'vip' | 'regular'>('all');
+  const [filter, setFilter] = useState<'all' | 'vip' | 'regular' | 'banned'>('all');
 
   const isBR = i18n.language?.startsWith('pt');
   const storeId = store?.id;
@@ -43,14 +56,15 @@ const AdminUsuarios: React.FC = () => {
     if (!storeId) return;
     try {
       // Get user IDs that belong to this store
-      const { data: storeUsers, error: storeUsersError } = await supabase
+      const { data: storeUsersData, error: storeUsersError } = await supabase
         .from('store_users')
-        .select('user_id')
+        .select('user_id, id, banned_at')
         .eq('store_id', storeId);
 
       if (storeUsersError) throw storeUsersError;
 
-      const userIds = (storeUsers || []).map(su => su.user_id);
+      const storeUsersMap = new Map((storeUsersData || []).map(su => [su.user_id, su]));
+      const userIds = Array.from(storeUsersMap.keys());
 
       if (userIds.length === 0) {
         setUsers([]);
@@ -76,10 +90,15 @@ const AdminUsuarios: React.FC = () => {
 
       const vipUserIds = new Set(vipSubs?.map(s => s.user_id) || []);
 
-      const usersWithVIP = (profiles || []).map(profile => ({
-        ...profile,
-        isVIP: vipUserIds.has(profile.user_id),
-      }));
+      const usersWithVIP = (profiles || []).map(profile => {
+        const storeUser = storeUsersMap.get(profile.user_id);
+        return {
+          ...profile,
+          isVIP: vipUserIds.has(profile.user_id),
+          banned_at: (storeUser as any)?.banned_at || null,
+          store_user_id: (storeUser as any)?.id || '',
+        };
+      });
 
       setUsers(usersWithVIP);
     } catch (error) {
@@ -96,7 +115,8 @@ const AdminUsuarios: React.FC = () => {
                          (user.handle || '').toLowerCase().includes(search.toLowerCase());
     let matchesFilter = true;
     if (filter === 'vip') matchesFilter = user.isVIP;
-    if (filter === 'regular') matchesFilter = !user.isVIP;
+    if (filter === 'regular') matchesFilter = !user.isVIP && !user.banned_at;
+    if (filter === 'banned') matchesFilter = !!user.banned_at;
     return matchesSearch && matchesFilter;
   });
 
@@ -133,6 +153,22 @@ const AdminUsuarios: React.FC = () => {
     } catch (error) {
       console.error('Error toggling VIP:', error);
       toast.error(t('usersAdmin.vipError'));
+    }
+  };
+  const toggleBan = async (user: UserProfile) => {
+    try {
+      const isBanned = !!user.banned_at;
+      const { error } = await supabase
+        .from('store_users')
+        .update({ banned_at: isBanned ? null : new Date().toISOString() } as any)
+        .eq('id', user.store_user_id);
+
+      if (error) throw error;
+      toast.success(isBanned ? t('usersAdmin.userUnbanned') : t('usersAdmin.userBanned'));
+      fetchUsers();
+    } catch (error) {
+      console.error('Error toggling ban:', error);
+      toast.error(t('usersAdmin.banError'));
     }
   };
 
@@ -178,14 +214,15 @@ const AdminUsuarios: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'vip', 'regular'] as const).map((f) => (
+              {(['all', 'vip', 'regular', 'banned'] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setFilter(f)}
+                  className={f === 'banned' && filter === f ? 'bg-destructive hover:bg-destructive/90' : ''}
                 >
-                  {f === 'all' ? t('usersAdmin.all') : f === 'vip' ? 'VIP' : t('usersAdmin.regular')}
+                  {f === 'all' ? t('usersAdmin.all') : f === 'vip' ? 'VIP' : f === 'regular' ? t('usersAdmin.regular') : t('usersAdmin.banned')}
                 </Button>
               ))}
             </div>
@@ -214,9 +251,12 @@ const AdminUsuarios: React.FC = () => {
                       
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-semibold">{displayName}</h3>
+                          <h3 className={`font-semibold ${user.banned_at ? 'line-through text-muted-foreground' : ''}`}>{displayName}</h3>
                           {user.isVIP && (
                             <Badge className="bg-yellow-500/20 text-yellow-400">VIP</Badge>
+                          )}
+                          {user.banned_at && (
+                            <Badge variant="destructive">{t('usersAdmin.banned')}</Badge>
                           )}
                         </div>
                         
@@ -245,6 +285,39 @@ const AdminUsuarios: React.FC = () => {
                           <Crown className="w-4 h-4 mr-1" />
                           {user.isVIP ? 'VIP' : t('usersAdmin.makeVip')}
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant={user.banned_at ? 'outline' : 'destructive'}
+                            >
+                              {user.banned_at ? <ShieldCheck className="w-4 h-4 mr-1" /> : <ShieldBan className="w-4 h-4 mr-1" />}
+                              {user.banned_at ? t('usersAdmin.unban') : t('usersAdmin.ban')}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {user.banned_at ? t('usersAdmin.confirmUnban') : t('usersAdmin.confirmBan')}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {user.banned_at
+                                  ? t('usersAdmin.confirmUnbanDesc', { name: displayName })
+                                  : t('usersAdmin.confirmBanDesc', { name: displayName })
+                                }
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => toggleBan(user)}
+                                className={!user.banned_at ? 'bg-destructive hover:bg-destructive/90' : ''}
+                              >
+                                {user.banned_at ? t('usersAdmin.unban') : t('usersAdmin.ban')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </div>

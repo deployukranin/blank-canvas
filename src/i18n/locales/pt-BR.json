@@ -526,7 +526,17 @@
     "vipActivated": "VIP ativado por 30 dias",
     "vipError": "Erro ao alterar VIP",
     "noUsers": "Nenhum usuário encontrado",
-    "loadingUsers": "Carregando usuários..."
+    "loadingUsers": "Carregando usuários...",
+    "banned": "Banido",
+    "ban": "Banir",
+    "unban": "Desbanir",
+    "confirmBan": "Banir Usuário?",
+    "confirmBanDesc": "{{name}} será banido e não poderá mais acessar a loja. Deseja continuar?",
+    "confirmUnban": "Desbanir Usuário?",
+    "confirmUnbanDesc": "{{name}} poderá acessar a loja novamente. Deseja continuar?",
+    "userBanned": "Usuário banido com sucesso",
+    "userUnbanned": "Usuário desbanido com sucesso",
+    "banError": "Erro ao alterar ban"
   },
   "youtubeAdmin": {
     "channelNotConfigured": "Canal não configurado",
