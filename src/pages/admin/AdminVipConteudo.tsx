@@ -292,7 +292,22 @@ const AdminVipConteudo = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Adult Content Toggle */}
+        <GlassCard className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                <ShieldAlert className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">{t('vipAdmin.adultContentLabel', 'Conteúdo +18')}</p>
+                <p className="text-xs text-muted-foreground">{t('vipAdmin.adultContentDesc', 'Exibe aviso de conteúdo adulto ao acessar a área VIP')}</p>
+              </div>
+            </div>
+            <Switch checked={isAdultContent} onCheckedChange={handleToggleAdultContent} />
+          </div>
+        </GlassCard>
+
           {['post', 'video', 'audio', 'image'].map(type => {
             const count = content.filter(c => c.content_type === type).length;
             return (
