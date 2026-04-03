@@ -182,11 +182,15 @@ const ClientAuth = () => {
         <div className="flex flex-col items-center mb-8">
           {store?.avatar_url ? (
             <img src={store.avatar_url} alt={store.name} className="w-14 h-14 rounded-2xl mb-4 object-cover" />
-          ) : (
-            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-              <Sparkles className="w-7 h-7 text-primary" />
-            </div>
-          )}
+          ) : (() => {
+            const logoIconValue = config.icons?.logoIcon?.value || 'Sparkles';
+            const IconComp = (LucideIcons as any)[logoIconValue] || LucideIcons.Sparkles;
+            return (
+              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+                <IconComp className="w-7 h-7 text-primary" />
+              </div>
+            );
+          })()}
           <h1 className="text-2xl font-bold text-foreground font-['Space_Grotesk']">
             {store?.name || "Bem-vindo"}
           </h1>
