@@ -37,7 +37,7 @@ export function usePersistentConfig<T>({
         setIsLoading(true);
         
         // Try to load from database first
-        const dbConfig = await loadConfig<T>(configKey);
+        const dbConfig = await loadConfig<T>(configKey, storeId);
         
         if (dbConfig) {
           // Merge with defaults to ensure new fields are present
