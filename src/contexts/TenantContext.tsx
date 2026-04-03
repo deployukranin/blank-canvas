@@ -121,6 +121,38 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             appleLink.href = data.avatar_url;
           }
         }
+
+        // Dynamically update manifest.json for PWA with store name and icon
+        const dynamicManifest = {
+          name: data.name,
+          short_name: data.name,
+          description: data.description || `${data.name} - Conteúdo exclusivo`,
+          start_url: `/${data.slug}`,
+          display: 'standalone' as const,
+          background_color: '#0a0612',
+          theme_color: '#8b5cf6',
+          orientation: 'portrait-primary' as const,
+          icons: data.avatar_url
+            ? [
+                { src: data.avatar_url, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                { src: data.avatar_url, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+              ]
+            : [
+                { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+              ],
+        };
+        const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        let manifestLink = document.querySelector("link[rel='manifest']") as HTMLLinkElement | null;
+        if (manifestLink) {
+          manifestLink.href = manifestUrl;
+        } else {
+          manifestLink = document.createElement('link');
+          manifestLink.rel = 'manifest';
+          manifestLink.href = manifestUrl;
+          document.head.appendChild(manifestLink);
+        }
       }
 
       setIsLoading(false);
