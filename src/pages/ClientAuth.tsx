@@ -37,6 +37,25 @@ const ClientAuth = () => {
     }
   }, [isAuthenticated, authLoading, navigate, homePath]);
 
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Erro ao entrar com Google");
+        setIsSubmitting(false);
+        return;
+      }
+      if (result.redirected) return;
+      // Session set - useEffect will redirect
+    } catch {
+      toast.error("Erro ao entrar com Google");
+      setIsSubmitting(false);
+    }
+  };
+
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleLogin = async (e: React.FormEvent) => {

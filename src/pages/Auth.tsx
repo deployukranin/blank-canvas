@@ -107,6 +107,25 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Erro ao entrar com Google");
+        setIsSubmitting(false);
+        return;
+      }
+      if (result.redirected) return;
+      // Session set automatically - redirect will happen via useEffect
+    } catch {
+      toast.error("Erro ao entrar com Google");
+      setIsSubmitting(false);
+    }
+  };
+
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const verifyYoutubeHandle = async () => {
