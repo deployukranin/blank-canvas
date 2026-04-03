@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { supabase } from '@/integrations/supabase/client';
@@ -495,16 +496,27 @@ const AdminPagamentosPix = () => {
                     />
                   </div>
                   <div>
-                    <Label>Cidade</Label>
-                    <Input
-                      placeholder="São Paulo"
+                    <Label>Estado</Label>
+                    <Select
                       value={config.pixManual.city}
-                      onChange={(e) => setConfig(prev => ({
+                      onValueChange={(value) => setConfig(prev => ({
                         ...prev,
-                        pixManual: { ...prev.pixManual, city: e.target.value }
+                        pixManual: { ...prev.pixManual, city: value }
                       }))}
-                      className="mt-1.5"
-                    />
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Selecione o estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
+                          'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
+                          'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+                        ].map(uf => (
+                          <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
