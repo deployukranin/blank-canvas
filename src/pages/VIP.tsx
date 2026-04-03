@@ -85,6 +85,9 @@ const VIPPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [chargeData, setChargeData] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [showAdultWarning, setShowAdultWarning] = useState(false);
+  const [adultAccepted, setAdultAccepted] = useState(false);
+  const [isAdultContent, setIsAdultContent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Resolve resolvedStoreId: use tenant context, or find user's associated store
