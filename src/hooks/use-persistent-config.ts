@@ -85,7 +85,7 @@ export function usePersistentConfig<T>({
     };
 
     loadFromDb();
-  }, [configKey, localStorageKey]);
+  }, [configKey, localStorageKey, storeId]);
 
   // Debounced save to database
   const debouncedSave = useCallback(async (newConfig: T) => {
