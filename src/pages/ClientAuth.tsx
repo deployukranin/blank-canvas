@@ -19,6 +19,7 @@ const ClientAuth = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const { store, basePath, isTenantScope } = useTenant();
+  const { config } = useWhiteLabel();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
