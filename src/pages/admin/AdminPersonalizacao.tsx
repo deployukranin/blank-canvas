@@ -52,6 +52,7 @@ const BUCKET = 'banners';
 const AdminPersonalizacao: React.FC = () => {
   const { toast } = useToast();
   const { config, setConfig, updateColors } = useWhiteLabel();
+  const { store } = useTenant();
   const { t } = useTranslation();
 
   // ── Color state ──
