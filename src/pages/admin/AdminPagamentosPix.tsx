@@ -437,10 +437,13 @@ const AdminPagamentosPix = () => {
                     {Object.entries(pixKeyLabels).map(([key, label]) => (
                       <button
                         key={key}
-                        onClick={() => setConfig(prev => ({
-                          ...prev,
-                          pixManual: { ...prev.pixManual, keyType: key as any }
-                        }))}
+                        onClick={() => {
+                          setPixKeyError(null);
+                          setConfig(prev => ({
+                            ...prev,
+                            pixManual: { ...prev.pixManual, keyType: key as any, key: '' }
+                          }));
+                        }}
                         className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
                           config.pixManual.keyType === key
                             ? 'bg-primary/10 border-primary/40 text-primary'
