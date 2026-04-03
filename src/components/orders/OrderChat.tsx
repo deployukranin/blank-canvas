@@ -88,7 +88,7 @@ const OrderChatInner = ({ orderId, customerName, senderRole = 'admin' }: OrderCh
     const { error } = await supabase.from('order_messages').insert({
       order_id: orderId,
       sender_id: session.user.id,
-      sender_role: 'admin',
+      sender_role: senderRole,
       message: newMessage.trim(),
     });
 
