@@ -265,8 +265,9 @@ const AdminPersonalizacao: React.FC = () => {
     <AdminLayout title={t('admin.personalization')}>
       <div className="max-w-3xl mx-auto">
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="colors" className="gap-2"><Palette className="w-4 h-4" />{t('admin.settings.colorTheme', 'Colors')}</TabsTrigger>
+            <TabsTrigger value="icon" className="gap-2"><ImageIcon className="w-4 h-4" />{t('admin.platformIcon.tab', 'Icon')}</TabsTrigger>
             <TabsTrigger value="banners" className="gap-2"><Image className="w-4 h-4" />{t('admin.banners.title', 'Banners')}</TabsTrigger>
             <TabsTrigger value="preview" className="gap-2"><Eye className="w-4 h-4" />Preview</TabsTrigger>
           </TabsList>
