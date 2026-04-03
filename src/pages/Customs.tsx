@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
+import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { 
@@ -57,6 +58,7 @@ const CustomsPage = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const { store } = useTenant();
 
   // Helpers to translate default category/duration names via i18n
   const tCategoryName = (id: string, fallback: string) =>
@@ -153,6 +155,7 @@ const CustomsPage = () => {
       durationMinutes: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
       customerName: personalizationData.name || 'Cliente',
+      storeId: store?.id,
     });
 
     setIsProcessing(false);
@@ -295,6 +298,7 @@ const CustomsPage = () => {
       customerName: audioFormData.name,
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
+      storeId: store?.id,
     });
 
     setIsProcessing(false);
