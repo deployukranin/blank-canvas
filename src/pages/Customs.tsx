@@ -144,17 +144,29 @@ const CustomsPage = () => {
   const handlePayment = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
+    if (!personalizationData.name.trim()) {
+      toast({
+        title: t('customs.nameRequired'),
+        description: t('customs.nameRequiredDesc'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsProcessing(true);
-    const finalPrice = calculatePrice(selectedDuration, selectedCategory);
+    const finalPriceVal = calculatePrice(selectedDuration, selectedCategory);
 
     const result = await createCharge({
-      amount: finalPrice,
+      amount: finalPriceVal,
       productType: 'video',
       category: selectedCategory.id,
       categoryName: selectedCategory.name,
       durationMinutes: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      customerName: personalizationData.name || 'Cliente',
+      customerName: personalizationData.name,
+      triggers: personalizationData.triggers,
+      script: personalizationData.script,
+      observations: personalizationData.observations,
       storeId: store?.id,
     });
 
@@ -166,7 +178,7 @@ const CustomsPage = () => {
       trackEvent('video_pix_charge_created', { 
         category: selectedCategory.id,
         duration: selectedDuration.id,
-        price: finalPrice
+        price: finalPriceVal
       });
     } else {
       toast({
