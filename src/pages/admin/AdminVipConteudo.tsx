@@ -48,6 +48,7 @@ const acceptByType: Record<string, string> = {
 };
 
 const AdminVipConteudo = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { session } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
