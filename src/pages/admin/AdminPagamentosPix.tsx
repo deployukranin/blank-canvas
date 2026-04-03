@@ -58,6 +58,7 @@ const AdminPagamentosPix = () => {
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [pixKeyError, setPixKeyError] = useState<string | null>(null);
 
   const {
     config,
@@ -130,6 +131,12 @@ const AdminPagamentosPix = () => {
       toast({ title: 'Preencha todos os campos do PIX', variant: 'destructive' });
       return;
     }
+    const error = validatePixKey(config.pixManual.key, config.pixManual.keyType);
+    if (error) {
+      setPixKeyError(error);
+      toast({ title: error, variant: 'destructive' });
+      return;
+    }
     setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
     await saveNow();
     toast({ title: 'PIX Manual configurado e ativado!' });
@@ -139,9 +146,57 @@ const AdminPagamentosPix = () => {
     cpf: 'CPF',
     cnpj: 'CNPJ',
     email: 'E-mail',
-    phone: 'Telefone',
+    phone: 'Celular',
     random: 'Chave Aleatória',
   };
+
+  const pixKeyPlaceholders: Record<string, string> = {
+    cpf: '12345678900',
+    cnpj: '12345678000199',
+    email: 'nome.sobrenome@exemplo.com.br',
+    phone: '+5511987654321',
+    random: '123e4567-e89b-12d3-a456-426614174000',
+  };
+
+  const pixKeyHints: Record<string, string> = {
+    cpf: 'Formato: 123.456.789-00 (apenas os 11 números do documento)',
+    cnpj: 'Formato: 12.345.678/0001-99 (apenas os 14 números)',
+    email: 'Formato: nome.sobrenome@exemplo.com.br',
+    phone: 'Formato: +5511987654321 (código do país +55, DDD e número)',
+    random: 'Formato: 123e4567-e89b-12d3-a456-426614174000 (código gerado pelo banco)',
+  };
+
+  const pixKeyMaxLength: Record<string, number> = {
+    cpf: 11,
+    cnpj: 14,
+    email: 77,
+    phone: 14,
+    random: 36,
+  };
+
+  const validatePixKey = (key: string, type: string): string | null => {
+    if (!key) return 'Chave PIX é obrigatória';
+    switch (type) {
+      case 'cpf':
+        if (!/^\d{11}$/.test(key)) return 'CPF deve conter exatamente 11 números';
+        break;
+      case 'cnpj':
+        if (!/^\d{14}$/.test(key)) return 'CNPJ deve conter exatamente 14 números';
+        break;
+      case 'email':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) return 'E-mail inválido';
+        break;
+      case 'phone':
+        if (!/^\+55\d{10,11}$/.test(key)) return 'Celular deve seguir o formato +55XXXXXXXXXXX';
+        break;
+      case 'random':
+        if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(key))
+          return 'Chave aleatória deve ser um UUID válido';
+        break;
+    }
+    return null;
+  };
+
 
   if (isLoading) {
     return (
@@ -382,10 +437,13 @@ const AdminPagamentosPix = () => {
                     {Object.entries(pixKeyLabels).map(([key, label]) => (
                       <button
                         key={key}
-                        onClick={() => setConfig(prev => ({
-                          ...prev,
-                          pixManual: { ...prev.pixManual, keyType: key as any }
-                        }))}
+                        onClick={() => {
+                          setPixKeyError(null);
+                          setConfig(prev => ({
+                            ...prev,
+                            pixManual: { ...prev.pixManual, keyType: key as any, key: '' }
+                          }));
+                        }}
                         className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
                           config.pixManual.keyType === key
                             ? 'bg-primary/10 border-primary/40 text-primary'
@@ -401,18 +459,25 @@ const AdminPagamentosPix = () => {
                 <div>
                   <Label>Chave PIX</Label>
                   <Input
-                    placeholder={
-                      config.pixManual.keyType === 'email' ? 'seu@email.com' :
-                      config.pixManual.keyType === 'phone' ? '+5511999999999' :
-                      'Digite sua chave PIX'
-                    }
+                    placeholder={pixKeyPlaceholders[config.pixManual.keyType] || 'Digite sua chave PIX'}
                     value={config.pixManual.key}
-                    onChange={(e) => setConfig(prev => ({
-                      ...prev,
-                      pixManual: { ...prev.pixManual, key: e.target.value }
-                    }))}
-                    className="mt-1.5"
+                    maxLength={pixKeyMaxLength[config.pixManual.keyType] || 77}
+                    onChange={(e) => {
+                      setPixKeyError(null);
+                      let value = e.target.value;
+                      if (config.pixManual.keyType === 'cpf' || config.pixManual.keyType === 'cnpj') {
+                        value = value.replace(/\D/g, '');
+                      }
+                      setConfig(prev => ({
+                        ...prev,
+                        pixManual: { ...prev.pixManual, key: value }
+                      }));
+                    }}
+                    className={`mt-1.5 ${pixKeyError ? 'border-destructive' : ''}`}
                   />
+                  <p className={`text-xs mt-1 ${pixKeyError ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {pixKeyError || pixKeyHints[config.pixManual.keyType]}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
