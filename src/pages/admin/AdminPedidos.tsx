@@ -473,7 +473,7 @@ const AdminPedidos: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           {chatOrder && (
-            <OrderChat orderId={chatOrder.id} senderRole="admin" />
+            <OrderChat orderId={chatOrder.id} customerName={chatOrder.customer_name} />
           )}
         </DialogContent>
       </Dialog>
