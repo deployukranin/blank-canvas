@@ -59,6 +59,7 @@ const AdminVipConteudo = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [storeId, setStoreId] = useState<string | null>(null);
+  const [isAdultContent, setIsAdultContent] = useState(false);
 
   // Form state
   const [formTitle, setFormTitle] = useState('');
