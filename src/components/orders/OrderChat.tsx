@@ -144,7 +144,10 @@ const OrderChatInner = ({ orderId, customerName, senderRole = 'admin' }: OrderCh
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-8">
-            Nenhuma mensagem ainda. Inicie a conversa com {customerName}.
+            {senderRole === 'client' 
+              ? 'O criador ainda não iniciou uma conversa.'
+              : `Nenhuma mensagem ainda. Inicie a conversa com ${customerName}.`
+            }
           </div>
         )}
 
