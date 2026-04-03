@@ -155,8 +155,24 @@ const AdminUsuarios: React.FC = () => {
       toast.error(t('usersAdmin.vipError'));
     }
   };
+  const toggleBan = async (user: UserProfile) => {
+    try {
+      const isBanned = !!user.banned_at;
+      const { error } = await supabase
+        .from('store_users')
+        .update({ banned_at: isBanned ? null : new Date().toISOString() } as any)
+        .eq('id', user.store_user_id);
 
-  const formatDate = (dateString: string) => {
+      if (error) throw error;
+      toast.success(isBanned ? t('usersAdmin.userUnbanned') : t('usersAdmin.userBanned'));
+      fetchUsers();
+    } catch (error) {
+      console.error('Error toggling ban:', error);
+      toast.error(t('usersAdmin.banError'));
+    }
+  };
+
+
     return new Date(dateString).toLocaleDateString(isBR ? 'pt-BR' : 'en-US');
   };
 
