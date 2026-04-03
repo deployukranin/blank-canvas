@@ -141,7 +141,7 @@ export const OrderChat = React.forwardRef<HTMLDivElement, OrderChatProps>(({ ord
   }
 
   return (
-    <div className="flex flex-col h-[400px]">
+    <div ref={ref} className="flex flex-col h-[400px]">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {messages.length === 0 && (
@@ -213,4 +213,6 @@ export const OrderChat = React.forwardRef<HTMLDivElement, OrderChatProps>(({ ord
       </div>
     </div>
   );
-};
+});
+
+OrderChat.displayName = 'OrderChat';
