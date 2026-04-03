@@ -41,6 +41,28 @@
     "myOrders": "Meus Pedidos",
     "subscriptions": "Assinaturas"
   },
+  "profile": {
+    "language": "Idioma",
+    "changeLanguage": "Alterar idioma do app",
+    "myOrders": "Meus Pedidos",
+    "trackVideos": "Acompanhe seus vídeos",
+    "notifications": "Notificações",
+    "commentsVotes": "Comentários e votos",
+    "videoIdeas": "Ideias de Vídeos",
+    "suggestVote": "Sugira e vote em ideias",
+    "vipCommunity": "Comunidade VIP",
+    "exclusiveAccess": "Acesso exclusivo",
+    "help": "Ajuda",
+    "faqSupport": "FAQ e suporte",
+    "terms": "Termos de Uso",
+    "readTerms": "Leia nossos termos",
+    "privacy": "Privacidade",
+    "privacyPolicy": "Política de privacidade",
+    "logout": "Sair",
+    "avatarSaved": "Foto de perfil atualizada!",
+    "avatarError": "Erro ao atualizar foto de perfil",
+    "avatarUrlPlaceholder": "Cole a URL da imagem..."
+  },
   "auth": {
     "enterButton": "Entrar",
     "loginTitle": "Bem-vindo de volta",
