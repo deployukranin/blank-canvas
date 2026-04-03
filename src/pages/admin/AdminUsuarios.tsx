@@ -56,9 +56,9 @@ const AdminUsuarios: React.FC = () => {
     if (!storeId) return;
     try {
       // Get user IDs that belong to this store
-      const { data: storeUsers, error: storeUsersError } = await supabase
+      const { data: storeUsersData, error: storeUsersError } = await supabase
         .from('store_users')
-        .select('user_id')
+        .select('user_id, id, banned_at')
         .eq('store_id', storeId);
 
       if (storeUsersError) throw storeUsersError;
