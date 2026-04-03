@@ -59,7 +59,7 @@ export function usePersistentConfig<T>({
                 setConfigState(merged);
                 
                 // Save to DB
-                const saved = await saveConfig(configKey, merged);
+                const saved = await saveConfig(configKey, merged, storeId);
                 if (saved) {
                   localStorage.removeItem(localStorageKey);
                   console.log(`Migrated ${localStorageKey} to database`);
