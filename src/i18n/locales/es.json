@@ -43,6 +43,31 @@
   },
   "auth": {
     "enterButton": "Entrar",
+@@INSERT_BEFORE@@
+  "profile": {
+    "language": "Idioma",
+    "changeLanguage": "Cambiar idioma de la app",
+    "myOrders": "Mis Pedidos",
+    "trackVideos": "Sigue tus videos",
+    "notifications": "Notificaciones",
+    "commentsVotes": "Comentarios y votos",
+    "videoIdeas": "Ideas de Videos",
+    "suggestVote": "Sugiere y vota ideas",
+    "vipCommunity": "Comunidad VIP",
+    "exclusiveAccess": "Acceso exclusivo",
+    "help": "Ayuda",
+    "faqSupport": "FAQ y soporte",
+    "terms": "Términos de Uso",
+    "readTerms": "Lee nuestros términos",
+    "privacy": "Privacidad",
+    "privacyPolicy": "Política de privacidad",
+    "logout": "Cerrar sesión",
+    "avatarSaved": "¡Foto de perfil actualizada!",
+    "avatarError": "Error al actualizar foto de perfil",
+    "avatarUrlPlaceholder": "Pega la URL de la imagen..."
+  },
+  "auth": {
+    "enterButton": "Entrar",
     "loginTitle": "Bienvenido de nuevo",
     "signUpTitle": "Crear cuenta",
     "emailPlaceholder": "tu@email.com",
