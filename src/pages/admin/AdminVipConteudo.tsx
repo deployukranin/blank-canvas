@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, X } from 'lucide-react';
+import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, Upload, X } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { uploadVipMedia, deleteVipMedia } from '@/lib/external-storage';
 
 interface VipContentItem {
   id: string;
@@ -37,14 +38,23 @@ const contentTypeLabels: Record<string, string> = {
   image: 'Image',
 };
 
+const acceptByType: Record<string, string> = {
+  video: 'video/*',
+  audio: 'audio/*',
+  image: 'image/*',
+  post: 'image/*,video/*,audio/*',
+};
+
 const AdminVipConteudo = () => {
   const { toast } = useToast();
   const { session } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [content, setContent] = useState<VipContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<VipContentItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [storeId, setStoreId] = useState<string | null>(null);
 
   // Form state
@@ -52,8 +62,8 @@ const AdminVipConteudo = () => {
   const [formContent, setFormContent] = useState('');
   const [formType, setFormType] = useState<string>('post');
   const [formMediaUrl, setFormMediaUrl] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState('');
 
-  // Get creator's store_id
   useEffect(() => {
     const getStoreId = async () => {
       if (!session?.user?.id) return;
@@ -67,7 +77,6 @@ const AdminVipConteudo = () => {
     getStoreId();
   }, [session?.user?.id]);
 
-  // Load VIP content
   useEffect(() => {
     if (!storeId) return;
     const load = async () => {
@@ -93,6 +102,7 @@ const AdminVipConteudo = () => {
     setFormContent('');
     setFormType('post');
     setFormMediaUrl('');
+    setUploadedFileName('');
     setEditingItem(null);
     setShowForm(false);
   };
@@ -103,16 +113,47 @@ const AdminVipConteudo = () => {
     setFormContent(item.content);
     setFormType(item.content_type);
     setFormMediaUrl(item.media_url || '');
+    setUploadedFileName('');
     setShowForm(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !storeId) return;
+
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      toast({ title: 'Arquivo muito grande', description: 'Máximo de 100MB', variant: 'destructive' });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const url = await uploadVipMedia(file, storeId);
+      setFormMediaUrl(url);
+      setUploadedFileName(file.name);
+      toast({ title: 'Upload concluído!' });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: 'Erro no upload', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setFormMediaUrl('');
+    setUploadedFileName('');
   };
 
   const handleSave = async () => {
     if (!formTitle.trim() || !formContent.trim()) {
-      toast({ title: 'Fill in title and content', variant: 'destructive' });
+      toast({ title: 'Preencha título e conteúdo', variant: 'destructive' });
       return;
     }
     if (!storeId) {
-      toast({ title: 'Store not found', variant: 'destructive' });
+      toast({ title: 'Loja não encontrada', variant: 'destructive' });
       return;
     }
 
@@ -136,7 +177,7 @@ const AdminVipConteudo = () => {
             ? { ...c, title: formTitle.trim(), content: formContent.trim(), content_type: formType, media_url: formMediaUrl.trim() || null }
             : c
         ));
-        toast({ title: 'Content updated!' });
+        toast({ title: 'Conteúdo atualizado!' });
       } else {
         const { data, error } = await supabase
           .from('vip_content')
@@ -153,53 +194,60 @@ const AdminVipConteudo = () => {
 
         if (error) throw error;
         setContent(prev => [data as VipContentItem, ...prev]);
-        toast({ title: 'Content published!' });
+        toast({ title: 'Conteúdo publicado!' });
       }
       resetForm();
     } catch (error: any) {
       console.error('Error saving:', error);
-      toast({ title: 'Error saving content', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('vip_content').delete().eq('id', id);
+  const handleDelete = async (item: VipContentItem) => {
+    // Try to delete media from external storage
+    if (item.media_url) {
+      try {
+        await deleteVipMedia(item.media_url);
+      } catch (e) {
+        console.warn('Could not delete external media:', e);
+      }
+    }
+
+    const { error } = await supabase.from('vip_content').delete().eq('id', item.id);
     if (error) {
-      toast({ title: 'Error deleting', variant: 'destructive' });
+      toast({ title: 'Erro ao deletar', variant: 'destructive' });
     } else {
-      setContent(prev => prev.filter(c => c.id !== id));
-      toast({ title: 'Content deleted' });
+      setContent(prev => prev.filter(c => c.id !== item.id));
+      toast({ title: 'Conteúdo deletado' });
     }
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title="VIP Content">
+      <AdminLayout title="Conteúdo VIP">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Loading...</span>
+          <span className="text-muted-foreground">Carregando...</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="VIP Content">
+    <AdminLayout title="Conteúdo VIP">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Manage exclusive content for your VIP subscribers
+            Gerencie conteúdo exclusivo para seus assinantes VIP
           </p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            New Content
+            Novo Conteúdo
           </Button>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {['post', 'video', 'audio', 'image'].map(type => {
             const count = content.filter(c => c.content_type === type).length;
@@ -215,7 +263,6 @@ const AdminVipConteudo = () => {
           })}
         </div>
 
-        {/* Content List */}
         <div className="space-y-3">
           {content.map((item, index) => (
             <motion.div
@@ -239,14 +286,14 @@ const AdminVipConteudo = () => {
                     <h3 className="font-semibold truncate">{item.title}</h3>
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{item.content}</p>
                     {item.media_url && (
-                      <p className="text-xs text-primary mt-2 truncate">📎 {item.media_url}</p>
+                      <p className="text-xs text-primary mt-2 truncate">📎 Mídia anexada</p>
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => openEdit(item)}>
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(item.id)}>
+                    <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(item)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -258,85 +305,133 @@ const AdminVipConteudo = () => {
           {content.length === 0 && (
             <GlassCard className="p-12 text-center">
               <Crown className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mb-4">No VIP content yet</p>
+              <p className="text-muted-foreground mb-4">Nenhum conteúdo VIP ainda</p>
               <Button onClick={() => { resetForm(); setShowForm(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create First Content
+                Criar Primeiro Conteúdo
               </Button>
             </GlassCard>
           )}
         </div>
       </div>
 
-      {/* Create/Edit Dialog */}
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept={acceptByType[formType] || '*/*'}
+        onChange={handleFileUpload}
+      />
+
       <Dialog open={showForm} onOpenChange={(open) => { if (!open) resetForm(); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              {editingItem ? 'Edit VIP Content' : 'New VIP Content'}
+              {editingItem ? 'Editar Conteúdo VIP' : 'Novo Conteúdo VIP'}
             </DialogTitle>
             <DialogDescription>
-              This content will only be visible to active VIP subscribers.
+              Este conteúdo será visível apenas para assinantes VIP ativos.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Title</label>
+              <label className="text-sm font-medium mb-1.5 block">Título</label>
               <Input
                 value={formTitle}
                 onChange={e => setFormTitle(e.target.value)}
-                placeholder="Content title..."
+                placeholder="Título do conteúdo..."
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Type</label>
-              <Select value={formType} onValueChange={setFormType}>
+              <label className="text-sm font-medium mb-1.5 block">Tipo</label>
+              <Select value={formType} onValueChange={(val) => { setFormType(val); setFormMediaUrl(''); setUploadedFileName(''); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="post">📝 Post</SelectItem>
-                  <SelectItem value="video">🎥 Video</SelectItem>
-                  <SelectItem value="audio">🎵 Audio</SelectItem>
-                  <SelectItem value="image">🖼️ Image</SelectItem>
+                  <SelectItem value="video">🎥 Vídeo</SelectItem>
+                  <SelectItem value="audio">🎵 Áudio</SelectItem>
+                  <SelectItem value="image">🖼️ Imagem</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Content</label>
+              <label className="text-sm font-medium mb-1.5 block">Conteúdo</label>
               <Textarea
                 value={formContent}
                 onChange={e => setFormContent(e.target.value)}
-                placeholder="Write your exclusive content..."
-                className="min-h-[120px]"
+                placeholder="Escreva seu conteúdo exclusivo..."
+                className="min-h-[100px]"
               />
             </div>
 
+            {/* Media upload section */}
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Media URL (optional)</label>
-              <Input
-                value={formMediaUrl}
-                onChange={e => setFormMediaUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=... or media link"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Link to video, audio, or image file
+              <label className="text-sm font-medium mb-1.5 block">Mídia</label>
+              
+              {formMediaUrl ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/50">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {uploadedFileName || 'Mídia anexada'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{formMediaUrl}</p>
+                  </div>
+                  <Button size="icon" variant="ghost" onClick={handleRemoveMedia} className="shrink-0">
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</>
+                    ) : (
+                      <><Upload className="w-4 h-4 mr-2" /> Fazer upload de arquivo</>
+                    )}
+                  </Button>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">ou</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  
+                  <Input
+                    value={formMediaUrl}
+                    onChange={e => setFormMediaUrl(e.target.value)}
+                    placeholder="Cole uma URL de mídia..."
+                    disabled={isUploading}
+                  />
+                </div>
+              )}
+              
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Upload direto (até 100MB) ou cole um link externo
               </p>
             </div>
 
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={resetForm}>
-                Cancel
+                Cancelar
               </Button>
-              <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
+              <Button className="flex-1" onClick={handleSave} disabled={isSaving || isUploading}>
                 {isSaving ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
                 ) : (
-                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? 'Update' : 'Publish'}</>
+                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? 'Atualizar' : 'Publicar'}</>
                 )}
               </Button>
             </div>
