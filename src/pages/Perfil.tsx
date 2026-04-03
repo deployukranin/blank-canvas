@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -16,6 +16,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useTenant } from '@/contexts/TenantContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -177,6 +178,22 @@ const PerfilPage = () => {
               </Link>
             );
           })}
+        </motion.div>
+
+        {/* Language Selector */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">{t('profile.language', 'Language')}</p>
+                <p className="text-xs text-muted-foreground">{t('profile.changeLanguage', 'Change app language')}</p>
+              </div>
+              <LanguageSelector variant="minimal" />
+            </div>
+          </GlassCard>
         </motion.div>
 
         <div className="space-y-2">
