@@ -43,6 +43,31 @@
   },
   "auth": {
     "enterButton": "Login",
+@@INSERT_BEFORE@@
+  "profile": {
+    "language": "Language",
+    "changeLanguage": "Change app language",
+    "myOrders": "My Orders",
+    "trackVideos": "Track your videos",
+    "notifications": "Notifications",
+    "commentsVotes": "Comments and votes",
+    "videoIdeas": "Video Ideas",
+    "suggestVote": "Suggest and vote on ideas",
+    "vipCommunity": "VIP Community",
+    "exclusiveAccess": "Exclusive access",
+    "help": "Help",
+    "faqSupport": "FAQ and support",
+    "terms": "Terms of Use",
+    "readTerms": "Read our terms",
+    "privacy": "Privacy",
+    "privacyPolicy": "Privacy policy",
+    "logout": "Log out",
+    "avatarSaved": "Profile photo updated!",
+    "avatarError": "Error updating profile photo",
+    "avatarUrlPlaceholder": "Paste image URL..."
+  },
+  "auth": {
+    "enterButton": "Login",
     "loginTitle": "Welcome back",
     "signUpTitle": "Create account",
     "emailPlaceholder": "your@email.com",
