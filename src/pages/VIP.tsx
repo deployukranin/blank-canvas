@@ -387,6 +387,30 @@ const VIPPage = () => {
 
   const featuredPlan = vipPlans.find(p => p.type === 'monthly') || vipPlans[0];
 
+  const adultWarningDialog = isAdultContent ? (
+    <AlertDialog open={showAdultWarning} onOpenChange={(open) => { if (!open && !adultAccepted) return; setShowAdultWarning(open); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-destructive" />
+            {t('vip.adultWarningTitle', 'Aviso de Conteúdo +18')}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm">
+            {t('vip.adultWarningDesc', 'Esta área contém conteúdo exclusivo para maiores de 18 anos. Ao continuar, você confirma que tem idade legal para visualizar este tipo de conteúdo.')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => window.history.back()}>
+            {t('vip.adultWarningLeave', 'Sair')}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); }} className="bg-destructive hover:bg-destructive/90">
+            {t('vip.adultWarningAccept', 'Tenho +18, continuar')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  ) : null;
+
   if (isLoading) {
     return (
       <MobileLayout title="VIP">
