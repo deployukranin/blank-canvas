@@ -11,6 +11,7 @@ interface UsePersistentConfigOptions<T> {
   defaultValue: T;
   localStorageKey?: string; // For migration from localStorage
   debounceMs?: number;
+  storeId?: string | null;
 }
 
 export function usePersistentConfig<T>({
@@ -18,6 +19,7 @@ export function usePersistentConfig<T>({
   defaultValue,
   localStorageKey,
   debounceMs = 1000,
+  storeId,
 }: UsePersistentConfigOptions<T>) {
   const [config, setConfigState] = useState<T>(defaultValue);
   const [isLoading, setIsLoading] = useState(true);
