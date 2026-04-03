@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getVipMediaSignedUrl } from '@/lib/external-storage';
 import {
   Dialog,
   DialogContent,
