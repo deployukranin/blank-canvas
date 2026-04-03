@@ -89,7 +89,6 @@ const CustomsPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
-  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
