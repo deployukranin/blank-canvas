@@ -31,6 +31,8 @@ interface UserProfile {
   avatar_url: string | null;
   created_at: string;
   isVIP: boolean;
+  banned_at: string | null;
+  store_user_id: string;
 }
 
 const AdminUsuarios: React.FC = () => {
