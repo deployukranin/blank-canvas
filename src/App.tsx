@@ -94,6 +94,7 @@ const App = () => (
 
                 {/* 🛡️ Rotas ADMIN (Creator Panel) — scoped by store slug */}
                 <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/customs" element={<TenantGate><AdminRoute requiredRole="admin"><AdminCustoms /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/ideas" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/orders" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/payments" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
