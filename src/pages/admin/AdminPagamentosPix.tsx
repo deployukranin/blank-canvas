@@ -58,6 +58,7 @@ const AdminPagamentosPix = () => {
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [pixKeyError, setPixKeyError] = useState<string | null>(null);
 
   const {
     config,
