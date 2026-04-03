@@ -40,6 +40,7 @@ import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
 import AdminVipConteudo from "./pages/admin/AdminVipConteudo";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
+import AdminCustoms from "./pages/admin/AdminCustoms";
 import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
