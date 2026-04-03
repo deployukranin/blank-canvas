@@ -719,6 +719,7 @@ const VIPPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      {adultWarningDialog}
     </MobileLayout>
   );
 };
