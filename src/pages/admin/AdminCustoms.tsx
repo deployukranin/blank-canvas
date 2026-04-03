@@ -54,6 +54,45 @@ const AdminCustoms = () => {
 
   const [showPreview, setShowPreview] = useState(false);
   const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
+  const supportedLanguages = ['pt-BR', 'en', 'es'] as const;
+
+  const getKnownTranslations = (translationKey: string) => {
+    return new Set(
+      supportedLanguages
+        .map((language) => i18n.getFixedT(language)(translationKey))
+        .filter((value) => value && value !== translationKey)
+    );
+  };
+
+  const getLocalizedConfigValue = (value: string, translationKey: string) => {
+    const trimmedValue = value?.trim();
+
+    if (!trimmedValue) {
+      return t(translationKey, { defaultValue: value });
+    }
+
+    return getKnownTranslations(translationKey).has(trimmedValue)
+      ? t(translationKey, { defaultValue: value })
+      : value;
+  };
+
+  const getLocalizedVideoCategoryName = (category: VideoCategory) =>
+    getLocalizedConfigValue(category.name, `customs.categories.${category.id}`);
+
+  const getLocalizedVideoCategoryDescription = (category: VideoCategory) =>
+    getLocalizedConfigValue(category.description, `customs.categories.${category.id}Desc`);
+
+  const getLocalizedAudioCategoryName = (category: AudioCategory) =>
+    getLocalizedConfigValue(category.name, `customs.audioCategories.${category.id}`);
+
+  const getLocalizedAudioCategoryDescription = (category: AudioCategory) =>
+    getLocalizedConfigValue(category.description, `customs.audioCategories.${category.id}Desc`);
+
+  const getLocalizedDurationLabel = (duration: VideoDuration | AudioDuration) =>
+    getLocalizedConfigValue(duration.label, `customs.durations.${duration.id}`);
+
+  const getLocalizedRule = (type: 'allowed' | 'notAllowed', index: number, rule: string) =>
+    getLocalizedConfigValue(rule, `customs.rules.${type}_${index}`);
 
   useEffect(() => {
     if (!isLoading) {
@@ -293,11 +332,11 @@ const AdminCustoms = () => {
                 )}
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.titleLabel', 'Título')}</label>
-                  <Input value={config.previewTitle} onChange={e => setConfig({ ...config, previewTitle: e.target.value })} />
+                  <Input value={getLocalizedConfigValue(config.previewTitle, 'customs.previewTitleDefault')} onChange={e => setConfig({ ...config, previewTitle: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.descLabel', 'Descrição')}</label>
-                  <Textarea value={config.previewDescription} onChange={e => setConfig({ ...config, previewDescription: e.target.value })} className="min-h-[80px]" />
+                  <Textarea value={getLocalizedConfigValue(config.previewDescription, 'customs.previewDescDefault')} onChange={e => setConfig({ ...config, previewDescription: e.target.value })} className="min-h-[80px]" />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.deliveryDays', 'Prazo de Entrega (dias)')}</label>
@@ -323,12 +362,12 @@ const AdminCustoms = () => {
                   <motion.div key={category.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="p-4 bg-muted/30 rounded-lg space-y-3">
                     <div className="flex items-center gap-3">
                       <Input className="w-16 text-center text-xl" value={category.icon} onChange={e => updateVideoCategory(index, 'icon', e.target.value)} />
-                      <Input className="flex-1" placeholder={t('customsAdmin.categoryName', 'Nome')} value={category.name} onChange={e => updateVideoCategory(index, 'name', e.target.value)} />
+                      <Input className="flex-1" placeholder={t('customsAdmin.categoryName', 'Nome')} value={getLocalizedVideoCategoryName(category)} onChange={e => updateVideoCategory(index, 'name', e.target.value)} />
                       <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => removeVideoCategory(index)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Input placeholder={t('admin.description', 'Descrição')} value={category.description} onChange={e => updateVideoCategory(index, 'description', e.target.value)} />
+                    <Input placeholder={t('admin.description', 'Descrição')} value={getLocalizedVideoCategoryDescription(category)} onChange={e => updateVideoCategory(index, 'description', e.target.value)} />
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground whitespace-nowrap">{t('customsAdmin.surcharge', 'Taxa fixa')}: +{currencySymbol}</span>
                       <Input type="number" className="w-24" step="0.01" min={0} value={category.surcharge || 0} onChange={e => updateVideoCategory(index, 'surcharge', parseFloat(e.target.value) || 0)} />
@@ -362,7 +401,7 @@ const AdminCustoms = () => {
               <div className="space-y-3">
                 {config.durations.map((duration, index) => (
                   <motion.div key={duration.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <Input className="w-full sm:w-32" placeholder="Label" value={duration.label} onChange={e => updateVideoDuration(index, 'label', e.target.value)} />
+                    <Input className="w-full sm:w-32" placeholder="Label" value={getLocalizedDurationLabel(duration)} onChange={e => updateVideoDuration(index, 'label', e.target.value)} />
                     <div className="flex items-center gap-2">
                       <Input type="number" className="w-20" min={1} value={duration.minutes} onChange={e => updateVideoDuration(index, 'minutes', parseInt(e.target.value) || 1)} />
                       <span className="text-sm text-muted-foreground">min</span>
@@ -416,7 +455,7 @@ const AdminCustoms = () => {
                   <div className="space-y-2">
                     {config.rules.allowed.map((rule, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <Input value={rule} onChange={e => updateRule('allowed', index, e.target.value)} className="flex-1" />
+                        <Input value={getLocalizedRule('allowed', index, rule)} onChange={e => updateRule('allowed', index, e.target.value)} className="flex-1" />
                         <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => removeRule('allowed', index)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -440,7 +479,7 @@ const AdminCustoms = () => {
                   <div className="space-y-2">
                     {config.rules.notAllowed.map((rule, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <Input value={rule} onChange={e => updateRule('notAllowed', index, e.target.value)} className="flex-1" />
+                        <Input value={getLocalizedRule('notAllowed', index, rule)} onChange={e => updateRule('notAllowed', index, e.target.value)} className="flex-1" />
                         <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => removeRule('notAllowed', index)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -503,12 +542,12 @@ const AdminCustoms = () => {
                   <motion.div key={category.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="p-4 bg-muted/30 rounded-lg space-y-3">
                     <div className="flex items-center gap-3">
                       <Input className="w-16 text-center text-xl" value={category.icon} onChange={e => updateAudioCategory(index, 'icon', e.target.value)} />
-                      <Input className="flex-1" placeholder={t('customsAdmin.categoryName', 'Nome')} value={category.name} onChange={e => updateAudioCategory(index, 'name', e.target.value)} />
+                      <Input className="flex-1" placeholder={t('customsAdmin.categoryName', 'Nome')} value={getLocalizedAudioCategoryName(category)} onChange={e => updateAudioCategory(index, 'name', e.target.value)} />
                       <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => removeAudioCategory(index)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Input placeholder={t('admin.description', 'Descrição')} value={category.description} onChange={e => updateAudioCategory(index, 'description', e.target.value)} />
+                    <Input placeholder={t('admin.description', 'Descrição')} value={getLocalizedAudioCategoryDescription(category)} onChange={e => updateAudioCategory(index, 'description', e.target.value)} />
                   </motion.div>
                 ))}
                 {config.audioCategories.length === 0 && (
@@ -535,7 +574,7 @@ const AdminCustoms = () => {
               <div className="space-y-3">
                 {config.audioDurations.map((duration, index) => (
                   <motion.div key={duration.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <Input className="w-full sm:w-32" placeholder="Label" value={duration.label} onChange={e => updateAudioDuration(index, 'label', e.target.value)} />
+                    <Input className="w-full sm:w-32" placeholder="Label" value={getLocalizedDurationLabel(duration)} onChange={e => updateAudioDuration(index, 'label', e.target.value)} />
                     <div className="flex items-center gap-2">
                       <Input type="number" className="w-20" min={1} value={duration.minutes} onChange={e => updateAudioDuration(index, 'minutes', parseInt(e.target.value) || 1)} />
                       <span className="text-sm text-muted-foreground">min</span>
@@ -577,7 +616,7 @@ const AdminCustoms = () => {
                 </h4>
                 <ul className="space-y-1">
                   {config.rules.allowed.map((rule, idx) => (
-                    <li key={idx} className="text-sm flex items-start gap-2"><span className="text-green-500">✓</span>{rule}</li>
+                    <li key={idx} className="text-sm flex items-start gap-2"><span className="text-green-500">✓</span>{getLocalizedRule('allowed', idx, rule)}</li>
                   ))}
                 </ul>
               </div>
@@ -588,7 +627,7 @@ const AdminCustoms = () => {
                 </h4>
                 <ul className="space-y-1">
                   {config.rules.notAllowed.map((rule, idx) => (
-                    <li key={idx} className="text-sm flex items-start gap-2"><span className="text-red-500">✕</span>{rule}</li>
+                    <li key={idx} className="text-sm flex items-start gap-2"><span className="text-red-500">✕</span>{getLocalizedRule('notAllowed', idx, rule)}</li>
                   ))}
                 </ul>
               </div>
