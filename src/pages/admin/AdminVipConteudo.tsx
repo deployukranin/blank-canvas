@@ -308,6 +308,7 @@ const AdminVipConteudo = () => {
           </div>
         </GlassCard>
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {['post', 'video', 'audio', 'image'].map(type => {
             const count = content.filter(c => c.content_type === type).length;
             return (
