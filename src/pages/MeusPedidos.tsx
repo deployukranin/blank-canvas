@@ -13,7 +13,8 @@ import {
   Sparkles,
   Download,
   Loader2,
-  CreditCard
+  CreditCard,
+  MessageCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
+import { OrderChat } from '@/components/orders/OrderChat';
 import {
   Dialog,
   DialogContent,
@@ -108,6 +110,8 @@ const MeusPedidosPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<DBOrder | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
@@ -149,9 +153,22 @@ const MeusPedidosPage = () => {
     await requestPermission();
   };
 
-  const handleViewDetails = (order: DBOrder) => {
+  const handleViewDetails = async (order: DBOrder) => {
     setSelectedOrder(order);
+    setShowChat(false);
+    setHasChatMessages(false);
     setShowDetailsDialog(true);
+
+    // Check if admin has started a conversation
+    const { data } = await supabase
+      .from('order_messages')
+      .select('id')
+      .eq('order_id', order.id)
+      .limit(1);
+    
+    if (data && data.length > 0) {
+      setHasChatMessages(true);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -426,6 +443,32 @@ const MeusPedidosPage = () => {
                         )}
                       </div>
                     </GlassCard>
+                  )}
+
+                  {/* Chat Section - only visible when admin started conversation */}
+                  {hasChatMessages && (
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => setShowChat(!showChat)}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {showChat 
+                          ? t('orders.hideChat', 'Fechar Chat') 
+                          : t('orders.openChat', 'Abrir Chat com Criador')
+                        }
+                      </Button>
+                      {showChat && selectedOrder && (
+                        <GlassCard className="p-0 overflow-hidden">
+                          <OrderChat
+                            orderId={selectedOrder.id}
+                            customerName={selectedOrder.customer_name}
+                            senderRole="client"
+                          />
+                        </GlassCard>
+                      )}
+                    </div>
                   )}
                 </div>
               </>

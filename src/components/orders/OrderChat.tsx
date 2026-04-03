@@ -18,9 +18,10 @@ interface Message {
 interface OrderChatProps {
   orderId: string;
   customerName: string;
+  senderRole?: 'admin' | 'client';
 }
 
-const OrderChatInner = ({ orderId, customerName }: OrderChatProps) => {
+const OrderChatInner = ({ orderId, customerName, senderRole = 'admin' }: OrderChatProps) => {
   const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -87,7 +88,7 @@ const OrderChatInner = ({ orderId, customerName }: OrderChatProps) => {
     const { error } = await supabase.from('order_messages').insert({
       order_id: orderId,
       sender_id: session.user.id,
-      sender_role: 'admin',
+      sender_role: senderRole,
       message: newMessage.trim(),
     });
 
@@ -143,7 +144,10 @@ const OrderChatInner = ({ orderId, customerName }: OrderChatProps) => {
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-8">
-            Nenhuma mensagem ainda. Inicie a conversa com {customerName}.
+            {senderRole === 'client' 
+              ? 'O criador ainda não iniciou uma conversa.'
+              : `Nenhuma mensagem ainda. Inicie a conversa com ${customerName}.`
+            }
           </div>
         )}
 
@@ -169,7 +173,9 @@ const OrderChatInner = ({ orderId, customerName }: OrderChatProps) => {
                     }`}
                   >
                     {!isMe && (
-                      <p className="text-xs font-medium mb-0.5 opacity-70">{customerName}</p>
+                      <p className="text-xs font-medium mb-0.5 opacity-70">
+                        {msg.sender_role === 'admin' ? 'Criador' : customerName}
+                      </p>
                     )}
                     <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
                     <div className={`flex items-center gap-1 justify-end mt-0.5 ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
