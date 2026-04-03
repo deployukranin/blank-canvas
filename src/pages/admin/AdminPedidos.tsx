@@ -416,6 +416,26 @@ const AdminPedidos: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Order Chat Dialog */}
+      <Dialog open={!!chatOrder} onOpenChange={(open) => { if (!open) setChatOrder(null); }}>
+        <DialogContent className="glass max-w-lg p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              Chat - {chatOrder?.customer_name}
+            </DialogTitle>
+            <DialogDescription>
+              Pedido: {chatOrder?.category_name || chatOrder?.category} • {chatOrder?.correlation_id.slice(0, 8)}...
+            </DialogDescription>
+          </DialogHeader>
+          {chatOrder && (
+            <OrderChat
+              orderId={chatOrder.id}
+              customerName={chatOrder.customer_name}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
