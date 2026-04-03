@@ -89,7 +89,6 @@ const CustomsPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
-  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
@@ -144,17 +143,29 @@ const CustomsPage = () => {
   const handlePayment = async () => {
     if (!selectedCategory || !selectedDuration || !config) return;
 
+    if (!personalizationData.name.trim()) {
+      toast({
+        title: t('customs.nameRequired'),
+        description: t('customs.nameRequiredDesc'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsProcessing(true);
-    const finalPrice = calculatePrice(selectedDuration, selectedCategory);
+    const finalPriceVal = calculatePrice(selectedDuration, selectedCategory);
 
     const result = await createCharge({
-      amount: finalPrice,
+      amount: finalPriceVal,
       productType: 'video',
       category: selectedCategory.id,
       categoryName: selectedCategory.name,
       durationMinutes: selectedDuration.minutes,
       durationLabel: selectedDuration.label,
-      customerName: personalizationData.name || 'Cliente',
+      customerName: personalizationData.name,
+      triggers: personalizationData.triggers,
+      script: personalizationData.script,
+      observations: personalizationData.observations,
       storeId: store?.id,
     });
 
@@ -166,7 +177,7 @@ const CustomsPage = () => {
       trackEvent('video_pix_charge_created', { 
         category: selectedCategory.id,
         duration: selectedDuration.id,
-        price: finalPrice
+        price: finalPriceVal
       });
     } else {
       toast({
@@ -179,70 +190,11 @@ const CustomsPage = () => {
 
   const handlePixPaymentConfirmed = () => {
     setShowPixModal(false);
-    setShowPersonalizationDialog(true);
+    setShowSuccessDialog(true);
     trackEvent('video_payment_completed', { 
       category: selectedCategory?.id,
       duration: selectedDuration?.id,
     });
-  };
-
-  const handleSubmitPersonalization = async () => {
-    if (!selectedCategory || !selectedDuration || !config) return;
-
-    if (!personalizationData.name.trim()) {
-      toast({
-        title: t('customs.nameRequired'),
-        description: t('customs.nameRequiredDesc'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-
-    await onCustomOrder({
-      type: 'video',
-      category: selectedCategory.id,
-      categoryName: selectedCategory.name,
-      duration: selectedDuration.minutes,
-      durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
-      name: personalizationData.name,
-      triggers: personalizationData.triggers,
-      script: personalizationData.script,
-      observations: personalizationData.observations,
-      status: 'pending',
-    });
-
-    const deliveryDate = new Date();
-    deliveryDate.setDate(deliveryDate.getDate() + (config?.deliveryDays || 7));
-    
-    addOrder<VideoOrder>({
-      type: 'video',
-      category: selectedCategory.id,
-      categoryName: selectedCategory.name,
-      categoryIcon: selectedCategory.icon,
-      duration: selectedDuration.minutes,
-      durationLabel: selectedDuration.label,
-      price: calculatePrice(selectedDuration, selectedCategory),
-      status: 'pending',
-      estimatedDelivery: deliveryDate.toISOString().split('T')[0],
-      personalization: {
-        name: personalizationData.name,
-        triggers: personalizationData.triggers,
-        script: personalizationData.script,
-        observations: personalizationData.observations,
-      },
-    });
-
-    trackEvent('video_order_submitted', { 
-      category: selectedCategory.id,
-      duration: selectedDuration.id 
-    });
-
-    setShowPersonalizationDialog(false);
-    setShowSuccessDialog(true);
-    setIsProcessing(false);
   };
 
   const resetVideoOrder = () => {
@@ -715,9 +667,9 @@ const CustomsPage = () => {
       {/* Auth Modal */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={t('customs.loginToOrder')} />
 
-      {/* Video Payment Dialog */}
+      {/* Video Payment Dialog - includes personalization */}
       <Dialog open={showPaymentDialog} onOpenChange={() => !isProcessing && !isPixLoading && setShowPaymentDialog(false)}>
-        <DialogContent className="glass mx-4">
+        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('customs.confirmPurchase')}</DialogTitle>
             <DialogDescription>{t('customs.reviewOrder')}</DialogDescription>
@@ -732,23 +684,36 @@ const CustomsPage = () => {
                 <span className="text-muted-foreground">{t('customs.duration')}</span>
                 <span className="font-medium">{selectedDuration?.label}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('customs.delivery')}:</span>
-                <span className="font-medium">{t('customs.deliveryBusinessDays', { days: config.deliveryDays })}</span>
-              </div>
               <div className="border-t border-white/10 my-2" />
               <div className="flex justify-between">
                 <span className="font-semibold">{t('customs.total')}</span>
-                <span className="font-bold text-lg text-primary">
-                  {formatCurrency(finalPrice)}
-                </span>
+                <span className="font-bold text-lg text-primary">{formatCurrency(finalPrice)}</span>
               </div>
             </div>
+
+            {/* Personalization fields inline */}
+            <div>
+              <label className="text-sm font-medium mb-1 block">{t('customs.yourName')} *</label>
+              <Input placeholder={t('customs.nameInVideo')} value={personalizationData.name} onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))} className="glass border-white/10" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">{t('customs.preferredTriggers')}</label>
+              <Input placeholder={t('customs.triggersPlaceholder')} value={personalizationData.triggers} onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))} className="glass border-white/10" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">{t('customs.scriptIdeas')}</label>
+              <Textarea placeholder={t('customs.scriptPlaceholder')} value={personalizationData.script} onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))} className="glass border-white/10 min-h-[80px]" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">{t('customs.observations')}</label>
+              <Textarea placeholder={t('customs.observationsPlaceholder')} value={personalizationData.observations} onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))} className="glass border-white/10" />
+            </div>
+
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={() => setShowPaymentDialog(false)} disabled={isProcessing || isPixLoading}>
                 {t('common.cancel')}
               </Button>
-              <Button className="flex-1 bg-gradient-to-r from-primary to-accent gap-2" onClick={handlePayment} disabled={isProcessing || isPixLoading}>
+              <Button className="flex-1 bg-gradient-to-r from-primary to-accent gap-2" onClick={handlePayment} disabled={isProcessing || isPixLoading || !personalizationData.name.trim()}>
                 {isProcessing || isPixLoading ? t('customs.generatingPix') : t('customs.confirmPayment')}
               </Button>
             </div>
@@ -767,42 +732,10 @@ const CustomsPage = () => {
           correlationId={chargeData.correlationId!}
           expiresAt={chargeData.expiresAt!}
           amount={finalPrice}
+          isManualPix
         />
       )}
 
-      {/* Video Personalization Dialog */}
-      <Dialog open={showPersonalizationDialog} onOpenChange={() => !isProcessing && setShowPersonalizationDialog(false)}>
-        <DialogContent className="glass mx-4 max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('customs.personalizeVideo')}</DialogTitle>
-            <DialogDescription>{t('customs.fillDetailsExclusive')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">{t('customs.yourName')}</label>
-              <Input placeholder={t('customs.nameInVideo')} value={personalizationData.name} onChange={(e) => setPersonalizationData(prev => ({ ...prev, name: e.target.value }))} className="glass border-white/10" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">{t('customs.preferredTriggers')}</label>
-              <Input placeholder={t('customs.triggersPlaceholder')} value={personalizationData.triggers} onChange={(e) => setPersonalizationData(prev => ({ ...prev, triggers: e.target.value }))} className="glass border-white/10" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">{t('customs.scriptIdeas')}</label>
-              <Textarea placeholder={t('customs.scriptPlaceholder')} value={personalizationData.script} onChange={(e) => setPersonalizationData(prev => ({ ...prev, script: e.target.value }))} className="glass border-white/10 min-h-[80px]" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">{t('customs.observations')}</label>
-              <Textarea placeholder={t('customs.observationsPlaceholder')} value={personalizationData.observations} onChange={(e) => setPersonalizationData(prev => ({ ...prev, observations: e.target.value }))} className="glass border-white/10" />
-            </div>
-            <Button className="w-full bg-gradient-to-r from-primary to-accent gap-2" onClick={handleSubmitPersonalization} disabled={isProcessing}>
-              <Send className="w-4 h-4" />
-              {isProcessing ? t('customs.sending') : t('customs.submitOrder')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Video Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={resetVideoOrder}>
         <DialogContent className="glass mx-4 text-center">
           <div className="py-6">
@@ -856,6 +789,7 @@ const CustomsPage = () => {
           correlationId={audioChargeData.correlationId!}
           expiresAt={audioChargeData.expiresAt!}
           amount={audioFinalPrice}
+          isManualPix
         />
       )}
 

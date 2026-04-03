@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, MessageCircle } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, MessageCircle, CreditCard, Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -32,7 +32,10 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
+  triggers: string | null;
+  script: string | null;
   user_id: string | null;
+  payment_proof_url: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
@@ -40,7 +43,7 @@ const AdminPedidos: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'processing' | 'completed' | 'cancelled'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'paid' | 'processing' | 'completed' | 'cancelled'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'video' | 'audio'>('all');
   
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -49,6 +52,8 @@ const AdminPedidos: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [showProofDialog, setShowProofDialog] = useState(false);
 
   const isBR = i18n.language?.startsWith('pt');
   const currencySymbol = isBR ? 'R$' : '$';
@@ -68,7 +73,7 @@ const AdminPedidos: React.FC = () => {
       setOrders(data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      toast.error(t('orders.loadError'));
+      toast.error(t('orders.loadError', 'Erro ao carregar pedidos'));
     } finally {
       setIsLoading(false);
     }
@@ -85,9 +90,17 @@ const AdminPedidos: React.FC = () => {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
+      const updateData: Record<string, unknown> = { status: newStatus };
+      if (newStatus === 'paid') {
+        updateData.paid_at = new Date().toISOString();
+      }
+      if (newStatus === 'completed') {
+        updateData.delivered_at = new Date().toISOString();
+      }
+      
       const { error } = await supabase
         .from('custom_orders')
-        .update({ status: newStatus })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
@@ -95,10 +108,10 @@ const AdminPedidos: React.FC = () => {
       setOrders(orders.map(order => 
         order.id === id ? { ...order, status: newStatus } : order
       ));
-      toast.success(t('orders.statusUpdated'));
+      toast.success(t('orders.statusUpdated', 'Status atualizado'));
     } catch (error) {
       console.error('Error updating status:', error);
-      toast.error(t('orders.statusUpdateError'));
+      toast.error(t('orders.statusUpdateError', 'Erro ao atualizar status'));
     }
   };
 
@@ -127,17 +140,30 @@ const AdminPedidos: React.FC = () => {
     }
   };
 
+  const handleViewProof = async (order: Order) => {
+    if (order.payment_proof_url) {
+      const { data } = await supabase.storage
+        .from('payment-proofs')
+        .createSignedUrl(order.payment_proof_url, 300);
+      if (data?.signedUrl) {
+        setProofUrl(data.signedUrl);
+        setShowProofDialog(true);
+      }
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-500/20 text-yellow-400">{t('orders.pending')}</Badge>;
-      case 'processing':
-        return <Badge className="bg-blue-500/20 text-blue-400">{t('orders.processing')}</Badge>;
-      case 'completed':
+        return <Badge className="bg-yellow-500/20 text-yellow-400">{t('orders.awaitingPayment', 'Aguardando Pagamento')}</Badge>;
       case 'paid':
-        return <Badge className="bg-green-500/20 text-green-400">{t('orders.completed')}</Badge>;
+        return <Badge className="bg-emerald-500/20 text-emerald-400">{t('orders.paymentConfirmed', 'Pagamento Confirmado')}</Badge>;
+      case 'processing':
+        return <Badge className="bg-blue-500/20 text-blue-400">{t('orders.processing', 'Em Produção')}</Badge>;
+      case 'completed':
+        return <Badge className="bg-green-500/20 text-green-400">{t('orders.completed', 'Concluído')}</Badge>;
       case 'cancelled':
-        return <Badge className="bg-red-500/20 text-red-400">{t('orders.cancelled')}</Badge>;
+        return <Badge className="bg-red-500/20 text-red-400">{t('orders.cancelled', 'Cancelado')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -146,9 +172,9 @@ const AdminPedidos: React.FC = () => {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'video':
-        return <Badge variant="outline" className="gap-1"><Video className="w-3 h-3" /> {t('orders.video')}</Badge>;
+        return <Badge variant="outline" className="gap-1"><Video className="w-3 h-3" /> {t('orders.video', 'Vídeo')}</Badge>;
       case 'audio':
-        return <Badge variant="outline" className="gap-1"><Music className="w-3 h-3" /> {t('orders.audio')}</Badge>;
+        return <Badge variant="outline" className="gap-1"><Music className="w-3 h-3" /> {t('orders.audio', 'Áudio')}</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -166,44 +192,44 @@ const AdminPedidos: React.FC = () => {
 
   const orderStats = {
     pending: orders.filter(o => o.status === 'pending').length,
+    paid: orders.filter(o => o.status === 'paid').length,
     processing: orders.filter(o => o.status === 'processing').length,
-    completed: orders.filter(o => o.status === 'completed' || o.status === 'paid').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length,
+    completed: orders.filter(o => o.status === 'completed').length,
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title={t('orders.title')}>
+      <AdminLayout title={t('orders.title', 'Pedidos')}>
         <GlassCard className="p-8 text-center">
-          <p className="text-muted-foreground">{t('common.loading')}</p>
+          <p className="text-muted-foreground">{t('common.loading', 'Carregando...')}</p>
         </GlassCard>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title={t('orders.title')}>
+    <AdminLayout title={t('orders.title', 'Pedidos')}>
       <div className="space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <GlassCard className="p-4 text-center">
-            <Clock className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
+            <CreditCard className="w-6 h-6 mx-auto text-yellow-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.pending}</p>
-            <p className="text-xs text-muted-foreground">{t('orders.pending')}</p>
+            <p className="text-xs text-muted-foreground">{t('orders.awaitingPayment', 'Aguardando Pagamento')}</p>
+          </GlassCard>
+          <GlassCard className="p-4 text-center">
+            <CheckCircle className="w-6 h-6 mx-auto text-emerald-400 mb-2" />
+            <p className="text-xl font-bold">{orderStats.paid}</p>
+            <p className="text-xs text-muted-foreground">{t('orders.paymentConfirmed', 'Pagamento Confirmado')}</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
             <Package className="w-6 h-6 mx-auto text-blue-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.processing}</p>
-            <p className="text-xs text-muted-foreground">{t('orders.inProduction')}</p>
+            <p className="text-xs text-muted-foreground">{t('orders.inProduction', 'Em Produção')}</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
             <CheckCircle className="w-6 h-6 mx-auto text-green-400 mb-2" />
             <p className="text-xl font-bold">{orderStats.completed}</p>
-            <p className="text-xs text-muted-foreground">{t('orders.completed')}</p>
-          </GlassCard>
-          <GlassCard className="p-4 text-center">
-            <XCircle className="w-6 h-6 mx-auto text-red-400 mb-2" />
-            <p className="text-xl font-bold">{orderStats.cancelled}</p>
-            <p className="text-xs text-muted-foreground">{t('orders.cancelled')}</p>
+            <p className="text-xs text-muted-foreground">{t('orders.completed', 'Concluídos')}</p>
           </GlassCard>
         </div>
 
@@ -212,32 +238,33 @@ const AdminPedidos: React.FC = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder={t('orders.searchPlaceholder')}
+                placeholder={t('orders.searchPlaceholder', 'Buscar pedidos...')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-              <SelectTrigger className="w-full lg:w-40">
+              <SelectTrigger className="w-full lg:w-48">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('orders.allStatuses')}</SelectItem>
-                <SelectItem value="pending">{t('orders.pending')}</SelectItem>
-                <SelectItem value="processing">{t('orders.processing')}</SelectItem>
-                <SelectItem value="completed">{t('orders.completed')}</SelectItem>
-                <SelectItem value="cancelled">{t('orders.cancelled')}</SelectItem>
+                <SelectItem value="all">{t('orders.allStatuses', 'Todos os status')}</SelectItem>
+                <SelectItem value="pending">{t('orders.awaitingPayment', 'Aguardando Pagamento')}</SelectItem>
+                <SelectItem value="paid">{t('orders.paymentConfirmed', 'Pagamento Confirmado')}</SelectItem>
+                <SelectItem value="processing">{t('orders.processing', 'Em Produção')}</SelectItem>
+                <SelectItem value="completed">{t('orders.completed', 'Concluído')}</SelectItem>
+                <SelectItem value="cancelled">{t('orders.cancelled', 'Cancelado')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
               <SelectTrigger className="w-full lg:w-40">
-                <SelectValue placeholder={t('contentAdmin.type')} />
+                <SelectValue placeholder={t('contentAdmin.type', 'Tipo')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('orders.allTypes')}</SelectItem>
-                <SelectItem value="video">{t('orders.video')}</SelectItem>
-                <SelectItem value="audio">{t('orders.audio')}</SelectItem>
+                <SelectItem value="all">{t('orders.allTypes', 'Todos os tipos')}</SelectItem>
+                <SelectItem value="video">{t('orders.video', 'Vídeo')}</SelectItem>
+                <SelectItem value="audio">{t('orders.audio', 'Áudio')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -261,12 +288,18 @@ const AdminPedidos: React.FC = () => {
                     </div>
                     <h3 className="font-semibold">{order.category_name || order.category}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {t('orders.client')}: {order.customer_name}
+                      {t('orders.client', 'Cliente')}: {order.customer_name}
                     </p>
                     {(order.observations || order.preferences) && (
                       <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted/50 rounded">
                         📝 {order.observations || order.preferences}
                       </p>
+                    )}
+                    {(order.triggers || order.script) && (
+                      <div className="text-sm text-muted-foreground mt-1 p-2 bg-muted/50 rounded space-y-1">
+                        {order.triggers && <p>🎯 Triggers: {order.triggers}</p>}
+                        {order.script && <p>📄 {t('orders.script', 'Roteiro')}: {order.script}</p>}
+                      </div>
                     )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(order.created_at)}
@@ -278,7 +311,7 @@ const AdminPedidos: React.FC = () => {
                       {currencySymbol} {(order.amount_cents / 100).toFixed(2)}
                     </p>
                     
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap justify-end">
                       <Button
                         size="sm"
                         variant="outline"
@@ -288,13 +321,30 @@ const AdminPedidos: React.FC = () => {
                         <MessageCircle className="w-4 h-4" />
                         Chat
                       </Button>
+
+                      {/* View payment proof */}
+                      {order.payment_proof_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          onClick={() => handleViewProof(order)}
+                        >
+                          <Eye className="w-4 h-4" />
+                          {t('orders.viewProof', 'Ver Comprovante')}
+                        </Button>
+                      )}
+
+                      {/* PENDING: Confirm Payment + Cancel */}
                       {order.status === 'pending' && (
                         <>
                           <Button
                             size="sm"
-                            onClick={() => handleStatusChange(order.id, 'processing')}
+                            className="bg-emerald-500 hover:bg-emerald-600 gap-1"
+                            onClick={() => handleStatusChange(order.id, 'paid')}
                           >
-                            {t('orders.start')}
+                            <CreditCard className="w-4 h-4" />
+                            {t('orders.confirmPayment', 'Confirmar Pagamento')}
                           </Button>
                           <Button
                             size="sm"
@@ -302,10 +352,24 @@ const AdminPedidos: React.FC = () => {
                             className="text-red-400 border-red-400/50"
                             onClick={() => handleStatusChange(order.id, 'cancelled')}
                           >
-                            {t('orders.cancel')}
+                            {t('orders.cancel', 'Cancelar')}
                           </Button>
                         </>
                       )}
+
+                      {/* PAID: Start Production */}
+                      {order.status === 'paid' && (
+                        <Button
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleStatusChange(order.id, 'processing')}
+                        >
+                          <Play className="w-4 h-4" />
+                          {t('orders.start', 'Iniciar Produção')}
+                        </Button>
+                      )}
+
+                      {/* PROCESSING: Deliver */}
                       {order.status === 'processing' && (
                         <Button
                           size="sm"
@@ -313,7 +377,7 @@ const AdminPedidos: React.FC = () => {
                           onClick={() => handleDeliverVideo(order)}
                         >
                           <Upload className="w-4 h-4" />
-                          {t('orders.deliver')}
+                          {t('orders.deliver', 'Entregar')}
                         </Button>
                       )}
                     </div>
@@ -326,11 +390,12 @@ const AdminPedidos: React.FC = () => {
 
         {filteredOrders.length === 0 && (
           <GlassCard className="p-8 text-center">
-            <p className="text-muted-foreground">{t('orders.noOrders')}</p>
+            <p className="text-muted-foreground">{t('orders.noOrders', 'Nenhum pedido encontrado')}</p>
           </GlassCard>
         )}
       </div>
 
+      {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
         <DialogContent className="glass max-w-2xl">
           <DialogHeader>
@@ -340,13 +405,12 @@ const AdminPedidos: React.FC = () => {
               ) : (
                 <Music className="w-5 h-5 text-blue-400" />
               )}
-              {selectedOrderForUpload?.product_type === 'video' ? t('orders.deliverVideo') : t('orders.deliverAudio')}
+              {selectedOrderForUpload?.product_type === 'video' ? t('orders.deliverVideo', 'Entregar Vídeo') : t('orders.deliverAudio', 'Entregar Áudio')}
             </DialogTitle>
             <DialogDescription>
               {t('orders.orderFrom', { name: selectedOrderForUpload?.customer_name })}
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 mt-4">
             <GlassCard className="p-4">
               <h4 className="font-semibold mb-2">{selectedOrderForUpload?.category_name || selectedOrderForUpload?.category}</h4>
@@ -356,13 +420,9 @@ const AdminPedidos: React.FC = () => {
                 </p>
               )}
             </GlassCard>
-
             {uploadedVideoUrl ? (
               <div className="rounded-lg overflow-hidden">
-                <VideoPlayer 
-                  videoUrl={uploadedVideoUrl} 
-                  title={t('orders.videoPreview')}
-                />
+                <VideoPlayer videoUrl={uploadedVideoUrl} title={t('orders.videoPreview', 'Preview')} />
               </div>
             ) : (
               <GlassCard 
@@ -371,51 +431,35 @@ const AdminPedidos: React.FC = () => {
               >
                 <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-sm font-medium mb-2">
-                  {selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo') : t('orders.clickToUploadAudio')}
+                  {selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo', 'Clique para enviar o vídeo') : t('orders.clickToUploadAudio', 'Clique para enviar o áudio')}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {selectedOrderForUpload?.product_type === 'video' 
-                    ? t('orders.videoFormats')
-                    : t('orders.audioFormats')
-                  }
-                </p>
-                {isUploading && (
-                  <div className="mt-4">
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary animate-pulse w-1/2" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">{t('orders.uploading')}</p>
-                  </div>
-                )}
               </GlassCard>
             )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={selectedOrderForUpload?.product_type === 'video' ? 'video/*' : 'audio/*'}
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-
+            <input ref={fileInputRef} type="file" accept={selectedOrderForUpload?.product_type === 'video' ? 'video/*' : 'audio/*'} className="hidden" onChange={handleFileUpload} />
             <div className="flex gap-2 justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowUploadDialog(false)}
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                disabled={!uploadedVideoUrl || isUploading}
-                onClick={handleConfirmDelivery}
-                className="bg-green-500 hover:bg-green-600"
-              >
-                {t('orders.confirmDelivery')}
+              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>{t('common.cancel', 'Cancelar')}</Button>
+              <Button disabled={!uploadedVideoUrl || isUploading} onClick={handleConfirmDelivery} className="bg-green-500 hover:bg-green-600">
+                {t('orders.confirmDelivery', 'Confirmar Entrega')}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Payment Proof Dialog */}
+      <Dialog open={showProofDialog} onOpenChange={setShowProofDialog}>
+        <DialogContent className="glass max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t('orders.paymentProof', 'Comprovante de Pagamento')}</DialogTitle>
+          </DialogHeader>
+          {proofUrl && (
+            <div className="mt-4">
+              <img src={proofUrl} alt="Comprovante" className="w-full rounded-lg" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Order Chat Dialog */}
       <Dialog open={!!chatOrder} onOpenChange={(open) => { if (!open) setChatOrder(null); }}>
         <DialogContent className="glass max-w-lg p-0 overflow-hidden">
@@ -425,14 +469,11 @@ const AdminPedidos: React.FC = () => {
               Chat - {chatOrder?.customer_name}
             </DialogTitle>
             <DialogDescription>
-              Pedido: {chatOrder?.category_name || chatOrder?.category} • {chatOrder?.correlation_id.slice(0, 8)}...
+              {t('orders.orderNumber', 'Pedido')}: {chatOrder?.category_name || chatOrder?.category} • {chatOrder?.correlation_id.slice(0, 8)}...
             </DialogDescription>
           </DialogHeader>
           {chatOrder && (
-            <OrderChat
-              orderId={chatOrder.id}
-              customerName={chatOrder.customer_name}
-            />
+            <OrderChat orderId={chatOrder.id} customerName={chatOrder.customer_name} />
           )}
         </DialogContent>
       </Dialog>
