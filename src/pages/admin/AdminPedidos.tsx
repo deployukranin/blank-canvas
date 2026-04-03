@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, XCircle, Upload, Video, Music, Play, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
+import { OrderChat } from '@/components/orders/OrderChat';
 import { toast } from 'sonner';
 
 interface Order {
@@ -31,6 +32,7 @@ interface Order {
   created_at: string;
   observations: string | null;
   preferences: string | null;
+  user_id: string | null;
 }
 
 const AdminPedidos: React.FC = () => {
@@ -46,6 +48,7 @@ const AdminPedidos: React.FC = () => {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [chatOrder, setChatOrder] = useState<Order | null>(null);
 
   const isBR = i18n.language?.startsWith('pt');
   const currencySymbol = isBR ? 'R$' : '$';
@@ -276,6 +279,15 @@ const AdminPedidos: React.FC = () => {
                     </p>
                     
                     <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        onClick={() => setChatOrder(order)}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Chat
+                      </Button>
                       {order.status === 'pending' && (
                         <>
                           <Button
@@ -402,6 +414,26 @@ const AdminPedidos: React.FC = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* Order Chat Dialog */}
+      <Dialog open={!!chatOrder} onOpenChange={(open) => { if (!open) setChatOrder(null); }}>
+        <DialogContent className="glass max-w-lg p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              Chat - {chatOrder?.customer_name}
+            </DialogTitle>
+            <DialogDescription>
+              Pedido: {chatOrder?.category_name || chatOrder?.category} • {chatOrder?.correlation_id.slice(0, 8)}...
+            </DialogDescription>
+          </DialogHeader>
+          {chatOrder && (
+            <OrderChat
+              orderId={chatOrder.id}
+              customerName={chatOrder.customer_name}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </AdminLayout>
