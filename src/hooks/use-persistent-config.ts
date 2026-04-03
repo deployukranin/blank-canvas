@@ -135,7 +135,7 @@ export function usePersistentConfig<T>({
     
     setIsSaving(true);
     try {
-      const success = await saveConfig(configKey, config);
+      const success = await saveConfig(configKey, config, storeId);
       if (success) {
         setLastSaved(new Date());
         toast({
