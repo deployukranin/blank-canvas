@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Clock, CheckCircle, Loader2, QrCode, AlertCircle } from 'lucide-react';
+import { Copy, Clock, CheckCircle, Loader2, QrCode, AlertCircle, CreditCard } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ interface PixPaymentModalProps {
   correlationId: string;
   expiresAt: string;
   amount: number;
+  isManualPix?: boolean;
 }
 
 export function PixPaymentModal({
@@ -32,6 +33,7 @@ export function PixPaymentModal({
   correlationId,
   expiresAt,
   amount,
+  isManualPix = false,
 }: PixPaymentModalProps) {
   const { copyBrCode, checkPaymentStatus } = usePixPayment();
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -61,9 +63,9 @@ export function PixPaymentModal({
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  // Poll for payment status
+  // Poll for payment status (only for non-manual PIX)
   useEffect(() => {
-    if (!isOpen || isPaid || isExpired || !correlationId) return;
+    if (!isOpen || isPaid || isExpired || !correlationId || isManualPix) return;
 
     const pollStatus = async () => {
       setIsChecking(true);
@@ -72,25 +74,28 @@ export function PixPaymentModal({
       
       if (status && status.status !== 'pending') {
         setIsPaid(true);
-        // Wait a moment to show success state, then trigger callback
         setTimeout(() => {
           onPaymentConfirmed();
         }, 1500);
       }
     };
 
-    // Poll every 3 seconds
     const interval = setInterval(pollStatus, 3000);
-    
-    // Also check immediately
     pollStatus();
     
     return () => clearInterval(interval);
-  }, [isOpen, isPaid, isExpired, correlationId, checkPaymentStatus, onPaymentConfirmed]);
+  }, [isOpen, isPaid, isExpired, correlationId, checkPaymentStatus, onPaymentConfirmed, isManualPix]);
 
   const handleCopy = useCallback(() => {
     copyBrCode(brCode);
   }, [brCode, copyBrCode]);
+
+  const handleManualConfirm = () => {
+    setIsPaid(true);
+    setTimeout(() => {
+      onPaymentConfirmed();
+    }, 1500);
+  };
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -135,7 +140,9 @@ export function PixPaymentModal({
                 className="w-48 h-48 flex flex-col items-center justify-center bg-success/20 rounded-lg"
               >
                 <CheckCircle className="w-16 h-16 text-success mb-2" />
-                <span className="text-success font-semibold">Pagamento Confirmado!</span>
+                <span className="text-success font-semibold text-center">
+                  {isManualPix ? 'Pedido Registrado!' : 'Pagamento Confirmado!'}
+                </span>
               </motion.div>
             ) : isExpired ? (
               <div className="w-48 h-48 flex flex-col items-center justify-center bg-destructive/20 rounded-lg">
@@ -186,31 +193,43 @@ export function PixPaymentModal({
             </Button>
           )}
 
+          {/* "Já Paguei" button for manual PIX */}
+          {isManualPix && !isPaid && !isExpired && (
+            <Button
+              className="w-full gap-2 bg-emerald-500 hover:bg-emerald-600"
+              onClick={handleManualConfirm}
+            >
+              <CreditCard className="w-4 h-4" />
+              Já Paguei
+            </Button>
+          )}
+
           {/* Status Messages */}
           {!isPaid && !isExpired && (
             <div className="text-center text-sm text-muted-foreground">
-              <p>Aguardando confirmação do pagamento...</p>
-              <p className="text-xs mt-1">O status será atualizado automaticamente</p>
+              {isManualPix ? (
+                <>
+                  <p>Após pagar, clique em "Já Paguei" para registrar seu pedido.</p>
+                  <p className="text-xs mt-1">O pagamento será confirmado pelo criador.</p>
+                </>
+              ) : (
+                <>
+                  <p>Aguardando confirmação do pagamento...</p>
+                  <p className="text-xs mt-1">O status será atualizado automaticamente</p>
+                </>
+              )}
             </div>
           )}
 
           {/* Action Buttons */}
           <div className="flex gap-2">
             {isExpired && !isPaid && (
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={onClose}
-              >
+              <Button variant="destructive" className="flex-1" onClick={onClose}>
                 Fechar
               </Button>
             )}
             {!isPaid && !isExpired && (
-              <Button
-                variant="ghost"
-                className="flex-1"
-                onClick={onClose}
-              >
+              <Button variant="ghost" className="flex-1" onClick={onClose}>
                 Cancelar
               </Button>
             )}

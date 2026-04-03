@@ -790,6 +790,7 @@ const CustomsPage = () => {
           correlationId={audioChargeData.correlationId!}
           expiresAt={audioChargeData.expiresAt!}
           amount={audioFinalPrice}
+          isManualPix
         />
       )}
 
