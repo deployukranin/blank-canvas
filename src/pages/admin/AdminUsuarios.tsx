@@ -172,7 +172,7 @@ const AdminUsuarios: React.FC = () => {
     }
   };
 
-
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(isBR ? 'pt-BR' : 'en-US');
   };
 
