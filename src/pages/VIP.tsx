@@ -473,7 +473,10 @@ const VIPPage = () => {
                             size="sm"
                             variant="outline"
                             className="mt-2 h-7 text-xs"
-                            onClick={() => window.open(item.media_url!, '_blank')}
+                            onClick={async () => {
+                              const url = await getVipMediaSignedUrl(item.media_url!);
+                              if (url) window.open(url, '_blank');
+                            }}
                           >
                             <Play className="w-3 h-3 mr-1" />
                             View Media
