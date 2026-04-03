@@ -103,7 +103,7 @@ export function usePersistentConfig<T>({
 
       setIsSaving(true);
       try {
-        const success = await saveConfig(configKey, configToSave);
+        const success = await saveConfig(configKey, configToSave, storeId);
         if (success) {
           setLastSaved(new Date());
         } else {
