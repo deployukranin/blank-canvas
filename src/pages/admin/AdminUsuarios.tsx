@@ -41,7 +41,7 @@ const AdminUsuarios: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'vip' | 'regular'>('all');
+  const [filter, setFilter] = useState<'all' | 'vip' | 'regular' | 'banned'>('all');
 
   const isBR = i18n.language?.startsWith('pt');
   const storeId = store?.id;
