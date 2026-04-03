@@ -965,5 +965,17 @@
     "preview": "Preview",
     "rulesPreview": "Rules Preview",
     "rulesPreviewDesc": "How users will see the rules"
+  },
+  "vipAdmin": {
+    "adultContentLabel": "+18 Content",
+    "adultContentDesc": "Shows an adult content warning when accessing the VIP area",
+    "adultEnabled": "+18 warning enabled",
+    "adultDisabled": "+18 warning disabled"
+  },
+  "vip": {
+    "adultWarningTitle": "+18 Content Warning",
+    "adultWarningDesc": "This area contains exclusive content for adults over 18. By continuing, you confirm you are of legal age to view this type of content.",
+    "adultWarningLeave": "Leave",
+    "adultWarningAccept": "I'm 18+, continue"
   }
 }

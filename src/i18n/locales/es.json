@@ -965,5 +965,17 @@
     "preview": "Vista previa",
     "rulesPreview": "Vista Previa de Reglas",
     "rulesPreviewDesc": "Cómo los usuarios verán las reglas"
+  },
+  "vipAdmin": {
+    "adultContentLabel": "Contenido +18",
+    "adultContentDesc": "Muestra un aviso de contenido adulto al acceder al área VIP",
+    "adultEnabled": "Aviso +18 activado",
+    "adultDisabled": "Aviso +18 desactivado"
+  },
+  "vip": {
+    "adultWarningTitle": "Aviso de Contenido +18",
+    "adultWarningDesc": "Esta área contiene contenido exclusivo para mayores de 18 años. Al continuar, confirma que tiene la edad legal para ver este tipo de contenido.",
+    "adultWarningLeave": "Salir",
+    "adultWarningAccept": "Tengo +18, continuar"
   }
 }

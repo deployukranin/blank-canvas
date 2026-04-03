@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, Upload, X } from 'lucide-react';
+import { Plus, Trash2, Crown, Save, Loader2, Play, FileText, Image, Music, Edit2, Upload, X, ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -46,6 +48,7 @@ const acceptByType: Record<string, string> = {
 };
 
 const AdminVipConteudo = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { session } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +59,7 @@ const AdminVipConteudo = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [storeId, setStoreId] = useState<string | null>(null);
+  const [isAdultContent, setIsAdultContent] = useState(false);
 
   // Form state
   const [formTitle, setFormTitle] = useState('');
@@ -76,6 +80,46 @@ const AdminVipConteudo = () => {
     };
     getStoreId();
   }, [session?.user?.id]);
+
+  // Load adult content setting
+  useEffect(() => {
+    if (!storeId) return;
+    const loadAdultSetting = async () => {
+      const { data } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_adult_content')
+        .eq('store_id', storeId)
+        .maybeSingle();
+      if (data?.config_value) {
+        setIsAdultContent((data.config_value as any).enabled === true);
+      }
+    };
+    loadAdultSetting();
+  }, [storeId]);
+
+  const handleToggleAdultContent = async (checked: boolean) => {
+    if (!storeId) return;
+    setIsAdultContent(checked);
+    const { data: existing } = await supabase
+      .from('app_configurations')
+      .select('id')
+      .eq('config_key', 'vip_adult_content')
+      .eq('store_id', storeId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('app_configurations')
+        .update({ config_value: { enabled: checked } })
+        .eq('id', existing.id);
+    } else {
+      await supabase
+        .from('app_configurations')
+        .insert({ config_key: 'vip_adult_content', store_id: storeId, config_value: { enabled: checked } });
+    }
+    toast({ title: checked ? t('vipAdmin.adultEnabled') : t('vipAdmin.adultDisabled') });
+  };
 
   useEffect(() => {
     if (!storeId) return;
@@ -247,6 +291,22 @@ const AdminVipConteudo = () => {
             Novo Conteúdo
           </Button>
         </div>
+
+        {/* Adult Content Toggle */}
+        <GlassCard className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                <ShieldAlert className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">{t('vipAdmin.adultContentLabel', 'Conteúdo +18')}</p>
+                <p className="text-xs text-muted-foreground">{t('vipAdmin.adultContentDesc', 'Exibe aviso de conteúdo adulto ao acessar a área VIP')}</p>
+              </div>
+            </div>
+            <Switch checked={isAdultContent} onCheckedChange={handleToggleAdultContent} />
+          </div>
+        </GlassCard>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {['post', 'video', 'audio', 'image'].map(type => {

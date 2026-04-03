@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image } from 'lucide-react';
+import { Crown, Check, Zap, Loader2, Copy, Clock, RefreshCw, Lock, Play, FileText, Music, Image, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -17,7 +17,18 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface VipPlanConfig {
   id: string;
@@ -56,7 +67,7 @@ const VIPPage = () => {
   const { session } = useAuth();
   const { store } = useTenant();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
   const tenantStoreId = store?.id;
@@ -74,6 +85,9 @@ const VIPPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [chargeData, setChargeData] = useState<any>(null);
   const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [showAdultWarning, setShowAdultWarning] = useState(false);
+  const [adultAccepted, setAdultAccepted] = useState(false);
+  const [isAdultContent, setIsAdultContent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Resolve resolvedStoreId: use tenant context, or find user's associated store
@@ -124,6 +138,26 @@ const VIPPage = () => {
     };
     resolve();
   }, [tenantStoreId, userId]);
+
+  // Check adult content setting
+  useEffect(() => {
+    if (!resolvedStoreId) return;
+    const checkAdult = async () => {
+      const { data } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_adult_content')
+        .eq('store_id', resolvedStoreId)
+        .maybeSingle();
+      if (data?.config_value && (data.config_value as any).enabled === true) {
+        setIsAdultContent(true);
+        if (!adultAccepted) {
+          setShowAdultWarning(true);
+        }
+      }
+    };
+    checkAdult();
+  }, [resolvedStoreId, adultAccepted]);
 
   // Load VIP plans from store config or global
   useEffect(() => {
@@ -353,6 +387,30 @@ const VIPPage = () => {
 
   const featuredPlan = vipPlans.find(p => p.type === 'monthly') || vipPlans[0];
 
+  const adultWarningDialog = isAdultContent ? (
+    <AlertDialog open={showAdultWarning} onOpenChange={(open) => { if (!open && !adultAccepted) return; setShowAdultWarning(open); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-destructive" />
+            {t('vip.adultWarningTitle', 'Aviso de Conteúdo +18')}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm">
+            {t('vip.adultWarningDesc', 'Esta área contém conteúdo exclusivo para maiores de 18 anos. Ao continuar, você confirma que tem idade legal para visualizar este tipo de conteúdo.')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => window.history.back()}>
+            {t('vip.adultWarningLeave', 'Sair')}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); }} className="bg-destructive hover:bg-destructive/90">
+            {t('vip.adultWarningAccept', 'Tenho +18, continuar')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  ) : null;
+
   if (isLoading) {
     return (
       <MobileLayout title="VIP">
@@ -446,6 +504,7 @@ const VIPPage = () => {
             </Button>
           </GlassCard>
         </div>
+      {adultWarningDialog}
       </MobileLayout>
     );
   }
@@ -660,6 +719,7 @@ const VIPPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      {adultWarningDialog}
     </MobileLayout>
   );
 };
