@@ -470,7 +470,9 @@
     "preferences": "Preferencias",
     "observations": "Observaciones",
     "noOrdersDesc": "Aún no has hecho ningún pedido personalizado.",
-    "makeFirstOrder": "Hacer Primer Pedido"
+    "makeFirstOrder": "Hacer Primer Pedido",
+    "openChat": "Abrir Chat con Creador",
+    "hideChat": "Cerrar Chat"
   },
   "contentAdmin": {
     "title": "Gestionar Contenido",

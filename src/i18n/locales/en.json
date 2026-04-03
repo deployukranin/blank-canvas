@@ -470,7 +470,9 @@
     "preferences": "Preferences",
     "observations": "Observations",
     "noOrdersDesc": "You haven't made any custom orders yet.",
-    "makeFirstOrder": "Make First Order"
+    "makeFirstOrder": "Make First Order",
+    "openChat": "Open Chat with Creator",
+    "hideChat": "Close Chat"
   },
   "contentAdmin": {
     "title": "Manage Content",
