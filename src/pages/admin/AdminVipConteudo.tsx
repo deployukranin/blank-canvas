@@ -81,6 +81,46 @@ const AdminVipConteudo = () => {
     getStoreId();
   }, [session?.user?.id]);
 
+  // Load adult content setting
+  useEffect(() => {
+    if (!storeId) return;
+    const loadAdultSetting = async () => {
+      const { data } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_adult_content')
+        .eq('store_id', storeId)
+        .maybeSingle();
+      if (data?.config_value) {
+        setIsAdultContent((data.config_value as any).enabled === true);
+      }
+    };
+    loadAdultSetting();
+  }, [storeId]);
+
+  const handleToggleAdultContent = async (checked: boolean) => {
+    if (!storeId) return;
+    setIsAdultContent(checked);
+    const { data: existing } = await supabase
+      .from('app_configurations')
+      .select('id')
+      .eq('config_key', 'vip_adult_content')
+      .eq('store_id', storeId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('app_configurations')
+        .update({ config_value: { enabled: checked } })
+        .eq('id', existing.id);
+    } else {
+      await supabase
+        .from('app_configurations')
+        .insert({ config_key: 'vip_adult_content', store_id: storeId, config_value: { enabled: checked } });
+    }
+    toast({ title: checked ? t('vipAdmin.adultEnabled') : t('vipAdmin.adultDisabled') });
+  };
+
   useEffect(() => {
     if (!storeId) return;
     const load = async () => {
