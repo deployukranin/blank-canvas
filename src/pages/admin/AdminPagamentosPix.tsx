@@ -70,6 +70,7 @@ const AdminPagamentosPix = () => {
     defaultValue: defaultPaymentConfig,
     localStorageKey: 'paymentConfig',
     debounceMs: 3000,
+    storeId,
   });
 
   // Check Stripe Connect status

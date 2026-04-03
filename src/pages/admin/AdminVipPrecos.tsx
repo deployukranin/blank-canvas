@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Crown, Sparkles, Loader2, TrendingDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTenant } from '@/contexts/TenantContext';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ const AdminVipPrecos = () => {
   const isBR = i18n.language?.startsWith('pt');
   const currency = isBR ? 'BRL' : 'USD';
   const locale = isBR ? 'pt-BR' : 'en-US';
+  const { store } = useTenant();
 
   const {
     config,
@@ -42,6 +44,7 @@ const AdminVipPrecos = () => {
     defaultValue: defaultVipConfig,
     localStorageKey: 'vipConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
 
   useEffect(() => {

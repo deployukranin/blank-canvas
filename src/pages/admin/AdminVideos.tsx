@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { useTenant } from '@/contexts/TenantContext';
 import {
   defaultVideoConfig,
   saveVideoConfig,
@@ -27,6 +28,7 @@ import {
 
 const AdminVideos = () => {
   const { toast } = useToast();
+  const { store } = useTenant();
   const { 
     config, 
     setConfig, 
@@ -36,8 +38,9 @@ const AdminVideos = () => {
   } = usePersistentConfig<VideoConfig>({
     configKey: 'video_config',
     defaultValue: defaultVideoConfig,
-    localStorageKey: 'videoConfig', // Migrate from old localStorage
+    localStorageKey: 'videoConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
   
   const [showPreview, setShowPreview] = useState(false);

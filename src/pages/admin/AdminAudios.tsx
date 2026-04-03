@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Headphones, Clock, Music, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTenant } from '@/contexts/TenantContext';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const MIN_PRICE = 10;
 
 const AdminAudios = () => {
   const { toast } = useToast();
+  const { store } = useTenant();
   const { 
     config, 
     setConfig, 
@@ -32,6 +34,7 @@ const AdminAudios = () => {
     defaultValue: defaultVideoConfig,
     localStorageKey: 'videoConfig',
     debounceMs: 2000,
+    storeId: store?.id,
   });
 
   // Keep local cache updated

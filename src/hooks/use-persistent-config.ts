@@ -11,6 +11,7 @@ interface UsePersistentConfigOptions<T> {
   defaultValue: T;
   localStorageKey?: string; // For migration from localStorage
   debounceMs?: number;
+  storeId?: string | null;
 }
 
 export function usePersistentConfig<T>({
@@ -18,6 +19,7 @@ export function usePersistentConfig<T>({
   defaultValue,
   localStorageKey,
   debounceMs = 1000,
+  storeId,
 }: UsePersistentConfigOptions<T>) {
   const [config, setConfigState] = useState<T>(defaultValue);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +37,7 @@ export function usePersistentConfig<T>({
         setIsLoading(true);
         
         // Try to load from database first
-        const dbConfig = await loadConfig<T>(configKey);
+        const dbConfig = await loadConfig<T>(configKey, storeId);
         
         if (dbConfig) {
           // Merge with defaults to ensure new fields are present
@@ -57,7 +59,7 @@ export function usePersistentConfig<T>({
                 setConfigState(merged);
                 
                 // Save to DB
-                const saved = await saveConfig(configKey, merged);
+                const saved = await saveConfig(configKey, merged, storeId);
                 if (saved) {
                   localStorage.removeItem(localStorageKey);
                   console.log(`Migrated ${localStorageKey} to database`);
@@ -83,7 +85,7 @@ export function usePersistentConfig<T>({
     };
 
     loadFromDb();
-  }, [configKey, localStorageKey]);
+  }, [configKey, localStorageKey, storeId]);
 
   // Debounced save to database
   const debouncedSave = useCallback(async (newConfig: T) => {
@@ -101,7 +103,7 @@ export function usePersistentConfig<T>({
 
       setIsSaving(true);
       try {
-        const success = await saveConfig(configKey, configToSave);
+        const success = await saveConfig(configKey, configToSave, storeId);
         if (success) {
           setLastSaved(new Date());
         } else {
@@ -114,7 +116,7 @@ export function usePersistentConfig<T>({
         pendingConfigRef.current = null;
       }
     }, debounceMs);
-  }, [configKey, debounceMs]);
+  }, [configKey, debounceMs, storeId]);
 
   // Update config and trigger debounced save
   const setConfig = useCallback((updater: T | ((prev: T) => T)) => {
@@ -133,7 +135,7 @@ export function usePersistentConfig<T>({
     
     setIsSaving(true);
     try {
-      const success = await saveConfig(configKey, config);
+      const success = await saveConfig(configKey, config, storeId);
       if (success) {
         setLastSaved(new Date());
         toast({
