@@ -41,9 +41,6 @@
     "myOrders": "My Orders",
     "subscriptions": "Subscriptions"
   },
-  "auth": {
-    "enterButton": "Login",
-@@INSERT_BEFORE@@
   "profile": {
     "language": "Language",
     "changeLanguage": "Change app language",

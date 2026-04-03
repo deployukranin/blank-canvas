@@ -41,9 +41,6 @@
     "myOrders": "Mis Pedidos",
     "subscriptions": "Suscripciones"
   },
-  "auth": {
-    "enterButton": "Entrar",
-@@INSERT_BEFORE@@
   "profile": {
     "language": "Idioma",
     "changeLanguage": "Cambiar idioma de la app",
