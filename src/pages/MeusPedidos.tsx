@@ -110,6 +110,8 @@ const MeusPedidosPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<DBOrder | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
