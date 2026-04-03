@@ -321,6 +321,21 @@
     "trialExpiringAlertDesc": "Notificar 2 dias antes do trial expirar",
     "saveSettings": "Salvar Configurações",
     "settingsSaved": "Configurações salvas com sucesso",
+    "planConfig": {
+      "navLabel": "Planos",
+      "title": "Configurar Planos",
+      "description": "Configure os planos de assinatura que os criadores podem contratar.",
+      "planName": "Nome do plano",
+      "priceBRL": "Preço BRL (R$)",
+      "priceUSD": "Preço USD ($)",
+      "discount": "Desconto (badge)",
+      "highlight": "Destacar como popular",
+      "features": "Recursos",
+      "feature": "Recurso",
+      "addFeature": "Adicionar recurso",
+      "saved": "Planos salvos com sucesso!",
+      "error": "Erro ao salvar planos"
+    },
     "metrics": {
       "platforms": "Plataformas",
       "totalUsers": "Usuários Totais",

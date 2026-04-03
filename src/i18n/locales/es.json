@@ -321,6 +321,21 @@
     "trialExpiringAlertDesc": "Notificar 2 días antes de que expire la prueba",
     "saveSettings": "Guardar Configuración",
     "settingsSaved": "Configuración guardada con éxito",
+    "planConfig": {
+      "navLabel": "Planes",
+      "title": "Configurar Planes",
+      "description": "Configure los planes de suscripción que los creadores pueden contratar.",
+      "planName": "Nombre del plan",
+      "priceBRL": "Precio BRL (R$)",
+      "priceUSD": "Precio USD ($)",
+      "discount": "Descuento (badge)",
+      "highlight": "Destacar como popular",
+      "features": "Recursos",
+      "feature": "Recurso",
+      "addFeature": "Agregar recurso",
+      "saved": "¡Planes guardados con éxito!",
+      "error": "Error al guardar planes"
+    },
     "metrics": {
       "platforms": "Plataformas",
       "totalUsers": "Usuarios Totales",
