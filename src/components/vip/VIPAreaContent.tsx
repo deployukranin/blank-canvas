@@ -127,7 +127,10 @@ export const VIPAreaContent = () => {
               {item.description}
             </p>
             {item.video_url && (
-              <Button className="w-full" onClick={() => window.open(item.video_url, '_blank')}>
+              <Button className="w-full" onClick={async () => {
+                const url = await getVipMediaSignedUrl(item.video_url);
+                if (url) window.open(url, '_blank');
+              }}>
                 Assistir Agora
               </Button>
             )}
