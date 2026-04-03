@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
-  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe
+  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const menuItems = [
     { path: base, icon: LayoutDashboard, label: t('admin.dashboard') },
+    { path: `${base}/customs`, icon: Sparkles, label: "Custom's" },
     { path: `${base}/orders`, icon: ShoppingCart, label: t('admin.orders') },
     { path: `${base}/payments`, icon: CreditCard, label: t('admin.payments') },
     { path: `${base}/vip`, icon: Crown, label: 'VIP' },

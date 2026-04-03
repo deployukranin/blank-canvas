@@ -40,6 +40,7 @@ import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
 import AdminVipConteudo from "./pages/admin/AdminVipConteudo";
 import AdminVideos from "./pages/admin/AdminVideos";
 import AdminAudios from "./pages/admin/AdminAudios";
+import AdminCustoms from "./pages/admin/AdminCustoms";
 import AdminYoutube from "./pages/admin/AdminYoutube";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
 import AdminConteudo from "./pages/admin/AdminConteudo";
@@ -93,6 +94,7 @@ const App = () => (
 
                 {/* 🛡️ Rotas ADMIN (Creator Panel) — scoped by store slug */}
                 <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/customs" element={<TenantGate><AdminRoute requiredRole="admin"><AdminCustoms /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/ideas" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/orders" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/payments" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
