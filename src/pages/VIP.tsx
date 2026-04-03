@@ -67,7 +67,7 @@ const VIPPage = () => {
   const { session } = useAuth();
   const { store } = useTenant();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id;
   const tenantStoreId = store?.id;
