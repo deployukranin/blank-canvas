@@ -1,21 +1,28 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
 
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 export default function TermosDeUsoPage() {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = "Termos de Uso | ASMR Luna";
-  }, []);
+    document.title = t("terms.title");
+  }, [t]);
 
   return (
-    <MobileLayout title="Termos" showBack>
+    <MobileLayout title={t("terms.title")} showBack>
       <main className="px-4 py-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="font-display text-2xl font-bold">Termos de Uso</h1>
-          <p className="text-sm text-muted-foreground">Última atualização: em breve.</p>
+        <header className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-bold">{t("terms.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("terms.lastUpdate")}</p>
+          </div>
+          <LanguageSelector variant="minimal" />
         </header>
 
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -25,33 +32,17 @@ export default function TermosDeUsoPage() {
                 <FileText className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-medium">Resumo</h2>
-                <p className="text-xs text-muted-foreground">
-                  Este texto é um rascunho. Substitua pelo conteúdo jurídico oficial quando estiver pronto.
-                </p>
+                <h2 className="font-medium">{t("terms.summary")}</h2>
+                <p className="text-xs text-muted-foreground">{t("terms.summaryDesc")}</p>
               </div>
             </div>
 
-            <section className="space-y-2">
-              <h3 className="font-medium">1. Uso do app</h3>
-              <p className="text-sm text-muted-foreground">
-                Você concorda em utilizar o app de forma responsável e em conformidade com as leis aplicáveis.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h3 className="font-medium">2. Conteúdo</h3>
-              <p className="text-sm text-muted-foreground">
-                O conteúdo pode ser atualizado, removido ou modificado a qualquer momento.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h3 className="font-medium">3. Compras e assinaturas</h3>
-              <p className="text-sm text-muted-foreground">
-                Caso existam produtos/subscriptions, as condições serão exibidas no momento da contratação.
-              </p>
-            </section>
+            {[1, 2, 3, 4].map((i) => (
+              <section key={i} className="space-y-2">
+                <h3 className="font-medium">{t(`terms.section${i}Title`)}</h3>
+                <p className="text-sm text-muted-foreground">{t(`terms.section${i}Text`)}</p>
+              </section>
+            ))}
           </GlassCard>
         </motion.section>
       </main>

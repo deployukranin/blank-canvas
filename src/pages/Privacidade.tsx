@@ -1,21 +1,28 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 export default function PrivacidadePage() {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = "Privacidade | ASMR Luna";
-  }, []);
+    document.title = t("privacy.title");
+  }, [t]);
 
   return (
-    <MobileLayout title="Privacidade" showBack>
+    <MobileLayout title={t("privacy.title")} showBack>
       <main className="px-4 py-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="font-display text-2xl font-bold">Política de Privacidade</h1>
-          <p className="text-sm text-muted-foreground">Última atualização: em breve.</p>
+        <header className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-bold">{t("privacy.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("privacy.lastUpdate")}</p>
+          </div>
+          <LanguageSelector variant="minimal" />
         </header>
 
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -25,33 +32,17 @@ export default function PrivacidadePage() {
                 <Shield className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-medium">Resumo</h2>
-                <p className="text-xs text-muted-foreground">
-                  Este texto é um rascunho. Substitua pelo conteúdo jurídico oficial quando estiver pronto.
-                </p>
+                <h2 className="font-medium">{t("privacy.summary")}</h2>
+                <p className="text-xs text-muted-foreground">{t("privacy.summaryDesc")}</p>
               </div>
             </div>
 
-            <section className="space-y-2">
-              <h3 className="font-medium">1. Dados que coletamos</h3>
-              <p className="text-sm text-muted-foreground">
-                Podemos coletar dados necessários para login e funcionamento do app (ex: identificadores de conta).
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h3 className="font-medium">2. Como usamos</h3>
-              <p className="text-sm text-muted-foreground">
-                Usamos os dados para autenticação, personalização e melhoria da experiência.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h3 className="font-medium">3. Seus controles</h3>
-              <p className="text-sm text-muted-foreground">
-                Você pode gerenciar permissões (ex: notificações) nas configurações do dispositivo/navegador.
-              </p>
-            </section>
+            {[1, 2, 3, 4].map((i) => (
+              <section key={i} className="space-y-2">
+                <h3 className="font-medium">{t(`privacy.section${i}Title`)}</h3>
+                <p className="text-sm text-muted-foreground">{t(`privacy.section${i}Text`)}</p>
+              </section>
+            ))}
           </GlassCard>
         </motion.section>
       </main>
