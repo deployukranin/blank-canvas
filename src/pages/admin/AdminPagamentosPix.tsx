@@ -191,7 +191,6 @@ const AdminPagamentosPix = () => {
     return null;
   };
 
-  const [pixKeyError, setPixKeyError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
