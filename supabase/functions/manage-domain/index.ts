@@ -21,6 +21,13 @@ const jsonResponse = (body: unknown, status = 200) =>
     },
   });
 
+interface VerificationLike {
+  type: string;
+  domain: string;
+  value: string;
+  reason: string;
+}
+
 const normalizeVerification = (verification: unknown) => {
   if (!Array.isArray(verification)) {
     return null;
