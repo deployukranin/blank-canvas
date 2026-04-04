@@ -12,6 +12,7 @@ import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
+import CustomDomainGate from "@/components/tenant/CustomDomainGate";
 
 import Index from "./pages/Index";
 import Setup from "./pages/Setup";
