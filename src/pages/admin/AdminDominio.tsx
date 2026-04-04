@@ -100,28 +100,23 @@ const AdminDominio: React.FC = () => {
   // Auto-check every 5 minutes while domain is pending
   useEffect(() => {
     if (domainState.customDomain && !domainState.domainVerified) {
-      // Initial check after 10s
-      const initialTimeout = setTimeout(() => {
-        silentVerify();
-      }, 10_000);
-
+      void silentVerify();
       autoCheckRef.current = setInterval(silentVerify, AUTO_CHECK_INTERVAL_MS);
-      setNextAutoCheck(new Date(Date.now() + 10_000));
+      setNextAutoCheck(new Date(Date.now() + AUTO_CHECK_INTERVAL_MS));
 
       return () => {
-        clearTimeout(initialTimeout);
         if (autoCheckRef.current) {
           clearInterval(autoCheckRef.current);
           autoCheckRef.current = null;
         }
       };
-    } else {
-      if (autoCheckRef.current) {
-        clearInterval(autoCheckRef.current);
-        autoCheckRef.current = null;
-      }
-      setNextAutoCheck(null);
     }
+
+    if (autoCheckRef.current) {
+      clearInterval(autoCheckRef.current);
+      autoCheckRef.current = null;
+    }
+    setNextAutoCheck(null);
   }, [domainState.customDomain, domainState.domainVerified, silentVerify]);
 
   const loadDomainState = async () => {
