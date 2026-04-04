@@ -14,11 +14,11 @@ export interface StoreInfo {
 }
 
 interface TenantInfo {
-  /** store slug resolved from URL path */
+  /** store slug resolved from URL path or custom domain */
   slug: string | null;
   /** Whether we're in a tenant-scoped context */
   isTenantScope: boolean;
-  /** The base path for tenant routes (e.g. /luna-asmr) */
+  /** The base path for tenant routes (e.g. /luna-asmr or / on custom domain) */
   basePath: string;
   /** Loaded store data */
   store: StoreInfo | null;
@@ -26,6 +26,8 @@ interface TenantInfo {
   isLoading: boolean;
   /** Error if store not found */
   error: string | null;
+  /** Whether we're on a custom domain (slug-free URLs) */
+  isCustomDomain: boolean;
 }
 
 const TenantContext = createContext<TenantInfo>({
@@ -35,6 +37,7 @@ const TenantContext = createContext<TenantInfo>({
   store: null,
   isLoading: false,
   error: null,
+  isCustomDomain: false,
 });
 
 /** Reserved top-level routes that are NOT tenant slugs */
@@ -45,6 +48,22 @@ const RESERVED_ROUTES = new Set([
   'profile', 'orders', 'notifications', 'audios', 'videos',
   'setup',
 ]);
+
+const PLATFORM_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  'lovableproject.com',
+  'lovable.app',
+  'mytinglebox.com',
+  'www.mytinglebox.com',
+  'vercel.app',
+];
+
+function isPlatformHost(hostname: string): boolean {
+  return PLATFORM_HOSTS.some(
+    (h) => hostname === h || hostname.endsWith('.' + h)
+  );
+}
 
 /**
  * Resolves tenant slug from current pathname.
@@ -59,9 +78,16 @@ function resolveSlugFromPath(pathname: string): string | null {
 
 export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const slug = resolveSlugFromPath(location.pathname);
-  const isTenantScope = !!slug;
-  const basePath = slug ? `/${slug}` : '/';
+  const hostname = window.location.hostname;
+  const isCustomDomain = !isPlatformHost(hostname);
+  const slugFromPath = resolveSlugFromPath(location.pathname);
+
+  // On custom domains, we resolve slug from hostname (DB lookup)
+  // On platform hosts, we resolve slug from URL path
+  const [resolvedSlug, setResolvedSlug] = useState<string | null>(slugFromPath);
+  const isTenantScope = !!(slugFromPath || isCustomDomain);
+  // On custom domain, basePath is "/" (no slug in URL); on platform, it's "/slug"
+  const basePath = isCustomDomain ? '' : (slugFromPath ? `/${slugFromPath}` : '/');
   const [store, setStore] = useState<StoreInfo | null>(null);
   const [isLoading, setIsLoading] = useState(isTenantScope);
   const [error, setError] = useState<string | null>(null);
