@@ -74,14 +74,41 @@ const App = () => (
               <Toaster />
               <Sonner />
               <Routes>
-                {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
-                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />} />} />
+                {/* Rota raiz — custom domain: store home; platform: NotFound */}
+                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />}><Index /></CustomDomainResolver>} />
                 <Route path="/auth" element={<Auth />} />
-                {/* /setup removed — no longer needed */}
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />
                 <Route path="/orders" element={<MyOrdersRedirect />} />
+
+                {/* 🌐 Rotas slug-free para domínios personalizados */}
+                <Route path="/login" element={<CustomDomainGate><ClientAuth /></CustomDomainGate>} />
+                <Route path="/customs" element={<CustomDomainGate><ProtectedRoute><Customs /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/community" element={<CustomDomainGate><ProtectedRoute><Comunidade /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/ideas" element={<CustomDomainGate><ProtectedRoute><Ideias /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/vip" element={<CustomDomainGate><ProtectedRoute><VIP /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/gallery" element={<CustomDomainGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/profile" element={<CustomDomainGate><ProtectedRoute><Perfil /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/notifications" element={<CustomDomainGate><ProtectedRoute><Notificacoes /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/admin" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/customs" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminCustoms /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/ideas" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/orders" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/payments" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/vip" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/vipcontent" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminVipConteudo /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/videos" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminVideos /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/audios" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminAudios /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/youtube" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminYoutube /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/users" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminUsuarios /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/content" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminConteudo /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/settings" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminConfiguracoes /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/customize" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPersonalizacao /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/plans" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPlanos /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/support" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/social-links" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/domain" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></CustomDomainGate>} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
@@ -124,7 +151,7 @@ const App = () => (
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
-                <Route path="*" element={<CustomDomainResolver fallback={<NotFound />} />} />
+                <Route path="*" element={<CustomDomainResolver fallback={<NotFound />}><NotFound /></CustomDomainResolver>} />
               </Routes>
             </TooltipProvider>
           </WhiteLabelProvider>
