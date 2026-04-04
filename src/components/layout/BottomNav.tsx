@@ -32,7 +32,7 @@ export const BottomNav = () => {
 
   const resolvePath = (path: string) => {
     if (!isTenantScope) return path;
-    if (path === '/') return basePath;
+    if (path === '/') return basePath || '/';
     return `${basePath}${path}`;
   };
 
@@ -43,7 +43,7 @@ export const BottomNav = () => {
           {navItems.map((item) => {
             const resolvedPath = resolvePath(item.path);
             const isActive = location.pathname === resolvedPath || 
-              (item.path === '/' && location.pathname === basePath);
+              (item.path === '/' && (location.pathname === basePath || location.pathname === '/'));
             const i18nKey = pathToI18nKey[item.path];
             const label = i18nKey ? t(i18nKey) : item.label;
 

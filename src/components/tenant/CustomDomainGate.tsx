@@ -3,16 +3,16 @@ import { useTenant } from '@/contexts/TenantContext';
 import NotFound from '@/pages/NotFound';
 
 /**
- * For the root "/" route:
- * - On custom domains: renders children (store home page)
- * - On platform hosts: renders fallback (NotFound)
+ * Gate component for routes that only work on custom domains (slug-free URLs).
+ * On platform hosts, these routes would conflict with reserved routes,
+ * so we fall through to NotFound.
  */
-const CustomDomainResolver: React.FC<{ fallback: React.ReactNode; children?: React.ReactNode }> = ({ fallback, children }) => {
+const CustomDomainGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isCustomDomain, store, isLoading, error } = useTenant();
 
-  // Not a custom domain — render fallback
+  // On platform hosts, these slug-free tenant routes don't apply
   if (!isCustomDomain) {
-    return <>{fallback}</>;
+    return null; // Let React Router try other routes
   }
 
   if (isLoading) {
@@ -24,10 +24,10 @@ const CustomDomainResolver: React.FC<{ fallback: React.ReactNode; children?: Rea
   }
 
   if (error || !store) {
-    return <>{fallback}</>;
+    return <NotFound />;
   }
 
-  return <>{children || fallback}</>;
+  return <>{children}</>;
 };
 
-export default CustomDomainResolver;
+export default CustomDomainGate;
