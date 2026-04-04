@@ -318,11 +318,18 @@ Deno.serve(async (req: Request) => {
 
         await supabaseAdmin.from("stores").update({ domain_verified: isVerified }).eq("id", store_id);
 
+        const verificationRecords = normalizeVerification(vercelData?.verification);
+        const finalVerification = (verificationRecords && verificationRecords.length > 0)
+          ? verificationRecords
+          : domainStatus.fallbackRecords.length > 0
+            ? domainStatus.fallbackRecords
+            : null;
+
         return jsonResponse({
           success: true,
           verified: isVerified,
           domain: store.custom_domain,
-          verification: normalizeVerification(vercelData?.verification),
+          verification: finalVerification,
           dnsMode: domainStatus.dnsMode,
           nameservers: domainStatus.nameservers,
           misconfigured: domainStatus.misconfigured,
