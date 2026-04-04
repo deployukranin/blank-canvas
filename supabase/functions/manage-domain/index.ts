@@ -91,19 +91,11 @@ const getDnsMode = (vercelDomain: Record<string, unknown> | null, existingDomain
   return "records";
 };
 
-const getDomainStatus = async (domain: string, vercelDomain: Record<string, unknown> | null, existingDomain: boolean) => {
+const getDomainStatus = async (domain: string, vercelDomain: Record<string, unknown> | null, _existingDomain: boolean) => {
   const { response: configResponse, data: configData } = await getDomainConfig(domain);
 
   const config = configResponse.ok && configData && typeof configData === "object"
     ? (configData as Record<string, unknown>)
-    : null;
-
-  const intendedNameservers = Array.isArray(config?.intendedNameservers) && config.intendedNameservers.length > 0
-    ? config.intendedNameservers
-    : null;
-
-  const projectNameservers = Array.isArray(vercelDomain?.nameservers) && vercelDomain.nameservers.length > 0
-    ? vercelDomain.nameservers
     : null;
 
   const configuredBy = typeof config?.configuredBy === "string" ? config.configuredBy : null;
@@ -113,40 +105,31 @@ const getDomainStatus = async (domain: string, vercelDomain: Record<string, unkn
 
   const isConfigured = config ? misconfigured === false : false;
 
-  // Determine DNS mode: prioritize what Vercel actually asks for
-  let dnsMode: "nameservers" | "records";
-  if (configuredBy === "A" || configuredBy === "CNAME") {
-    dnsMode = "records";
-  } else if (Array.isArray(vercelDomain?.verification) && (vercelDomain.verification as unknown[]).length > 0) {
-    // Vercel returned specific verification records — show those
-    dnsMode = "records";
-  } else if (Array.isArray(config?.nameservers) && (config.nameservers as unknown[]).length > 0) {
-    dnsMode = "nameservers";
-  } else {
-    dnsMode = getDnsMode(vercelDomain, existingDomain);
-  }
+  // Always default to "records" mode (A/CNAME) — it's the most universal approach
+  // Only use "nameservers" if Vercel explicitly returned nameservers in the config
+  const hasVercelNameservers = Array.isArray(config?.intendedNameservers) && (config.intendedNameservers as unknown[]).length > 0;
+  const dnsMode: "nameservers" | "records" = hasVercelNameservers ? "nameservers" : "records";
 
-  // Build A/CNAME records from config if verification array is empty
-  const aRecords: VerificationLike[] = [];
+  const nameservers = hasVercelNameservers
+    ? config!.intendedNameservers as string[]
+    : VERCEL_NAMESERVERS;
+
+  // Build fallback A/CNAME records when verification array is empty
+  const fallbackRecords: VerificationLike[] = [];
   if (dnsMode === "records" && (!Array.isArray(vercelDomain?.verification) || (vercelDomain?.verification as unknown[]).length === 0)) {
-    // Provide default A record from Vercel's recommended IP
-    const aValue = typeof config?.aValue === "string" ? config.aValue : "76.76.21.21";
-    aRecords.push({ type: "A", domain: "@", value: aValue, reason: "" });
-    if (typeof config?.cnames === "object" && config.cnames) {
-      // Add CNAME for www if available
-      const cnameEntries = config.cnames as Record<string, string>;
-      for (const [name, value] of Object.entries(cnameEntries)) {
-        aRecords.push({ type: "CNAME", domain: name, value, reason: "" });
-      }
-    }
+    // Use Vercel's current recommended IP (216.198.79.1) with legacy fallback
+    const aValue = typeof config?.aValue === "string" ? config.aValue : "216.198.79.1";
+    fallbackRecords.push({ type: "A", domain: "@", value: aValue, reason: "" });
+    // Also recommend CNAME for www subdomain
+    fallbackRecords.push({ type: "CNAME", domain: "www", value: "cname.vercel-dns.com", reason: "" });
   }
 
   return {
     isConfigured,
     misconfigured,
     dnsMode,
-    nameservers: intendedNameservers ?? projectNameservers ?? VERCEL_NAMESERVERS,
-    fallbackRecords: aRecords,
+    nameservers,
+    fallbackRecords,
   };
 };
 
