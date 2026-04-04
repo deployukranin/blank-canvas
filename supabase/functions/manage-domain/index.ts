@@ -279,9 +279,16 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({
           success: true,
           domain: cleanDomain,
+          const verificationRecords = normalizeVerification(vercelDomain?.verification);
+          const finalVerification = (verificationRecords && verificationRecords.length > 0)
+            ? verificationRecords
+            : domainStatus.fallbackRecords.length > 0
+              ? domainStatus.fallbackRecords
+              : null;
+
           verified: domainStatus.isConfigured,
           existing: existingDomain,
-          verification: normalizeVerification(vercelDomain?.verification),
+          verification: finalVerification,
           dnsMode: domainStatus.dnsMode,
           nameservers: domainStatus.nameservers,
           misconfigured: domainStatus.misconfigured,
