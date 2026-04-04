@@ -74,7 +74,7 @@ const App = () => (
               <Sonner />
               <Routes>
                 {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
-                <Route path="/" element={<NotFound />} />
+                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />} />} />
                 <Route path="/auth" element={<Auth />} />
                 {/* /setup removed — no longer needed */}
                 <Route path="/help" element={<Ajuda />} />
