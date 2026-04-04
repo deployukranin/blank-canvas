@@ -123,7 +123,7 @@ const App = () => (
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<CustomDomainResolver fallback={<NotFound />} />} />
               </Routes>
             </TooltipProvider>
           </WhiteLabelProvider>
