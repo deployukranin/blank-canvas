@@ -11,6 +11,7 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
+import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
 
 import Index from "./pages/Index";
 import Setup from "./pages/Setup";
@@ -73,7 +74,7 @@ const App = () => (
               <Sonner />
               <Routes>
                 {/* Rota raiz — placeholder (landing page externa será usada em produção) */}
-                <Route path="/" element={<NotFound />} />
+                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />} />} />
                 <Route path="/auth" element={<Auth />} />
                 {/* /setup removed — no longer needed */}
                 <Route path="/help" element={<Ajuda />} />
@@ -122,7 +123,7 @@ const App = () => (
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
 
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<CustomDomainResolver fallback={<NotFound />} />} />
               </Routes>
             </TooltipProvider>
           </WhiteLabelProvider>
