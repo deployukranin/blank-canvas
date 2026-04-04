@@ -92,12 +92,15 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isLoading, setIsLoading] = useState(isTenantScope);
   const [error, setError] = useState<string | null>(null);
 
-  // Load store data when slug changes
+  // Load store data when slug changes or when custom domain needs resolution
   useEffect(() => {
-    if (!slug) {
+    const effectiveSlug = slugFromPath;
+    
+    if (!effectiveSlug && !isCustomDomain) {
       setStore(null);
       setError(null);
       setIsLoading(false);
+      setResolvedSlug(null);
       return;
     }
 
@@ -107,12 +110,18 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsLoading(true);
       setError(null);
 
-      const { data, error: dbError } = await supabase
+      let query = supabase
         .from('stores')
         .select('id, name, slug, description, avatar_url, banner_url, status, created_by')
-        .eq('slug', slug)
-        .eq('status', 'active')
-        .maybeSingle();
+        .eq('status', 'active');
+
+      if (effectiveSlug) {
+        query = query.eq('slug', effectiveSlug);
+      } else if (isCustomDomain) {
+        query = query.eq('custom_domain', hostname);
+      }
+
+      const { data, error: dbError } = await query.maybeSingle();
 
       if (cancelled) return;
 
@@ -120,11 +129,14 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.error('Error loading store:', dbError);
         setError('Erro ao carregar loja');
         setStore(null);
+        setResolvedSlug(null);
       } else if (!data) {
         setError('Loja não encontrada');
         setStore(null);
+        setResolvedSlug(null);
       } else {
         setStore(data as StoreInfo);
+        setResolvedSlug(data.slug);
         setError(null);
 
         // Dynamically set page title to the store name
