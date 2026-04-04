@@ -232,10 +232,10 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     loadStore();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slugFromPath, isCustomDomain, hostname]);
 
   return (
-    <TenantContext.Provider value={{ slug, isTenantScope, basePath, store, isLoading, error }}>
+    <TenantContext.Provider value={{ slug: resolvedSlug, isTenantScope, basePath, store, isLoading, error, isCustomDomain }}>
       {children}
     </TenantContext.Provider>
   );
