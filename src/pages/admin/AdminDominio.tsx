@@ -100,28 +100,23 @@ const AdminDominio: React.FC = () => {
   // Auto-check every 5 minutes while domain is pending
   useEffect(() => {
     if (domainState.customDomain && !domainState.domainVerified) {
-      // Initial check after 10s
-      const initialTimeout = setTimeout(() => {
-        silentVerify();
-      }, 10_000);
-
+      void silentVerify();
       autoCheckRef.current = setInterval(silentVerify, AUTO_CHECK_INTERVAL_MS);
-      setNextAutoCheck(new Date(Date.now() + 10_000));
+      setNextAutoCheck(new Date(Date.now() + AUTO_CHECK_INTERVAL_MS));
 
       return () => {
-        clearTimeout(initialTimeout);
         if (autoCheckRef.current) {
           clearInterval(autoCheckRef.current);
           autoCheckRef.current = null;
         }
       };
-    } else {
-      if (autoCheckRef.current) {
-        clearInterval(autoCheckRef.current);
-        autoCheckRef.current = null;
-      }
-      setNextAutoCheck(null);
     }
+
+    if (autoCheckRef.current) {
+      clearInterval(autoCheckRef.current);
+      autoCheckRef.current = null;
+    }
+    setNextAutoCheck(null);
   }, [domainState.customDomain, domainState.domainVerified, silentVerify]);
 
   const loadDomainState = async () => {
@@ -328,24 +323,32 @@ const AdminDominio: React.FC = () => {
             </GlassCard>
 
             {!domainState.domainVerified && (
-              <GlassCard className="p-5 space-y-3">
+              <GlassCard className="p-5 space-y-4">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">
                   <AlertCircle className="w-4 h-4 text-primary" />
                   {t('admin.domain.dnsInstructions', 'Configuração DNS pendente')}
                 </h3>
 
                 <p className="text-sm text-muted-foreground">
-                  {t('admin.domain.dnsSimple', 'Acesse o painel da Vercel para ver os registros DNS necessários e configure no seu provedor de domínio.')}
+                  {dnsMode === 'nameservers'
+                    ? t('admin.domain.nameserverIntro', 'No seu provedor de domínio, troque os nameservers do domínio por estes nameservers da Vercel:')
+                    : t('admin.domain.recordsIntro', 'No DNS do seu domínio, crie os registros abaixo para apontar para a Vercel:')}
                 </p>
 
-                {verification && verification.length > 0 && (
+                {dnsMode === 'nameservers' ? (
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      {t('admin.domain.verificationRecords', 'Registros de verificação pendentes:')}
-                    </p>
+                    {nameservers.map((server) => (
+                      <div key={server} className="rounded-lg border border-border/30 bg-background/50 p-3">
+                        <p className="text-xs text-muted-foreground">Nameserver</p>
+                        <p className="font-mono text-sm font-semibold break-all">{server}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : verification && verification.length > 0 ? (
+                  <div className="space-y-2">
                     {verification.map((item, index) => (
                       <div key={`${item.type}-${item.domain}-${index}`} className="rounded-lg border border-border/30 bg-background/50 p-3">
-                        <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="grid grid-cols-1 gap-2 text-xs md:grid-cols-3">
                           <div>
                             <p className="text-muted-foreground">Type</p>
                             <p className="font-mono font-semibold">{item.type}</p>
@@ -362,6 +365,16 @@ const AdminDominio: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="rounded-lg border border-border/30 bg-background/50 p-3 text-sm text-muted-foreground">
+                    {t('admin.domain.awaitingRecords', 'A Vercel ainda não retornou registros detalhados. Se o domínio estiver novo no projeto, use nameservers da Vercel ou clique em “Check DNS” após salvar as alterações no seu provedor.')}
+                  </div>
+                )}
+
+                {misconfigured && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                    {t('admin.domain.misconfigured', 'O domínio ainda está configurado incorretamente no provedor. Ajuste os dados acima e depois clique em “Check DNS”.')}
+                  </div>
                 )}
 
                 <div className="rounded-lg border border-border/30 bg-muted/20 p-3">
@@ -370,6 +383,11 @@ const AdminDominio: React.FC = () => {
                     {lastAutoCheck && (
                       <span className="ml-1 text-foreground/50">
                         — {t('admin.domain.lastCheck', 'Última verificação')}: {lastAutoCheck.toLocaleTimeString()}
+                      </span>
+                    )}
+                    {nextAutoCheck && (
+                      <span className="ml-1 text-foreground/50">
+                        — {t('admin.domain.nextCheck', 'Próxima verificação')}: {nextAutoCheck.toLocaleTimeString()}
                       </span>
                     )}
                   </p>
