@@ -32,7 +32,7 @@ const PerfilPage = () => {
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
   const { basePath } = useTenant();
-  const myOrdersPath = basePath === '/' ? '/orders' : `${basePath}/orders`;
+  const myOrdersPath = basePath ? `${basePath}/orders` : '/orders';
 
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: myOrdersPath, gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
