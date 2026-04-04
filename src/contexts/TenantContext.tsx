@@ -199,7 +199,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           name: data.name,
           short_name: data.name,
           description: data.description || `${data.name} - Conteúdo exclusivo`,
-          start_url: `/${data.slug}`,
+          start_url: isCustomDomain ? '/' : `/${data.slug}`,
           display: 'standalone' as const,
           background_color: bgColorHex,
           theme_color: themeColorHex,
