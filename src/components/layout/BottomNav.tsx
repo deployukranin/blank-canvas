@@ -32,7 +32,7 @@ export const BottomNav = () => {
 
   const resolvePath = (path: string) => {
     if (!isTenantScope) return path;
-    if (path === '/') return basePath;
+    if (path === '/') return basePath || '/';
     return `${basePath}${path}`;
   };
 
