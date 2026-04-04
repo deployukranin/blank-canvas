@@ -68,6 +68,11 @@ const getDomainConfig = async (domain: string) => {
 };
 
 const getDnsMode = (vercelDomain: Record<string, unknown> | null, existingDomain: boolean) => {
+  // If Vercel returned verification records, user needs to set DNS records
+  if (Array.isArray(vercelDomain?.verification) && vercelDomain.verification.length > 0) {
+    return "records";
+  }
+
   if (existingDomain) {
     return "nameservers";
   }
