@@ -336,15 +336,15 @@ const AdminSuporte = () => {
           <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
-              { icon: Globe, label: t('admin.support.topicDns'), subject: 'Domínio: Não sei configurar o DNS', desc: t('admin.support.topicDnsDesc') },
-              { icon: ShieldAlert, label: t('admin.support.topicSsl'), subject: 'Domínio: SSL não está funcionando (site inseguro)', desc: t('admin.support.topicSslDesc') },
-              { icon: Globe, label: t('admin.support.topicDomainNotLoading'), subject: 'Domínio: Meu site não carrega no domínio personalizado', desc: t('admin.support.topicDomainNotLoadingDesc') },
-              { icon: CreditCard, label: t('admin.support.topicPayment'), subject: 'Pagamentos: Problema com pagamentos ou Pix', desc: t('admin.support.topicPaymentDesc') },
-              { icon: Video, label: t('admin.support.topicContent'), subject: 'Conteúdo: Problema com vídeos ou conteúdo', desc: t('admin.support.topicContentDesc') },
-              { icon: Settings, label: t('admin.support.topicConfig'), subject: 'Configurações: Problema nas configurações da plataforma', desc: t('admin.support.topicConfigDesc') },
-              { icon: Users, label: t('admin.support.topicUsers'), subject: 'Usuários: Problema com contas ou cadastros', desc: t('admin.support.topicUsersDesc') },
-              { icon: Crown, label: t('admin.support.topicVip'), subject: 'VIP: Problema com assinaturas ou conteúdo VIP', desc: t('admin.support.topicVipDesc') },
-              { icon: HelpCircle, label: t('admin.support.topicOther'), subject: 'Outro: Preciso de ajuda', desc: t('admin.support.topicOtherDesc') },
+              { icon: Globe, label: t('admin.support.topicDns'), subject: t('admin.support.topicDnsSubject'), desc: t('admin.support.topicDnsDesc') },
+              { icon: ShieldAlert, label: t('admin.support.topicSsl'), subject: t('admin.support.topicSslSubject'), desc: t('admin.support.topicSslDesc') },
+              { icon: Globe, label: t('admin.support.topicDomainNotLoading'), subject: t('admin.support.topicDomainNotLoadingSubject'), desc: t('admin.support.topicDomainNotLoadingDesc') },
+              { icon: CreditCard, label: t('admin.support.topicPayment'), subject: t('admin.support.topicPaymentSubject'), desc: t('admin.support.topicPaymentDesc') },
+              { icon: Video, label: t('admin.support.topicContent'), subject: t('admin.support.topicContentSubject'), desc: t('admin.support.topicContentDesc') },
+              { icon: Settings, label: t('admin.support.topicConfig'), subject: t('admin.support.topicConfigSubject'), desc: t('admin.support.topicConfigDesc') },
+              { icon: Users, label: t('admin.support.topicUsers'), subject: t('admin.support.topicUsersSubject'), desc: t('admin.support.topicUsersDesc') },
+              { icon: Crown, label: t('admin.support.topicVip'), subject: t('admin.support.topicVipSubject'), desc: t('admin.support.topicVipDesc') },
+              { icon: HelpCircle, label: t('admin.support.topicOther'), subject: t('admin.support.topicOtherSubject'), desc: t('admin.support.topicOtherDesc') },
             ].map((item) => (
               <button
                 key={item.subject}
