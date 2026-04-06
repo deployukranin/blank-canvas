@@ -483,6 +483,5 @@ const AdminDominio: React.FC = () => {
     </AdminLayout>
   );
 };
-};
 
 export default AdminDominio;
