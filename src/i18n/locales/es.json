@@ -263,7 +263,26 @@
       "sendError": "Error al enviar mensaje",
       "statusOpen": "Abierto",
       "statusAnswered": "Respondido",
-      "statusClosed": "Cerrado"
+      "statusClosed": "Cerrado",
+      "quickTopics": "Atajos rápidos — selecciona el tema:",
+      "topicDns": "Configuración de DNS",
+      "topicDnsDesc": "Ayuda con apuntamiento de dominio",
+      "topicSsl": "SSL / Sitio inseguro",
+      "topicSslDesc": "Certificado o HTTPS con problema",
+      "topicDomainNotLoading": "Dominio no carga",
+      "topicDomainNotLoadingDesc": "Dominio conectado pero sitio no aparece",
+      "topicPayment": "Pagos",
+      "topicPaymentDesc": "Pix, cobros o transferencias",
+      "topicContent": "Contenido / Videos",
+      "topicContentDesc": "Subida, visualización u organización",
+      "topicConfig": "Configuración de la tienda",
+      "topicConfigDesc": "Personalización, planes o general",
+      "topicUsers": "Usuarios / Cuentas",
+      "topicUsersDesc": "Registros, inicio de sesión o permisos",
+      "topicVip": "VIP / Suscripciones",
+      "topicVipDesc": "Planes VIP, cobros o acceso",
+      "topicOther": "Otro tema",
+      "topicOtherDesc": "Cualquier otra duda o problema"
     }
   },
   "superAdmin": {

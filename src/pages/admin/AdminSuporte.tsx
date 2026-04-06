@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck, Globe, CreditCard, Video, Settings, ShieldAlert, HelpCircle } from 'lucide-react';
+import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck, Globe, CreditCard, Video, Settings, ShieldAlert, HelpCircle, Users, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -333,16 +333,18 @@ const AdminSuporte = () => {
 
         {/* Support shortcut cards */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics', 'Atalhos rápidos — selecione o assunto:')}</p>
+          <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
-              { icon: Globe, label: t('admin.support.topicDns', 'Configuração de DNS'), subject: 'Domínio: Não sei configurar o DNS', desc: t('admin.support.topicDnsDesc', 'Ajuda com apontamento de domínio') },
-              { icon: ShieldAlert, label: t('admin.support.topicSsl', 'SSL / Site inseguro'), subject: 'Domínio: SSL não está funcionando (site inseguro)', desc: t('admin.support.topicSslDesc', 'Certificado ou HTTPS com problema') },
-              { icon: Globe, label: t('admin.support.topicDomainNotLoading', 'Domínio não carrega'), subject: 'Domínio: Meu site não carrega no domínio personalizado', desc: t('admin.support.topicDomainNotLoadingDesc', 'Domínio conectado mas site não aparece') },
-              { icon: CreditCard, label: t('admin.support.topicPayment', 'Pagamentos'), subject: 'Pagamentos: Problema com pagamentos ou Pix', desc: t('admin.support.topicPaymentDesc', 'Pix, cobranças ou repasses') },
-              { icon: Video, label: t('admin.support.topicContent', 'Conteúdo / Vídeos'), subject: 'Conteúdo: Problema com vídeos ou conteúdo', desc: t('admin.support.topicContentDesc', 'Upload, exibição ou organização') },
-              { icon: Settings, label: t('admin.support.topicConfig', 'Configurações da loja'), subject: 'Configurações: Problema nas configurações da plataforma', desc: t('admin.support.topicConfigDesc', 'Personalização, planos ou geral') },
-              { icon: HelpCircle, label: t('admin.support.topicOther', 'Outro assunto'), subject: 'Outro: Preciso de ajuda', desc: t('admin.support.topicOtherDesc', 'Qualquer outra dúvida ou problema') },
+              { icon: Globe, label: t('admin.support.topicDns'), subject: 'Domínio: Não sei configurar o DNS', desc: t('admin.support.topicDnsDesc') },
+              { icon: ShieldAlert, label: t('admin.support.topicSsl'), subject: 'Domínio: SSL não está funcionando (site inseguro)', desc: t('admin.support.topicSslDesc') },
+              { icon: Globe, label: t('admin.support.topicDomainNotLoading'), subject: 'Domínio: Meu site não carrega no domínio personalizado', desc: t('admin.support.topicDomainNotLoadingDesc') },
+              { icon: CreditCard, label: t('admin.support.topicPayment'), subject: 'Pagamentos: Problema com pagamentos ou Pix', desc: t('admin.support.topicPaymentDesc') },
+              { icon: Video, label: t('admin.support.topicContent'), subject: 'Conteúdo: Problema com vídeos ou conteúdo', desc: t('admin.support.topicContentDesc') },
+              { icon: Settings, label: t('admin.support.topicConfig'), subject: 'Configurações: Problema nas configurações da plataforma', desc: t('admin.support.topicConfigDesc') },
+              { icon: Users, label: t('admin.support.topicUsers'), subject: 'Usuários: Problema com contas ou cadastros', desc: t('admin.support.topicUsersDesc') },
+              { icon: Crown, label: t('admin.support.topicVip'), subject: 'VIP: Problema com assinaturas ou conteúdo VIP', desc: t('admin.support.topicVipDesc') },
+              { icon: HelpCircle, label: t('admin.support.topicOther'), subject: 'Outro: Preciso de ajuda', desc: t('admin.support.topicOtherDesc') },
             ].map((item) => (
               <button
                 key={item.subject}
