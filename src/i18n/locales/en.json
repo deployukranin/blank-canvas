@@ -263,7 +263,26 @@
       "sendError": "Error sending message",
       "statusOpen": "Open",
       "statusAnswered": "Answered",
-      "statusClosed": "Closed"
+      "statusClosed": "Closed",
+      "quickTopics": "Quick shortcuts — select a topic:",
+      "topicDns": "DNS Configuration",
+      "topicDnsDesc": "Help with domain pointing",
+      "topicSsl": "SSL / Insecure site",
+      "topicSslDesc": "Certificate or HTTPS issue",
+      "topicDomainNotLoading": "Domain not loading",
+      "topicDomainNotLoadingDesc": "Domain connected but site not showing",
+      "topicPayment": "Payments",
+      "topicPaymentDesc": "Pix, charges or payouts",
+      "topicContent": "Content / Videos",
+      "topicContentDesc": "Upload, display or organization",
+      "topicConfig": "Store settings",
+      "topicConfigDesc": "Customization, plans or general",
+      "topicUsers": "Users / Accounts",
+      "topicUsersDesc": "Signups, login or permissions",
+      "topicVip": "VIP / Subscriptions",
+      "topicVipDesc": "VIP plans, billing or access",
+      "topicOther": "Other topic",
+      "topicOtherDesc": "Any other question or issue"
     }
   },
   "superAdmin": {
