@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/oauth-helper";
 
 
 const Auth = () => {
@@ -110,9 +110,7 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
+      const result = await signInWithGoogle();
       if (result.error) {
         toast.error("Erro ao entrar com Google");
         setIsSubmitting(false);
