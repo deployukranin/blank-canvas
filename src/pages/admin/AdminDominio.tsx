@@ -44,7 +44,7 @@ const AdminDominio: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { store: tenantStore } = useTenant();
-  const [ownStore, setOwnStore] = useState<{ id: string } | null>(null);
+  const [ownStore, setOwnStore] = useState<typeof tenantStore>(null);
   const store = ownStore || tenantStore;
   const [domain, setDomain] = useState('');
   const [domainState, setDomainState] = useState<DomainState>({
