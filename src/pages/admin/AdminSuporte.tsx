@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck } from 'lucide-react';
+import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck, Globe, CreditCard, Video, Settings, ShieldAlert, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
