@@ -45,8 +45,36 @@ const AdminDominio: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { store: tenantStore } = useTenant();
+  const { user } = useAuth();
   const [ownStore, setOwnStore] = useState<typeof tenantStore>(null);
   const store = ownStore || tenantStore;
+
+  // Resolve user's own store (creator may be on a different tenant's URL)
+  useEffect(() => {
+    if (!user?.id) return;
+    const resolveOwnStore = async () => {
+      // First check store_admins
+      const { data: adminEntry } = await supabase
+        .from('store_admins')
+        .select('store_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      const storeId = adminEntry?.store_id;
+      if (!storeId) return;
+
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single();
+      
+      if (storeData) {
+        setOwnStore(storeData as typeof tenantStore);
+      }
+    };
+    resolveOwnStore();
+  }, [user?.id]);
   const [domain, setDomain] = useState('');
   const [domainState, setDomainState] = useState<DomainState>({
     customDomain: null,
