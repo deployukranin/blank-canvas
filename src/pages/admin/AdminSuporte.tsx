@@ -205,7 +205,23 @@ const AdminSuporte = () => {
     onError: () => toast.error(t('admin.support.sendError')),
   });
 
-  // Read receipt indicator
+  // Delete ticket
+  const deleteTicket = useMutation({
+    mutationFn: async (ticketId: string) => {
+      // Delete messages first, then ticket
+      await supabase.from('support_messages').delete().eq('ticket_id', ticketId);
+      const { error } = await supabase.from('support_tickets').delete().eq('id', ticketId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
+      setSelectedTicket(null);
+      toast.success(t('admin.support.ticketDeleted'));
+    },
+    onError: () => toast.error(t('admin.support.deleteError')),
+  });
+
+
   const ReadReceipt = ({ msg }: { msg: Message }) => {
     if (msg.sender_role !== 'creator') return null;
     return (
