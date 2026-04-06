@@ -11,11 +11,10 @@ export async function signInWithGoogle(): Promise<{ error?: Error; redirected?: 
     // Custom domains don't have /~oauth routes.
     // Redirect OAuth initiation through the published lovable.app domain,
     // but set redirect_uri to the custom domain so user comes back here.
-    const customOrigin = window.location.origin;
-    const state = crypto.randomUUID().replace(/-/g, "");
+    const customRedirectUri = new URL("/", window.location.origin).toString();
     const initiateUrl =
       `${LOVABLE_PUBLISHED_ORIGIN}/~oauth/initiate?provider=google` +
-      `&redirect_uri=${encodeURIComponent(customOrigin)}` +
+      `&redirect_uri=${encodeURIComponent(customRedirectUri)}` +
       `&state=${state}`;
     window.location.href = initiateUrl;
     return { redirected: true };
