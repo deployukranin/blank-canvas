@@ -449,36 +449,15 @@ const AdminDominio: React.FC = () => {
           </GlassCard>
         )}
 
-        {/* Support shortcuts */}
-        <GlassCard className="p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Headset className="w-5 h-5 text-primary" />
-            <h3 className="text-sm font-semibold">{t('admin.domain.needHelp', 'Precisa de ajuda?')}</h3>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {t('admin.domain.supportDesc', 'Selecione o assunto abaixo para abrir um ticket de suporte com nosso time:')}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {[
-              { label: t('admin.domain.supportDnsConfig', 'Não sei configurar o DNS'), subject: 'Domínio: Não sei configurar o DNS' },
-              { label: t('admin.domain.supportNotVerifying', 'Domínio não verifica'), subject: 'Domínio: Meu domínio não está verificando' },
-              { label: t('admin.domain.supportSsl', 'SSL / Site não seguro'), subject: 'Domínio: SSL não está funcionando (site inseguro)' },
-              { label: t('admin.domain.supportNotLoading', 'Site não carrega no domínio'), subject: 'Domínio: Meu site não carrega no domínio personalizado' },
-              { label: t('admin.domain.supportCloudflare', 'Uso Cloudflare / Proxy'), subject: 'Domínio: Preciso de ajuda com Cloudflare / Proxy DNS' },
-              { label: t('admin.domain.supportOther', 'Outro problema'), subject: 'Domínio: Outro problema' },
-            ].map((item) => (
-              <Button
-                key={item.subject}
-                variant="outline"
-                size="sm"
-                className="justify-start text-left h-auto py-2.5 px-3 text-xs"
-                onClick={() => navigate(`${basePath}/admin/support`, { state: { prefillSubject: item.subject } })}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </div>
-        </GlassCard>
+        {/* Support button */}
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={() => navigate(`${basePath}/admin/support`)}
+        >
+          <Headset className="w-4 h-4" />
+          {t('admin.domain.needHelp', 'Precisa de ajuda? Fale com o suporte')}
+        </Button>
       </div>
     </AdminLayout>
   );
