@@ -191,7 +191,11 @@ Deno.serve(async (req: Request) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (storeCheck.created_by !== user.id && !storeAdminCheck && !userRoles.includes("super_admin")) {
+    const isStoreOwner = storeCheck.created_by === user.id;
+    const isStoreAdmin = !!storeAdminCheck;
+    const isSuperAdmin = userRoles.includes("super_admin");
+
+    if (!isStoreOwner && !isStoreAdmin && !isSuperAdmin) {
       return jsonResponse({ success: false, error: "Not authorized for this store" }, 403);
     }
 
