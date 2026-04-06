@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck, Globe, CreditCard, Video, Settings, ShieldAlert, HelpCircle, Users, Crown } from 'lucide-react';
+import { Send, Plus, ArrowLeft, MessageCircle, Clock, CheckCircle2, Check, CheckCheck, Globe, CreditCard, Video, Settings, ShieldAlert, HelpCircle, Users, Crown, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -204,7 +205,23 @@ const AdminSuporte = () => {
     onError: () => toast.error(t('admin.support.sendError')),
   });
 
-  // Read receipt indicator
+  // Delete ticket
+  const deleteTicket = useMutation({
+    mutationFn: async (ticketId: string) => {
+      // Delete messages first, then ticket
+      await supabase.from('support_messages').delete().eq('ticket_id', ticketId);
+      const { error } = await supabase.from('support_tickets').delete().eq('id', ticketId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
+      setSelectedTicket(null);
+      toast.success(t('admin.support.ticketDeleted'));
+    },
+    onError: () => toast.error(t('admin.support.deleteError')),
+  });
+
+
   const ReadReceipt = ({ msg }: { msg: Message }) => {
     if (msg.sender_role !== 'creator') return null;
     return (
@@ -238,7 +255,28 @@ const AdminSuporte = () => {
                   {format(new Date(selectedTicket.created_at), "dd MMM yyyy HH:mm")}
                 </p>
               </div>
-              <Badge variant="outline" className={status.color}>{status.label}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={status.color}>{status.label}</Badge>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('admin.support.deleteTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>{t('admin.support.deleteDescription')}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteTicket.mutate(selectedTicket.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        {t('admin.support.deleteConfirm')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
