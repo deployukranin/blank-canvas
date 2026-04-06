@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,9 +44,11 @@ const AdminSuporte = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const prefillSubject = (location.state as any)?.prefillSubject as string | undefined;
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [showNewTicket, setShowNewTicket] = useState(false);
-  const [newSubject, setNewSubject] = useState('');
+  const [showNewTicket, setShowNewTicket] = useState(!!prefillSubject);
+  const [newSubject, setNewSubject] = useState(prefillSubject || '');
   const [newMessage, setNewMessage] = useState('');
   const [replyText, setReplyText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
