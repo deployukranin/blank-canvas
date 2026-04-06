@@ -255,7 +255,28 @@ const AdminSuporte = () => {
                   {format(new Date(selectedTicket.created_at), "dd MMM yyyy HH:mm")}
                 </p>
               </div>
-              <Badge variant="outline" className={status.color}>{status.label}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={status.color}>{status.label}</Badge>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('admin.support.deleteTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>{t('admin.support.deleteDescription')}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteTicket.mutate(selectedTicket.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        {t('admin.support.deleteConfirm')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
