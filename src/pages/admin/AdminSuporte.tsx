@@ -333,7 +333,7 @@ const AdminSuporte = () => {
 
         {/* Support shortcut cards */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics', 'Atalhos rápidos — selecione o assunto:')}</p>
+          <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
               { icon: Globe, label: t('admin.support.topicDns'), subject: 'Domínio: Não sei configurar o DNS', desc: t('admin.support.topicDnsDesc') },
