@@ -323,7 +323,7 @@ const AdminSuporte = () => {
   // Ticket list
   return (
     <AdminLayout title={t('admin.support.title')}>
-      <div className="max-w-3xl mx-auto space-y-4">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{t('admin.support.sendMessage')}</p>
           <Button onClick={() => setShowNewTicket(true)} size="sm" className="gap-2">
@@ -331,13 +331,41 @@ const AdminSuporte = () => {
           </Button>
         </div>
 
+        {/* Support shortcut cards */}
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-3">{t('admin.support.quickTopics', 'Atalhos rápidos — selecione o assunto:')}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { icon: Globe, label: t('admin.support.topicDns', 'Configuração de DNS'), subject: 'Domínio: Não sei configurar o DNS', desc: t('admin.support.topicDnsDesc', 'Ajuda com apontamento de domínio') },
+              { icon: ShieldAlert, label: t('admin.support.topicSsl', 'SSL / Site inseguro'), subject: 'Domínio: SSL não está funcionando (site inseguro)', desc: t('admin.support.topicSslDesc', 'Certificado ou HTTPS com problema') },
+              { icon: Globe, label: t('admin.support.topicDomainNotLoading', 'Domínio não carrega'), subject: 'Domínio: Meu site não carrega no domínio personalizado', desc: t('admin.support.topicDomainNotLoadingDesc', 'Domínio conectado mas site não aparece') },
+              { icon: CreditCard, label: t('admin.support.topicPayment', 'Pagamentos'), subject: 'Pagamentos: Problema com pagamentos ou Pix', desc: t('admin.support.topicPaymentDesc', 'Pix, cobranças ou repasses') },
+              { icon: Video, label: t('admin.support.topicContent', 'Conteúdo / Vídeos'), subject: 'Conteúdo: Problema com vídeos ou conteúdo', desc: t('admin.support.topicContentDesc', 'Upload, exibição ou organização') },
+              { icon: Settings, label: t('admin.support.topicConfig', 'Configurações da loja'), subject: 'Configurações: Problema nas configurações da plataforma', desc: t('admin.support.topicConfigDesc', 'Personalização, planos ou geral') },
+              { icon: HelpCircle, label: t('admin.support.topicOther', 'Outro assunto'), subject: 'Outro: Preciso de ajuda', desc: t('admin.support.topicOtherDesc', 'Qualquer outra dúvida ou problema') },
+            ].map((item) => (
+              <button
+                key={item.subject}
+                onClick={() => { setNewSubject(item.subject); setShowNewTicket(true); }}
+                className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:bg-accent/30 transition-colors text-left"
+              >
+                <div className="rounded-lg bg-primary/10 p-2 shrink-0">
+                  <item.icon className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Ticket list */}
         {tickets.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-12 text-center">
             <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">{t('admin.support.noTickets')}</p>
-            <Button onClick={() => setShowNewTicket(true)} variant="outline" size="sm" className="mt-4 gap-2">
-              <Plus className="w-4 h-4" /> {t('admin.support.openFirst')}
-            </Button>
           </div>
         ) : (
           <div className="space-y-2">
