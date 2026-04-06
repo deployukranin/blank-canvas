@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/oauth-helper";
 
 const ClientAuth = () => {
   const navigate = useNavigate();
@@ -43,9 +43,7 @@ const ClientAuth = () => {
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
+      const result = await signInWithGoogle();
       if (result.error) {
         toast.error("Erro ao entrar com Google");
         setIsSubmitting(false);
