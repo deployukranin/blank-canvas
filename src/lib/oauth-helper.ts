@@ -1,5 +1,6 @@
 const LOVABLE_PUBLISHED_ORIGIN = "https://cozy-corner-seed.lovable.app";
 const LOVABLE_DOMAINS = [".lovable.app", ".lovableproject.com"];
+const CUSTOM_DOMAIN_REDIRECT_URI = "https://www.mytinglebox.com/";
 
 function isCustomDomain(): boolean {
   const hostname = window.location.hostname;
@@ -7,6 +8,10 @@ function isCustomDomain(): boolean {
 }
 
 function getRedirectUri(): string {
+  if (isCustomDomain()) {
+    return CUSTOM_DOMAIN_REDIRECT_URI;
+  }
+
   const currentUrl = new URL(window.location.href);
   currentUrl.hash = "";
   return currentUrl.toString();
