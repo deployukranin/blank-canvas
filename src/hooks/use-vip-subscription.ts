@@ -116,7 +116,7 @@ export const useVIPSubscription = () => {
     }
   }, [isVIP, fetchVIPContent]);
 
-  // Create VIP charge via edge function (OpenPix)
+  // Create VIP charge via edge function
   const createCharge = useCallback(async (
     planType: 'monthly' | 'quarterly' | 'yearly' = 'monthly',
     customerName?: string

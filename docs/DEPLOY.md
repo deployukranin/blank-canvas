@@ -6,7 +6,6 @@ Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do
 
 - Node.js 18+ instalado
 - Conta no [Supabase](https://supabase.com)
-- Conta na [OpenPix](https://openpix.com.br) (para pagamentos PIX)
 - Chave de API do YouTube Data API v3 (para galeria de vídeos)
 
 ---
@@ -28,55 +27,30 @@ Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do
 
 1. Acesse **SQL Editor** no painel do Supabase
 2. Copie o conteúdo de `docs/database-schema.sql`
-3. Cole no editor SQL e execute
-4. Verifique se as tabelas foram criadas:
-   - `profiles`
-   - `influencers`
-   - `pix_payments`
-   - `video_chat_messages`
+3. Execute o SQL
 
 ---
 
-## 3. Configurar Edge Functions
-
-As Edge Functions precisam ser deployadas manualmente no Supabase.
-
-### 3.1 Instalar Supabase CLI
+## 3. Deploy das Edge Functions
 
 ```bash
-npm install -g supabase
-```
-
-### 3.2 Login e Link do Projeto
-
-```bash
-supabase login
-supabase link --project-ref SEU_PROJECT_REF
-```
-
-O `project-ref` está na URL do seu projeto: `https://app.supabase.com/project/SEU_PROJECT_REF`
-
-### 3.3 Deploy das Functions
-
-```bash
-# Deploy de todas as funções
 supabase functions deploy youtube-videos
 supabase functions deploy create-pix-charge
-supabase functions deploy openpix-webhook
-supabase functions deploy mock-pix-webhook
-supabase functions deploy sandbox-pix-test
-supabase functions deploy send-report
+supabase functions deploy create-vip-charge
+supabase functions deploy save-app-config
+supabase functions deploy export-metrics
+supabase functions deploy super-admin-metrics
+supabase functions deploy youtube-channel-metrics
 ```
 
-### 3.4 Configurar Secrets das Functions
+### Configurar Secrets das Functions
 
 ```bash
 # YouTube
 supabase secrets set YOUTUBE_API_KEY=SUA_CHAVE_YOUTUBE
 
-# OpenPix
-supabase secrets set OPENPIX_APP_ID=SEU_APP_ID_OPENPIX
-supabase secrets set OPENPIX_WEBHOOK_SECRET=SEU_WEBHOOK_SECRET
+# Stripe (se usar pagamentos via Stripe Connect)
+supabase secrets set STRIPE_SECRET_KEY=SUA_CHAVE_STRIPE
 
 # As variáveis SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são definidas automaticamente
 ```
@@ -95,46 +69,9 @@ VITE_SUPABASE_PROJECT_ID=SEU_PROJECT_ID
 
 ---
 
-## 5. Configurar OpenPix (Pagamentos PIX)
+## 5. Configurar YouTube API
 
-### 5.1 Criar Conta na OpenPix
-
-1. Acesse [openpix.com.br](https://openpix.com.br)
-2. Crie uma conta e complete a verificação
-3. Acesse **Developers > APIs**
-4. Crie um **App ID** e anote
-
-### 5.2 Configurar Webhook
-
-1. Acesse **Developers > Webhooks**
-2. Adicione um novo webhook com a URL:
-   ```
-   https://SEU_PROJETO.supabase.co/functions/v1/openpix-webhook
-   ```
-3. Selecione os eventos:
-   - `OPENPIX:CHARGE_COMPLETED`
-   - `OPENPIX:CHARGE_EXPIRED`
-   - `OPENPIX:TRANSACTION_RECEIVED`
-   - `OPENPIX:TRANSACTION_REFUND_RECEIVED`
-4. Copie o **Webhook Secret** gerado
-
-### 5.3 Configurar Split (Recebedores)
-
-Se você usa split de pagamentos:
-
-1. Acesse **Recebedores** na OpenPix
-2. Cadastre o recebedor (influenciador) com:
-   - Nome
-   - CPF/CNPJ
-   - Chave PIX
-3. Anote o **Receiver ID** gerado
-4. Adicione na tabela `influencers` do Supabase
-
----
-
-## 6. Configurar YouTube API
-
-### 6.1 Criar Projeto no Google Cloud
+### 5.1 Criar Projeto no Google Cloud
 
 1. Acesse [console.cloud.google.com](https://console.cloud.google.com)
 2. Crie um novo projeto
@@ -145,7 +82,7 @@ Se você usa split de pagamentos:
    supabase secrets set YOUTUBE_API_KEY=SUA_CHAVE
    ```
 
-### 6.2 Obter Channel ID
+### 5.2 Obter Channel ID
 
 1. Acesse o canal do YouTube
 2. O Channel ID está na URL ou em **About > Share Channel**
@@ -153,16 +90,16 @@ Se você usa split de pagamentos:
 
 ---
 
-## 7. Build e Deploy da Aplicação
+## 6. Build e Deploy da Aplicação
 
-### 7.1 Build Local
+### 6.1 Build Local
 
 ```bash
 npm install
 npm run build
 ```
 
-### 7.2 Deploy no Vercel
+### 6.2 Deploy no Vercel
 
 1. Conecte o repositório ao [Vercel](https://vercel.com)
 2. Configure as variáveis de ambiente:
@@ -171,56 +108,39 @@ npm run build
    - `VITE_SUPABASE_PROJECT_ID`
 3. Deploy automático em cada push
 
-### 7.3 Deploy no Netlify
-
-1. Conecte o repositório ao [Netlify](https://netlify.com)
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-4. Configure as variáveis de ambiente
-
 ---
 
-## 8. Configuração Inicial (CEO Panel)
+## 7. Configuração Inicial
 
 Após o deploy:
 
-1. Acesse `/ceo` no seu site
+1. Acesse o painel admin no seu site
 2. Configure:
    - **Branding**: Nome, descrição, logos
    - **Cores**: Tema visual
-   - **Integrações**: Credenciais do Supabase, OpenPix, YouTube
-
-As configurações são salvas no `localStorage` e persistem entre sessões.
+   - **Integrações**: YouTube
 
 ---
 
-## 9. Configurar Autenticação
+## 8. Configurar Autenticação
 
-### 9.1 Email/Senha
+### 8.1 Email/Senha
 
 1. No Supabase, acesse **Authentication > Settings**
 2. Desabilite **Confirm email** para testes rápidos
 3. Configure o **Site URL** com a URL do seu deploy
 
-### 9.2 Google OAuth (Opcional)
-
-1. Configure um projeto no [Google Cloud Console](https://console.cloud.google.com)
-2. Crie credenciais OAuth 2.0
-3. No Supabase, acesse **Authentication > Providers > Google**
-4. Adicione as credenciais
-
 ---
 
-## 10. Checklist Final
+## 9. Checklist Final
 
 - [ ] Banco de dados criado com todas as tabelas
 - [ ] Edge Functions deployadas
 - [ ] Secrets configurados no Supabase
 - [ ] Variáveis de ambiente configuradas
-- [ ] Webhook da OpenPix configurado
 - [ ] YouTube API funcionando
 - [ ] Autenticação testada
-- [ ] CEO Panel configurado
+- [ ] Painel Admin configurado
 
 ---
 
@@ -232,15 +152,6 @@ As configurações são salvas no `localStorage` e persistem entre sessões.
 # Ver logs das funções
 supabase functions logs youtube-videos --tail
 ```
-
-### Webhook não recebe pagamentos
-
-1. Verifique a URL do webhook na OpenPix
-2. Confirme que a função está deployada
-3. Verifique os logs:
-   ```bash
-   supabase functions logs openpix-webhook --tail
-   ```
 
 ### Erro de CORS
 
@@ -255,5 +166,4 @@ As Edge Functions já incluem headers CORS. Se ainda houver erro:
 
 Para problemas ou dúvidas:
 - Consulte a documentação do [Supabase](https://supabase.com/docs)
-- Consulte a documentação da [OpenPix](https://developers.openpix.com.br)
 - Abra uma issue no repositório

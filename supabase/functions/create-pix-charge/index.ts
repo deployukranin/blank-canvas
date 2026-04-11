@@ -213,7 +213,6 @@ Deno.serve(async (req) => {
 
     let qrCodeImage: string | null = null;
     let brCode: string | null = null;
-    let openpixChargeId: string | null = null;
 
     // ─── PIX Manual ───
     if (activeGateway === 'pix_manual') {
@@ -228,43 +227,6 @@ Deno.serve(async (req) => {
       const txId = correlationID.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '');
       brCode = generatePixBrCode(pix.key, pix.receiverName, pix.city, amountCents / 100, txId);
       qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(brCode)}`;
-    }
-    // ─── OpenPix (only if explicitly configured) ───
-    else if (activeGateway === 'openpix') {
-      const OPENPIX_APP_ID = Deno.env.get('OPENPIX_APP_ID');
-      if (!OPENPIX_APP_ID) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'OpenPix not configured. Ask the creator to set up payments.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const openPixResponse = await fetch('https://api.openpix.com.br/api/v1/charge', {
-        method: 'POST',
-        headers: { 'Authorization': OPENPIX_APP_ID, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          correlationID,
-          value: amountCents,
-          comment: `Custom ${productType} order`,
-          expiresIn: 900,
-        }),
-      });
-
-      let openPixData: any;
-      try { openPixData = await openPixResponse.json(); } catch { openPixData = null; }
-
-      const charge = openPixData?.charge;
-      if (!openPixResponse.ok || !charge?.identifier || !charge?.brCode || !charge?.qrCodeImage) {
-        console.error('OpenPix failure:', { status: openPixResponse.status, error: openPixData?.error });
-        return new Response(
-          JSON.stringify({ success: false, error: 'Payment provider error' }),
-          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      qrCodeImage = charge.qrCodeImage;
-      brCode = charge.brCode;
-      openpixChargeId = charge.identifier;
     }
     // ─── No payment configured ───
     else {
@@ -296,7 +258,7 @@ Deno.serve(async (req) => {
         correlation_id: correlationID,
         qr_code_image: qrCodeImage,
         br_code: brCode,
-        openpix_charge_id: openpixChargeId,
+        openpix_charge_id: null,
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
         store_id: storeId,
