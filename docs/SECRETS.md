@@ -11,11 +11,8 @@ Este documento lista todas as chaves secretas e tokens necessários para o funci
 | `SUPABASE_URL` | ✅ Sim | Edge Functions | URL |
 | `SUPABASE_ANON_KEY` | ✅ Sim | Frontend + Edge Functions | Token |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ Sim | Edge Functions | Token (Secreto!) |
-| `OPENPIX_APP_ID` | 💰 Pagamentos | Edge Functions | Token |
-| `OPENPIX_WEBHOOK_SECRET` | 💰 Pagamentos | Edge Functions | Token |
 | `YOUTUBE_API_KEY` | 🎬 Vídeos | Edge Functions | Token |
-| `MODERATION_API_URL` | 📢 Moderação | Edge Functions | URL |
-| `MODERATION_API_KEY` | 📢 Moderação | Edge Functions | Token |
+| `STRIPE_SECRET_KEY` | 💰 Pagamentos | Edge Functions | Token |
 
 ---
 
@@ -43,49 +40,13 @@ Este documento lista todas as chaves secretas e tokens necessários para o funci
 
 ---
 
-## 2. OpenPix / Woovi (Pagamentos PIX)
-
-### OPENPIX_APP_ID
-- **Descrição**: ID da aplicação/API Key da OpenPix
-- **Formato**: String alfanumérica
-- **Onde encontrar**: OpenPix Dashboard > Developers > APIs
-- **Uso**: Criar cobranças PIX, autenticar chamadas
-
-### OPENPIX_WEBHOOK_SECRET
-- **Descrição**: Secret para validar webhooks da OpenPix
-- **Formato**: String alfanumérica
-- **Onde encontrar**: OpenPix Dashboard > Developers > Webhooks
-- **Uso**: Validar assinatura HMAC das notificações
-- **Segurança**: ⚠️ Nunca expor publicamente
-
-### Configuração no Supabase
-
-```bash
-# Definir secrets via CLI
-supabase secrets set OPENPIX_APP_ID="seu_app_id_aqui"
-supabase secrets set OPENPIX_WEBHOOK_SECRET="seu_webhook_secret_aqui"
-
-# Verificar secrets definidos
-supabase secrets list
-```
-
----
-
-## 3. YouTube API
+## 2. YouTube API
 
 ### YOUTUBE_API_KEY
 - **Descrição**: Chave da YouTube Data API v3
 - **Formato**: `AIza...` (39 caracteres)
 - **Onde encontrar**: Google Cloud Console > Credenciais
 - **Uso**: Buscar vídeos do canal do influenciador
-
-### Configurar no Google Cloud
-
-1. Acesse [console.cloud.google.com](https://console.cloud.google.com)
-2. Crie/selecione um projeto
-3. Ative a API: **YouTube Data API v3**
-4. Vá em **Credenciais > Criar Credenciais > Chave de API**
-5. Restrinja a chave por IP ou referrer para segurança
 
 ### Configuração no Supabase
 
@@ -95,39 +56,17 @@ supabase secrets set YOUTUBE_API_KEY="AIza..."
 
 ---
 
-## 4. Painel de Moderação (Opcional)
+## 3. Stripe (Pagamentos)
 
-Se você tem um projeto separado para moderação:
-
-### MODERATION_API_URL
-- **Descrição**: URL do projeto de moderação
-- **Formato**: `https://seu-projeto-moderacao.supabase.co`
-- **Uso**: Enviar denúncias e tickets de suporte
-
-### MODERATION_API_KEY
-- **Descrição**: Chave de autenticação do projeto de moderação
-- **Formato**: UUID ou string gerada
-- **Uso**: Autenticar chamadas ao projeto externo
+### STRIPE_SECRET_KEY
+- **Descrição**: Chave secreta da conta Stripe
+- **Formato**: `sk_live_...` ou `sk_test_...`
+- **Onde encontrar**: Stripe Dashboard > Developers > API Keys
+- **Uso**: Processar pagamentos via Stripe Connect
 
 ---
 
-## 5. Configuração via CEO Panel
-
-Algumas credenciais podem ser configuradas dinamicamente pelo CEO Panel em `/ceo/integracoes`:
-
-| Integração | Configurável no CEO Panel |
-|------------|---------------------------|
-| Supabase URL/Key | ✅ Sim |
-| OpenPix App ID/Secret | ✅ Sim |
-| YouTube Channel ID | ✅ Sim |
-| Moderação URL/Key | ✅ Sim |
-| Suporte Webhook | ✅ Sim |
-
-As configurações do CEO Panel são salvas no `localStorage` e usadas como fallback quando as variáveis de ambiente não estão definidas.
-
----
-
-## 6. Variáveis de Ambiente do Frontend
+## 4. Variáveis de Ambiente do Frontend
 
 Arquivo `.env` na raiz do projeto:
 
@@ -143,7 +82,7 @@ VITE_SUPABASE_PROJECT_ID=xxxx
 
 ---
 
-## 7. Segurança
+## 5. Segurança
 
 ### ⚠️ NUNCA faça isso:
 
@@ -152,10 +91,7 @@ VITE_SUPABASE_PROJECT_ID=xxxx
 const supabase = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // ❌ ERRADO - Hardcoded no código
-const OPENPIX_KEY = "minha_chave_secreta";
-
-// ❌ ERRADO - Commitar .env com secrets
-// git add .env
+const API_KEY = "minha_chave_secreta";
 ```
 
 ### ✅ Boas práticas:
@@ -165,43 +101,8 @@ const OPENPIX_KEY = "minha_chave_secreta";
 const supabase = createClient(url, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
 // ✅ CORRETO - Secrets apenas em Edge Functions
-// (definidos via supabase secrets set)
-const apiKey = Deno.env.get("OPENPIX_APP_ID");
+const apiKey = Deno.env.get("STRIPE_SECRET_KEY");
 ```
-
-### .gitignore
-
-Certifique-se que seu `.gitignore` inclui:
-
-```
-.env
-.env.local
-.env.*.local
-supabase/.env
-```
-
----
-
-## 8. Rotação de Chaves
-
-Se uma chave for comprometida:
-
-### Supabase
-1. Vá em **Settings > API**
-2. Clique em **Regenerate** na chave comprometida
-3. Atualize todos os lugares que usam a chave
-
-### OpenPix
-1. Vá em **Developers > APIs**
-2. Revogue o App ID antigo
-3. Crie um novo App ID
-4. Atualize o secret no Supabase
-
-### YouTube
-1. Vá em **Google Cloud Console > Credenciais**
-2. Delete a chave antiga
-3. Crie uma nova chave
-4. Atualize o secret no Supabase
 
 ---
 
@@ -210,8 +111,7 @@ Se uma chave for comprometida:
 - [ ] `SUPABASE_URL` configurado
 - [ ] `SUPABASE_ANON_KEY` configurado no frontend
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` configurado nas Edge Functions
-- [ ] `OPENPIX_APP_ID` configurado (se usar pagamentos)
-- [ ] `OPENPIX_WEBHOOK_SECRET` configurado (se usar pagamentos)
 - [ ] `YOUTUBE_API_KEY` configurado (se usar galeria de vídeos)
+- [ ] `STRIPE_SECRET_KEY` configurado (se usar pagamentos Stripe)
 - [ ] `.env` no `.gitignore`
 - [ ] Nenhum secret hardcoded no código
