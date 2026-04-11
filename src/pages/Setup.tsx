@@ -46,7 +46,7 @@ const WelcomeStep = ({ onNext }: StepProps) => (
       </h1>
       <p className="text-muted-foreground max-w-md mx-auto">
         Vamos configurar seu projeto em poucos passos. Você precisará das credenciais
-        do Supabase e, opcionalmente, OpenPix e YouTube.
+        do Supabase e, opcionalmente, YouTube.
       </p>
     </div>
     <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
@@ -56,7 +56,7 @@ const WelcomeStep = ({ onNext }: StepProps) => (
       </div>
       <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
         <CreditCard className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-        <p className="text-xs text-muted-foreground">OpenPix</p>
+        <p className="text-xs text-muted-foreground">PIX Manual</p>
       </div>
       <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
         <Youtube className="w-6 h-6 text-red-400 mx-auto mb-2" />
@@ -169,7 +169,7 @@ const SupabaseStep = ({ onNext, onBack }: StepProps) => {
   );
 };
 
-// OpenPix step removed - functionality cleaned up
+
 
 // Step 4: YouTube (Optional)
 const YouTubeStep = ({ onNext, onBack }: StepProps) => {
