@@ -229,15 +229,12 @@ export const useVIPSubscription = () => {
     if (!subscription) return { success: false };
 
     try {
-      const { error } = await supabase
-        .from('vip_subscriptions')
-        .update({
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString(),
-        })
-        .eq('id', subscription.id);
+      const { data, error } = await supabase.rpc('cancel_vip_subscription', {
+        p_subscription_id: subscription.id,
+      });
 
       if (error) throw error;
+      if (data && !data.success) throw new Error(data.error || 'Failed to cancel');
 
       setSubscription(null);
       setIsVIP(false);
