@@ -234,7 +234,8 @@ export const useVIPSubscription = () => {
       });
 
       if (error) throw error;
-      if (data && !data.success) throw new Error(data.error || 'Failed to cancel');
+      const result = data as { success: boolean; error?: string } | null;
+      if (result && !result.success) throw new Error(result.error || 'Failed to cancel');
 
       setSubscription(null);
       setIsVIP(false);
