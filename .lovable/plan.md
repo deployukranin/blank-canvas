@@ -1,48 +1,119 @@
 
 
-## Plano: Trial expirado = loja offline + auto-exclusão em 7 dias
+# Plano: Hardening de Segurança Completo
 
-### Resumo
-Quando o trial de uma loja expirar, clientes verão uma tela "Plataforma Offline". O criador verá um aviso no admin para contratar um plano. Lojas com trial expirado há mais de 7 dias serão automaticamente apagadas.
-
-### O que muda para o usuário final
-
-1. **Clientes** que acessarem uma loja com trial expirado verão uma página bonita dizendo "Esta plataforma está temporariamente offline" — sem acesso a nenhum conteúdo.
-2. **Criadores (admin)** verão um banner de alerta no painel admin informando que o trial expirou e que têm X dias para contratar um plano antes da exclusão automática.
-3. Lojas expiradas há 7+ dias serão apagadas automaticamente por um job agendado.
+Auditoria revelou **5 vulnerabilidades críticas (ERROR)** e **6 avisos (WARN)**. O plano está organizado por prioridade.
 
 ---
 
-### Detalhes Técnicos
+## Fase 1 — Vulnerabilidades Críticas (RLS)
 
-#### 1. Alterar TenantContext para carregar dados de plano
-- Remover o filtro `.eq('status', 'active')` da query de stores no `TenantContext.tsx`
-- Adicionar `plan_type` e `plan_expires_at` ao `StoreInfo`
-- Carregar a loja mesmo se `status = 'suspended'` ou trial expirado
+### 1.1 VIP Subscriptions: Remover INSERT/UPDATE do cliente
+Usuários podem criar assinaturas VIP sem pagamento e alterar status/expiração livremente.
+- **Remover** as policies "Users can create their own VIP subscriptions" e "Users can update their own VIP subscriptions"
+- Criar uma function `SECURITY DEFINER` `create_vip_subscription(p_store_id, p_plan_type, p_price_cents, p_payment_ref)` que valida pagamento antes de inserir
+- Somente Edge Functions (via service role) ou essa function poderão criar/atualizar assinaturas
 
-#### 2. Alterar TenantGate para mostrar tela "Offline"
-- Verificar se `store.plan_expires_at` já passou e `plan_type === 'trial'`
-- Se sim, renderizar um componente `<StoreOffline>` com mensagem amigável para clientes
-- Se o usuário for admin/creator da loja, permitir acesso ao painel admin (com banner de alerta)
+### 1.2 Self-assign client role
+Qualquer autenticado pode se dar a role `client` sem restrição.
+- **Remover** a policy "Users can assign own client role"
+- Mover a atribuição de role `client` para dentro do fluxo de login da loja (`/:slug/login`), via RPC `SECURITY DEFINER` que valida se o usuário está registrado na `store_users`
 
-#### 3. Criar componente `StoreOffline`
-- Tela fullscreen com ícone e mensagem: "Esta plataforma está temporariamente offline. Entre em contato com o criador."
-- Design consistente com o tema dark/glass do projeto
+### 1.3 app_configurations: SELECT muito aberto
+A policy `Authenticated users can read configurations` com `USING (true)` expõe configs de todas as lojas.
+- **Substituir** por: `USING (store_id IS NULL OR store_id IN (SELECT store_id FROM store_users WHERE user_id = auth.uid()) OR store_id IN (SELECT store_id FROM store_admins WHERE user_id = auth.uid()))`
+- Isso limita configs de loja apenas aos membros/admins daquela loja
 
-#### 4. Adicionar banner de alerta no AdminLayout
-- Quando trial expirado, mostrar banner vermelho no topo do painel admin: "Seu trial expirou! Contrate um plano em X dias ou sua loja será apagada."
-- Calcular dias restantes antes da exclusão (7 dias após expiração)
-- Link para a página `/:slug/admin/plans`
+### 1.4 Realtime Channel Authorization
+Tabelas `vip_content`, `support_messages`, `order_messages` publicadas em Realtime sem controle de canal.
+- Adicionar policies na tabela `realtime.messages` para restringir canais por `auth.uid()` e tópico
+- Nota: isso requer verificação se o projeto usa Realtime Broadcast ou só postgres_changes (que já respeitam RLS de tabela)
 
-#### 5. Criar Edge Function `cleanup-expired-stores`
-- Busca lojas com `plan_type = 'trial'` e `plan_expires_at < now() - interval '7 days'`
-- Executa a mesma lógica de cascade delete que já existe em `super-admin-manage-store` (apaga store_admins, store_users, invite_codes, app_configurations, custom_orders, video_ideas, video_chat_messages, depois a store)
-- Protegida por verificação de Authorization header (será chamada via cron)
+### 1.5 Stripe Account ID exposto publicamente
+A tabela `stores` expõe `stripe_account_id` para anon/public.
+- Criar uma VIEW `public.stores_public` sem a coluna `stripe_account_id`
+- Ou criar uma policy mais restritiva que exclua essa coluna (via view)
+- Atualizar o frontend para usar a view nas queries públicas
 
-#### 6. Agendar cron job via pg_cron
-- Rodar `cleanup-expired-stores` diariamente
-- Usar `pg_cron` + `pg_net` para chamar a edge function
+---
 
-#### 7. Atualizar a query RLS/stores
-- A RLS de `stores` já permite anon ver lojas `active`. Precisamos também permitir que anon veja lojas com trial expirado (para mostrar a tela offline em vez de 404). Ajustar a policy de SELECT para `(status = 'active' OR (plan_type = 'trial'))`.
+## Fase 2 — Edge Functions: Migrar getUser → getClaims
+
+7 de 8 Edge Functions usam `auth.getUser()` (roundtrip ao servidor) em vez de `auth.getClaims(token)` (validação local). Migrar:
+- `create-vip-charge`
+- `create-pix-charge`
+- `export-metrics`
+- `stripe-connect-status`
+- `stripe-connect-onboarding`
+- `manage-domain`
+- `super-admin-metrics`
+- `super-admin-manage-store`
+
+Padrão correto:
+```typescript
+const token = authHeader.replace('Bearer ', '');
+const { data, error } = await supabase.auth.getClaims(token);
+const userId = data.claims.sub;
+```
+
+### 2.1 Rate Limiting em Edge Functions críticas
+O banco já tem `check_rate_limit()` mas nenhuma Edge Function o usa.
+- Adicionar chamada a `check_rate_limit` em: `create-pix-charge` (10 req/h), `create-vip-charge` (10 req/h), `save-app-config` (30 req/h)
+
+### 2.2 cleanup-expired-stores sem autenticação
+A Edge Function `cleanup-expired-stores` não valida nenhum header — qualquer pessoa pode chamá-la.
+- Adicionar validação de um secret fixo (`CRON_SECRET`) no header, ou validar que o caller é super_admin
+
+---
+
+## Fase 3 — Leaked Password Protection + Storage
+
+### 3.1 Habilitar HIBP (Have I Been Pwned)
+- Usar `configure_auth` com `password_hibp_enabled: true`
+
+### 3.2 Public Buckets: Restringir listagem
+- Buckets `media-previews` e `banners` permitem listagem de todos os arquivos
+- Adicionar policies de SELECT em `storage.objects` que limitem a listagem (ou aceitar o risco, já que são públicos por design)
+
+---
+
+## Fase 4 — Frontend Hardening
+
+### 4.1 Sanitizar dangerouslySetInnerHTML
+- `SocialLinksBar.tsx`: SVGs vêm do DB (config admin) — sanitizar com DOMPurify antes de injetar
+- `Ajuda.tsx`: Strings i18n são seguras (hardcoded), risco baixo — manter mas documentar
+
+### 4.2 Erro genérico para usuário final
+- Auditar `toast.error()` calls que possam expor mensagens técnicas do Supabase
+- Substituir por mensagens amigáveis, logando o detalhe técnico apenas no console
+
+---
+
+## Fase 5 — Tabela de Audit Log
+
+Criar tabela `audit_logs` para registrar ações críticas:
+- Colunas: `id`, `user_id`, `action`, `target_table`, `target_id`, `metadata (jsonb)`, `created_at`
+- RLS: somente super_admin pode ler; INSERT via SECURITY DEFINER function
+- Registrar: mudanças de role, exclusão de lojas, alterações de plano, ban/unban de usuários
+
+---
+
+## Resumo de Migrações SQL
+
+1. DROP policies VIP subscriptions INSERT/UPDATE para public
+2. DROP policy "Users can assign own client role"
+3. CREATE function `create_vip_subscription` (SECURITY DEFINER)
+4. CREATE function `assign_client_role` (SECURITY DEFINER)
+5. ALTER policy app_configurations authenticated SELECT
+6. CREATE VIEW `stores_public` (sem stripe_account_id)
+7. CREATE TABLE `audit_logs` + policies
+8. Habilitar HIBP via configure_auth
+
+## Arquivos a Editar
+
+- 8 Edge Functions (getClaims migration + rate limiting)
+- `src/components/social/SocialLinksBar.tsx` (DOMPurify)
+- `src/hooks/use-vip-subscription.ts` (usar RPC em vez de insert direto)
+- `src/contexts/TenantContext.tsx` (usar view stores_public)
+- Frontend: audit de toast.error para mensagens genéricas
 
