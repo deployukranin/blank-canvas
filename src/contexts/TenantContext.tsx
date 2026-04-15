@@ -113,7 +113,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setError(null);
 
       let query = supabase
-        .from('stores')
+        .from('stores_public')
         .select('id, name, slug, description, avatar_url, banner_url, status, created_by, plan_type, plan_expires_at');
 
       if (effectiveSlug) {

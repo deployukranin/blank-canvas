@@ -153,15 +153,13 @@ Deno.serve(async (req: Request) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseUser.auth.getUser();
-
-    if (authError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return jsonResponse({ success: false, error: "Invalid token" }, 401);
     }
 
+    const user = { id: claimsData.claims.sub as string };
     const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", user.id);
 
     const userRoles = (roles || []).map((roleRow: { role: string }) => roleRow.role);

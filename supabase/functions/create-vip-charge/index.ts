@@ -85,16 +85,33 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !userData.user) {
+    const anonClient = createClient(SUPABASE_URL, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid authentication token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = userData.user.id;
-    const userEmail = userData.user.email || 'User';
+    const userId = claimsData.claims.sub as string;
+    const userEmail = (claimsData.claims.email as string) || 'User';
+
+    // Rate limiting
+    const { data: rlResult } = await supabase.rpc('check_rate_limit', {
+      p_identifier: userId,
+      p_endpoint: 'create-vip-charge',
+      p_max_requests: 10,
+      p_window_minutes: 60,
+    });
+    if (rlResult && !rlResult.allowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Too many requests, try again later' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     const body: CreateVIPChargeRequest = await req.json();
 
     if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
