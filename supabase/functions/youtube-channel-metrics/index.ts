@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
@@ -12,6 +12,33 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Auth check — only store admins/creators can trigger metric fetches
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = claimsData.claims.sub as string;
+
     const { channelId, storeId } = await req.json();
 
     if (!channelId || !storeId) {
@@ -21,10 +48,37 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const youtubeKey = Deno.env.get("YOUTUBE_API_KEY");
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Verify user is admin of this store
+    const { data: adminCheck } = await supabase
+      .from("store_admins")
+      .select("id")
+      .eq("store_id", storeId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const { data: storeCheck } = await supabase
+      .from("stores")
+      .select("created_by")
+      .eq("id", storeId)
+      .single();
+
+    const { data: roleCheck } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (!adminCheck && storeCheck?.created_by !== userId && !roleCheck) {
+      return new Response(
+        JSON.stringify({ error: "Not authorized for this store" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const youtubeKey = Deno.env.get("YOUTUBE_API_KEY");
 
     // Check if we already have metrics for TODAY
     const today = new Date().toISOString().split("T")[0];
@@ -38,7 +92,6 @@ Deno.serve(async (req) => {
 
     if (todaySnapshot) {
       console.log(`[yt-metrics] Already have today's snapshot, returning cached`);
-      // Also update the main metrics table
       return new Response(JSON.stringify({ success: true, metrics: todaySnapshot, fromCache: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -57,7 +110,6 @@ Deno.serve(async (req) => {
       const maxAge = 24 * 60 * 60 * 1000;
       if (age < maxAge) {
         console.log(`[yt-metrics] Returning cached metrics (age: ${Math.round(age / 60000)}min)`);
-        // Save daily snapshot if not exists
         await supabase.from("youtube_metrics_history").upsert({
           store_id: storeId,
           channel_id: channelId,
@@ -76,7 +128,6 @@ Deno.serve(async (req) => {
     }
 
     if (!youtubeKey) {
-      // Return stale data if available
       if (cached) {
         return new Response(JSON.stringify({ success: true, metrics: cached, fromCache: true, stale: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -89,7 +140,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch channel statistics
-    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${youtubeKey}`;
+    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${encodeURIComponent(channelId)}&key=${youtubeKey}`;
     const channelRes = await fetch(channelUrl);
     const channelData = await channelRes.json();
 
@@ -123,7 +174,7 @@ Deno.serve(async (req) => {
 
     if (recentVideos?.length) {
       const videoIds = recentVideos.map(v => v.video_id).slice(0, 50).join(",");
-      const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${youtubeKey}`;
+      const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(videoIds)}&key=${youtubeKey}`;
       const statsRes = await fetch(statsUrl);
       const statsData = await statsRes.json();
 
@@ -157,12 +208,10 @@ Deno.serve(async (req) => {
       updated_at: new Date().toISOString(),
     };
 
-    // Upsert into main cache
     await supabase
       .from("youtube_channel_metrics")
       .upsert(metrics, { onConflict: "store_id,channel_id" });
 
-    // Save daily snapshot
     await supabase.from("youtube_metrics_history").upsert({
       store_id: storeId,
       channel_id: channelId,
@@ -182,7 +231,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("[yt-metrics] Error:", err);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

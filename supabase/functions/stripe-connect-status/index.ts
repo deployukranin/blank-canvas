@@ -54,11 +54,36 @@ Deno.serve(async (req) => {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: store } = await supabaseAdmin
+
+    // Verify user is admin of this store
+    const { data: adminCheck } = await supabaseAdmin
+      .from("store_admins")
+      .select("id")
+      .eq("store_id", store_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const { data: storeOwnerCheck } = await supabaseAdmin
       .from("stores")
-      .select("stripe_account_id")
+      .select("created_by, stripe_account_id")
       .eq("id", store_id)
       .single();
+
+    if (!storeOwnerCheck) {
+      return new Response(
+        JSON.stringify({ error: "Store not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (storeOwnerCheck.created_by !== user.id && !adminCheck) {
+      return new Response(
+        JSON.stringify({ error: "Not authorized for this store" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const store = { stripe_account_id: storeOwnerCheck.stripe_account_id };
 
     if (!store?.stripe_account_id) {
       return new Response(
