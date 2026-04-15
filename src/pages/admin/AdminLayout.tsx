@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
-  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles
+  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles, AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useProfile } from '@/hooks/use-profile';
+import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
@@ -27,7 +28,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { user, logout } = useAuth();
   const { roles } = useUserRole();
   const { profile } = useProfile();
+  const { store } = useTenant();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+  // Trial expiry calculations
+  const isTrialExpired = store?.plan_type === 'trial' && store?.plan_expires_at && new Date(store.plan_expires_at) < new Date();
+  const daysUntilDeletion = isTrialExpired && store?.plan_expires_at
+    ? Math.max(0, 7 - Math.floor((Date.now() - new Date(store.plan_expires_at).getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
 
   const base = slug ? `/${slug}/admin` : '/admin';
 
@@ -114,6 +122,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       )}
 
       <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen bg-background">
+        {isTrialExpired && (
+          <div className="bg-destructive/10 border-b border-destructive/30 px-4 py-3 flex items-center gap-3 text-sm">
+            <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
+            <p className="text-destructive font-medium">
+              Seu trial expirou! {daysUntilDeletion !== null && daysUntilDeletion > 0
+                ? `Contrate um plano em ${daysUntilDeletion} dia${daysUntilDeletion !== 1 ? 's' : ''} ou sua loja será apagada automaticamente.`
+                : 'Sua loja será apagada em breve. Contrate um plano agora!'}
+            </p>
+            <Link to={`${base}/plans`} className="shrink-0 ml-auto text-xs font-semibold text-destructive underline hover:no-underline">
+              Ver planos
+            </Link>
+          </div>
+        )}
         <div className="hidden lg:flex items-center justify-between h-14 px-6 border-b border-primary/10">
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           <div className="flex items-center gap-2">

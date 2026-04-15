@@ -11,6 +11,8 @@ export interface StoreInfo {
   banner_url: string | null;
   status: string;
   created_by: string | null;
+  plan_type: string;
+  plan_expires_at: string | null;
 }
 
 interface TenantInfo {
