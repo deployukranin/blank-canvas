@@ -74,7 +74,44 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "app_configurations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_table: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       custom_orders: {
         Row: {
@@ -175,6 +212,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "custom_orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       invite_codes: {
@@ -217,6 +261,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invite_codes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -349,6 +400,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "store_admins_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       store_users: {
@@ -379,6 +437,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_users_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -532,6 +597,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "support_tickets_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -586,6 +658,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_chat_messages_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -659,6 +738,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_ideas_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -771,6 +857,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vip_content_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vip_subscriptions: {
@@ -819,6 +912,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vip_subscriptions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -925,6 +1025,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "youtube_channel_metrics_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       youtube_metrics_history: {
@@ -972,6 +1079,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "youtube_metrics_history_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       youtube_videos_cache: {
@@ -1012,9 +1126,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      stores_public: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string | null
+          created_by: string | null
+          custom_domain: string | null
+          description: string | null
+          domain_verified: boolean | null
+          id: string | null
+          name: string | null
+          onboarding_completed: boolean | null
+          plan_expires_at: string | null
+          plan_type: string | null
+          slug: string | null
+          status: string | null
+          updated_at: string | null
+          url: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          domain_verified?: boolean | null
+          id?: string | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          plan_expires_at?: string | null
+          plan_type?: string | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+          url?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          domain_verified?: boolean | null
+          id?: string | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          plan_expires_at?: string | null
+          plan_type?: string | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+          url?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      assign_client_role: { Args: { p_store_id: string }; Returns: Json }
       check_rate_limit: {
         Args: {
           p_endpoint: string
@@ -1025,6 +1199,15 @@ export type Database = {
         Returns: Json
       }
       cleanup_old_rate_limits: { Args: never; Returns: number }
+      create_vip_subscription: {
+        Args: {
+          p_payment_ref?: string
+          p_plan_type?: string
+          p_price_cents?: number
+          p_store_id: string
+        }
+        Returns: Json
+      }
       get_admin_credentials_safe: {
         Args: never
         Returns: {
@@ -1043,6 +1226,16 @@ export type Database = {
         Returns: boolean
       }
       is_vip: { Args: { check_user_id: string }; Returns: boolean }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_target_id?: string
+          p_target_table?: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }
