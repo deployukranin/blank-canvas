@@ -11,6 +11,8 @@ export interface StoreInfo {
   banner_url: string | null;
   status: string;
   created_by: string | null;
+  plan_type: string;
+  plan_expires_at: string | null;
 }
 
 interface TenantInfo {
@@ -112,8 +114,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       let query = supabase
         .from('stores')
-        .select('id, name, slug, description, avatar_url, banner_url, status, created_by')
-        .eq('status', 'active');
+        .select('id, name, slug, description, avatar_url, banner_url, status, created_by, plan_type, plan_expires_at');
 
       if (effectiveSlug) {
         query = query.eq('slug', effectiveSlug);
