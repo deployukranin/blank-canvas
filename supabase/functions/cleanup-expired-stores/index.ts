@@ -12,10 +12,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate CRON_SECRET to prevent unauthorized invocations
+    // Validate CRON_SECRET to prevent unauthorized invocations — MANDATORY
     const cronSecret = Deno.env.get("CRON_SECRET");
+    if (!cronSecret) {
+      console.error("CRON_SECRET not configured — refusing to run cleanup");
+      return new Response(
+        JSON.stringify({ error: "Server misconfigured: CRON_SECRET not set" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const cronHeader = req.headers.get("x-cron-secret");
-    if (cronSecret && (!cronHeader || cronHeader !== cronSecret)) {
+    if (!cronHeader || cronHeader !== cronSecret) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
