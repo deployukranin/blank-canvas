@@ -72,10 +72,7 @@ const AdminDashboard: React.FC = () => {
         const { data: owned } = await supabase.from('stores').select('id').eq('created_by', userId).limit(1).maybeSingle();
         sid = owned?.id ?? null;
       }
-      if (!sid) {
-        const { data: any } = await supabase.from('stores').select('id').eq('status', 'active').limit(1).maybeSingle();
-        sid = any?.id ?? null;
-      }
+      // No insecure fallback to "first active store" — user must own/admin a store
       if (!sid) { if (!cancelled) setStoreSlug(null); return; }
       const { data: store } = await supabase.from('stores').select('slug, plan_type, plan_expires_at, name, description, avatar_url').eq('id', sid).maybeSingle();
       if (!cancelled) {
