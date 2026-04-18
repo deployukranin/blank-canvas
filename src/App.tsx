@@ -15,6 +15,7 @@ import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
 import CustomDomainGate from "@/components/tenant/CustomDomainGate";
 
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import Setup from "./pages/Setup";
 import Ideias from "./pages/Ideias";
 import VIP from "./pages/VIP";
@@ -75,7 +76,7 @@ const App = () => (
               <Sonner />
               <Routes>
                 {/* Rota raiz — custom domain: store home; platform: NotFound */}
-                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />}><Index /></CustomDomainResolver>} />
+                <Route path="/" element={<CustomDomainResolver fallback={<Landing />}><Index /></CustomDomainResolver>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
