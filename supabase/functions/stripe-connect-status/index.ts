@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify user is admin of this store
+    // Verify user is admin of this store, owner, or super_admin
     const { data: adminCheck } = await supabaseAdmin
       .from("store_admins")
       .select("id")
@@ -76,7 +76,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (storeOwnerCheck.created_by !== user.id && !adminCheck) {
+    const { data: superAdminCheck } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+
+    if (storeOwnerCheck.created_by !== user.id && !adminCheck && !superAdminCheck) {
       return new Response(
         JSON.stringify({ error: "Not authorized for this store" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
