@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Mail, Sparkles, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,14 +20,14 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateEmail(email)) { toast.error("Email inválido"); return; }
+    if (!validateEmail(email)) { toast.error(t("auth.invalidEmail")); return; }
     setIsSubmitting(true);
     const result = await resetPassword(email);
     setIsSubmitting(false);
     if (result.success) {
       setSent(true);
     } else {
-      toast.error(result.error || "Erro ao enviar email");
+      toast.error(result.error || t("auth.errorSendingEmail"));
     }
   };
 
@@ -53,36 +55,37 @@ const ForgotPassword = () => {
               <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-7 h-7 text-green-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Email enviado!</h2>
+              <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">{t("auth.emailSent")}</h2>
               <p className="text-gray-400 text-sm">
-                Enviamos um link de recuperação para <span className="text-white">{email}</span>.
-                Verifique sua caixa de entrada (e spam).
+                <Trans
+                  i18nKey="auth.emailSentDesc"
+                  values={{ email }}
+                  components={{ 1: <span className="text-white" /> }}
+                />
               </p>
               <Link
                 to="/auth"
                 className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm pt-4"
               >
-                <ArrowLeft className="w-4 h-4" /> Voltar para o login
+                <ArrowLeft className="w-4 h-4" /> {t("auth.backToLogin")}
               </Link>
             </div>
           ) : (
             <>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Recuperar senha</h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  Digite seu email e enviaremos um link para criar uma nova senha
-                </p>
+                <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">{t("auth.forgotPasswordTitle")}</h2>
+                <p className="text-gray-500 text-sm mt-1">{t("auth.forgotPasswordDesc")}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-300 text-sm">Email</Label>
+                  <Label htmlFor="email" className="text-gray-300 text-sm">{t("common.email")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="seu@email.com"
+                      placeholder={t("auth.emailPlaceholder")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-gray-600 focus-visible:ring-purple-500/20 focus-visible:border-purple-500"
@@ -97,14 +100,14 @@ const ForgotPassword = () => {
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white h-11 font-medium"
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  Enviar link de recuperação
+                  {t("auth.sendRecoveryLink")}
                 </Button>
 
                 <Link
                   to="/auth"
                   className="flex items-center justify-center gap-2 text-gray-400 hover:text-white text-sm pt-2"
                 >
-                  <ArrowLeft className="w-4 h-4" /> Voltar para o login
+                  <ArrowLeft className="w-4 h-4" /> {t("auth.backToLogin")}
                 </Link>
               </form>
             </>
