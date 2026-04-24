@@ -202,27 +202,28 @@ const Auth = () => {
         return;
       }
 
-      // Wait a moment for session to establish after auto-confirm
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Email confirmation required → store pending data and show confirmation message
+      if (result.needsConfirmation) {
+        // Persist pending store creation data so we can finalize after the user confirms email
+        sessionStorage.setItem('pending_store_setup', JSON.stringify({
+          email: signupEmail,
+          storeName: storeName.trim(),
+          storeSlug,
+          youtubeVerified,
+        }));
+        toast.success("Conta criada! Verifique seu email para confirmar e continuar.", { duration: 8000 });
+        setSignupConfirmationSent(true);
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Get session - try multiple times since auto-confirm might take a moment
+      // Auto-confirmed (no email verification required) — continue with store creation
       let userId: string | null = null;
       for (let i = 0; i < 3; i++) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.id) {
           userId = session.user.id;
           break;
-        }
-        // If no session yet, try signing in directly
-        if (i === 1) {
-          const { data } = await supabase.auth.signInWithPassword({
-            email: signupEmail,
-            password: signupPassword,
-          });
-          if (data?.session?.user?.id) {
-            userId = data.session.user.id;
-            break;
-          }
         }
         await new Promise(resolve => setTimeout(resolve, 500));
       }
