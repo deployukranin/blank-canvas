@@ -11,6 +11,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { UserHandle } from '@/components/profile/UserHandle';
@@ -19,6 +20,7 @@ const NotificacoesPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { basePath } = useTenant();
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useCommunityNotifications();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -136,7 +138,7 @@ const NotificacoesPage = () => {
                   <GlassCard 
                     className={`p-4 cursor-pointer transition-all ${!notification.read ? 'ring-1 ring-accent/50 bg-accent/5' : 'opacity-80'}`}
                     hover
-                    onClick={() => { if (!notification.read) markAsRead(notification.id); navigate('/community'); }}
+                    onClick={() => { if (!notification.read) markAsRead(notification.id); navigate(`${basePath}/community`); }}
                   >
                     <div className="flex gap-3">
                       <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getNotificationColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
