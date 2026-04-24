@@ -167,17 +167,15 @@ const Auth = () => {
     if (result.success) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { isAdmin } = await checkUserRoles(user.id);
-        if (isAdmin) {
+        const slug = await getStoreSlug(user.id);
+        if (slug) {
           toast.success(t("auth.welcomeAdmin"));
-          const slug = await getStoreSlug(user.id);
-          navigate(slug ? `/${slug}/admin` : '/', { replace: true });
+          navigate(`/${slug}/admin`, { replace: true });
         } else {
-          toast.success(t("auth.enterButton") + "!");
-          navigate("/", { replace: true });
+          toast.error('Nenhuma loja encontrada para esta conta.');
         }
       } else {
-        navigate("/", { replace: true });
+        toast.error('Erro ao obter sessão. Tente novamente.');
       }
     } else {
       toast.error(result.error || t("auth.errorLoggingIn"));
