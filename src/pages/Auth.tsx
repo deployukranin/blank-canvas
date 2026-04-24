@@ -20,6 +20,7 @@ const Auth = () => {
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
 
   // Form states
