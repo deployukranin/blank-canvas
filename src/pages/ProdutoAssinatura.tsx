@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { mockSubscriptions } from '@/lib/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -45,6 +46,7 @@ const ProdutoAssinatura = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { basePath } = useTenant();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [storeTexts, setStoreTexts] = useState<StoreTexts>(() => {
@@ -98,7 +100,7 @@ const ProdutoAssinatura = () => {
     toast.success('Pedido realizado com sucesso!', {
       description: 'Você receberá os dados de acesso por email em até 24h.',
     });
-    navigate('/orders');
+    navigate(`${basePath}/orders`);
   };
 
   return (

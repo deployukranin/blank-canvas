@@ -6,6 +6,7 @@ import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { getVipMediaSignedUrl } from "@/lib/external-storage";
+import { useTenant } from "@/contexts/TenantContext";
 
 interface VipContent {
   id: string;
@@ -21,6 +22,7 @@ export const VIPAreaContent = () => {
   const [isVip, setIsVip] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { basePath } = useTenant();
 
   useEffect(() => {
     checkVipStatusAndLoadContent();
@@ -97,7 +99,7 @@ export const VIPAreaContent = () => {
         <p className="text-gray-600 mb-6">
           Este conteúdo é reservado para assinantes. Desbloqueie acesso total agora.
         </p>
-        <Button onClick={() => navigate("/plans")} size="lg" className="animate-pulse">
+        <Button onClick={() => navigate(`${basePath}/vip`)} size="lg" className="animate-pulse">
           Quero ser VIP
         </Button>
       </div>
