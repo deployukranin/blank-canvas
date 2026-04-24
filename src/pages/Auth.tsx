@@ -20,6 +20,7 @@ const Auth = () => {
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
 
   // Form states
@@ -108,12 +109,70 @@ const Auth = () => {
   const redirectToAdminWithSlug = async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
+
+    // Check for pending store setup (user just confirmed email)
+    const pendingRaw = sessionStorage.getItem('pending_store_setup');
+    if (pendingRaw) {
+      try {
+        const pending = JSON.parse(pendingRaw);
+        // Verify it's the same user (by email)
+        if (pending.email === authUser.email) {
+          await finalizeStoreCreation(authUser.id, pending);
+          sessionStorage.removeItem('pending_store_setup');
+          return;
+        }
+        sessionStorage.removeItem('pending_store_setup');
+      } catch {
+        sessionStorage.removeItem('pending_store_setup');
+      }
+    }
+
     const slug = await getStoreSlug(authUser.id);
     if (slug) {
       navigate(`/${slug}/admin`, { replace: true });
     } else {
-      // User has no store — stay on auth page and show message
       toast.error('Nenhuma loja encontrada para esta conta. Crie uma nova loja ou entre com outra conta.');
+    }
+  };
+
+  const finalizeStoreCreation = async (userId: string, pending: { storeName: string; storeSlug: string; youtubeVerified: any }) => {
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
+      .select()
+      .single();
+
+    if (storeError) {
+      toast.error("Erro ao criar loja: " + storeError.message);
+      return;
+    }
+
+    if (store) {
+      await Promise.all([
+        supabase.from('store_admins').insert({ store_id: store.id, user_id: userId }),
+        supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any }),
+      ]);
+
+      if (pending.youtubeVerified) {
+        await supabase.functions.invoke('save-app-config', {
+          body: {
+            config_key: 'youtube_channel',
+            config_value: { channelId: pending.youtubeVerified.channelId, channelTitle: pending.youtubeVerified.channelTitle },
+            store_id: store.id,
+          },
+        });
+        if (pending.youtubeVerified.thumbnailUrl) {
+          await supabase.from('stores').update({ avatar_url: pending.youtubeVerified.thumbnailUrl }).eq('id', store.id);
+          await supabase.from('profiles').upsert({
+            user_id: userId,
+            avatar_url: pending.youtubeVerified.thumbnailUrl,
+            display_name: pending.storeName,
+          }, { onConflict: 'user_id' });
+        }
+      }
+
+      toast.success("Email confirmado! Sua loja foi criada. 🎉");
+      navigate(`/${pending.storeSlug}/admin`, { replace: true });
     }
   };
 
@@ -202,27 +261,28 @@ const Auth = () => {
         return;
       }
 
-      // Wait a moment for session to establish after auto-confirm
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Email confirmation required → store pending data and show confirmation message
+      if (result.needsConfirmation) {
+        // Persist pending store creation data so we can finalize after the user confirms email
+        sessionStorage.setItem('pending_store_setup', JSON.stringify({
+          email: signupEmail,
+          storeName: storeName.trim(),
+          storeSlug,
+          youtubeVerified,
+        }));
+        toast.success("Conta criada! Verifique seu email para confirmar e continuar.", { duration: 8000 });
+        setSignupConfirmationSent(true);
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Get session - try multiple times since auto-confirm might take a moment
+      // Auto-confirmed (no email verification required) — continue with store creation
       let userId: string | null = null;
       for (let i = 0; i < 3; i++) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.id) {
           userId = session.user.id;
           break;
-        }
-        // If no session yet, try signing in directly
-        if (i === 1) {
-          const { data } = await supabase.auth.signInWithPassword({
-            email: signupEmail,
-            password: signupPassword,
-          });
-          if (data?.session?.user?.id) {
-            userId = data.session.user.id;
-            break;
-          }
         }
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -300,6 +360,46 @@ const Auth = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  if (signupConfirmationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6 py-12" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+        <div className="absolute top-4 right-4 z-20">
+          <LanguageSelector variant="minimal" />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <div className="flex items-center gap-3 mb-8 justify-center">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight font-['Space_Grotesk']">Creator Platform</span>
+          </div>
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
+              <Mail className="w-7 h-7 text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Confirme seu email</h2>
+            <p className="text-gray-400 text-sm">
+              Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
+              Clique no link para ativar sua conta — sua loja será criada automaticamente.
+            </p>
+            <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
+            <Button
+              onClick={() => { setSignupConfirmationSent(false); }}
+              variant="ghost"
+              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+            >
+              Voltar
+            </Button>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -453,6 +553,15 @@ const Auth = () => {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <a
+                      href="/forgot-password"
+                      className="text-sm text-purple-400 hover:text-purple-300"
+                    >
+                      Esqueci minha senha
+                    </a>
                   </div>
 
                   <Button

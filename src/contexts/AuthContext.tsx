@@ -19,9 +19,11 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   requireAuth: (callback: () => void) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
@@ -90,9 +92,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -107,9 +109,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
 
-      return { success: true };
+      // If no session is returned, email confirmation is required
+      const needsConfirmation = !data.session;
+      return { success: true, needsConfirmation };
     } catch (err) {
       return { success: false, error: "Erro ao criar conta" };
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Erro ao enviar email de recuperação" };
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Erro ao atualizar senha" };
     }
   }, []);
 
@@ -180,6 +207,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
+        resetPassword,
+        updatePassword,
         logout,
         requireAuth,
         applyLocalProfile,
@@ -206,6 +235,8 @@ export const useAuth = (): AuthContextType => {
       signUp: asyncNoop,
       signIn: asyncNoop,
       signOut: async () => {},
+      resetPassword: asyncNoop,
+      updatePassword: asyncNoop,
       logout: noop,
       requireAuth: noop,
       applyLocalProfile: noop,
