@@ -22,3 +22,6 @@ verify_jwt = false
 
 [functions.cleanup-expired-stores]
 verify_jwt = false
+
+[functions.platform-subscription-webhook]
+verify_jwt = false
