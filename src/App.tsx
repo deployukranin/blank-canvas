@@ -31,6 +31,8 @@ import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Admin Pages
 // AdminLogin removed — admin is now under /:slug/admin
@@ -77,6 +79,8 @@ const App = () => (
                 {/* Rota raiz — custom domain: store home; platform: NotFound */}
                 <Route path="/" element={<CustomDomainResolver fallback={<NotFound />}><Index /></CustomDomainResolver>} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />
