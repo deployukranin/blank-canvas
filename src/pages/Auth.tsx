@@ -455,6 +455,15 @@ const Auth = () => {
                     </div>
                   </div>
 
+                  <div className="flex justify-end">
+                    <a
+                      href="/forgot-password"
+                      className="text-sm text-purple-400 hover:text-purple-300"
+                    >
+                      Esqueci minha senha
+                    </a>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
