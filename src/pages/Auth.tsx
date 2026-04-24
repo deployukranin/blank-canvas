@@ -109,12 +109,70 @@ const Auth = () => {
   const redirectToAdminWithSlug = async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
+
+    // Check for pending store setup (user just confirmed email)
+    const pendingRaw = sessionStorage.getItem('pending_store_setup');
+    if (pendingRaw) {
+      try {
+        const pending = JSON.parse(pendingRaw);
+        // Verify it's the same user (by email)
+        if (pending.email === authUser.email) {
+          await finalizeStoreCreation(authUser.id, pending);
+          sessionStorage.removeItem('pending_store_setup');
+          return;
+        }
+        sessionStorage.removeItem('pending_store_setup');
+      } catch {
+        sessionStorage.removeItem('pending_store_setup');
+      }
+    }
+
     const slug = await getStoreSlug(authUser.id);
     if (slug) {
       navigate(`/${slug}/admin`, { replace: true });
     } else {
-      // User has no store — stay on auth page and show message
       toast.error('Nenhuma loja encontrada para esta conta. Crie uma nova loja ou entre com outra conta.');
+    }
+  };
+
+  const finalizeStoreCreation = async (userId: string, pending: { storeName: string; storeSlug: string; youtubeVerified: any }) => {
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
+      .select()
+      .single();
+
+    if (storeError) {
+      toast.error("Erro ao criar loja: " + storeError.message);
+      return;
+    }
+
+    if (store) {
+      await Promise.all([
+        supabase.from('store_admins').insert({ store_id: store.id, user_id: userId }),
+        supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any }),
+      ]);
+
+      if (pending.youtubeVerified) {
+        await supabase.functions.invoke('save-app-config', {
+          body: {
+            config_key: 'youtube_channel',
+            config_value: { channelId: pending.youtubeVerified.channelId, channelTitle: pending.youtubeVerified.channelTitle },
+            store_id: store.id,
+          },
+        });
+        if (pending.youtubeVerified.thumbnailUrl) {
+          await supabase.from('stores').update({ avatar_url: pending.youtubeVerified.thumbnailUrl }).eq('id', store.id);
+          await supabase.from('profiles').upsert({
+            user_id: userId,
+            avatar_url: pending.youtubeVerified.thumbnailUrl,
+            display_name: pending.storeName,
+          }, { onConflict: 'user_id' });
+        }
+      }
+
+      toast.success("Email confirmado! Sua loja foi criada. 🎉");
+      navigate(`/${pending.storeSlug}/admin`, { replace: true });
     }
   };
 
