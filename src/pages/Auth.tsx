@@ -75,23 +75,34 @@ const Auth = () => {
   }, [isAuthenticated, authLoading]);
 
   const getStoreSlug = async (userId: string): Promise<string | null> => {
-    // First check store_admins
-    const { data: adminData } = await supabase
-      .from('store_admins')
-      .select('store_id, stores(slug)')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
-    if ((adminData as any)?.stores?.slug) return (adminData as any).stores.slug;
-
-    // Fallback: check stores.created_by
-    const { data: storeData } = await supabase
+    // 1) Check stores.created_by (most reliable, no join)
+    const { data: ownedStore, error: ownedErr } = await supabase
       .from('stores')
       .select('slug')
       .eq('created_by', userId)
       .limit(1)
       .maybeSingle();
-    return storeData?.slug || null;
+    if (ownedErr) console.error('[Auth] getStoreSlug ownedStore error:', ownedErr);
+    if (ownedStore?.slug) return ownedStore.slug;
+
+    // 2) Fallback: check store_admins → fetch store separately
+    const { data: adminRow, error: adminErr } = await supabase
+      .from('store_admins')
+      .select('store_id')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+    if (adminErr) console.error('[Auth] getStoreSlug adminRow error:', adminErr);
+    if (adminRow?.store_id) {
+      const { data: storeRow } = await supabase
+        .from('stores')
+        .select('slug')
+        .eq('id', adminRow.store_id)
+        .maybeSingle();
+      if (storeRow?.slug) return storeRow.slug;
+    }
+
+    return null;
   };
 
   const redirectToAdminWithSlug = async () => {
