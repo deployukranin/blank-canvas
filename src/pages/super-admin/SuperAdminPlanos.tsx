@@ -18,6 +18,8 @@ interface PlanConfig {
   period: 'monthly' | 'quarterly' | 'annual';
   priceBRL: number;
   priceUSD: number;
+  stripe_price_id_brl?: string;
+  stripe_price_id_usd?: string;
   features_pt: string[];
   features_en: string[];
   features_es: string[];
@@ -290,6 +292,31 @@ const SuperAdminPlanos: React.FC = () => {
                         {t('superAdmin.planConfig.highlight', 'Destacar como popular')}
                       </span>
                     </label>
+                  </div>
+                </div>
+
+                {/* Stripe Price IDs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5 p-4 rounded-lg bg-purple-500/5 border border-purple-500/10">
+                  <div className="md:col-span-2 flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Stripe Recurring Price IDs</span>
+                  </div>
+                  <div>
+                    <Label className="text-white/60 text-xs">Price ID (BRL)</Label>
+                    <Input
+                      value={plan.stripe_price_id_brl || ''}
+                      onChange={e => updatePlan(planIndex, 'stripe_price_id_brl', e.target.value)}
+                      placeholder="price_1Abc...XYZ"
+                      className="bg-white/5 border-white/10 text-white mt-1 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white/60 text-xs">Price ID (USD)</Label>
+                    <Input
+                      value={plan.stripe_price_id_usd || ''}
+                      onChange={e => updatePlan(planIndex, 'stripe_price_id_usd', e.target.value)}
+                      placeholder="price_1Abc...XYZ"
+                      className="bg-white/5 border-white/10 text-white mt-1 font-mono text-xs"
+                    />
                   </div>
                 </div>
 
