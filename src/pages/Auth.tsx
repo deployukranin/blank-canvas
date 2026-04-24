@@ -364,6 +364,46 @@ const Auth = () => {
     );
   }
 
+  if (signupConfirmationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6 py-12" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+        <div className="absolute top-4 right-4 z-20">
+          <LanguageSelector variant="minimal" />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <div className="flex items-center gap-3 mb-8 justify-center">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight font-['Space_Grotesk']">Creator Platform</span>
+          </div>
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
+              <Mail className="w-7 h-7 text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Confirme seu email</h2>
+            <p className="text-gray-400 text-sm">
+              Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
+              Clique no link para ativar sua conta — sua loja será criada automaticamente.
+            </p>
+            <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
+            <Button
+              onClick={() => { setSignupConfirmationSent(false); }}
+              variant="ghost"
+              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+            >
+              Voltar
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-[#0a0a0a] relative" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
       {/* Language selector — top right */}
