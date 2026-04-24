@@ -560,7 +560,7 @@ const Auth = () => {
                       href="/forgot-password"
                       className="text-sm text-purple-400 hover:text-purple-300"
                     >
-                      Esqueci minha senha
+                      {t("auth.forgotPassword")}
                     </a>
                   </div>
 
