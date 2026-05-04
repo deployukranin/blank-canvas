@@ -142,7 +142,6 @@ const Landing = () => {
               src={logo}
               alt="My Tingle Box"
               className="h-12 md:h-16 w-auto object-contain"
-              style={{ mixBlendMode: "screen" }}
             />
           </Link>
 
@@ -416,7 +415,6 @@ const Landing = () => {
               src={logo}
               alt="My Tingle Box"
               className="h-10 md:h-12 w-auto object-contain"
-              style={{ mixBlendMode: "screen" }}
             />
             <span className="text-white/70 text-sm">
               © {new Date().getFullYear()}
