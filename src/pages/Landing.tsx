@@ -137,11 +137,12 @@ const Landing = () => {
       {/* Header */}
       <header className="relative z-20 px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center -my-2">
             <img
               src={logo}
               alt="My Tingle Box"
-              className="h-9 md:h-10 w-auto"
+              className="h-12 md:h-16 w-auto object-contain"
+              style={{ mixBlendMode: "screen" }}
             />
           </Link>
 
@@ -410,10 +411,15 @@ const Landing = () => {
       {/* Footer */}
       <footer className="relative z-10 px-6 py-10 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="My Tingle Box" className="h-7 w-auto" />
+          <div className="flex items-center gap-2 -my-2">
+            <img
+              src={logo}
+              alt="My Tingle Box"
+              className="h-10 md:h-12 w-auto object-contain"
+              style={{ mixBlendMode: "screen" }}
+            />
             <span className="text-white/70 text-sm">
-              © {new Date().getFullYear()} My Tingle Box
+              © {new Date().getFullYear()}
             </span>
           </div>
           <div className="flex items-center gap-6 text-sm text-white/50">
