@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/mytinglebox-logo.png";
 
 const features = [
   {
@@ -136,13 +137,12 @@ const Landing = () => {
       {/* Header */}
       <header className="relative z-20 px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-display text-xl font-bold text-white">
-              TingleBox
-            </span>
+          <Link to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="My Tingle Box"
+              className="h-9 md:h-10 w-auto"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-white/70">
@@ -410,12 +410,10 @@ const Landing = () => {
       {/* Footer */}
       <footer className="relative z-10 px-6 py-10 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="My Tingle Box" className="h-7 w-auto" />
             <span className="text-white/70 text-sm">
-              © {new Date().getFullYear()} TingleBox
+              © {new Date().getFullYear()} My Tingle Box
             </span>
           </div>
           <div className="flex items-center gap-6 text-sm text-white/50">
