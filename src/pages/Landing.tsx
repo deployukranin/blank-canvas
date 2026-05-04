@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/mytinglebox-logo.png";
+import heroMockup from "@/assets/landing-hero-mockup.jpg";
 
 const features = [
   {
@@ -224,17 +225,14 @@ const Landing = () => {
           className="relative mt-20 max-w-5xl mx-auto"
         >
           <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-2 shadow-2xl shadow-purple-500/20">
-            <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0f0820] aspect-[16/9] flex items-center justify-center">
-              <div className="grid grid-cols-3 gap-3 p-6 w-full h-full">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg bg-gradient-to-br from-purple-900/40 to-purple-800/10 border border-purple-500/20 flex items-center justify-center"
-                  >
-                    <Play className="w-8 h-8 text-purple-300/50" />
-                  </div>
-                ))}
-              </div>
+            <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0f0820]">
+              <img
+                src={heroMockup}
+                alt="Pré-visualização da plataforma TingleBox para criadores ASMR"
+                className="w-full h-auto block"
+                width={1376}
+                height={768}
+              />
             </div>
           </div>
           <div
