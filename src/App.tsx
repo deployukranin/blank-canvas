@@ -29,6 +29,7 @@ import TermosDeUso from "./pages/TermosDeUso";
 import Privacidade from "./pages/Privacidade";
 import MeusPedidos from "./pages/MeusPedidos";
 import NotFound from "./pages/NotFound";
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -77,7 +78,7 @@ const App = () => (
               <Sonner />
               <Routes>
                 {/* Rota raiz — custom domain: store home; platform: NotFound */}
-                <Route path="/" element={<CustomDomainResolver fallback={<NotFound />}><Index /></CustomDomainResolver>} />
+                <Route path="/" element={<CustomDomainResolver fallback={<Landing />}><Index /></CustomDomainResolver>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
