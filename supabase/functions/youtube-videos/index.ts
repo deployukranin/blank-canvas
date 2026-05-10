@@ -63,16 +63,42 @@ async function resolveHandleToChannelId(handle: string, apiKey: string): Promise
   const res = await fetch(url);
   const data = await res.json();
 
-  if (!res.ok || !data.items?.length) {
-    console.log("[youtube-videos] Handle resolution failed:", data);
+  if (res.ok && data.items?.length) {
+    const channel = data.items[0];
+    return {
+      channelId: channel.id,
+      channelTitle: channel.snippet?.title || "",
+      thumbnailUrl: channel.snippet?.thumbnails?.default?.url || "",
+    };
+  }
+
+  console.log("[youtube-videos] forHandle failed, trying search fallback:", data);
+
+  // Fallback: use search.list (100 quota units, but resolves more handles)
+  const searchParams = new URLSearchParams({
+    part: "snippet",
+    q: cleanHandle,
+    type: "channel",
+    maxResults: "1",
+    key: apiKey,
+  });
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`;
+  const searchRes = await fetch(searchUrl);
+  const searchData = await searchRes.json();
+
+  if (!searchRes.ok || !searchData.items?.length) {
+    console.log("[youtube-videos] Search fallback failed:", searchData);
     return null;
   }
 
-  const channel = data.items[0];
+  const item = searchData.items[0];
+  const resolvedId = item?.id?.channelId || item?.snippet?.channelId;
+  if (!resolvedId) return null;
+
   return {
-    channelId: channel.id,
-    channelTitle: channel.snippet?.title || "",
-    thumbnailUrl: channel.snippet?.thumbnails?.default?.url || "",
+    channelId: resolvedId,
+    channelTitle: item.snippet?.title || "",
+    thumbnailUrl: item.snippet?.thumbnails?.default?.url || "",
   };
 }
 
