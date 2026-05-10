@@ -148,10 +148,8 @@ const Auth = () => {
     }
 
     if (store) {
-      await Promise.all([
-        supabase.from('store_admins').insert({ store_id: store.id, user_id: userId }),
-        supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any }),
-      ]);
+      await supabase.from('store_admins').insert({ store_id: store.id, user_id: userId });
+      await supabase.rpc('assign_creator_role' as any, { p_store_id: store.id });
 
       if (pending.youtubeVerified) {
         await supabase.functions.invoke('save-app-config', {
@@ -314,13 +312,10 @@ const Auth = () => {
 
       if (store) {
         // Link admin role and store_admins
-        const [adminResult, roleResult] = await Promise.all([
-          supabase.from('store_admins').insert({ store_id: store.id, user_id: userId }),
-          supabase.from('user_roles').insert({ user_id: userId, role: 'admin' as any }),
-        ]);
-
-        if (adminResult.error) console.error('store_admins error:', adminResult.error);
-        if (roleResult.error) console.error('user_roles error:', roleResult.error);
+        const { error: adminErr } = await supabase.from('store_admins').insert({ store_id: store.id, user_id: userId });
+        if (adminErr) console.error('store_admins error:', adminErr);
+        const { error: roleErr } = await supabase.rpc('assign_creator_role' as any, { p_store_id: store.id });
+        if (roleErr) console.error('assign_creator_role error:', roleErr);
 
         // Save youtube channel if verified - use edge function to bypass RLS timing issues
         if (youtubeVerified) {
