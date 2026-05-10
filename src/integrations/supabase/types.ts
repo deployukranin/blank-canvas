@@ -1189,6 +1189,7 @@ export type Database = {
     }
     Functions: {
       assign_client_role: { Args: { p_store_id: string }; Returns: Json }
+      assign_creator_role: { Args: { p_store_id: string }; Returns: Json }
       cancel_vip_subscription: {
         Args: { p_subscription_id: string }
         Returns: Json
