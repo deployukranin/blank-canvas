@@ -32,19 +32,20 @@ export const useYouTubeVideos = ({ channelId, enabled = true }: UseYouTubeVideos
       });
 
       if (error) {
-        console.error("[useYouTubeVideos] Error:", error);
-        throw error;
+        console.warn("[useYouTubeVideos] Non-fatal error:", error);
+        return { videos: [] };
       }
 
       // Handle API errors returned in data
       if (data?.error) {
         const errorMessage = data.details?.error?.message || data.error;
         const isQuotaError = errorMessage?.includes("quota") || data.details?.error?.code === 403;
-        
+
         if (isQuotaError) {
           throw new Error("Quota da API do YouTube excedida. Tente novamente amanhã.");
         }
-        throw new Error(errorMessage);
+        console.warn("[useYouTubeVideos] API error (non-fatal):", errorMessage);
+        return { videos: [] };
       }
 
       const videos = ((data?.videos ?? []) as YouTubeVideoItem[])
