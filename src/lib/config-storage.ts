@@ -23,8 +23,7 @@ const canSaveConfig = async (userId: string): Promise<boolean> => {
   const { data, error } = await supabase
     .from('user_roles')
     .select('role')
-    .eq('user_id', userId)
-    .in('role', CONFIG_ADMIN_ROLES as unknown as string[]);
+    .eq('user_id', userId);
 
   if (error) {
     console.debug('Skipping config save: could not verify admin permissions', error.message);
@@ -32,7 +31,7 @@ const canSaveConfig = async (userId: string): Promise<boolean> => {
     return false;
   }
 
-  const allowed = !!data?.length;
+  const allowed = data?.some((r) => CONFIG_ADMIN_ROLES.includes(r.role as any)) ?? false;
   permissionCache.set(userId, allowed);
   return allowed;
 };
