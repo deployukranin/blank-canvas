@@ -13,6 +13,29 @@ export type ConfigKey =
   | 'payment_config'
   | 'social_links';
 
+const CONFIG_ADMIN_ROLES = ['admin', 'creator', 'ceo', 'super_admin'] as const;
+const permissionCache = new Map<string, boolean>();
+
+const canSaveConfig = async (userId: string): Promise<boolean> => {
+  const cached = permissionCache.get(userId);
+  if (cached !== undefined) return cached;
+
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.debug('Skipping config save: could not verify admin permissions', error.message);
+    permissionCache.set(userId, false);
+    return false;
+  }
+
+  const allowed = data?.some((r) => CONFIG_ADMIN_ROLES.includes(r.role as any)) ?? false;
+  permissionCache.set(userId, allowed);
+  return allowed;
+};
+
 /**
  * Load configuration from database.
  * If storeId is provided, loads store-specific config.
@@ -59,6 +82,11 @@ export const saveConfig = async <T>(
     
     if (!session) {
       console.debug(`Skipping save for ${key}: user not authenticated`);
+      return false;
+    }
+
+    if (!(await canSaveConfig(session.user.id))) {
+      console.debug(`Skipping save for ${key}: administrative permissions required`);
       return false;
     }
 
