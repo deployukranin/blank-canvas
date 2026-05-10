@@ -62,29 +62,45 @@ export const saveConfig = async <T>(
       return false;
     }
 
-    const { data, error } = await supabase.functions.invoke('save-app-config', {
-      body: {
-        config_key: key,
-        config_value: value,
-        ...(storeId ? { store_id: storeId } : {}),
-      },
-    });
-
-    if (error) {
-      if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
-        console.debug(`Config ${key} not saved: user lacks admin permissions`);
-        return false;
-      }
-      console.error(`Error saving config ${key}:`, error);
+    let data: any = null;
+    let error: any = null;
+    try {
+      const res = await supabase.functions.invoke('save-app-config', {
+        body: {
+          config_key: key,
+          config_value: value,
+          ...(storeId ? { store_id: storeId } : {}),
+        },
+      });
+      data = res.data;
+      error = res.error;
+    } catch (invokeErr) {
+      console.debug(`Config ${key} not saved (invoke threw):`, invokeErr);
       return false;
     }
 
-    if (!data?.success) {
-      if (data?.error?.includes('Acesso negado') || data?.error?.includes('permissão')) {
-        console.debug(`Config ${key} not saved: ${data.error}`);
+    // Try to extract body from FunctionsHttpError when present
+    if (error && typeof (error as any).context?.json === 'function') {
+      try { data = await (error as any).context.json(); } catch {}
+    }
+
+    const errMsg = (data?.error || error?.message || '') as string;
+    const isPermissionDenied =
+      errMsg.includes('Acesso negado') ||
+      errMsg.includes('permissão') ||
+      errMsg.includes('permissões') ||
+      errMsg.includes('403') ||
+      errMsg.includes('401') ||
+      errMsg.includes('Forbidden') ||
+      errMsg.includes('Autenticação') ||
+      errMsg.includes('Token inválido');
+
+    if (error || !data?.success) {
+      if (isPermissionDenied) {
+        console.debug(`Config ${key} not saved: ${errMsg || 'permission denied'}`);
         return false;
       }
-      console.error(`Failed to save config ${key}:`, data?.error);
+      console.error(`Failed to save config ${key}:`, errMsg || error || data);
       return false;
     }
 
