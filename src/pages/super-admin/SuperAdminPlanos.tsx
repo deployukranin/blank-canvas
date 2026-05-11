@@ -135,15 +135,8 @@ const SuperAdminPlanos: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('app_configurations')
-        .upsert({
-          config_key: 'platform_plans',
-          store_id: null,
-          config_value: plans as any,
-        }, { onConflict: 'config_key' });
-
-      if (error) throw error;
+      const ok = await saveConfig('platform_plans', plans);
+      if (!ok) throw new Error('save failed');
       toast.success(t('superAdmin.planConfig.saved', 'Planos salvos com sucesso!'));
     } catch (err) {
       console.error(err);
