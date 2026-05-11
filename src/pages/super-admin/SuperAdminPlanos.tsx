@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { toast } from 'sonner';
 
 interface PlanConfig {
@@ -77,20 +78,9 @@ const SuperAdminPlanos: React.FC = () => {
 
   useEffect(() => {
     const fetchPlans = async () => {
-      const { data } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'platform_plans')
-        .is('store_id', null)
-        .maybeSingle();
-
-      if (data?.config_value) {
-        try {
-          const parsed = data.config_value as unknown as PlanConfig[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPlans(parsed);
-          }
-        } catch { /* use defaults */ }
+      const parsed = await loadConfig<PlanConfig[]>('platform_plans');
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setPlans(parsed);
       }
       setIsLoading(false);
     };
@@ -145,15 +135,8 @@ const SuperAdminPlanos: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('app_configurations')
-        .upsert({
-          config_key: 'platform_plans',
-          store_id: null,
-          config_value: plans as any,
-        }, { onConflict: 'config_key' });
-
-      if (error) throw error;
+      const ok = await saveConfig('platform_plans', plans);
+      if (!ok) throw new Error('save failed');
       toast.success(t('superAdmin.planConfig.saved', 'Planos salvos com sucesso!'));
     } catch (err) {
       console.error(err);
