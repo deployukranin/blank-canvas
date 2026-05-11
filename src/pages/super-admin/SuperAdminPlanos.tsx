@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { toast } from 'sonner';
 
 interface PlanConfig {
