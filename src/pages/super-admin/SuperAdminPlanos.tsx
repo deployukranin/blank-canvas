@@ -78,20 +78,9 @@ const SuperAdminPlanos: React.FC = () => {
 
   useEffect(() => {
     const fetchPlans = async () => {
-      const { data } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'platform_plans')
-        .is('store_id', null)
-        .maybeSingle();
-
-      if (data?.config_value) {
-        try {
-          const parsed = data.config_value as unknown as PlanConfig[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPlans(parsed);
-          }
-        } catch { /* use defaults */ }
+      const parsed = await loadConfig<PlanConfig[]>('platform_plans');
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setPlans(parsed);
       }
       setIsLoading(false);
     };
