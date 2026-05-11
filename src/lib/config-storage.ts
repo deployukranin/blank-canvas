@@ -11,7 +11,8 @@ export type ConfigKey =
   | 'white_label_config'
   | 'global_default_categories'
   | 'payment_config'
-  | 'social_links';
+  | 'social_links'
+  | 'platform_settings';
 
 const CONFIG_ADMIN_ROLES = ['admin', 'creator', 'ceo', 'super_admin'] as const;
 const permissionCache = new Map<string, boolean>();
