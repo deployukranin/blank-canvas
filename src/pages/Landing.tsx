@@ -135,37 +135,6 @@ const Landing = () => {
         />
       </div>
 
-      {/* Header */}
-      <header className="relative z-20 px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center -my-2">
-            <img
-              src={logo}
-              alt="My Tingle Box"
-              className="h-12 md:h-16 w-auto object-contain"
-            />
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm text-white/70">
-            <a href="#features" className="hover:text-white transition-colors">
-              Recursos
-            </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
-              Planos
-            </a>
-            <a href="#cta" className="hover:text-white transition-colors">
-              Começar
-            </a>
-          </nav>
-
-          <Link to="/auth">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-5 shadow-lg shadow-purple-500/30">
-              Criar minha loja
-            </Button>
-          </Link>
-        </div>
-      </header>
-
       {/* Hero */}
       <section className="relative z-10 px-6 pt-16 pb-24 text-center">
         <motion.div
@@ -177,7 +146,7 @@ const Landing = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mb-8">
             <Crown className="w-4 h-4 text-purple-300" />
             <span className="text-sm text-purple-100">
-              A plataforma de criadores ASMR mais completa do Brasil
+              A plataforma de criadores ASMR mais completa do Mundo
             </span>
           </div>
 
