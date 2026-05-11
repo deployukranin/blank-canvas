@@ -425,9 +425,6 @@ const Landing = () => {
             <Link to="/privacy" className="hover:text-white transition-colors">
               Privacidade
             </Link>
-            <Link to="/admin-master/login" className="hover:text-white transition-colors">
-              Admin
-            </Link>
           </div>
         </div>
       </footer>
