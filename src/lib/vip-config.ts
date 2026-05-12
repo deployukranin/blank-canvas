@@ -79,6 +79,45 @@ export const getDefaultVipConfig = (lang?: string): VipConfig => {
 // Default configuration (PT-BR, kept for backward compatibility with loader/tests)
 export const defaultVipConfig: VipConfig = getDefaultVipConfig('pt');
 
+/**
+ * Translate any saved plan strings that match the known PT defaults into the
+ * target language. Returns the original string unchanged if no match is found
+ * (i.e. the user customized it).
+ */
+export const translateDefaultsToLang = (config: VipConfig, lang?: string): VipConfig => {
+  const l = normalizeLang(lang);
+  if (l === 'pt') return config;
+
+  const ptDefaults = getDefaultVipConfig('pt');
+  const targetDefaults = getDefaultVipConfig(l);
+
+  // Build lookup maps: PT string → target string
+  const nameMap = new Map<string, string>();
+  const descMap = new Map<string, string>();
+  const featureMap = new Map<string, string>();
+
+  ptDefaults.plans.forEach((ptPlan, idx) => {
+    const tgt = targetDefaults.plans[idx];
+    if (!tgt) return;
+    nameMap.set(ptPlan.name, tgt.name);
+    descMap.set(ptPlan.description, tgt.description);
+    ptPlan.features.forEach((f, i) => {
+      if (tgt.features[i]) featureMap.set(f, tgt.features[i]);
+    });
+  });
+
+  return {
+    ...config,
+    plans: config.plans.map(plan => ({
+      ...plan,
+      name: nameMap.get(plan.name) ?? plan.name,
+      description: descMap.get(plan.description) ?? plan.description,
+      features: plan.features.map(f => featureMap.get(f) ?? f),
+    })),
+  };
+};
+
+
 // Get config from localStorage cache (for sync access)
 export const getVipConfig = (): VipConfig => {
   const savedConfig = localStorage.getItem('vipConfig_cache');
