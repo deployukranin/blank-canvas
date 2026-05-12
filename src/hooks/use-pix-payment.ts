@@ -15,6 +15,8 @@ export interface CreateChargeParams {
   preferences?: string;
   observations?: string;
   storeId?: string;
+  successUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface PixChargeResult {
