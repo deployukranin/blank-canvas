@@ -176,10 +176,10 @@ const AdminVipConteudo = () => {
       const url = await uploadVipMedia(file, storeId);
       setFormMediaUrl(url);
       setUploadedFileName(file.name);
-      toast({ title: 'Upload concluído!' });
+      toast({ title: t('vipAdmin.uploadDone') });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast({ title: 'Erro no upload', description: error.message, variant: 'destructive' });
+      toast({ title: t('vipAdmin.uploadError'), description: error.message, variant: 'destructive' });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
