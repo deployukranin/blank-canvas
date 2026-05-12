@@ -12,6 +12,7 @@ interface UsePersistentConfigOptions<T> {
   localStorageKey?: string; // For migration from localStorage
   debounceMs?: number;
   storeId?: string | null;
+  seedDefaultsIfMissing?: boolean; // Auto-write defaults to DB when no record exists
 }
 
 export function usePersistentConfig<T>({
@@ -20,6 +21,7 @@ export function usePersistentConfig<T>({
   localStorageKey,
   debounceMs = 1000,
   storeId,
+  seedDefaultsIfMissing = false,
 }: UsePersistentConfigOptions<T>) {
   const [config, setConfigState] = useState<T>(defaultValue);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,9 +72,17 @@ export function usePersistentConfig<T>({
               }
             } else {
               setConfigState(defaultValue);
+              if (seedDefaultsIfMissing) {
+                const seeded = await saveConfig(configKey, defaultValue, storeId);
+                if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+              }
             }
           } else {
             setConfigState(defaultValue);
+            if (seedDefaultsIfMissing) {
+              const seeded = await saveConfig(configKey, defaultValue, storeId);
+              if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+            }
           }
         }
       } catch (err) {
