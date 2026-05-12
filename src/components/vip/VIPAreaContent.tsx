@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export const VIPAreaContent = () => {
   const [content, setContent] = useState<VipContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVip, setIsVip] = useState(false);
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { basePath } = useTenant();
@@ -60,8 +62,8 @@ export const VIPAreaContent = () => {
           console.error("Erro ao carregar conteúdo VIP:", error);
           toast({
             variant: "destructive",
-            title: "Erro de Acesso",
-            description: "Não foi possível carregar o conteúdo exclusivo."
+            title: t('storefront.vipAccessError'),
+            description: t('storefront.vipAccessErrorDesc')
           });
         } else {
           // Mapear para o formato esperado pelo componente
@@ -95,12 +97,12 @@ export const VIPAreaContent = () => {
     return (
       <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
         <Lock className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Área Exclusiva VIP</h2>
+        <h2 className="text-2xl font-bold mb-2">{t('storefront.vipExclusiveTitle')}</h2>
         <p className="text-gray-600 mb-6">
-          Este conteúdo é reservado para assinantes. Desbloqueie acesso total agora.
+          {t('storefront.vipExclusiveDesc')}
         </p>
         <Button onClick={() => navigate(`${basePath}/vip`)} size="lg" className="animate-pulse">
-          Quero ser VIP
+          {t('storefront.becomeVip')}
         </Button>
       </div>
     );
@@ -133,7 +135,7 @@ export const VIPAreaContent = () => {
                 const url = await getVipMediaSignedUrl(item.video_url);
                 if (url) window.open(url, '_blank');
               }}>
-                Assistir Agora
+                {t('storefront.watchNow')}
               </Button>
             )}
           </CardContent>
@@ -142,7 +144,7 @@ export const VIPAreaContent = () => {
       
       {content.length === 0 && (
         <div className="col-span-full text-center text-gray-500 py-10">
-          Nenhum conteúdo disponível no momento.
+          {t('storefront.noVipContent')}
         </div>
       )}
     </div>
