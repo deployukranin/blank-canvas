@@ -119,39 +119,43 @@ export const useVideoIdeas = () => {
     }
 
     try {
+      const initialStatus: VideoIdea['status'] = contentSettings.requireApprovalForIdeas ? 'pending' : 'active';
       const { data, error: insertError } = await supabase
         .from('video_ideas')
         .insert({
           title,
           description,
           user_id: user.id,
+          status: initialStatus,
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      // Add to local state
+      // Add to local state only if active (pending ideas don't appear publicly)
       const newIdea: VideoIdea = {
         id: data.id,
         title: data.title,
         description: data.description,
         votes: 0,
-        status: 'active',
+        status: data.status as VideoIdea['status'],
         user_id: data.user_id,
         created_at: data.created_at,
         hasVoted: false,
         authorName: user.username || 'Você',
       };
 
-      setIdeas(prev => [newIdea, ...prev]);
+      if (newIdea.status === 'active') {
+        setIdeas(prev => [newIdea, ...prev]);
+      }
 
-      return { success: true, idea: newIdea };
+      return { success: true, idea: newIdea, pending: newIdea.status === 'pending' };
     } catch (err) {
       console.error('Error submitting idea:', err);
       return { success: false, error: 'Erro ao enviar ideia' };
     }
-  }, [isAuthenticated, user?.id, user?.username]);
+  }, [isAuthenticated, user?.id, user?.username, contentSettings.requireApprovalForIdeas]);
 
   const reportIdea = useCallback(async (ideaId: string, reason: string) => {
     console.log('[Report] Idea reported:', { ideaId, reason });
