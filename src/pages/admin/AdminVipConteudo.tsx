@@ -365,10 +365,10 @@ const AdminVipConteudo = () => {
           {content.length === 0 && (
             <GlassCard className="p-12 text-center">
               <Crown className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mb-4">Nenhum conteúdo VIP ainda</p>
+              <p className="text-muted-foreground mb-4">{t('vipAdmin.noContent')}</p>
               <Button onClick={() => { resetForm(); setShowForm(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro Conteúdo
+                {t('vipAdmin.createFirst')}
               </Button>
             </GlassCard>
           )}
