@@ -100,7 +100,7 @@ const AdminVipPrecos = () => {
   const updatePlan = (index: number, field: keyof VipPlan, value: string | number | string[]) => {
     setConfig(prev => {
       const newPlans = [...prev.plans];
-      newPlans[index] = { ...newPlans[index], [field]: value };
+      newPlans[index] = { ...newPlans[index], [field]: value } as VipPlan;
       return { ...prev, plans: newPlans };
     });
   };
