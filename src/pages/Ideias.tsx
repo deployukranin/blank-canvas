@@ -82,6 +82,26 @@ const IdeiasPage = () => {
 
   const sortedIdeas = [...ideas].sort((a, b) => b.votes - a.votes);
 
+  if (!contentSettings.publicIdeas && !isAuthenticated) {
+    return (
+      <MobileLayout title={t('nav.ideas')}>
+        <div className="px-4 py-12">
+          <GlassCard className="p-8 text-center space-y-4">
+            <AlertCircle className="w-10 h-10 text-primary mx-auto" />
+            <h3 className="font-semibold text-lg">{t('storefront.ideasPrivateTitle', 'Members only')}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t('storefront.ideasPrivateDesc', 'Sign in to view and submit ideas.')}
+            </p>
+            <Button onClick={() => { setAuthMessage(t('storefront.loginToVote')); setShowAuthModal(true); }} className="bg-gradient-to-r from-primary to-accent">
+              {t('common.signIn', 'Sign in')}
+            </Button>
+          </GlassCard>
+        </div>
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} />
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout title={t('nav.ideas')}>
       <div className="px-4 py-6 space-y-4">
