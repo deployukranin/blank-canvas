@@ -389,10 +389,10 @@ const AdminVipConteudo = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              {editingItem ? 'Editar Conteúdo VIP' : 'Novo Conteúdo VIP'}
+              {editingItem ? t('vipAdmin.editTitle') : t('vipAdmin.newTitle')}
             </DialogTitle>
             <DialogDescription>
-              Este conteúdo será visível apenas para assinantes VIP ativos.
+              {t('vipAdmin.dialogDesc')}
             </DialogDescription>
           </DialogHeader>
 
