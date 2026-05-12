@@ -15,7 +15,7 @@ interface VideoIdea {
   title: string;
   description: string;
   votes: number;
-  status: 'active' | 'reported' | 'removed';
+  status: 'active' | 'pending' | 'reported' | 'removed';
   user_id: string | null;
   created_at: string;
 }
@@ -26,7 +26,7 @@ const AdminIdeias: React.FC = () => {
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'reported' | 'removed'>('all');
+  const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'reported' | 'removed'>('all');
 
   const isBR = i18n.language?.startsWith('pt');
 
