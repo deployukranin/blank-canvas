@@ -222,8 +222,11 @@ Deno.serve(async (req) => {
     let stripeCheckoutUrl: string | null = null;
     let stripeSessionId: string | null = null;
 
-    // ─── PIX Manual: Generate BRCode ───
+    // ─── PIX Manual: Generate BRCode (BRL only) ───
     if (activeGateway === 'pix_manual') {
+      if (planCurrency !== 'brl') {
+        return jsonResponse({ success: false, error: 'PIX only supports BRL pricing. Switch this plan to BRL or enable Stripe.' }, 400);
+      }
       const pix = paymentConfig.pixManual;
       if (!pix?.key || !pix?.receiverName || !pix?.city) {
         return jsonResponse({ success: false, error: 'Store PIX payment not fully configured' }, 400);
