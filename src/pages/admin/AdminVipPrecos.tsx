@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Crown, Sparkles, Loader2, TrendingDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
