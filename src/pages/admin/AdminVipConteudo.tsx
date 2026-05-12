@@ -261,10 +261,10 @@ const AdminVipConteudo = () => {
 
     const { error } = await supabase.from('vip_content').delete().eq('id', item.id);
     if (error) {
-      toast({ title: 'Erro ao deletar', variant: 'destructive' });
+      toast({ title: t('vipAdmin.deleteError'), variant: 'destructive' });
     } else {
       setContent(prev => prev.filter(c => c.id !== item.id));
-      toast({ title: 'Conteúdo deletado' });
+      toast({ title: t('vipAdmin.contentDeleted') });
     }
   };
 
