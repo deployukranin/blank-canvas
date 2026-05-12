@@ -30,8 +30,6 @@ const MONTHS_MAP = { monthly: 1, quarterly: 3, yearly: 12 } as const;
 const AdminVipPrecos = () => {
   const { t, i18n } = useTranslation();
   const isBR = i18n.language?.startsWith('pt');
-  const currency = isBR ? 'BRL' : 'USD';
-  const locale = isBR ? 'pt-BR' : 'en-US';
   const { store } = useTenant();
 
   const {
@@ -64,8 +62,10 @@ const AdminVipPrecos = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, i18n.language]);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+  const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL') => {
+    const locale = currency === 'BRL' ? 'pt-BR' : 'en-US';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+  };
 
   // Find the monthly plan price as baseline for savings calculation
   const monthlyBasePrice = useMemo(() => {
