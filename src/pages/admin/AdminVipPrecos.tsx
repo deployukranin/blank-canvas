@@ -232,21 +232,36 @@ const AdminVipPrecos = () => {
                       </Select>
                     </div>
 
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">
-                        {t('vipPricing.price')} ({currency})
-                      </label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min={1}
-                        value={plan.price}
-                        onChange={e => updatePlan(planIndex, 'price', parseFloat(e.target.value) || 0)}
-                        className={plan.price < 10 ? 'border-destructive' : ''}
-                      />
-                      {plan.price < 10 && (
-                        <p className="text-xs text-destructive mt-1">{t('vipPricing.minValue')}</p>
-                      )}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="text-sm font-medium mb-1 block">{t('vipPricing.currency', 'Moeda')}</label>
+                        <Select
+                          value={plan.currency || 'BRL'}
+                          onValueChange={(value: 'BRL' | 'USD') => updatePlan(planIndex, 'currency', value)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BRL">BRL (R$)</SelectItem>
+                            <SelectItem value="USD">USD ($)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-sm font-medium mb-1 block">
+                          {t('vipPricing.price')} ({plan.currency || 'BRL'})
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={1}
+                          value={plan.price}
+                          onChange={e => updatePlan(planIndex, 'price', parseFloat(e.target.value) || 0)}
+                          className={plan.price < 10 ? 'border-destructive' : ''}
+                        />
+                        {plan.price < 10 && (
+                          <p className="text-xs text-destructive mt-1">{t('vipPricing.minValue')}</p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
