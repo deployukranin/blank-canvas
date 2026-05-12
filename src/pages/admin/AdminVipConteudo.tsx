@@ -63,13 +63,21 @@ const AdminVipConteudo = () => {
 
   useEffect(() => {
     const getStoreId = async () => {
-      if (!session?.user?.id) return;
-      const { data } = await supabase
+      if (!session?.user?.id) {
+        setIsLoading(false);
+        return;
+      }
+      const { data, error } = await supabase
         .from('store_admins')
         .select('store_id')
         .eq('user_id', session.user.id)
         .maybeSingle();
-      if (data) setStoreId(data.store_id);
+      if (error) console.error('store_admins error:', error);
+      if (data?.store_id) {
+        setStoreId(data.store_id);
+      } else {
+        setIsLoading(false);
+      }
     };
     getStoreId();
   }, [session?.user?.id]);
