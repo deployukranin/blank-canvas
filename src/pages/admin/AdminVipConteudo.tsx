@@ -398,35 +398,35 @@ const AdminVipConteudo = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Título</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldTitle')}</label>
               <Input
                 value={formTitle}
                 onChange={e => setFormTitle(e.target.value)}
-                placeholder="Título do conteúdo..."
+                placeholder={t('vipAdmin.fieldTitlePlaceholder')}
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Tipo</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldType')}</label>
               <Select value={formType} onValueChange={(val) => { setFormType(val); setFormMediaUrl(''); setUploadedFileName(''); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="post">📝 Post</SelectItem>
-                  <SelectItem value="video">🎥 Vídeo</SelectItem>
-                  <SelectItem value="audio">🎵 Áudio</SelectItem>
-                  <SelectItem value="image">🖼️ Imagem</SelectItem>
+                  <SelectItem value="post">📝 {t('vipAdmin.typePost')}</SelectItem>
+                  <SelectItem value="video">🎥 {t('vipAdmin.typeVideo')}</SelectItem>
+                  <SelectItem value="audio">🎵 {t('vipAdmin.typeAudio')}</SelectItem>
+                  <SelectItem value="image">🖼️ {t('vipAdmin.typeImage')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Conteúdo</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldContent')}</label>
               <Textarea
                 value={formContent}
                 onChange={e => setFormContent(e.target.value)}
-                placeholder="Escreva seu conteúdo exclusivo..."
+                placeholder={t('vipAdmin.fieldContentPlaceholder')}
                 className="min-h-[100px]"
               />
             </div>
