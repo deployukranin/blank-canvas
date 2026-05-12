@@ -19,6 +19,12 @@ export interface VideoIdea {
 
 export const useVideoIdeas = () => {
   const { user, isAuthenticated } = useAuth();
+  const { store } = useTenant();
+  const { config: contentSettings } = usePersistentConfig<ContentSettings>({
+    configKey: 'content_settings',
+    defaultValue: defaultContentSettings,
+    storeId: store?.id ?? null,
+  });
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
