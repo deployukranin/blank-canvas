@@ -74,6 +74,7 @@ export function usePixPayment() {
         correlationId: data.correlation_id,
         qrCodeImage: data.qr_code_image,
         brCode: data.br_code,
+        checkoutUrl: data.checkout_url,
         expiresAt: data.expires_at,
       };
 
