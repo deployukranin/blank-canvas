@@ -596,7 +596,8 @@
     "approve": "Aprobar",
     "hide": "Ocultar",
     "deleteBtn": "Eliminar",
-    "noIdeas": "No se encontraron ideas"
+    "noIdeas": "No se encontraron ideas",
+    "pending": "Pendientes"
   },
   "usersAdmin": {
     "title": "Gestionar Usuarios",
