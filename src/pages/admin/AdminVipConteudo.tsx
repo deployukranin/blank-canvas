@@ -221,7 +221,7 @@ const AdminVipConteudo = () => {
             ? { ...c, title: formTitle.trim(), content: formContent.trim(), content_type: formType, media_url: formMediaUrl.trim() || null }
             : c
         ));
-        toast({ title: 'Conteúdo atualizado!' });
+        toast({ title: t('vipAdmin.contentUpdated') });
       } else {
         const { data, error } = await supabase
           .from('vip_content')
@@ -238,12 +238,12 @@ const AdminVipConteudo = () => {
 
         if (error) throw error;
         setContent(prev => [data as VipContentItem, ...prev]);
-        toast({ title: 'Conteúdo publicado!' });
+        toast({ title: t('vipAdmin.contentPublished') });
       }
       resetForm();
     } catch (error: any) {
       console.error('Error saving:', error);
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      toast({ title: t('vipAdmin.saveError'), description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
