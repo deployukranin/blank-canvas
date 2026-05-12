@@ -1,0 +1,2 @@
+ALTER TABLE public.video_ideas DROP CONSTRAINT IF EXISTS video_ideas_status_check;
+ALTER TABLE public.video_ideas ADD CONSTRAINT video_ideas_status_check CHECK (status IN ('active', 'pending', 'reported', 'removed'));

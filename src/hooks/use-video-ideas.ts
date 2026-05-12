@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { defaultContentSettings, type ContentSettings } from '@/pages/admin/AdminConfiguracoes';
 
 export interface VideoIdea {
   id: string;
   title: string;
   description: string;
   votes: number;
-  status: 'active' | 'reported' | 'removed';
+  status: 'active' | 'pending' | 'reported' | 'removed';
   user_id: string | null;
   created_at: string;
   hasVoted?: boolean;
@@ -16,6 +19,12 @@ export interface VideoIdea {
 
 export const useVideoIdeas = () => {
   const { user, isAuthenticated } = useAuth();
+  const { store } = useTenant();
+  const { config: contentSettings } = usePersistentConfig<ContentSettings>({
+    configKey: 'content_settings',
+    defaultValue: defaultContentSettings,
+    storeId: store?.id ?? null,
+  });
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +60,7 @@ export const useVideoIdeas = () => {
         title: idea.title,
         description: idea.description,
         votes: idea.votes,
-        status: idea.status as 'active' | 'reported' | 'removed',
+        status: idea.status as VideoIdea['status'],
         user_id: idea.user_id,
         created_at: idea.created_at,
         hasVoted: userVotes.includes(idea.id),
@@ -110,39 +119,43 @@ export const useVideoIdeas = () => {
     }
 
     try {
+      const initialStatus: VideoIdea['status'] = contentSettings.requireApprovalForIdeas ? 'pending' : 'active';
       const { data, error: insertError } = await supabase
         .from('video_ideas')
         .insert({
           title,
           description,
           user_id: user.id,
+          status: initialStatus,
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      // Add to local state
+      // Add to local state only if active (pending ideas don't appear publicly)
       const newIdea: VideoIdea = {
         id: data.id,
         title: data.title,
         description: data.description,
         votes: 0,
-        status: 'active',
+        status: data.status as VideoIdea['status'],
         user_id: data.user_id,
         created_at: data.created_at,
         hasVoted: false,
         authorName: user.username || 'Você',
       };
 
-      setIdeas(prev => [newIdea, ...prev]);
+      if (newIdea.status === 'active') {
+        setIdeas(prev => [newIdea, ...prev]);
+      }
 
-      return { success: true, idea: newIdea };
+      return { success: true, idea: newIdea, pending: newIdea.status === 'pending' };
     } catch (err) {
       console.error('Error submitting idea:', err);
       return { success: false, error: 'Erro ao enviar ideia' };
     }
-  }, [isAuthenticated, user?.id, user?.username]);
+  }, [isAuthenticated, user?.id, user?.username, contentSettings.requireApprovalForIdeas]);
 
   const reportIdea = useCallback(async (ideaId: string, reason: string) => {
     console.log('[Report] Idea reported:', { ideaId, reason });
@@ -158,5 +171,6 @@ export const useVideoIdeas = () => {
     submitIdea,
     reportIdea,
     refetch: fetchIdeas,
+    contentSettings,
   };
 };

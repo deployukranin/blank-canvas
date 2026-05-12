@@ -15,7 +15,7 @@ interface VideoIdea {
   title: string;
   description: string;
   votes: number;
-  status: 'active' | 'reported' | 'removed';
+  status: 'active' | 'pending' | 'reported' | 'removed';
   user_id: string | null;
   created_at: string;
 }
@@ -26,7 +26,7 @@ const AdminIdeias: React.FC = () => {
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'reported' | 'removed'>('all');
+  const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'reported' | 'removed'>('all');
 
   const isBR = i18n.language?.startsWith('pt');
 
@@ -42,7 +42,7 @@ const AdminIdeias: React.FC = () => {
       
       setIdeas((data || []).map(idea => ({
         ...idea,
-        status: idea.status as 'active' | 'reported' | 'removed',
+        status: idea.status as VideoIdea['status'],
       })));
     } catch (err) {
       console.error('Error fetching ideas:', err);
@@ -66,7 +66,7 @@ const AdminIdeias: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleStatusChange = async (id: string, newStatus: 'active' | 'removed' | 'reported') => {
+  const handleStatusChange = async (id: string, newStatus: 'active' | 'pending' | 'removed' | 'reported') => {
     try {
       const { error } = await supabase
         .from('video_ideas')
@@ -119,6 +119,8 @@ const AdminIdeias: React.FC = () => {
     switch (status) {
       case 'active':
         return <Badge className="bg-green-500/20 text-green-400">{t('ideasAdmin.active')}</Badge>;
+      case 'pending':
+        return <Badge className="bg-blue-500/20 text-blue-400">{t('ideasAdmin.pending', 'Pending')}</Badge>;
       case 'reported':
         return <Badge className="bg-yellow-500/20 text-yellow-400">{t('ideasAdmin.reported')}</Badge>;
       case 'removed':
@@ -143,7 +145,7 @@ const AdminIdeias: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'active', 'reported', 'removed'] as const).map((f) => (
+              {(['all', 'active', 'pending', 'reported', 'removed'] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'outline'}

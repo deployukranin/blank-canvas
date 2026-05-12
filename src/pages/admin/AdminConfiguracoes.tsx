@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Save, Bell, Shield } from 'lucide-react';
+import { Save, Bell, Shield, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -9,23 +9,52 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { useTenant } from '@/contexts/TenantContext';
+
+export interface ContentSettings {
+  emailNotifications: boolean;
+  publicIdeas: boolean;
+  requireApprovalForIdeas: boolean;
+}
+
+export const defaultContentSettings: ContentSettings = {
+  emailNotifications: true,
+  publicIdeas: true,
+  requireApprovalForIdeas: false,
+};
 
 const AdminConfiguracoes: React.FC = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
-  
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    publicIdeas: true,
-    requireApprovalForIdeas: false,
-  });
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
 
-  const handleSave = () => {
+  const { config: settings, setConfig: setSettings, isLoading, isSaving, saveNow } =
+    usePersistentConfig<ContentSettings>({
+      configKey: 'content_settings',
+      defaultValue: defaultContentSettings,
+      storeId,
+      debounceMs: 800,
+    });
+
+  const handleSave = async () => {
+    await saveNow();
     toast({
       title: t('admin.settings.saved', 'Settings saved!'),
       description: t('admin.settings.savedDesc', 'Changes applied successfully.'),
     });
   };
+
+  if (isLoading) {
+    return (
+      <AdminLayout title={t('admin.settings.title', 'Settings')}>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title={t('admin.settings.title', 'Settings')}>
@@ -86,8 +115,8 @@ const AdminConfiguracoes: React.FC = () => {
         </motion.div>
 
         <div className="flex justify-end">
-          <Button onClick={handleSave} className="gap-2">
-            <Save className="w-4 h-4" />
+          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {t('admin.settings.save', 'Save Settings')}
           </Button>
         </div>
