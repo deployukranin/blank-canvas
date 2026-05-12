@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
 
     // ─── Load store's VIP prices ───
     let amountCents: number;
+    let planCurrency: 'brl' | 'usd' = 'brl';
     if (storeId) {
       const { data: vipCfg } = await supabase
         .from('app_configurations')
@@ -170,6 +171,8 @@ Deno.serve(async (req) => {
       const plans = (vipCfg?.config_value as any)?.plans || [];
       const matchingPlan = plans.find((p: any) => p.type === body.planType);
       amountCents = matchingPlan ? Math.round(matchingPlan.price * 100) : 1990;
+      const cur = (matchingPlan?.currency || 'BRL').toString().toLowerCase();
+      planCurrency = cur === 'usd' ? 'usd' : 'brl';
     } else {
       const defaultPrices: Record<string, number> = { monthly: 1990, quarterly: 4990, yearly: 19990 };
       amountCents = defaultPrices[body.planType] || 1990;
