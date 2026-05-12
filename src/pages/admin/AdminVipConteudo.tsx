@@ -114,6 +114,13 @@ const AdminVipConteudo = () => {
     toast({ title: checked ? t('vipAdmin.adultEnabled') : t('vipAdmin.adultDisabled') });
   };
 
+  const contentTypeLabels: Record<string, string> = {
+    post: t('vipAdmin.typePost'),
+    video: t('vipAdmin.typeVideo'),
+    audio: t('vipAdmin.typeAudio'),
+    image: t('vipAdmin.typeImage'),
+  };
+
   useEffect(() => {
     if (!storeId) return;
     const load = async () => {
