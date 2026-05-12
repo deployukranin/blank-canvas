@@ -244,8 +244,9 @@ const Landing = () => {
   }, [t.docTitle, t.docDesc]);
 
   const changeLang = (l: Lang) => {
-    i18n.changeLanguage(l);
-    try { localStorage.setItem("i18nextLng", l); } catch {}
+    const target = l === "pt" ? "pt-BR" : l;
+    i18n.changeLanguage(target);
+    try { localStorage.setItem("i18n_lang", target); } catch {}
   };
 
   return (
