@@ -624,7 +624,7 @@ const VIPPage = () => {
                       <div className="text-xs text-muted-foreground">{plan.description}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-primary">{formatCurrency(plan.price)}</div>
+                      <div className="text-lg font-bold text-primary">{formatCurrency(plan.price, plan.currency)}</div>
                       <div className="text-xs text-muted-foreground">{getPlanLabel(plan.type)}</div>
                     </div>
                   </div>
