@@ -36,6 +36,7 @@ interface VipPlanConfig {
   name: string;
   type: 'monthly' | 'quarterly' | 'yearly';
   price: number;
+  currency?: 'BRL' | 'USD';
   description: string;
   features: string[];
 }
@@ -253,11 +254,12 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, resolvedStoreId]);
 
-  const formatCurrency = (value: number) => {
-    const isBR = i18n.language?.startsWith('pt');
-    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+  const formatCurrency = (value: number, currency?: 'BRL' | 'USD') => {
+    const cur = currency || (i18n.language?.startsWith('pt') ? 'BRL' : 'USD');
+    const locale = cur === 'BRL' ? 'pt-BR' : 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: isBR ? 'BRL' : 'USD',
+      currency: cur,
     }).format(value);
   };
 
@@ -509,7 +511,7 @@ const VIPPage = () => {
             {featuredPlan && (
               <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="font-display text-3xl font-bold text-primary">
-                  {formatCurrency(featuredPlan.price)}
+                  {formatCurrency(featuredPlan.price, featuredPlan.currency)}
                 </span>
                 <span className="text-muted-foreground">{getPlanLabel(featuredPlan.type)}</span>
               </div>
@@ -534,7 +536,7 @@ const VIPPage = () => {
                       <p className="text-xs text-muted-foreground">{plan.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-primary">{formatCurrency(plan.price)}</p>
+                      <p className="font-bold text-primary">{formatCurrency(plan.price, plan.currency)}</p>
                       <p className="text-xs text-muted-foreground">{getPlanLabel(plan.type)}</p>
                     </div>
                   </div>
@@ -622,7 +624,7 @@ const VIPPage = () => {
                       <div className="text-xs text-muted-foreground">{plan.description}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-primary">{formatCurrency(plan.price)}</div>
+                      <div className="text-lg font-bold text-primary">{formatCurrency(plan.price, plan.currency)}</div>
                       <div className="text-xs text-muted-foreground">{getPlanLabel(plan.type)}</div>
                     </div>
                   </div>
@@ -675,7 +677,7 @@ const VIPPage = () => {
               {chargeData?.amountCents && (
                 <div className="text-center">
                   <span className="text-2xl font-bold text-primary">
-                    {formatCurrency(chargeData.amountCents / 100)}
+                    {formatCurrency(chargeData.amountCents / 100, selectedPlan?.currency)}
                   </span>
                 </div>
               )}

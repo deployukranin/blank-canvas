@@ -2,11 +2,15 @@
  * VIP Subscription Configuration
  */
 
+export type VipCurrency = 'BRL' | 'USD';
+
 export interface VipPlan {
   id: string;
   name: string;
   type: 'monthly' | 'quarterly' | 'yearly';
   price: number;
+  /** Currency the price is denominated in. Defaults to 'BRL' when missing (legacy). */
+  currency?: VipCurrency;
   description: string;
   features: string[];
 }

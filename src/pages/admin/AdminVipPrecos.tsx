@@ -30,8 +30,6 @@ const MONTHS_MAP = { monthly: 1, quarterly: 3, yearly: 12 } as const;
 const AdminVipPrecos = () => {
   const { t, i18n } = useTranslation();
   const isBR = i18n.language?.startsWith('pt');
-  const currency = isBR ? 'BRL' : 'USD';
-  const locale = isBR ? 'pt-BR' : 'en-US';
   const { store } = useTenant();
 
   const {
@@ -64,8 +62,10 @@ const AdminVipPrecos = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, i18n.language]);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+  const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL') => {
+    const locale = currency === 'BRL' ? 'pt-BR' : 'en-US';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+  };
 
   // Find the monthly plan price as baseline for savings calculation
   const monthlyBasePrice = useMemo(() => {
@@ -90,6 +90,7 @@ const AdminVipPrecos = () => {
       name: isBR ? 'Novo Plano' : 'New Plan',
       type: 'monthly',
       price: 29.90,
+      currency: isBR ? 'BRL' : 'USD',
       description: isBR ? 'Descrição do plano' : 'Plan description',
       features: [isBR ? 'Recurso 1' : 'Feature 1', isBR ? 'Recurso 2' : 'Feature 2'],
     };
@@ -99,7 +100,7 @@ const AdminVipPrecos = () => {
   const updatePlan = (index: number, field: keyof VipPlan, value: string | number | string[]) => {
     setConfig(prev => {
       const newPlans = [...prev.plans];
-      newPlans[index] = { ...newPlans[index], [field]: value };
+      newPlans[index] = { ...newPlans[index], [field]: value } as VipPlan;
       return { ...prev, plans: newPlans };
     });
   };
@@ -231,21 +232,36 @@ const AdminVipPrecos = () => {
                       </Select>
                     </div>
 
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">
-                        {t('vipPricing.price')} ({currency})
-                      </label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min={1}
-                        value={plan.price}
-                        onChange={e => updatePlan(planIndex, 'price', parseFloat(e.target.value) || 0)}
-                        className={plan.price < 10 ? 'border-destructive' : ''}
-                      />
-                      {plan.price < 10 && (
-                        <p className="text-xs text-destructive mt-1">{t('vipPricing.minValue')}</p>
-                      )}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="text-sm font-medium mb-1 block">{t('vipPricing.currency', 'Moeda')}</label>
+                        <Select
+                          value={plan.currency || 'BRL'}
+                          onValueChange={(value: 'BRL' | 'USD') => updatePlan(planIndex, 'currency', value)}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BRL">BRL (R$)</SelectItem>
+                            <SelectItem value="USD">USD ($)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-sm font-medium mb-1 block">
+                          {t('vipPricing.price')} ({plan.currency || 'BRL'})
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={1}
+                          value={plan.price}
+                          onChange={e => updatePlan(planIndex, 'price', parseFloat(e.target.value) || 0)}
+                          className={plan.price < 10 ? 'border-destructive' : ''}
+                        />
+                        {plan.price < 10 && (
+                          <p className="text-xs text-destructive mt-1">{t('vipPricing.minValue')}</p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
@@ -296,7 +312,7 @@ const AdminVipPrecos = () => {
                     <p className="text-xs text-muted-foreground mb-2">{t('vipPricing.preview')}:</p>
                     <div className="text-center p-3 bg-muted/30 rounded-lg">
                       <p className="font-semibold">{plan.name}</p>
-                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price, plan.currency || 'BRL')}</p>
                       <p className="text-xs text-muted-foreground">{periodLabel(plan.type)}</p>
                       {savings && (
                         <div className="mt-2 flex flex-col items-center gap-1">
@@ -305,7 +321,7 @@ const AdminVipPrecos = () => {
                             {t('vipPricing.savings', { percent: savings.percent })}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth) })}
+                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth, plan.currency || 'BRL') })}
                           </span>
                         </div>
                       )}

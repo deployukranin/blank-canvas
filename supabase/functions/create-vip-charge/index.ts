@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
 
     // ─── Load store's VIP prices ───
     let amountCents: number;
+    let planCurrency: 'brl' | 'usd' = 'brl';
     if (storeId) {
       const { data: vipCfg } = await supabase
         .from('app_configurations')
@@ -170,6 +171,8 @@ Deno.serve(async (req) => {
       const plans = (vipCfg?.config_value as any)?.plans || [];
       const matchingPlan = plans.find((p: any) => p.type === body.planType);
       amountCents = matchingPlan ? Math.round(matchingPlan.price * 100) : 1990;
+      const cur = (matchingPlan?.currency || 'BRL').toString().toLowerCase();
+      planCurrency = cur === 'usd' ? 'usd' : 'brl';
     } else {
       const defaultPrices: Record<string, number> = { monthly: 1990, quarterly: 4990, yearly: 19990 };
       amountCents = defaultPrices[body.planType] || 1990;
@@ -219,8 +222,11 @@ Deno.serve(async (req) => {
     let stripeCheckoutUrl: string | null = null;
     let stripeSessionId: string | null = null;
 
-    // ─── PIX Manual: Generate BRCode ───
+    // ─── PIX Manual: Generate BRCode (BRL only) ───
     if (activeGateway === 'pix_manual') {
+      if (planCurrency !== 'brl') {
+        return jsonResponse({ success: false, error: 'PIX only supports BRL pricing. Switch this plan to BRL or enable Stripe.' }, 400);
+      }
       const pix = paymentConfig.pixManual;
       if (!pix?.key || !pix?.receiverName || !pix?.city) {
         return jsonResponse({ success: false, error: 'Store PIX payment not fully configured' }, 400);
@@ -251,7 +257,7 @@ Deno.serve(async (req) => {
 
       const params = new URLSearchParams({
         mode: 'subscription',
-        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][currency]': planCurrency,
         'line_items[0][price_data][product_data][name]': `${storeName} VIP ${body.planType}`.substring(0, 200),
         'line_items[0][price_data][unit_amount]': String(amountCents),
         'line_items[0][price_data][recurring][interval]': getPlanInterval(body.planType),
