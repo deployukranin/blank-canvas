@@ -33,13 +33,6 @@ const contentTypeIcons: Record<string, React.ReactNode> = {
   image: <Image className="w-4 h-4" />,
 };
 
-const contentTypeLabels: Record<string, string> = {
-  post: 'Post',
-  video: 'Video',
-  audio: 'Audio',
-  image: 'Image',
-};
-
 const acceptByType: Record<string, string> = {
   video: 'video/*',
   audio: 'audio/*',
