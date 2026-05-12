@@ -11,6 +11,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { toast } from 'sonner';
 
+export interface PlanCapabilities {
+  customStore?: boolean;
+  customDomain?: boolean;
+  vipSubscriptions?: boolean;
+  community?: boolean;
+  customsOrders?: boolean;
+  advancedMetrics?: boolean;
+  whiteLabelFull?: boolean;
+  prioritySupport?: boolean;
+  dedicatedOnboarding?: boolean;
+  zeroPlatformFee?: boolean;
+  apiAccess?: boolean;
+  dailyBackup?: boolean;
+}
+
+export interface PlanLimits {
+  maxUsers?: number; // 0 or undefined = unlimited
+  maxVideos?: number;
+  maxVipPosts?: number;
+  maxAdmins?: number;
+}
+
 interface PlanConfig {
   id: string;
   name_pt: string;
@@ -24,9 +46,33 @@ interface PlanConfig {
   features_pt: string[];
   features_en: string[];
   features_es: string[];
+  capabilities?: PlanCapabilities;
+  limits?: PlanLimits;
   highlight?: boolean;
   discount?: string;
 }
+
+const CAPABILITY_LABELS: { key: keyof PlanCapabilities; pt: string; en: string; es: string }[] = [
+  { key: 'customStore', pt: 'Loja personalizada', en: 'Custom store', es: 'Tienda personalizada' },
+  { key: 'customDomain', pt: 'Domínio personalizado', en: 'Custom domain', es: 'Dominio personalizado' },
+  { key: 'vipSubscriptions', pt: 'Assinaturas VIP', en: 'VIP subscriptions', es: 'Suscripciones VIP' },
+  { key: 'community', pt: 'Comunidade integrada', en: 'Integrated community', es: 'Comunidad integrada' },
+  { key: 'customsOrders', pt: 'Vídeos personalizados', en: 'Custom video orders', es: 'Videos a pedido' },
+  { key: 'advancedMetrics', pt: 'Métricas avançadas', en: 'Advanced metrics', es: 'Métricas avanzadas' },
+  { key: 'whiteLabelFull', pt: 'White-label total', en: 'Full white-label', es: 'White-label total' },
+  { key: 'prioritySupport', pt: 'Suporte prioritário', en: 'Priority support', es: 'Soporte prioritario' },
+  { key: 'dedicatedOnboarding', pt: 'Onboarding dedicado', en: 'Dedicated onboarding', es: 'Onboarding dedicado' },
+  { key: 'zeroPlatformFee', pt: '0% taxa da plataforma', en: '0% platform fee', es: '0% tarifa de plataforma' },
+  { key: 'apiAccess', pt: 'Acesso à API', en: 'API access', es: 'Acceso a API' },
+  { key: 'dailyBackup', pt: 'Backup diário', en: 'Daily backup', es: 'Backup diario' },
+];
+
+const LIMIT_LABELS: { key: keyof PlanLimits; pt: string; en: string; es: string }[] = [
+  { key: 'maxUsers', pt: 'Máx. de usuários', en: 'Max users', es: 'Máx. usuarios' },
+  { key: 'maxVideos', pt: 'Máx. de vídeos', en: 'Max videos', es: 'Máx. videos' },
+  { key: 'maxVipPosts', pt: 'Máx. de posts VIP', en: 'Max VIP posts', es: 'Máx. publicaciones VIP' },
+  { key: 'maxAdmins', pt: 'Máx. de admins', en: 'Max admins', es: 'Máx. admins' },
+];
 
 const defaultPlans: PlanConfig[] = [
   {
