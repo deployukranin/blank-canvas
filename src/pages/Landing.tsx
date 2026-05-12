@@ -327,62 +327,58 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((p, i) => (
-              <motion.div
-                key={p.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className={`relative rounded-2xl border p-7 ${
-                  p.highlight
-                    ? "border-purple-500/60 bg-gradient-to-b from-purple-600/20 to-purple-900/10 shadow-2xl shadow-purple-500/20 md:scale-105"
-                    : "border-white/10 bg-white/[0.03]"
-                }`}
-              >
-                {p.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold">
-                    Mais popular
+            {plans.map((p, i) => {
+              const name = p[`name_${lang}` as const] as string;
+              const features = p[`features_${lang}` as const] as string[];
+              return (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  className={`relative rounded-2xl border p-7 ${
+                    p.highlight
+                      ? "border-purple-500/60 bg-gradient-to-b from-purple-600/20 to-purple-900/10 shadow-2xl shadow-purple-500/20 md:scale-105"
+                      : "border-white/10 bg-white/[0.03]"
+                  }`}
+                >
+                  {p.highlight && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold">
+                      {{ pt: "Mais popular", en: "Most popular", es: "Más popular" }[lang]}
+                    </div>
+                  )}
+
+                  <h3 className="font-display text-xl font-bold text-white mb-1">{name}</h3>
+
+                  <div className="flex items-baseline gap-1 mb-6 mt-4">
+                    <span className="text-4xl font-bold text-white">{formatPrice(p)}</span>
+                    <span className="text-white/50 text-sm">{periodLabel[p.period]}</span>
                   </div>
-                )}
 
-                <h3 className="font-display text-xl font-bold text-white mb-1">
-                  {p.name}
-                </h3>
-                <p className="text-sm text-white/60 mb-5">{p.desc}</p>
-
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold text-white">
-                    {p.price}
-                  </span>
-                  <span className="text-white/50 text-sm">{p.period}</span>
-                </div>
-
-                <Link to="/auth">
-                  <Button
-                    className={`w-full rounded-full mb-6 ${
-                      p.highlight
-                        ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30"
-                        : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
-                    }`}
-                  >
-                    {p.cta}
-                  </Button>
-                </Link>
-
-                <ul className="space-y-3">
-                  {p.features.map((feat) => (
-                    <li
-                      key={feat}
-                      className="flex items-start gap-2 text-sm text-white/70"
+                  <Link to="/auth">
+                    <Button
+                      className={`w-full rounded-full mb-6 ${
+                        p.highlight
+                          ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30"
+                          : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                      }`}
                     >
-                      <Check className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+                      {ctaLabel(p.highlight)}
+                    </Button>
+                  </Link>
+
+                  <ul className="space-y-3">
+                    {features?.map((feat) => (
+                      <li key={feat} className="flex items-start gap-2 text-sm text-white/70">
+                        <Check className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
