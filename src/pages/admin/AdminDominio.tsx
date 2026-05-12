@@ -44,7 +44,25 @@ interface DomainFunctionResult {
 
 const AdminDominio: React.FC = () => {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.startsWith('pt') ? 'pt' : i18n.language?.startsWith('es') ? 'es' : 'en';
+  const trialCopy = {
+    pt: {
+      title: 'Recurso disponível após o período de teste',
+      description: 'O domínio personalizado é liberado após a contratação de um plano. Durante o trial, sua loja fica disponível pelo URL padrão.',
+      cta: 'Ver planos de assinatura',
+    },
+    en: {
+      title: 'Feature available after the trial period',
+      description: 'Custom domain is unlocked after subscribing to a plan. During the trial, your store remains available on the default URL.',
+      cta: 'View subscription plans',
+    },
+    es: {
+      title: 'Función disponible tras el período de prueba',
+      description: 'El dominio personalizado se libera después de contratar un plan. Durante el trial, tu tienda permanece disponible en la URL predeterminada.',
+      cta: 'Ver planes de suscripción',
+    },
+  }[lang];
   const { store: tenantStore, basePath } = useTenant();
   const { user } = useAuth();
   const navigate = useNavigate();
