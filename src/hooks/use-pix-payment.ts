@@ -15,6 +15,8 @@ export interface CreateChargeParams {
   preferences?: string;
   observations?: string;
   storeId?: string;
+  successUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface PixChargeResult {
@@ -23,6 +25,7 @@ export interface PixChargeResult {
   correlationId?: string;
   qrCodeImage?: string;
   brCode?: string;
+  checkoutUrl?: string;
   expiresAt?: string;
   error?: string;
 }
@@ -73,6 +76,7 @@ export function usePixPayment() {
         correlationId: data.correlation_id,
         qrCodeImage: data.qr_code_image,
         brCode: data.br_code,
+        checkoutUrl: data.checkout_url,
         expiresAt: data.expires_at,
       };
 

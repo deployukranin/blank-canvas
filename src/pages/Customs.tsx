@@ -167,11 +167,18 @@ const CustomsPage = () => {
       script: personalizationData.script,
       observations: personalizationData.observations,
       storeId: store?.id,
-    });
+      successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
+      cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
+    } as any);
 
     setIsProcessing(false);
 
     if (result.success) {
+      // Stripe checkout: redirect to hosted page
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
       setShowPaymentDialog(false);
       setShowPixModal(true);
       trackEvent('video_pix_charge_created', { 
@@ -251,11 +258,18 @@ const CustomsPage = () => {
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
       storeId: store?.id,
-    });
+      successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
+      cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
+    } as any);
 
     setIsProcessing(false);
 
     if (result.success) {
+      // Stripe checkout: redirect to hosted page
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
       setAudioChargeData(result);
       setShowAudioOrderDialog(false);
       setShowAudioPixModal(true);
