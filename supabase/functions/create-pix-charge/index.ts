@@ -216,9 +216,86 @@ Deno.serve(async (req) => {
 
     let qrCodeImage: string | null = null;
     let brCode: string | null = null;
+    let checkoutUrl: string | null = null;
+    let stripeSessionId: string | null = null;
 
+    // ─── Stripe Connect (Direct Charge) ───
+    if (activeGateway === 'stripe') {
+      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (!stripeSecretKey) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Stripe is not configured on the platform' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get store stripe_account_id
+      const { data: storeRow } = await supabase
+        .from('stores')
+        .select('name, stripe_account_id')
+        .eq('id', storeId)
+        .maybeSingle();
+
+      if (!storeRow?.stripe_account_id) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Store has not connected Stripe yet' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
+      const successUrl = (typeof rawBody.successUrl === 'string' && /^https?:\/\//.test(rawBody.successUrl))
+        ? rawBody.successUrl
+        : `${origin}/customs?payment=success`;
+      const cancelUrl = (typeof rawBody.cancelUrl === 'string' && /^https?:\/\//.test(rawBody.cancelUrl))
+        ? rawBody.cancelUrl
+        : `${origin}/customs?payment=cancelled`;
+
+      const productLabel = `${storeRow.name || 'Custom'} - ${productType === 'audio' ? 'Áudio' : 'Vídeo'} ${String(rawBody.categoryName || category)} ${durationMinutes ? `(${durationMinutes}min)` : ''}`.trim().substring(0, 200);
+
+      const params = new URLSearchParams({
+        mode: 'payment',
+        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][product_data][name]': productLabel,
+        'line_items[0][price_data][unit_amount]': String(amountCents),
+        'line_items[0][quantity]': '1',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        'metadata[store_id]': storeId || '',
+        'metadata[user_id]': userId,
+        'metadata[correlation_id]': correlationID,
+        'metadata[product_type]': productType,
+        'payment_intent_data[metadata][store_id]': storeId || '',
+        'payment_intent_data[metadata][user_id]': userId,
+        'payment_intent_data[metadata][correlation_id]': correlationID,
+        'payment_intent_data[metadata][product_type]': productType,
+      });
+
+      const sessionRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Stripe-Account': storeRow.stripe_account_id,
+        },
+        body: params,
+      });
+
+      if (!sessionRes.ok) {
+        const errBody = await sessionRes.text();
+        console.error('Stripe custom checkout error:', errBody);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to create Stripe checkout session' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const session = await sessionRes.json();
+      checkoutUrl = session.url;
+      stripeSessionId = session.id;
+    }
     // ─── PIX Manual ───
-    if (activeGateway === 'pix_manual') {
+    else if (activeGateway === 'pix_manual') {
       const pix = paymentConfig.pixManual;
       if (!pix?.key || !pix?.receiverName || !pix?.city) {
         return new Response(
