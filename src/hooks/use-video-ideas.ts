@@ -60,7 +60,7 @@ export const useVideoIdeas = () => {
         title: idea.title,
         description: idea.description,
         votes: idea.votes,
-        status: idea.status as 'active' | 'reported' | 'removed',
+        status: idea.status as VideoIdea['status'],
         user_id: idea.user_id,
         created_at: idea.created_at,
         hasVoted: userVotes.includes(idea.id),
