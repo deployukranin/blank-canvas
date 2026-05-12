@@ -102,7 +102,7 @@ const AdminPagamentosPix = () => {
 
   const handleConnectStripe = async () => {
     if (!storeId) {
-      toast({ title: 'Loja não encontrada', variant: 'destructive' });
+      toast({ title: t('adminPayments.errors.storeNotFound'), variant: 'destructive' });
       return;
     }
     setConnectingStripe(true);
@@ -118,8 +118,8 @@ const AdminPagamentosPix = () => {
     } catch (err) {
       console.error('Stripe connect error:', err);
       toast({
-        title: 'Erro ao conectar Stripe',
-        description: err instanceof Error ? err.message : 'Tente novamente',
+        title: t('adminPayments.errors.stripeConnectError'),
+        description: err instanceof Error ? err.message : t('adminPayments.errors.tryAgain'),
         variant: 'destructive',
       });
     } finally {
@@ -129,7 +129,7 @@ const AdminPagamentosPix = () => {
 
   const handleSavePix = async () => {
     if (!config.pixManual.key || !config.pixManual.receiverName || !config.pixManual.city) {
-      toast({ title: 'Preencha todos os campos do PIX', variant: 'destructive' });
+      toast({ title: t('adminPayments.errors.fillAllPixFields'), variant: 'destructive' });
       return;
     }
     const error = validatePixKey(config.pixManual.key, config.pixManual.keyType);
@@ -140,15 +140,15 @@ const AdminPagamentosPix = () => {
     }
     setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
     await saveNow();
-    toast({ title: 'PIX Manual configurado e ativado!' });
+    toast({ title: t('adminPayments.pixManualConfigured') });
   };
 
   const pixKeyLabels: Record<string, string> = {
-    cpf: 'CPF',
-    cnpj: 'CNPJ',
-    email: 'E-mail',
-    phone: 'Celular',
-    random: 'Chave Aleatória',
+    cpf: t('adminPayments.pixKeyLabels.cpf'),
+    cnpj: t('adminPayments.pixKeyLabels.cnpj'),
+    email: t('adminPayments.pixKeyLabels.email'),
+    phone: t('adminPayments.pixKeyLabels.phone'),
+    random: t('adminPayments.pixKeyLabels.random'),
   };
 
   const pixKeyPlaceholders: Record<string, string> = {
@@ -160,11 +160,11 @@ const AdminPagamentosPix = () => {
   };
 
   const pixKeyHints: Record<string, string> = {
-    cpf: 'Formato: 123.456.789-00 (apenas os 11 números do documento)',
-    cnpj: 'Formato: 12.345.678/0001-99 (apenas os 14 números)',
-    email: 'Formato: nome.sobrenome@exemplo.com.br',
-    phone: 'Formato: +5511987654321 (código do país +55, DDD e número)',
-    random: 'Formato: 123e4567-e89b-12d3-a456-426614174000 (código gerado pelo banco)',
+    cpf: t('adminPayments.pixKeyHints.cpf'),
+    cnpj: t('adminPayments.pixKeyHints.cnpj'),
+    email: t('adminPayments.pixKeyHints.email'),
+    phone: t('adminPayments.pixKeyHints.phone'),
+    random: t('adminPayments.pixKeyHints.random'),
   };
 
   const pixKeyMaxLength: Record<string, number> = {
@@ -176,23 +176,23 @@ const AdminPagamentosPix = () => {
   };
 
   const validatePixKey = (key: string, type: string): string | null => {
-    if (!key) return 'Chave PIX é obrigatória';
+    if (!key) return t('adminPayments.errors.pixKeyRequired');
     switch (type) {
       case 'cpf':
-        if (!/^\d{11}$/.test(key)) return 'CPF deve conter exatamente 11 números';
+        if (!/^\d{11}$/.test(key)) return t('adminPayments.errors.invalidCpf');
         break;
       case 'cnpj':
-        if (!/^\d{14}$/.test(key)) return 'CNPJ deve conter exatamente 14 números';
+        if (!/^\d{14}$/.test(key)) return t('adminPayments.errors.invalidCnpj');
         break;
       case 'email':
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) return 'E-mail inválido';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) return t('adminPayments.errors.invalidEmail');
         break;
       case 'phone':
-        if (!/^\+55\d{10,11}$/.test(key)) return 'Celular deve seguir o formato +55XXXXXXXXXXX';
+        if (!/^\+55\d{10,11}$/.test(key)) return t('adminPayments.errors.invalidPhone');
         break;
       case 'random':
         if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(key))
-          return 'Chave aleatória deve ser um UUID válido';
+          return t('adminPayments.errors.invalidRandom');
         break;
     }
     return null;
@@ -201,34 +201,34 @@ const AdminPagamentosPix = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout title={t('admin.payments', 'Pagamentos')}>
+      <AdminLayout title={t('adminPayments.title')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Carregando configurações...</span>
+          <span className="text-muted-foreground">{t('adminPayments.loadingConfig')}</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title={t('admin.payments', 'Pagamentos')}>
+    <AdminLayout title={t('adminPayments.title')}>
       <div className="space-y-6 max-w-4xl">
 
         {/* Active gateway indicator */}
         <GlassCard className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Método de Pagamento Ativo</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">{t('adminPayments.activeMethod')}</h3>
               <p className="text-lg font-semibold mt-1">
-                {config.activeGateway === 'stripe' && '💳 Stripe Connect'}
-                {config.activeGateway === 'pix_manual' && '📱 PIX Manual'}
-                {!config.activeGateway && 'Não configurado'}
+                {config.activeGateway === 'stripe' && `💳 ${t('adminPayments.stripeConnect')}`}
+                {config.activeGateway === 'pix_manual' && `📱 ${t('adminPayments.pixManual')}`}
+                {!config.activeGateway && t('adminPayments.notConfigured')}
               </p>
             </div>
             <div className="flex items-center gap-2">
               {isSaving && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
+                  <Loader2 className="w-3 h-3 animate-spin" /> {t('adminPayments.saving')}
                 </span>
               )}
               <div className={`w-3 h-3 rounded-full ${config.activeGateway ? 'bg-green-500' : 'bg-muted'}`} />
@@ -241,16 +241,16 @@ const AdminPagamentosPix = () => {
           <TabsList className="w-full">
             <TabsTrigger value="stripe" className="flex-1 gap-2">
               <CreditCard className="w-4 h-4" />
-              Stripe Connect
+              {t('adminPayments.stripeConnect')}
             </TabsTrigger>
             <TabsTrigger value="pix_manual" className="flex-1 gap-2">
               <QrCode className="w-4 h-4" />
-              PIX Manual
+              {t('adminPayments.pixManual')}
             </TabsTrigger>
             <TabsTrigger value="pix_auto" disabled className="flex-1 gap-2 opacity-40 cursor-not-allowed">
               <Zap className="w-4 h-4" />
-              PIX Automático
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">Em breve</Badge>
+              {t('adminPayments.pixAuto')}
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">{t('adminPayments.comingSoon')}</Badge>
             </TabsTrigger>
           </TabsList>
 
@@ -261,20 +261,20 @@ const AdminPagamentosPix = () => {
                 <div>
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-primary" />
-                    Stripe Connect
+                    {t('adminPayments.stripeConnect')}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Conecte sua conta Stripe e receba pagamentos diretamente. 100% do valor vai para você.
+                    {t('adminPayments.stripeDescription')}
                   </p>
                 </div>
                 {stripeStatus.connected && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                    <Check className="w-3 h-3 mr-1" /> Conectado
+                    <Check className="w-3 h-3 mr-1" /> {t('adminPayments.connected')}
                   </Badge>
                 )}
                 {stripeStatus.onboarding_started && !stripeStatus.connected && (
                   <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
-                    <Clock className="w-3 h-3 mr-1" /> Pendente
+                    <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.pending')}
                   </Badge>
                 )}
               </div>
@@ -282,7 +282,7 @@ const AdminPagamentosPix = () => {
               {stripeLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-sm text-muted-foreground">Verificando status...</span>
+                  <span className="ml-2 text-sm text-muted-foreground">{t('adminPayments.checkingStatus')}</span>
                 </div>
               ) : stripeStatus.connected ? (
                 <div className="space-y-4">
@@ -293,7 +293,7 @@ const AdminPagamentosPix = () => {
                         <Link2 className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-green-600">Conta Stripe Ativa</p>
+                        <p className="font-medium text-green-600">{t('adminPayments.stripeAccountActive')}</p>
                         {stripeStatus.email && (
                           <p className="text-xs text-muted-foreground">{stripeStatus.email}</p>
                         )}
@@ -301,25 +301,25 @@ const AdminPagamentosPix = () => {
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div className="p-2 rounded bg-background/50 text-center">
-                        <div className="text-xs font-medium text-green-600">✓ Ativo</div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Cobranças</div>
+                        <div className="text-xs font-medium text-green-600">{t('adminPayments.activeShort')}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.charges')}</div>
                       </div>
                       <div className="p-2 rounded bg-background/50 text-center">
                         <div className={`text-xs font-medium ${stripeStatus.payouts_enabled ? 'text-green-600' : 'text-amber-500'}`}>
-                          {stripeStatus.payouts_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                          {stripeStatus.payouts_enabled ? t('adminPayments.activeShort') : t('adminPayments.pendingShort')}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Saques</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.payouts')}</div>
                       </div>
                       <div className="p-2 rounded bg-background/50 text-center">
-                        <div className="text-xs font-medium text-green-600">✓ Completo</div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Cadastro</div>
+                        <div className="text-xs font-medium text-green-600">{t('adminPayments.completeShort')}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.registration')}</div>
                       </div>
                     </div>
                   </div>
                   <div className="p-3 rounded-lg bg-muted/50 border border-border">
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      Pagamentos são processados diretamente na sua conta Stripe (Direct Charges). Nenhuma taxa de plataforma é cobrada.
+                      {t('adminPayments.directChargesNote')}
                     </p>
                   </div>
                 </div>
@@ -332,7 +332,7 @@ const AdminPagamentosPix = () => {
                         <Clock className="w-5 h-5 text-amber-500" />
                       </div>
                       <div>
-                        <p className="font-medium text-amber-500">Cadastro Pendente</p>
+                        <p className="font-medium text-amber-500">{t('adminPayments.registrationPending')}</p>
                         {stripeStatus.email && (
                           <p className="text-xs text-muted-foreground">{stripeStatus.email}</p>
                         )}
@@ -341,21 +341,21 @@ const AdminPagamentosPix = () => {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="p-2 rounded bg-background/50 text-center">
                         <div className={`text-xs font-medium ${stripeStatus.charges_enabled ? 'text-green-600' : 'text-amber-500'}`}>
-                          {stripeStatus.charges_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                          {stripeStatus.charges_enabled ? t('adminPayments.activeShort') : t('adminPayments.pendingShort')}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Cobranças</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.charges')}</div>
                       </div>
                       <div className="p-2 rounded bg-background/50 text-center">
                         <div className={`text-xs font-medium ${stripeStatus.payouts_enabled ? 'text-green-600' : 'text-amber-500'}`}>
-                          {stripeStatus.payouts_enabled ? '✓ Ativo' : '⏳ Pendente'}
+                          {stripeStatus.payouts_enabled ? t('adminPayments.activeShort') : t('adminPayments.pendingShort')}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Saques</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.payouts')}</div>
                       </div>
                       <div className="p-2 rounded bg-background/50 text-center">
                         <div className={`text-xs font-medium ${stripeStatus.details_submitted ? 'text-green-600' : 'text-amber-500'}`}>
-                          {stripeStatus.details_submitted ? '✓ Completo' : '⏳ Pendente'}
+                          {stripeStatus.details_submitted ? t('adminPayments.completeShort') : t('adminPayments.pendingShort')}
                         </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">Cadastro</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{t('adminPayments.registration')}</div>
                       </div>
                     </div>
                   </div>
@@ -365,12 +365,12 @@ const AdminPagamentosPix = () => {
                     ) : (
                       <ExternalLink className="w-4 h-4 mr-2" />
                     )}
-                    Completar Cadastro no Stripe
+                    {t('adminPayments.completeStripeRegistration')}
                   </Button>
                   <div className="p-3 rounded-lg bg-muted/50 border border-border">
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      Complete seu cadastro no Stripe para começar a receber pagamentos.
+                      {t('adminPayments.completeStripeNote')}
                     </p>
                   </div>
                 </div>
@@ -381,9 +381,9 @@ const AdminPagamentosPix = () => {
                     <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                       <Link2Off className="w-7 h-7 text-primary/60" />
                     </div>
-                    <h4 className="font-medium">Conecte sua conta Stripe</h4>
+                    <h4 className="font-medium">{t('adminPayments.connectStripeAccount')}</h4>
                     <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                      Ao conectar, você poderá aceitar cartões de crédito, débito e pagamentos internacionais. O dinheiro vai direto para sua conta.
+                      {t('adminPayments.connectStripeDescription')}
                     </p>
                     <Button
                       onClick={handleConnectStripe}
@@ -396,14 +396,14 @@ const AdminPagamentosPix = () => {
                       ) : (
                         <CreditCard className="w-4 h-4 mr-2" />
                       )}
-                      {connectingStripe ? 'Redirecionando...' : 'Conectar Stripe'}
+                      {connectingStripe ? t('adminPayments.redirecting') : t('adminPayments.connectStripe')}
                     </Button>
                   </div>
 
                   <div className="p-3 rounded-lg bg-muted/50 border border-border">
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      Suas credenciais nunca são armazenadas na plataforma. A conexão é feita via OAuth seguro do Stripe.
+                      {t('adminPayments.stripeSecurityNote')}
                     </p>
                   </div>
                 </div>
