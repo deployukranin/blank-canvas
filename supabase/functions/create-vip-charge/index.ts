@@ -104,10 +104,7 @@ Deno.serve(async (req) => {
     // Auth
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Authentication required' }, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -116,10 +113,7 @@ Deno.serve(async (req) => {
     });
     const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authentication token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Invalid authentication token' }, 401);
     }
 
     const userId = claimsData.claims.sub as string;
@@ -133,18 +127,12 @@ Deno.serve(async (req) => {
       p_window_minutes: 60,
     });
     if (rlResult && !rlResult.allowed) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Too many requests, try again later' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Too many requests, try again later' }, 429);
     }
     const body: CreateVIPChargeRequest = await req.json();
 
     if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid plan type' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Invalid plan type' }, 400);
     }
 
     const storeId = body.storeId || null;
