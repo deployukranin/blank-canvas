@@ -48,17 +48,24 @@ const getPostTypeConfig = (type: FeedPost['type'], t: (key: string) => string) =
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, locale = 'pt-BR') => {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffHours < 1) return 'Agora';
+  const labels = {
+    'pt-BR': { now: 'Agora' },
+    'en': { now: 'Now' },
+    'es': { now: 'Ahora' },
+  } as const;
+  const lang = (locale.startsWith('pt') ? 'pt-BR' : locale.startsWith('es') ? 'es' : 'en') as keyof typeof labels;
+
+  if (diffHours < 1) return labels[lang].now;
   if (diffHours < 24) return `${diffHours}h`;
   if (diffDays < 7) return `${diffDays}d`;
-  return date.toLocaleDateString('pt-BR');
+  return date.toLocaleDateString(lang === 'pt-BR' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US');
 };
 
 // Helper function to get level icon
