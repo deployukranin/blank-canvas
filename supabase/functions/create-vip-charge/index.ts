@@ -223,10 +223,7 @@ Deno.serve(async (req) => {
     if (activeGateway === 'pix_manual') {
       const pix = paymentConfig.pixManual;
       if (!pix?.key || !pix?.receiverName || !pix?.city) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Store PIX payment not fully configured' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ success: false, error: 'Store PIX payment not fully configured' }, 400);
       }
 
       const txId = correlationID.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '');
@@ -317,10 +314,7 @@ Deno.serve(async (req) => {
 
     if (dbError) {
       console.error('Database error:', dbError);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to save subscription' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Failed to save subscription' }, 500);
     }
 
     // Create order entry for tracking
