@@ -312,7 +312,7 @@ const AdminVipPrecos = () => {
                     <p className="text-xs text-muted-foreground mb-2">{t('vipPricing.preview')}:</p>
                     <div className="text-center p-3 bg-muted/30 rounded-lg">
                       <p className="font-semibold">{plan.name}</p>
-                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price, plan.currency || 'BRL')}</p>
                       <p className="text-xs text-muted-foreground">{periodLabel(plan.type)}</p>
                       {savings && (
                         <div className="mt-2 flex flex-col items-center gap-1">
@@ -321,7 +321,7 @@ const AdminVipPrecos = () => {
                             {t('vipPricing.savings', { percent: savings.percent })}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth) })}
+                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth, plan.currency || 'BRL') })}
                           </span>
                         </div>
                       )}
