@@ -66,7 +66,7 @@ const AdminIdeias: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleStatusChange = async (id: string, newStatus: 'active' | 'removed' | 'reported') => {
+  const handleStatusChange = async (id: string, newStatus: 'active' | 'pending' | 'removed' | 'reported') => {
     try {
       const { error } = await supabase
         .from('video_ideas')
