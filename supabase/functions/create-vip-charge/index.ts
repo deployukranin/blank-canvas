@@ -185,14 +185,28 @@ Deno.serve(async (req) => {
 
     // ─── Load store's payment config ───
     let paymentConfig: any = null;
+    let stripeAccountId: string | null = null;
+    let storeName = 'VIP';
     if (storeId) {
-      const { data: payCfg } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'payment_config')
-        .eq('store_id', storeId)
-        .maybeSingle();
-      paymentConfig = payCfg?.config_value;
+      const [payCfgRes, storeRes] = await Promise.all([
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'payment_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+        supabase
+          .from('stores')
+          .select('name, stripe_account_id')
+          .eq('id', storeId)
+          .maybeSingle(),
+      ]);
+      if (!storeRes.data) {
+        return jsonResponse({ success: false, error: 'Store not found' }, 404);
+      }
+      paymentConfig = payCfgRes.data?.config_value;
+      stripeAccountId = storeRes.data.stripe_account_id;
+      storeName = storeRes.data.name || storeName;
     }
 
     const activeGateway = paymentConfig?.activeGateway || null;
@@ -202,6 +216,8 @@ Deno.serve(async (req) => {
     let qrCodeImage: string | null = null;
     let brCode: string | null = null;
     let paymentMethod = 'pending_config';
+    let stripeCheckoutUrl: string | null = null;
+    let stripeSessionId: string | null = null;
 
     // ─── PIX Manual: Generate BRCode ───
     if (activeGateway === 'pix_manual') {
