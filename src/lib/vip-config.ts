@@ -86,34 +86,38 @@ export const defaultVipConfig: VipConfig = getDefaultVipConfig('pt');
  */
 export const translateDefaultsToLang = (config: VipConfig, lang?: string): VipConfig => {
   const l = normalizeLang(lang);
-  if (l === 'pt') return config;
+  const target = getDefaultVipConfig(l);
+  const sources: Lang[] = ['pt', 'en', 'es'];
 
-  const ptDefaults = getDefaultVipConfig('pt');
-  const targetDefaults = getDefaultVipConfig(l);
-
-  // Build lookup maps: PT string → target string
+  // Build lookup maps from ANY language's default → target language
   const nameMap = new Map<string, string>();
   const descMap = new Map<string, string>();
   const featureMap = new Map<string, string>();
 
-  ptDefaults.plans.forEach((ptPlan, idx) => {
-    const tgt = targetDefaults.plans[idx];
-    if (!tgt) return;
-    nameMap.set(ptPlan.name, tgt.name);
-    descMap.set(ptPlan.description, tgt.description);
-    ptPlan.features.forEach((f, i) => {
-      if (tgt.features[i]) featureMap.set(f, tgt.features[i]);
+  sources.forEach(src => {
+    const srcCfg = getDefaultVipConfig(src);
+    srcCfg.plans.forEach((srcPlan, idx) => {
+      const tgt = target.plans[idx];
+      if (!tgt) return;
+      nameMap.set(srcPlan.name, tgt.name);
+      descMap.set(srcPlan.description, tgt.description);
+      srcPlan.features.forEach((f, i) => {
+        if (tgt.features[i]) featureMap.set(f, tgt.features[i]);
+      });
     });
   });
 
   return {
     ...config,
-    plans: config.plans.map(plan => ({
-      ...plan,
-      name: nameMap.get(plan.name) ?? plan.name,
-      description: descMap.get(plan.description) ?? plan.description,
-      features: plan.features.map(f => featureMap.get(f) ?? f),
-    })),
+    plans: config.plans.map((plan, idx) => {
+      const tgt = target.plans[idx];
+      return {
+        ...plan,
+        name: nameMap.get(plan.name) ?? plan.name,
+        description: descMap.get(plan.description) ?? plan.description,
+        features: plan.features.map(f => featureMap.get(f) ?? f),
+      };
+    }),
   };
 };
 
