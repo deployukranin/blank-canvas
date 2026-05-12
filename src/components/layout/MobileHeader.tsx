@@ -32,7 +32,7 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
         )}
 
         <h1 className="flex-1 text-center font-display font-semibold">
-          {title || 'ASMR Luna'}
+          {title || 'MyTingleBox'}
         </h1>
 
         {/* Login button for unauthenticated users */}

@@ -41,7 +41,7 @@ export const Header = () => {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="font-display text-xl font-bold gradient-text hidden sm:block">
-                ASMR Luna
+                MyTingleBox
               </span>
             </Link>
 

@@ -75,7 +75,7 @@ export const PWAInstallPrompt = () => {
                 <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/25">
                   <img 
                     src="/icon-192.png" 
-                    alt="ASMR Luna" 
+                    alt="MyTingleBox" 
                     className="h-16 w-16 rounded-xl"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -87,7 +87,7 @@ export const PWAInstallPrompt = () => {
 
                 {/* Title */}
                 <h3 className="mb-2 text-xl font-bold text-foreground">
-                  Instale o ASMR Luna!
+                  Instale o MyTingleBox!
                 </h3>
 
                 {/* Description - Different for iOS */}

@@ -12,7 +12,7 @@ export default function AjudaPage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = `${t('storefront.helpTitle')} | ASMR Luna`;
+    document.title = `${t('storefront.helpTitle')} | MyTingleBox`;
   }, [t]);
 
   return (

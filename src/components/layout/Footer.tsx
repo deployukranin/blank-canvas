@@ -13,7 +13,7 @@ export const Footer = () => {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="font-display text-xl font-bold gradient-text">
-                ASMR Luna
+                MyTingleBox
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
@@ -106,7 +106,7 @@ export const Footer = () => {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-white/5 text-center">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} ASMR Luna. Todos os direitos reservados.
+            © {new Date().getFullYear()} MyTingleBox. Todos os direitos reservados.
           </p>
         </div>
       </div>
