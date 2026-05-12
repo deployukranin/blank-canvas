@@ -113,6 +113,7 @@ interface ReportDialogProps {
 }
 
 const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: ReportDialogProps) => {
+  const { t } = useTranslation();
   const [category, setCategory] = useState<string>('');
   const [reason, setReason] = useState('');
 
@@ -131,21 +132,21 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-5 h-5" />
-            Denunciar {contentType === 'idea' ? 'Ideia' : 'Comentário'}
+            {contentType === 'idea' ? t('storefront.reportIdeaTitle') : t('storefront.reportCommentTitle')}
           </DialogTitle>
           <DialogDescription>
-            Ajude a manter a comunidade saudável reportando conteúdo inapropriado.
+            {t('storefront.reportHelpText')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
           <div className="p-3 bg-muted/30 rounded-lg">
-            <p className="text-xs text-muted-foreground">Conteúdo:</p>
+            <p className="text-xs text-muted-foreground">{t('storefront.reportedContent')}</p>
             <p className="text-sm font-medium truncate">{contentTitle}</p>
           </div>
 
           <div>
-            <Label className="text-sm font-medium mb-2 block">Motivo da denúncia</Label>
+            <Label className="text-sm font-medium mb-2 block">{t('storefront.reportReason')}</Label>
             <RadioGroup value={category} onValueChange={setCategory}>
               {reasonCategories.map((cat) => (
                 <div key={cat.value} className="flex items-center space-x-2">
@@ -158,11 +159,11 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
 
           {category === 'other' && (
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Descreva o problema</Label>
+              <Label className="text-sm font-medium mb-1.5 block">{t('storefront.describeIssue')}</Label>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Explique por que esse conteúdo é inapropriado..."
+                placeholder={t('storefront.explainProblem')}
                 rows={3}
               />
             </div>
@@ -170,7 +171,7 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleSubmit} 
@@ -178,7 +179,7 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
               className="flex-1 bg-red-500 hover:bg-red-600 gap-2"
             >
               <Flag className="w-4 h-4" />
-              Denunciar
+              {t('storefront.reportContent')}
             </Button>
           </div>
         </div>
