@@ -163,34 +163,10 @@ const VIPPage = () => {
   // Load VIP plans strictly from this store's config (never fall back to global)
   useEffect(() => {
     const loadPlans = async () => {
-      if (!resolvedStoreId) {
-        setVipPlans([]);
-        setSelectedPlan(null);
-        return;
-      }
-
-      let plans: VipPlanConfig[] = [];
-
-      const { data } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'vip_config')
-        .eq('store_id', resolvedStoreId)
-        .maybeSingle();
-
-      if (data?.config_value) {
-        plans = (data.config_value as any).plans || [];
-      }
-
-      // If the store has no vip_config yet, show defaults only as a visual placeholder
-      // (admin must save in /admin/vip to persist real prices). Never use global config.
-      if (plans.length === 0) {
-        const { defaultVipConfig } = await import('@/lib/vip-config');
-        plans = defaultVipConfig.plans;
-      }
-
+      const { loadVipPlansForStore } = await import('@/lib/vip-plans-loader');
+      const { plans } = await loadVipPlansForStore(resolvedStoreId);
       setVipPlans(plans);
-      if (plans.length > 0) setSelectedPlan(plans[0]);
+      setSelectedPlan(plans.length > 0 ? plans[0] : null);
     };
     loadPlans();
   }, [resolvedStoreId]);
