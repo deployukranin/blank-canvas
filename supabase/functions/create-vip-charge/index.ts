@@ -336,26 +336,22 @@ Deno.serve(async (req) => {
         store_id: storeId,
       });
 
-    return new Response(
-      JSON.stringify({
+    return jsonResponse({
         success: true,
         subscription_id: subscription.id,
         correlation_id: correlationID,
         qr_code_image: qrCodeImage,
         br_code: brCode,
+        checkout_url: stripeCheckoutUrl,
+        stripe_session_id: stripeSessionId,
         expires_at: chargeExpiresAt.toISOString(),
         amount_cents: amountCents,
         plan_type: body.planType,
         payment_method: paymentMethod,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      });
 
   } catch (error) {
     console.error('Unexpected error:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse({ success: false, error: 'Internal server error' }, 500);
   }
 });
