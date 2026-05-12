@@ -20,6 +20,7 @@ import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
   getDefaultVipConfig,
   saveVipConfig,
+  translateDefaultsToLang,
   type VipConfig,
   type VipPlan,
 } from '@/lib/vip-config';
