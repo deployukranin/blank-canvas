@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useTenant } from "@/contexts/TenantContext";
+import { useStoreAccess } from "@/hooks/use-store-access";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Forbidden } from "./Forbidden";
-import { supabase } from "@/integrations/supabase/client";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -22,42 +21,18 @@ export const AdminRoute = ({ children, requiredRole = "admin" }: AdminRouteProps
   const hasCeoAccess = isCEO() || isSuperAdmin();
   const isSuper = isSuperAdmin();
 
-  // Check store ownership for tenant-scoped admin routes
-  const [isStoreOwner, setIsStoreOwner] = useState<boolean | null>(null);
+  const { hasAccess: isStoreOwner, isLoading: isCheckingAccess } = useStoreAccess({
+    storeId: store?.id,
+    userId: user?.id,
+    storeCreatedBy: store?.created_by,
+    enabled: isTenantScope && !isSuper,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    async function check() {
-      if (!isTenantScope || !store?.id || !user?.id) {
-        setIsStoreOwner(null);
-        return;
-      }
-      // Owner of the store
-      if (store.created_by === user.id) {
-        setIsStoreOwner(true);
-        return;
-      }
-      // Or assigned as a store admin
-      const { data, error } = await supabase
-        .from("store_admins")
-        .select("id")
-        .eq("store_id", store.id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      if (error) {
-        setIsStoreOwner(false);
-        return;
-      }
-      setIsStoreOwner(!!data);
-    }
-    check();
-    return () => {
-      cancelled = true;
-    };
-  }, [isTenantScope, store?.id, store?.created_by, user?.id]);
-
-  if (isLoading || isLoadingRoles || (isTenantScope && (isLoadingTenant || isStoreOwner === null))) {
+  if (
+    isLoading ||
+    isLoadingRoles ||
+    (isTenantScope && (isLoadingTenant || (!isSuper && isCheckingAccess)))
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
