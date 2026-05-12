@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Save, DollarSign, Percent } from 'lucide-react';
+import { Crown, Save, DollarSign, Percent, ToggleRight, Hash } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,28 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { toast } from 'sonner';
+
+export interface PlanCapabilities {
+  customStore?: boolean;
+  customDomain?: boolean;
+  vipSubscriptions?: boolean;
+  community?: boolean;
+  customsOrders?: boolean;
+  advancedMetrics?: boolean;
+  whiteLabelFull?: boolean;
+  prioritySupport?: boolean;
+  dedicatedOnboarding?: boolean;
+  zeroPlatformFee?: boolean;
+  apiAccess?: boolean;
+  dailyBackup?: boolean;
+}
+
+export interface PlanLimits {
+  maxUsers?: number; // 0 or undefined = unlimited
+  maxVideos?: number;
+  maxVipPosts?: number;
+  maxAdmins?: number;
+}
 
 interface PlanConfig {
   id: string;
@@ -24,9 +46,33 @@ interface PlanConfig {
   features_pt: string[];
   features_en: string[];
   features_es: string[];
+  capabilities?: PlanCapabilities;
+  limits?: PlanLimits;
   highlight?: boolean;
   discount?: string;
 }
+
+const CAPABILITY_LABELS: { key: keyof PlanCapabilities; pt: string; en: string; es: string }[] = [
+  { key: 'customStore', pt: 'Loja personalizada', en: 'Custom store', es: 'Tienda personalizada' },
+  { key: 'customDomain', pt: 'Domínio personalizado', en: 'Custom domain', es: 'Dominio personalizado' },
+  { key: 'vipSubscriptions', pt: 'Assinaturas VIP', en: 'VIP subscriptions', es: 'Suscripciones VIP' },
+  { key: 'community', pt: 'Comunidade integrada', en: 'Integrated community', es: 'Comunidad integrada' },
+  { key: 'customsOrders', pt: 'Vídeos personalizados', en: 'Custom video orders', es: 'Videos a pedido' },
+  { key: 'advancedMetrics', pt: 'Métricas avançadas', en: 'Advanced metrics', es: 'Métricas avanzadas' },
+  { key: 'whiteLabelFull', pt: 'White-label total', en: 'Full white-label', es: 'White-label total' },
+  { key: 'prioritySupport', pt: 'Suporte prioritário', en: 'Priority support', es: 'Soporte prioritario' },
+  { key: 'dedicatedOnboarding', pt: 'Onboarding dedicado', en: 'Dedicated onboarding', es: 'Onboarding dedicado' },
+  { key: 'zeroPlatformFee', pt: '0% taxa da plataforma', en: '0% platform fee', es: '0% tarifa de plataforma' },
+  { key: 'apiAccess', pt: 'Acesso à API', en: 'API access', es: 'Acceso a API' },
+  { key: 'dailyBackup', pt: 'Backup diário', en: 'Daily backup', es: 'Backup diario' },
+];
+
+const LIMIT_LABELS: { key: keyof PlanLimits; pt: string; en: string; es: string }[] = [
+  { key: 'maxUsers', pt: 'Máx. de usuários', en: 'Max users', es: 'Máx. usuarios' },
+  { key: 'maxVideos', pt: 'Máx. de vídeos', en: 'Max videos', es: 'Máx. videos' },
+  { key: 'maxVipPosts', pt: 'Máx. de posts VIP', en: 'Max VIP posts', es: 'Máx. publicaciones VIP' },
+  { key: 'maxAdmins', pt: 'Máx. de admins', en: 'Max admins', es: 'Máx. admins' },
+];
 
 const defaultPlans: PlanConfig[] = [
   {
@@ -128,6 +174,24 @@ const SuperAdminPlanos: React.FC = () => {
         features_en: updated[planIndex].features_en.filter((_, i) => i !== featureIndex),
         features_es: updated[planIndex].features_es.filter((_, i) => i !== featureIndex),
       };
+      return updated;
+    });
+  };
+
+  const updateCapability = (planIndex: number, key: keyof PlanCapabilities, value: boolean) => {
+    setPlans(prev => {
+      const updated = [...prev];
+      const caps = { ...(updated[planIndex].capabilities || {}), [key]: value };
+      updated[planIndex] = { ...updated[planIndex], capabilities: caps };
+      return updated;
+    });
+  };
+
+  const updateLimit = (planIndex: number, key: keyof PlanLimits, value: number | undefined) => {
+    setPlans(prev => {
+      const updated = [...prev];
+      const limits = { ...(updated[planIndex].limits || {}), [key]: value };
+      updated[planIndex] = { ...updated[planIndex], limits };
       return updated;
     });
   };
@@ -300,6 +364,69 @@ const SuperAdminPlanos: React.FC = () => {
                       placeholder="price_1Abc...XYZ"
                       className="bg-white/5 border-white/10 text-white mt-1 font-mono text-xs"
                     />
+                  </div>
+                </div>
+
+                {/* Capabilities */}
+                <div className="mb-5 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ToggleRight className="w-4 h-4 text-emerald-300" />
+                    <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">
+                      {t('superAdmin.planConfig.capabilities', 'Recursos liberados')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {CAPABILITY_LABELS.map(cap => {
+                      const enabled = !!plan.capabilities?.[cap.key];
+                      return (
+                        <label
+                          key={cap.key}
+                          className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md border transition-colors ${
+                            enabled
+                              ? 'bg-emerald-500/10 border-emerald-500/30'
+                              : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={e => updateCapability(planIndex, cap.key, e.target.checked)}
+                            className="rounded accent-emerald-500"
+                          />
+                          <span className="text-sm text-white/80">{cap[lang]}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Limits */}
+                <div className="mb-5 p-4 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Hash className="w-4 h-4 text-amber-300" />
+                    <span className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
+                      {t('superAdmin.planConfig.limits', 'Limites (0 = ilimitado)')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {LIMIT_LABELS.map(lim => (
+                      <div key={lim.key}>
+                        <Label className="text-white/60 text-xs">{lim[lang]}</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={plan.limits?.[lim.key] ?? 0}
+                          onChange={e =>
+                            updateLimit(
+                              planIndex,
+                              lim.key,
+                              e.target.value === '' ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0),
+                            )
+                          }
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
 
