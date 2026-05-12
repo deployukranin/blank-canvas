@@ -253,11 +253,12 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, resolvedStoreId]);
 
-  const formatCurrency = (value: number) => {
-    const isBR = i18n.language?.startsWith('pt');
-    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
+  const formatCurrency = (value: number, currency?: 'BRL' | 'USD') => {
+    const cur = currency || (i18n.language?.startsWith('pt') ? 'BRL' : 'USD');
+    const locale = cur === 'BRL' ? 'pt-BR' : 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: isBR ? 'BRL' : 'USD',
+      currency: cur,
     }).format(value);
   };
 
