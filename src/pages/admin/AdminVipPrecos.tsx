@@ -53,18 +53,16 @@ const AdminVipPrecos = () => {
     if (!isLoading) saveVipConfig(config);
   }, [config, isLoading]);
 
-  // One-time migration: translate PT defaults to current language so existing
-  // stores see their (still-default) plan copy in the active locale.
-  const migratedRef = useRef(false);
+  // Translate plan copy whenever language changes — any value still matching a
+  // known default in pt/en/es gets converted to the active locale.
   useEffect(() => {
-    if (isLoading || migratedRef.current) return;
-    migratedRef.current = true;
+    if (isLoading) return;
     const migrated = translateDefaultsToLang(config, i18n.language);
     if (JSON.stringify(migrated) !== JSON.stringify(config)) {
       setConfig(migrated);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, [isLoading, i18n.language]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
