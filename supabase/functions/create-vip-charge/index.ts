@@ -9,6 +9,32 @@ interface CreateVIPChargeRequest {
   planType: 'monthly' | 'quarterly' | 'yearly';
   customerName?: string;
   storeId?: string;
+  successUrl?: string;
+  cancelUrl?: string;
+}
+
+function jsonResponse(payload: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+function isSafeRedirectUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function getPlanInterval(planType: CreateVIPChargeRequest['planType']): 'month' | 'year' {
+  return planType === 'yearly' ? 'year' : 'month';
+}
+
+function getPlanIntervalCount(planType: CreateVIPChargeRequest['planType']): string {
+  return planType === 'quarterly' ? '3' : '1';
 }
 
 // ─── BRCode Generator (PIX Manual) ───
@@ -78,10 +104,7 @@ Deno.serve(async (req) => {
     // Auth
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Authentication required' }, 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -90,10 +113,7 @@ Deno.serve(async (req) => {
     });
     const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authentication token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Invalid authentication token' }, 401);
     }
 
     const userId = claimsData.claims.sub as string;
@@ -107,18 +127,12 @@ Deno.serve(async (req) => {
       p_window_minutes: 60,
     });
     if (rlResult && !rlResult.allowed) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Too many requests, try again later' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Too many requests, try again later' }, 429);
     }
     const body: CreateVIPChargeRequest = await req.json();
 
     if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid plan type' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Invalid plan type' }, 400);
     }
 
     const storeId = body.storeId || null;
@@ -171,14 +185,28 @@ Deno.serve(async (req) => {
 
     // ─── Load store's payment config ───
     let paymentConfig: any = null;
+    let stripeAccountId: string | null = null;
+    let storeName = 'VIP';
     if (storeId) {
-      const { data: payCfg } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'payment_config')
-        .eq('store_id', storeId)
-        .maybeSingle();
-      paymentConfig = payCfg?.config_value;
+      const [payCfgRes, storeRes] = await Promise.all([
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'payment_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+        supabase
+          .from('stores')
+          .select('name, stripe_account_id')
+          .eq('id', storeId)
+          .maybeSingle(),
+      ]);
+      if (!storeRes.data) {
+        return jsonResponse({ success: false, error: 'Store not found' }, 404);
+      }
+      paymentConfig = payCfgRes.data?.config_value;
+      stripeAccountId = storeRes.data.stripe_account_id;
+      storeName = storeRes.data.name || storeName;
     }
 
     const activeGateway = paymentConfig?.activeGateway || null;
@@ -188,15 +216,14 @@ Deno.serve(async (req) => {
     let qrCodeImage: string | null = null;
     let brCode: string | null = null;
     let paymentMethod = 'pending_config';
+    let stripeCheckoutUrl: string | null = null;
+    let stripeSessionId: string | null = null;
 
     // ─── PIX Manual: Generate BRCode ───
     if (activeGateway === 'pix_manual') {
       const pix = paymentConfig.pixManual;
       if (!pix?.key || !pix?.receiverName || !pix?.city) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Store PIX payment not fully configured' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return jsonResponse({ success: false, error: 'Store PIX payment not fully configured' }, 400);
       }
 
       const txId = correlationID.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '');
@@ -206,20 +233,69 @@ Deno.serve(async (req) => {
       qrCodeImage = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(brCode)}&choe=UTF-8`;
       paymentMethod = 'pix_manual';
     }
-    // ─── Stripe: placeholder for future integration ───
+    // ─── Stripe Connect: create Checkout session as Direct Charge ───
     else if (activeGateway === 'stripe') {
-      // TODO: Create Stripe checkout session using store's stripe keys
-      return new Response(
-        JSON.stringify({ success: false, error: 'Stripe payments coming soon. Please configure Manual PIX for now.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (!stripeSecretKey) {
+        return jsonResponse({ success: false, error: 'Stripe is not configured on the platform' }, 500);
+      }
+      if (!stripeAccountId) {
+        return jsonResponse({ success: false, error: 'Store has not connected Stripe yet' }, 400);
+      }
+      const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
+      const successUrl = body.successUrl || `${origin}/vip?payment=success`;
+      const cancelUrl = body.cancelUrl || `${origin}/vip?payment=cancelled`;
+      if (!isSafeRedirectUrl(successUrl) || !isSafeRedirectUrl(cancelUrl)) {
+        return jsonResponse({ success: false, error: 'Invalid redirect URLs' }, 400);
+      }
+
+      const params = new URLSearchParams({
+        mode: 'subscription',
+        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][product_data][name]': `${storeName} VIP ${body.planType}`.substring(0, 200),
+        'line_items[0][price_data][unit_amount]': String(amountCents),
+        'line_items[0][price_data][recurring][interval]': getPlanInterval(body.planType),
+        'line_items[0][price_data][recurring][interval_count]': getPlanIntervalCount(body.planType),
+        'line_items[0][quantity]': '1',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: userEmail !== 'User' ? userEmail : '',
+        'metadata[store_id]': storeId || '',
+        'metadata[user_id]': userId,
+        'metadata[correlation_id]': correlationID,
+        'metadata[product_type]': 'vip_subscription',
+        'metadata[plan_type]': body.planType,
+        'subscription_data[metadata][store_id]': storeId || '',
+        'subscription_data[metadata][user_id]': userId,
+        'subscription_data[metadata][correlation_id]': correlationID,
+        'subscription_data[metadata][product_type]': 'vip_subscription',
+        'subscription_data[metadata][plan_type]': body.planType,
+      });
+
+      const sessionRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Stripe-Account': stripeAccountId,
+        },
+        body: params,
+      });
+
+      if (!sessionRes.ok) {
+        const errBody = await sessionRes.text();
+        console.error('Stripe VIP checkout error:', errBody);
+        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session' }, 500);
+      }
+
+      const session = await sessionRes.json();
+      stripeCheckoutUrl = session.url;
+      stripeSessionId = session.id;
+      paymentMethod = 'stripe';
     }
     // ─── No payment configured ───
     else {
-      return new Response(
-        JSON.stringify({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }, 400);
     }
 
     // Create pending VIP subscription
@@ -238,10 +314,7 @@ Deno.serve(async (req) => {
 
     if (dbError) {
       console.error('Database error:', dbError);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to save subscription' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'Failed to save subscription' }, 500);
     }
 
     // Create order entry for tracking
@@ -263,26 +336,22 @@ Deno.serve(async (req) => {
         store_id: storeId,
       });
 
-    return new Response(
-      JSON.stringify({
+    return jsonResponse({
         success: true,
         subscription_id: subscription.id,
         correlation_id: correlationID,
         qr_code_image: qrCodeImage,
         br_code: brCode,
+        checkout_url: stripeCheckoutUrl,
+        stripe_session_id: stripeSessionId,
         expires_at: chargeExpiresAt.toISOString(),
         amount_cents: amountCents,
         plan_type: body.planType,
         payment_method: paymentMethod,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      });
 
   } catch (error) {
     console.error('Unexpected error:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse({ success: false, error: 'Internal server error' }, 500);
   }
 });

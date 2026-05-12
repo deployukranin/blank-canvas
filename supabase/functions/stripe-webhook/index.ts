@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     const body = await req.text();
 
     // Verify Stripe signature if webhook secret is configured
-    const stripeWebhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    const stripeWebhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET");
     const sigHeader = req.headers.get("stripe-signature");
 
     if (stripeWebhookSecret) {
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
         });
       }
     } else {
-      console.warn("STRIPE_WEBHOOK_SECRET not set — signature verification SKIPPED. Configure it for production!");
+      console.warn("Stripe webhook secret not set — signature verification SKIPPED. Configure it for production!");
     }
 
     const event = JSON.parse(body);
@@ -107,32 +107,35 @@ Deno.serve(async (req) => {
         const session = event.data.object;
         const storeId = session.metadata?.store_id;
         const orderId = session.metadata?.order_id;
+        const correlationId = session.metadata?.correlation_id;
 
         console.log("Payment completed for store:", storeId, "order:", orderId);
 
-        if (orderId && storeId) {
-          const { error } = await supabaseAdmin
+        let paidOrder: { product_id: string | null } | null = null;
+        if ((orderId || correlationId) && storeId) {
+          let updateQuery = supabaseAdmin
             .from("custom_orders")
-            .update({
-              status: "paid",
-              paid_at: new Date().toISOString(),
-            })
-            .eq("id", orderId)
+            .update({ status: "paid", paid_at: new Date().toISOString() })
             .eq("store_id", storeId);
+
+          updateQuery = orderId ? updateQuery.eq("id", orderId) : updateQuery.eq("correlation_id", correlationId);
+
+          const { data, error } = await updateQuery.select("product_id").maybeSingle();
+          paidOrder = data;
 
           if (error) {
             console.error("Error updating order:", error);
           } else {
-            console.log("Order updated to paid:", orderId);
+            console.log("Order updated to paid:", orderId || correlationId);
           }
         }
 
         // Handle VIP subscription activation
-        const subscriptionId = session.metadata?.subscription_id;
-        if (subscriptionId && storeId) {
+        const subscriptionId = session.metadata?.subscription_id || paidOrder?.product_id;
+        if (subscriptionId && storeId && session.metadata?.product_type === "vip_subscription") {
           const { error } = await supabaseAdmin
             .from("vip_subscriptions")
-            .update({ status: "active" })
+            .update({ status: "active", started_at: new Date().toISOString() })
             .eq("id", subscriptionId)
             .eq("store_id", storeId);
 

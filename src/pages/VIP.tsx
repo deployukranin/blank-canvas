@@ -327,12 +327,22 @@ const VIPPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-vip-charge', {
-        body: { planType: selectedPlan.type, storeId: resolvedStoreId },
+        body: {
+          planType: selectedPlan.type,
+          storeId: resolvedStoreId,
+          successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
+          cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
+        },
       });
 
       if (error || !data?.success) {
         toast({ title: 'Error', description: data?.error || error?.message || 'Failed to create charge', variant: 'destructive' });
         setIsProcessing(false);
+        return;
+      }
+
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
         return;
       }
 
