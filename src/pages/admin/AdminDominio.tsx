@@ -281,6 +281,45 @@ const AdminDominio: React.FC = () => {
     );
   }
 
+  const isTrial = store?.plan_type === 'trial';
+
+  if (isTrial) {
+    return (
+      <AdminLayout title={t('admin.domain.title', 'Custom Domain')}>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <GlassCard className="p-5">
+            <div className="flex items-start gap-3">
+              <Globe className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {t('admin.domain.description', 'Connect your own domain to your store. Your fans will access your platform through your custom address instead of the default URL.')}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('admin.domain.currentUrl', 'Current URL')}: <span className="font-mono text-foreground">{PRODUCTION_DOMAIN}/{store?.slug}</span>
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-8 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto">
+              <Lock className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              {t('admin.domain.trialLockedTitle', 'Recurso disponível após o período de teste')}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {t('admin.domain.trialLockedDescription', 'O domínio personalizado é liberado após a contratação de um plano. Durante o trial, sua loja fica disponível pelo URL padrão.')}
+            </p>
+            <Button onClick={() => navigate(`${basePath}/admin/planos`)} className="mt-2">
+              {t('admin.domain.goToPlans', 'Ver planos de assinatura')}
+            </Button>
+          </GlassCard>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   const hasDomain = !!domainState.customDomain;
 
   return (
