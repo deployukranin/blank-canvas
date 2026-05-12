@@ -367,6 +367,69 @@ const SuperAdminPlanos: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Capabilities */}
+                <div className="mb-5 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ToggleRight className="w-4 h-4 text-emerald-300" />
+                    <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">
+                      {t('superAdmin.planConfig.capabilities', 'Recursos liberados')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {CAPABILITY_LABELS.map(cap => {
+                      const enabled = !!plan.capabilities?.[cap.key];
+                      return (
+                        <label
+                          key={cap.key}
+                          className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md border transition-colors ${
+                            enabled
+                              ? 'bg-emerald-500/10 border-emerald-500/30'
+                              : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={enabled}
+                            onChange={e => updateCapability(planIndex, cap.key, e.target.checked)}
+                            className="rounded accent-emerald-500"
+                          />
+                          <span className="text-sm text-white/80">{cap[lang]}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Limits */}
+                <div className="mb-5 p-4 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Hash className="w-4 h-4 text-amber-300" />
+                    <span className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
+                      {t('superAdmin.planConfig.limits', 'Limites (0 = ilimitado)')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {LIMIT_LABELS.map(lim => (
+                      <div key={lim.key}>
+                        <Label className="text-white/60 text-xs">{lim[lang]}</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={plan.limits?.[lim.key] ?? 0}
+                          onChange={e =>
+                            updateLimit(
+                              planIndex,
+                              lim.key,
+                              e.target.value === '' ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0),
+                            )
+                          }
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Features */}
                 <div>
                   <Label className="text-white/60 text-xs mb-2 block">
