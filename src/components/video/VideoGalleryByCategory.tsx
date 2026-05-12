@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { VideoGalleryCarousel } from "@/components/video/VideoGalleryCarousel";
@@ -38,6 +39,7 @@ export function VideoGalleryByCategory({
   categoryPreviewLimit?: number | null;
   metaById?: Record<string, { isNew?: boolean; progressPercent?: number }>;
 }) {
+  const { t } = useTranslation();
   const categories = categorization?.categories ?? [];
   const map = categorization?.videoCategoryMap ?? {};
 
@@ -108,7 +110,7 @@ export function VideoGalleryByCategory({
                   size="sm"
                   onClick={() => setExpanded((prev) => ({ ...prev, [cat.id]: true }))}
                 >
-                  Ver mais
+                  {t('storefront.viewMore')}
                 </Button>
               ) : null}
             </div>
@@ -134,7 +136,7 @@ export function VideoGalleryByCategory({
                     <span className="text-base" aria-hidden>
                       🎬
                     </span>
-                    <h2 className="font-display text-base font-semibold">Outros</h2>
+                    <h2 className="font-display text-base font-semibold">{t('storefront.othersCategory')}</h2>
                   </div>
 
                   {canExpand ? (
@@ -144,7 +146,7 @@ export function VideoGalleryByCategory({
                       size="sm"
                       onClick={() => setExpanded((prev) => ({ ...prev, [key]: true }))}
                     >
-                      Ver mais
+                      {t('storefront.viewMore')}
                     </Button>
                   ) : null}
                 </div>

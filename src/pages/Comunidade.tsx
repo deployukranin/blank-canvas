@@ -48,17 +48,24 @@ const getPostTypeConfig = (type: FeedPost['type'], t: (key: string) => string) =
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, locale = 'pt-BR') => {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffHours < 1) return 'Agora';
+  const labels = {
+    'pt-BR': { now: 'Agora' },
+    'en': { now: 'Now' },
+    'es': { now: 'Ahora' },
+  } as const;
+  const lang = (locale.startsWith('pt') ? 'pt-BR' : locale.startsWith('es') ? 'es' : 'en') as keyof typeof labels;
+
+  if (diffHours < 1) return labels[lang].now;
   if (diffHours < 24) return `${diffHours}h`;
   if (diffDays < 7) return `${diffDays}d`;
-  return date.toLocaleDateString('pt-BR');
+  return date.toLocaleDateString(lang === 'pt-BR' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US');
 };
 
 // Helper function to get level icon
@@ -113,6 +120,7 @@ interface ReportDialogProps {
 }
 
 const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: ReportDialogProps) => {
+  const { t } = useTranslation();
   const [category, setCategory] = useState<string>('');
   const [reason, setReason] = useState('');
 
@@ -131,21 +139,21 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-5 h-5" />
-            Denunciar {contentType === 'idea' ? 'Ideia' : 'Comentário'}
+            {contentType === 'idea' ? t('storefront.reportIdeaTitle') : t('storefront.reportCommentTitle')}
           </DialogTitle>
           <DialogDescription>
-            Ajude a manter a comunidade saudável reportando conteúdo inapropriado.
+            {t('storefront.reportHelpText')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">
           <div className="p-3 bg-muted/30 rounded-lg">
-            <p className="text-xs text-muted-foreground">Conteúdo:</p>
+            <p className="text-xs text-muted-foreground">{t('storefront.reportedContent')}</p>
             <p className="text-sm font-medium truncate">{contentTitle}</p>
           </div>
 
           <div>
-            <Label className="text-sm font-medium mb-2 block">Motivo da denúncia</Label>
+            <Label className="text-sm font-medium mb-2 block">{t('storefront.reportReason')}</Label>
             <RadioGroup value={category} onValueChange={setCategory}>
               {reasonCategories.map((cat) => (
                 <div key={cat.value} className="flex items-center space-x-2">
@@ -158,11 +166,11 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
 
           {category === 'other' && (
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">Descreva o problema</Label>
+              <Label className="text-sm font-medium mb-1.5 block">{t('storefront.describeIssue')}</Label>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Explique por que esse conteúdo é inapropriado..."
+                placeholder={t('storefront.explainProblem')}
                 rows={3}
               />
             </div>
@@ -170,7 +178,7 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} className="flex-1">
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleSubmit} 
@@ -178,7 +186,7 @@ const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: 
               className="flex-1 bg-red-500 hover:bg-red-600 gap-2"
             >
               <Flag className="w-4 h-4" />
-              Denunciar
+              {t('storefront.reportContent')}
             </Button>
           </div>
         </div>
@@ -254,6 +262,7 @@ interface IdeiaCardProps {
 }
 
 const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onReportComment, votedIdeas }: IdeiaCardProps) => {
+  const { t } = useTranslation();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const { user } = useAuth();
@@ -296,7 +305,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                 <span className="text-xs text-muted-foreground">{formatDate(idea.createdAt)}</span>
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs bg-accent/20 text-accent">
                   <Lightbulb className="w-3 h-3" />
-                  Ideia
+                  {t('storefront.ideaBadge')}
                 </span>
               </div>
               
@@ -314,7 +323,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       className="text-red-400 focus:text-red-400"
                     >
                       <Flag className="w-4 h-4 mr-2" />
-                      Denunciar
+                      {t('storefront.reportContent')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -375,7 +384,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                                 <button 
                                   onClick={() => onReportComment(comment, idea.title)}
                                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-500/20 rounded"
-                                  title="Denunciar comentário"
+                                  title={t('storefront.reportCommentTooltip')}
                                 >
                                   <Flag className="w-3 h-3 text-red-400" />
                                 </button>
@@ -387,7 +396,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground text-center py-2">Nenhum comentário ainda</p>
+                    <p className="text-xs text-muted-foreground text-center py-2">{t('storefront.noCommentsYet')}</p>
                   )}
 
                   {user && (
@@ -395,7 +404,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       <Input
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Adicione um comentário..."
+                        placeholder={t('storefront.addComment')}
                         className="text-xs h-8"
                         onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
                       />
@@ -671,7 +680,7 @@ const ComunidadePage = () => {
     } catch (error) {
       toast({
         title: t('storefront.reportError'),
-        description: error instanceof Error ? error.message : 'Não foi possível enviar a denúncia',
+        description: error instanceof Error ? error.message : t('storefront.reportSubmitErrorFallback'),
         variant: 'destructive',
       });
     }
@@ -734,7 +743,7 @@ const ComunidadePage = () => {
   };
 
   return (
-    <MobileLayout title="Comunidade" hideHeader>
+    <MobileLayout title={t('storefront.communityTitle')} hideHeader>
       <div className="px-4 py-6">
         {/* Header do fórum */}
         <div className="flex items-center justify-end mb-4">
@@ -855,7 +864,7 @@ const ComunidadePage = () => {
             {config.community.vipTabEnabled && (
               <TabsTrigger value="vip" className="flex-1 gap-2">
                 <Crown className="w-4 h-4" />
-                {config.community.vipTabLabel || 'Área VIP'}
+                {config.community.vipTabLabel || t('storefront.vipArea')}
               </TabsTrigger>
             )}
           </TabsList>

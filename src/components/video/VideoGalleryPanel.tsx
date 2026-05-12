@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
@@ -20,6 +21,7 @@ const normalizeForSearch = (value: string) =>
 
 export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
   const { config } = useWhiteLabel();
+  const { t } = useTranslation();
   const channelId = config.youtube?.channelId?.trim() || "";
 
   const { data, isLoading, error } = useYouTubeVideos({
@@ -59,7 +61,9 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
     [filteredVideos, selectedVideoId]
   );
 
-  const title = config.youtube?.enabled ? `Galeria de Vídeos de ${config.siteName}` : "Para Você";
+  const title = config.youtube?.enabled
+    ? t('storefront.galleryTitle', { name: config.siteName })
+    : t('storefront.forYou');
 
   const categorization = useMemo(
     () => ({
@@ -84,7 +88,7 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
         <header className="space-y-3">
           <div className="space-y-1">
             <h1 className="font-display text-lg font-semibold">{title}</h1>
-            <p className="text-sm text-muted-foreground">Assista sem sair da plataforma.</p>
+            <p className="text-sm text-muted-foreground">{t('storefront.watchOnPlatform')}</p>
           </div>
 
           {searchEnabled && config.youtube?.enabled && channelId && !error ? (
@@ -96,9 +100,9 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar vídeo pelo título..."
+                placeholder={t('storefront.searchVideoPlaceholder')}
                 className="pl-9"
-                aria-label="Buscar vídeos"
+                aria-label={t('storefront.searchVideosLabel')}
               />
             </div>
           ) : null}
@@ -107,21 +111,21 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
         {!config.youtube?.enabled ? (
           <div className="glass rounded-xl p-4">
             <p className="text-sm text-muted-foreground">
-              A galeria de vídeos ainda não está habilitada para este influenciador.
+              {t('storefront.galleryNotEnabled')}
             </p>
           </div>
         ) : !channelId ? (
           <div className="glass rounded-xl p-4">
             <p className="text-sm text-muted-foreground">
-              Falta configurar o <span className="font-medium">channelId</span> do YouTube no White Label.
+              {t('storefront.galleryMissingChannelId')}
             </p>
           </div>
         ) : error ? (
           <div className="glass rounded-xl p-6 text-center">
             <p className="text-sm text-muted-foreground mb-2">
               {error.message?.includes("quota") || error.message?.includes("Quota")
-                ? "⚠️ Limite diário da API do YouTube atingido. Os vídeos estarão disponíveis novamente amanhã."
-                : "Não foi possível carregar os vídeos agora. Tente novamente mais tarde."}
+                ? t('storefront.youtubeQuotaError')
+                : t('storefront.youtubeLoadError')}
             </p>
           </div>
         ) : (

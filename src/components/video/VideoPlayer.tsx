@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Upload } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -203,13 +204,14 @@ export const VideoPlaceholder = ({
   description?: string;
   className?: string;
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`}>
       <div className="aspect-video bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex flex-col items-center justify-center">
         <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4">
           <Upload className="w-8 h-8 text-white/60" />
         </div>
-        <p className="text-white/60 text-sm text-center px-4">Nenhum vídeo configurado</p>
+        <p className="text-white/60 text-sm text-center px-4">{t('storefront.noVideoConfigured')}</p>
         {title && <p className="text-white/40 text-xs mt-2">{title}</p>}
       </div>
     </div>
