@@ -33,38 +33,120 @@ interface PlatformPlanConfig {
   highlight?: boolean;
 }
 
-const features = [
-  {
-    icon: Video,
-    title: "Vídeos Personalizados",
-    desc: "Receba pedidos de vídeos sob medida e cobre o que quiser, a partir de R$ 10.",
+type Lang = "pt" | "en" | "es";
+
+const tr = {
+  pt: {
+    badge: "A plataforma de criadores ASMR mais completa do Mundo",
+    heroTitle1: "Sua audiência em",
+    heroTitle2: "uma plataforma só sua",
+    heroSub:
+      "Venda vídeos personalizados, monetize conteúdo VIP e construa sua comunidade — tudo com sua marca, sem intermediários.",
+    ctaStart: "Começar grátis",
+    ctaSeeFeatures: "Ver recursos",
+    heroAlt: "Pré-visualização da plataforma TingleBox para criadores ASMR",
+    featuresKicker: "Recursos",
+    featuresTitle1: "Tudo que você precisa para",
+    featuresTitle2: "viver da sua arte",
+    featuresSub:
+      "Uma plataforma completa, pensada para criadores ASMR que querem independência e crescimento.",
+    pricingKicker: "Planos",
+    pricingTitle1: "Escolha o plano",
+    pricingTitle2: "ideal para você",
+    pricingSub: "Comece grátis com 7 dias de teste. Sem cartão de crédito.",
+    mostPopular: "Mais popular",
+    ctaFinalTitle1: "Pronto para começar",
+    ctaFinalTitle2: "sua jornada?",
+    ctaFinalSub:
+      "Junte-se aos criadores que já estão transformando sua audiência em renda recorrente.",
+    ctaFinalBtn: "Criar minha loja agora",
+    docTitle: "TingleBox — A plataforma white-label para criadores ASMR",
+    docDesc:
+      "Crie sua loja ASMR, venda vídeos personalizados, monetize conteúdo VIP e construa sua comunidade. Setup em minutos, sem código.",
+    features: [
+      { title: "Vídeos Personalizados", desc: "Receba pedidos de vídeos sob medida e cobre o que quiser, a partir de R$ 10." },
+      { title: "Área VIP Exclusiva", desc: "Monetize conteúdo premium com assinaturas recorrentes para seus fãs mais fiéis." },
+      { title: "Comunidade Própria", desc: "Engaje sua audiência com posts, ideias de vídeos e interação direta." },
+      { title: "Pagamentos Integrados", desc: "Stripe e PIX nativos. Receba direto na sua conta, sem intermediários." },
+      { title: "Marca Própria", desc: "Domínio personalizado, cores, logo e identidade 100% sua." },
+      { title: "Setup em Minutos", desc: "Crie sua loja, configure e publique no mesmo dia. Sem código." },
+    ],
   },
-  {
-    icon: Crown,
-    title: "Área VIP Exclusiva",
-    desc: "Monetize conteúdo premium com assinaturas recorrentes para seus fãs mais fiéis.",
+  en: {
+    badge: "The most complete ASMR creator platform in the world",
+    heroTitle1: "Your audience on",
+    heroTitle2: "a platform that's all yours",
+    heroSub:
+      "Sell custom videos, monetize VIP content and build your community — all under your brand, no middlemen.",
+    ctaStart: "Get started free",
+    ctaSeeFeatures: "See features",
+    heroAlt: "Preview of the TingleBox platform for ASMR creators",
+    featuresKicker: "Features",
+    featuresTitle1: "Everything you need to",
+    featuresTitle2: "live from your art",
+    featuresSub:
+      "A complete platform designed for ASMR creators who want independence and growth.",
+    pricingKicker: "Plans",
+    pricingTitle1: "Choose the plan",
+    pricingTitle2: "that's right for you",
+    pricingSub: "Start with a free 7-day trial. No credit card required.",
+    mostPopular: "Most popular",
+    ctaFinalTitle1: "Ready to start",
+    ctaFinalTitle2: "your journey?",
+    ctaFinalSub:
+      "Join the creators who are already turning their audience into recurring income.",
+    ctaFinalBtn: "Create my store now",
+    docTitle: "TingleBox — The white-label platform for ASMR creators",
+    docDesc:
+      "Build your ASMR store, sell custom videos, monetize VIP content and grow your community. Set up in minutes, no code.",
+    features: [
+      { title: "Custom Videos", desc: "Take tailor-made video orders and charge whatever you want, starting at $5." },
+      { title: "Exclusive VIP Area", desc: "Monetize premium content with recurring subscriptions for your most loyal fans." },
+      { title: "Your Own Community", desc: "Engage your audience with posts, video ideas and direct interaction." },
+      { title: "Integrated Payments", desc: "Native Stripe and PIX. Get paid directly, no middlemen." },
+      { title: "Your Own Brand", desc: "Custom domain, colors, logo and 100% your identity." },
+      { title: "Setup in Minutes", desc: "Create your store, configure and publish the same day. No code." },
+    ],
   },
-  {
-    icon: Users,
-    title: "Comunidade Própria",
-    desc: "Engaje sua audiência com posts, ideias de vídeos e interação direta.",
+  es: {
+    badge: "La plataforma de creadores ASMR más completa del mundo",
+    heroTitle1: "Tu audiencia en",
+    heroTitle2: "una plataforma que es solo tuya",
+    heroSub:
+      "Vende videos personalizados, monetiza contenido VIP y construye tu comunidad — todo con tu marca, sin intermediarios.",
+    ctaStart: "Empezar gratis",
+    ctaSeeFeatures: "Ver funciones",
+    heroAlt: "Vista previa de la plataforma TingleBox para creadores ASMR",
+    featuresKicker: "Funciones",
+    featuresTitle1: "Todo lo que necesitas para",
+    featuresTitle2: "vivir de tu arte",
+    featuresSub:
+      "Una plataforma completa, pensada para creadores ASMR que quieren independencia y crecimiento.",
+    pricingKicker: "Planes",
+    pricingTitle1: "Elige el plan",
+    pricingTitle2: "ideal para ti",
+    pricingSub: "Empieza con 7 días de prueba gratis. Sin tarjeta de crédito.",
+    mostPopular: "Más popular",
+    ctaFinalTitle1: "¿Listo para comenzar",
+    ctaFinalTitle2: "tu camino?",
+    ctaFinalSub:
+      "Únete a los creadores que ya están convirtiendo su audiencia en ingresos recurrentes.",
+    ctaFinalBtn: "Crear mi tienda ahora",
+    docTitle: "TingleBox — La plataforma white-label para creadores ASMR",
+    docDesc:
+      "Crea tu tienda ASMR, vende videos personalizados, monetiza contenido VIP y construye tu comunidad. Configuración en minutos, sin código.",
+    features: [
+      { title: "Videos Personalizados", desc: "Recibe pedidos de videos a medida y cobra lo que quieras, desde $5." },
+      { title: "Área VIP Exclusiva", desc: "Monetiza contenido premium con suscripciones recurrentes para tus fans más fieles." },
+      { title: "Comunidad Propia", desc: "Involucra a tu audiencia con publicaciones, ideas de videos e interacción directa." },
+      { title: "Pagos Integrados", desc: "Stripe y PIX nativos. Recibe directamente en tu cuenta, sin intermediarios." },
+      { title: "Marca Propia", desc: "Dominio personalizado, colores, logo e identidad 100% tuya." },
+      { title: "Configuración en Minutos", desc: "Crea tu tienda, configúrala y publícala el mismo día. Sin código." },
+    ],
   },
-  {
-    icon: Wallet,
-    title: "Pagamentos Integrados",
-    desc: "Stripe e PIX nativos. Receba direto na sua conta, sem intermediários.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Marca Própria",
-    desc: "Domínio personalizado, cores, logo e identidade 100% sua.",
-  },
-  {
-    icon: Zap,
-    title: "Setup em Minutos",
-    desc: "Crie sua loja, configure e publique no mesmo dia. Sem código.",
-  },
-];
+} as const;
+
+const featureIcons = [Video, Crown, Users, Wallet, ShieldCheck, Zap];
 
 const fallbackPlans: PlatformPlanConfig[] = [
   {
@@ -99,12 +181,13 @@ const fallbackPlans: PlatformPlanConfig[] = [
 
 const Landing = () => {
   const { i18n } = useTranslation();
-  const lang: "pt" | "en" | "es" = i18n.language?.startsWith("pt")
+  const lang: Lang = i18n.language?.startsWith("pt")
     ? "pt"
     : i18n.language?.startsWith("es")
     ? "es"
     : "en";
   const isBR = lang === "pt";
+  const t = tr[lang];
 
   const [plans, setPlans] = useState<PlatformPlanConfig[]>(fallbackPlans);
 
@@ -149,18 +232,21 @@ const Landing = () => {
       : { pt: "Começar grátis", en: "Get started", es: "Empezar gratis" }[lang];
 
   useEffect(() => {
-    document.title = "TingleBox — A plataforma white-label para criadores ASMR";
+    document.title = t.docTitle;
     const meta = document.querySelector('meta[name="description"]');
-    const content =
-      "Crie sua loja ASMR, venda vídeos personalizados, monetize conteúdo VIP e construa sua comunidade. Setup em minutos, sem código.";
-    if (meta) meta.setAttribute("content", content);
+    if (meta) meta.setAttribute("content", t.docDesc);
     else {
       const m = document.createElement("meta");
       m.name = "description";
-      m.content = content;
+      m.content = t.docDesc;
       document.head.appendChild(m);
     }
-  }, []);
+  }, [t.docTitle, t.docDesc]);
+
+  const changeLang = (l: Lang) => {
+    i18n.changeLanguage(l);
+    try { localStorage.setItem("i18nextLng", l); } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0418] text-foreground overflow-x-hidden relative">
@@ -185,8 +271,28 @@ const Landing = () => {
         />
       </div>
 
+      {/* Language switcher */}
+      <div className="relative z-20 flex justify-end px-6 pt-6">
+        <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs">
+          {(["pt", "en", "es"] as Lang[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => changeLang(l)}
+              className={`px-3 py-1 rounded-full transition-colors ${
+                lang === l
+                  ? "bg-purple-600 text-white"
+                  : "text-white/60 hover:text-white"
+              }`}
+              aria-label={`Switch language to ${l.toUpperCase()}`}
+            >
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Hero */}
-      <section className="relative z-10 px-6 pt-16 pb-24 text-center">
+      <section className="relative z-10 px-6 pt-10 pb-24 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -195,22 +301,19 @@ const Landing = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mb-8">
             <Crown className="w-4 h-4 text-purple-300" />
-            <span className="text-sm text-purple-100">
-              A plataforma de criadores ASMR mais completa do Mundo
-            </span>
+            <span className="text-sm text-purple-100">{t.badge}</span>
           </div>
 
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.05]">
-            Sua audiência em
+            {t.heroTitle1}
             <br />
             <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">
-              uma plataforma só sua
+              {t.heroTitle2}
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10">
-            Venda vídeos personalizados, monetize conteúdo VIP e construa sua
-            comunidade — tudo com sua marca, sem intermediários.
+            {t.heroSub}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -220,7 +323,7 @@ const Landing = () => {
                 className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-7 h-12 gap-2 shadow-xl shadow-purple-500/40"
               >
                 <Sparkles className="w-4 h-4" />
-                Começar grátis
+                {t.ctaStart}
               </Button>
             </Link>
             <a href="#features">
@@ -230,7 +333,7 @@ const Landing = () => {
                 className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white rounded-full px-7 h-12 gap-2 backdrop-blur-sm"
               >
                 <Play className="w-4 h-4" />
-                Ver recursos
+                {t.ctaSeeFeatures}
               </Button>
             </a>
           </div>
@@ -247,7 +350,7 @@ const Landing = () => {
             <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0f0820]">
               <img
                 src={heroMockup}
-                alt="Pré-visualização da plataforma TingleBox para criadores ASMR"
+                alt={t.heroAlt}
                 className="w-full h-auto block"
                 width={1376}
                 height={768}
@@ -269,40 +372,40 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
-              Recursos
+              {t.featuresKicker}
             </span>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
-              Tudo que você precisa para
+              {t.featuresTitle1}
               <br />
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
-                viver da sua arte
+                {t.featuresTitle2}
               </span>
             </h2>
-            <p className="text-white/60 max-w-2xl mx-auto">
-              Uma plataforma completa, pensada para criadores ASMR que querem
-              independência e crescimento.
-            </p>
+            <p className="text-white/60 max-w-2xl mx-auto">{t.featuresSub}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 hover:border-purple-500/40 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center mb-5 group-hover:bg-purple-500/25 transition-colors">
-                  <f.icon className="w-5 h-5 text-purple-300" />
-                </div>
-                <h3 className="font-display text-lg font-semibold text-white mb-2">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-white/60 leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
+            {t.features.map((f, i) => {
+              const Icon = featureIcons[i];
+              return (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                  className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 hover:border-purple-500/40 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center mb-5 group-hover:bg-purple-500/25 transition-colors">
+                    <Icon className="w-5 h-5 text-purple-300" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-white mb-2">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm text-white/60 leading-relaxed">{f.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -312,18 +415,16 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
-              Planos
+              {t.pricingKicker}
             </span>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
-              Escolha o plano
+              {t.pricingTitle1}
               <br />
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
-                ideal para você
+                {t.pricingTitle2}
               </span>
             </h2>
-            <p className="text-white/60 max-w-2xl mx-auto">
-              Comece grátis com 7 dias de teste. Sem cartão de crédito.
-            </p>
+            <p className="text-white/60 max-w-2xl mx-auto">{t.pricingSub}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -345,7 +446,7 @@ const Landing = () => {
                 >
                   {p.highlight && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold">
-                      {{ pt: "Mais popular", en: "Most popular", es: "Más popular" }[lang]}
+                      {t.mostPopular}
                     </div>
                   )}
 
@@ -396,22 +497,19 @@ const Landing = () => {
             />
             <div className="relative">
               <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
-                Pronto para começar
+                {t.ctaFinalTitle1}
                 <br />
                 <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
-                  sua jornada?
+                  {t.ctaFinalTitle2}
                 </span>
               </h2>
-              <p className="text-white/70 max-w-xl mx-auto mb-8">
-                Junte-se aos criadores que já estão transformando sua audiência
-                em renda recorrente.
-              </p>
+              <p className="text-white/70 max-w-xl mx-auto mb-8">{t.ctaFinalSub}</p>
               <Link to="/auth">
                 <Button
                   size="lg"
                   className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 h-12 gap-2 shadow-xl shadow-purple-500/40"
                 >
-                  Criar minha loja agora
+                  {t.ctaFinalBtn}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
@@ -419,7 +517,6 @@ const Landing = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };
