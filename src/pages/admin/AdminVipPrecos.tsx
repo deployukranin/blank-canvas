@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
-  defaultVipConfig,
+  getDefaultVipConfig,
   saveVipConfig,
   type VipConfig,
   type VipPlan,
@@ -41,7 +41,7 @@ const AdminVipPrecos = () => {
     saveNow,
   } = usePersistentConfig<VipConfig>({
     configKey: 'vip_config',
-    defaultValue: defaultVipConfig,
+    defaultValue: getDefaultVipConfig(i18n.language),
     localStorageKey: 'vipConfig',
     debounceMs: 2000,
     storeId: store?.id,
