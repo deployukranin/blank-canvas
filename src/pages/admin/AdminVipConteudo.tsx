@@ -433,13 +433,13 @@ const AdminVipConteudo = () => {
 
             {/* Media upload section */}
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Mídia</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldMedia')}</label>
               
               {formMediaUrl ? (
                 <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/50">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {uploadedFileName || 'Mídia anexada'}
+                      {uploadedFileName || t('vipAdmin.mediaAttached')}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">{formMediaUrl}</p>
                   </div>
@@ -457,41 +457,41 @@ const AdminVipConteudo = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {isUploading ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('vipAdmin.uploading')}</>
                     ) : (
-                      <><Upload className="w-4 h-4 mr-2" /> Fazer upload de arquivo</>
+                      <><Upload className="w-4 h-4 mr-2" /> {t('vipAdmin.uploadFile')}</>
                     )}
                   </Button>
                   
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">ou</span>
+                    <span className="text-xs text-muted-foreground">{t('vipAdmin.or')}</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
                   
                   <Input
                     value={formMediaUrl}
                     onChange={e => setFormMediaUrl(e.target.value)}
-                    placeholder="Cole uma URL de mídia..."
+                    placeholder={t('vipAdmin.mediaUrlPlaceholder')}
                     disabled={isUploading}
                   />
                 </div>
               )}
               
               <p className="text-xs text-muted-foreground mt-1.5">
-                Upload direto (até 100MB) ou cole um link externo
+                {t('vipAdmin.mediaHint')}
               </p>
             </div>
 
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={resetForm}>
-                Cancelar
+                {t('vipAdmin.cancel')}
               </Button>
               <Button className="flex-1" onClick={handleSave} disabled={isSaving || isUploading}>
                 {isSaving ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('vipAdmin.saving')}</>
                 ) : (
-                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? 'Atualizar' : 'Publicar'}</>
+                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? t('vipAdmin.update') : t('vipAdmin.publish')}</>
                 )}
               </Button>
             </div>
