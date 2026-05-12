@@ -90,6 +90,7 @@ const AdminVipPrecos = () => {
       name: isBR ? 'Novo Plano' : 'New Plan',
       type: 'monthly',
       price: 29.90,
+      currency: isBR ? 'BRL' : 'USD',
       description: isBR ? 'Descrição do plano' : 'Plan description',
       features: [isBR ? 'Recurso 1' : 'Feature 1', isBR ? 'Recurso 2' : 'Feature 2'],
     };
