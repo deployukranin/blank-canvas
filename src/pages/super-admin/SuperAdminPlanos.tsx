@@ -178,6 +178,24 @@ const SuperAdminPlanos: React.FC = () => {
     });
   };
 
+  const updateCapability = (planIndex: number, key: keyof PlanCapabilities, value: boolean) => {
+    setPlans(prev => {
+      const updated = [...prev];
+      const caps = { ...(updated[planIndex].capabilities || {}), [key]: value };
+      updated[planIndex] = { ...updated[planIndex], capabilities: caps };
+      return updated;
+    });
+  };
+
+  const updateLimit = (planIndex: number, key: keyof PlanLimits, value: number | undefined) => {
+    setPlans(prev => {
+      const updated = [...prev];
+      const limits = { ...(updated[planIndex].limits || {}), [key]: value };
+      updated[planIndex] = { ...updated[planIndex], limits };
+      return updated;
+    });
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
