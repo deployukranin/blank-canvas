@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Save, DollarSign, Percent } from 'lucide-react';
+import { Crown, Save, DollarSign, Percent, ToggleRight, Hash } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
