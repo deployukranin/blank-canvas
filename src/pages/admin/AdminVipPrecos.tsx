@@ -55,7 +55,7 @@ const AdminVipPrecos = () => {
 
   // One-time migration: translate PT defaults to current language so existing
   // stores see their (still-default) plan copy in the active locale.
-  const migratedRef = React.useRef(false);
+  const migratedRef = useRef(false);
   useEffect(() => {
     if (isLoading || migratedRef.current) return;
     migratedRef.current = true;
