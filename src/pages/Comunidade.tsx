@@ -850,21 +850,21 @@ const ComunidadePage = () => {
             {videosTabEnabled && (
               <TabsTrigger value="videos" className="flex-1 gap-2">
                 <Video className="w-4 h-4" />
-                {config.community.videosTabLabel}
+                {config.community.videosTabLabel === 'Vídeos' ? t('storefront.tabVideos') : config.community.videosTabLabel}
               </TabsTrigger>
             )}
             <TabsTrigger value="avisos" className="flex-1 gap-2">
               <Bell className="w-4 h-4" />
-              {config.community.avisosTabLabel}
+              {config.community.avisosTabLabel === 'Avisos' ? t('storefront.tabAvisos') : config.community.avisosTabLabel}
             </TabsTrigger>
             <TabsTrigger value="ideias" className="flex-1 gap-2">
               <Lightbulb className="w-4 h-4" />
-              {config.community.ideiasTabLabel}
+              {config.community.ideiasTabLabel === 'Ideias' ? t('storefront.tabIdeias') : config.community.ideiasTabLabel}
             </TabsTrigger>
             {config.community.vipTabEnabled && (
               <TabsTrigger value="vip" className="flex-1 gap-2">
                 <Crown className="w-4 h-4" />
-                {config.community.vipTabLabel || t('storefront.vipArea')}
+                {!config.community.vipTabLabel || config.community.vipTabLabel === 'Área VIP' ? t('storefront.vipArea') : config.community.vipTabLabel}
               </TabsTrigger>
             )}
           </TabsList>
