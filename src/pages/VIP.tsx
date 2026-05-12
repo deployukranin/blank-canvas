@@ -36,6 +36,7 @@ interface VipPlanConfig {
   name: string;
   type: 'monthly' | 'quarterly' | 'yearly';
   price: number;
+  currency?: 'BRL' | 'USD';
   description: string;
   features: string[];
 }
