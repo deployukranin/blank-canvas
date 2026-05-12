@@ -23,6 +23,7 @@ export interface PixChargeResult {
   correlationId?: string;
   qrCodeImage?: string;
   brCode?: string;
+  checkoutUrl?: string;
   expiresAt?: string;
   error?: string;
 }
