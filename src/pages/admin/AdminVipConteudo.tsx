@@ -167,7 +167,7 @@ const AdminVipConteudo = () => {
 
     const maxSize = 100 * 1024 * 1024; // 100MB
     if (file.size > maxSize) {
-      toast({ title: 'Arquivo muito grande', description: 'Máximo de 100MB', variant: 'destructive' });
+      toast({ title: t('vipAdmin.fileTooLarge'), description: t('vipAdmin.fileTooLargeDesc'), variant: 'destructive' });
       return;
     }
 
