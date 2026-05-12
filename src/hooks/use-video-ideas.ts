@@ -171,5 +171,6 @@ export const useVideoIdeas = () => {
     submitIdea,
     reportIdea,
     refetch: fetchIdeas,
+    contentSettings,
   };
 };
