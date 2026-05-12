@@ -160,39 +160,30 @@ const VIPPage = () => {
     checkAdult();
   }, [resolvedStoreId, adultAccepted]);
 
-  // Load VIP plans from store config or global
+  // Load VIP plans strictly from this store's config (never fall back to global)
   useEffect(() => {
     const loadPlans = async () => {
+      if (!resolvedStoreId) {
+        setVipPlans([]);
+        setSelectedPlan(null);
+        return;
+      }
+
       let plans: VipPlanConfig[] = [];
 
-      if (resolvedStoreId) {
-        const { data } = await supabase
-          .from('app_configurations')
-          .select('config_value')
-          .eq('config_key', 'vip_config')
-          .eq('store_id', resolvedStoreId)
-          .maybeSingle();
+      const { data } = await supabase
+        .from('app_configurations')
+        .select('config_value')
+        .eq('config_key', 'vip_config')
+        .eq('store_id', resolvedStoreId)
+        .maybeSingle();
 
-        if (data?.config_value) {
-          plans = (data.config_value as any).plans || [];
-        }
+      if (data?.config_value) {
+        plans = (data.config_value as any).plans || [];
       }
 
-      // Fallback: try global config
-      if (plans.length === 0) {
-        const { data: globalData } = await supabase
-          .from('app_configurations')
-          .select('config_value')
-          .eq('config_key', 'vip_config')
-          .is('store_id', null)
-          .maybeSingle();
-
-        if (globalData?.config_value) {
-          plans = (globalData.config_value as any).plans || [];
-        }
-      }
-
-      // Final fallback: use defaults from vip-config
+      // If the store has no vip_config yet, show defaults only as a visual placeholder
+      // (admin must save in /admin/vip to persist real prices). Never use global config.
       if (plans.length === 0) {
         const { defaultVipConfig } = await import('@/lib/vip-config');
         plans = defaultVipConfig.plans;
