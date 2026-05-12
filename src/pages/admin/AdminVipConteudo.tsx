@@ -270,25 +270,25 @@ const AdminVipConteudo = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout title="Conteúdo VIP">
+      <AdminLayout title={t('vipAdmin.pageTitle')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Carregando...</span>
+          <span className="text-muted-foreground">{t('vipAdmin.loading')}</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Conteúdo VIP">
+    <AdminLayout title={t('vipAdmin.pageTitle')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Gerencie conteúdo exclusivo para seus assinantes VIP
+            {t('vipAdmin.subtitle')}
           </p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Novo Conteúdo
+            {t('vipAdmin.newContent')}
           </Button>
         </div>
 
