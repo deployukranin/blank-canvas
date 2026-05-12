@@ -145,7 +145,7 @@ const AdminIdeias: React.FC = () => {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'active', 'reported', 'removed'] as const).map((f) => (
+              {(['all', 'active', 'pending', 'reported', 'removed'] as const).map((f) => (
                 <Button
                   key={f}
                   variant={filter === f ? 'default' : 'outline'}
