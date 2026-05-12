@@ -33,13 +33,6 @@ const contentTypeIcons: Record<string, React.ReactNode> = {
   image: <Image className="w-4 h-4" />,
 };
 
-const contentTypeLabels: Record<string, string> = {
-  post: 'Post',
-  video: 'Video',
-  audio: 'Audio',
-  image: 'Image',
-};
-
 const acceptByType: Record<string, string> = {
   video: 'video/*',
   audio: 'audio/*',
@@ -121,6 +114,13 @@ const AdminVipConteudo = () => {
     toast({ title: checked ? t('vipAdmin.adultEnabled') : t('vipAdmin.adultDisabled') });
   };
 
+  const contentTypeLabels: Record<string, string> = {
+    post: t('vipAdmin.typePost'),
+    video: t('vipAdmin.typeVideo'),
+    audio: t('vipAdmin.typeAudio'),
+    image: t('vipAdmin.typeImage'),
+  };
+
   useEffect(() => {
     if (!storeId) return;
     const load = async () => {
@@ -167,7 +167,7 @@ const AdminVipConteudo = () => {
 
     const maxSize = 100 * 1024 * 1024; // 100MB
     if (file.size > maxSize) {
-      toast({ title: 'Arquivo muito grande', description: 'Máximo de 100MB', variant: 'destructive' });
+      toast({ title: t('vipAdmin.fileTooLarge'), description: t('vipAdmin.fileTooLargeDesc'), variant: 'destructive' });
       return;
     }
 
@@ -176,10 +176,10 @@ const AdminVipConteudo = () => {
       const url = await uploadVipMedia(file, storeId);
       setFormMediaUrl(url);
       setUploadedFileName(file.name);
-      toast({ title: 'Upload concluído!' });
+      toast({ title: t('vipAdmin.uploadDone') });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast({ title: 'Erro no upload', description: error.message, variant: 'destructive' });
+      toast({ title: t('vipAdmin.uploadError'), description: error.message, variant: 'destructive' });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -193,11 +193,11 @@ const AdminVipConteudo = () => {
 
   const handleSave = async () => {
     if (!formTitle.trim() || !formContent.trim()) {
-      toast({ title: 'Preencha título e conteúdo', variant: 'destructive' });
+      toast({ title: t('vipAdmin.fillRequired'), variant: 'destructive' });
       return;
     }
     if (!storeId) {
-      toast({ title: 'Loja não encontrada', variant: 'destructive' });
+      toast({ title: t('vipAdmin.storeNotFound'), variant: 'destructive' });
       return;
     }
 
@@ -221,7 +221,7 @@ const AdminVipConteudo = () => {
             ? { ...c, title: formTitle.trim(), content: formContent.trim(), content_type: formType, media_url: formMediaUrl.trim() || null }
             : c
         ));
-        toast({ title: 'Conteúdo atualizado!' });
+        toast({ title: t('vipAdmin.contentUpdated') });
       } else {
         const { data, error } = await supabase
           .from('vip_content')
@@ -238,12 +238,12 @@ const AdminVipConteudo = () => {
 
         if (error) throw error;
         setContent(prev => [data as VipContentItem, ...prev]);
-        toast({ title: 'Conteúdo publicado!' });
+        toast({ title: t('vipAdmin.contentPublished') });
       }
       resetForm();
     } catch (error: any) {
       console.error('Error saving:', error);
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      toast({ title: t('vipAdmin.saveError'), description: error.message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -261,34 +261,34 @@ const AdminVipConteudo = () => {
 
     const { error } = await supabase.from('vip_content').delete().eq('id', item.id);
     if (error) {
-      toast({ title: 'Erro ao deletar', variant: 'destructive' });
+      toast({ title: t('vipAdmin.deleteError'), variant: 'destructive' });
     } else {
       setContent(prev => prev.filter(c => c.id !== item.id));
-      toast({ title: 'Conteúdo deletado' });
+      toast({ title: t('vipAdmin.contentDeleted') });
     }
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title="Conteúdo VIP">
+      <AdminLayout title={t('vipAdmin.pageTitle')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Carregando...</span>
+          <span className="text-muted-foreground">{t('vipAdmin.loading')}</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Conteúdo VIP">
+    <AdminLayout title={t('vipAdmin.pageTitle')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Gerencie conteúdo exclusivo para seus assinantes VIP
+            {t('vipAdmin.subtitle')}
           </p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Novo Conteúdo
+            {t('vipAdmin.newContent')}
           </Button>
         </div>
 
@@ -346,7 +346,7 @@ const AdminVipConteudo = () => {
                     <h3 className="font-semibold truncate">{item.title}</h3>
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{item.content}</p>
                     {item.media_url && (
-                      <p className="text-xs text-primary mt-2 truncate">📎 Mídia anexada</p>
+                      <p className="text-xs text-primary mt-2 truncate">📎 {t('vipAdmin.mediaAttached')}</p>
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -365,10 +365,10 @@ const AdminVipConteudo = () => {
           {content.length === 0 && (
             <GlassCard className="p-12 text-center">
               <Crown className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mb-4">Nenhum conteúdo VIP ainda</p>
+              <p className="text-muted-foreground mb-4">{t('vipAdmin.noContent')}</p>
               <Button onClick={() => { resetForm(); setShowForm(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro Conteúdo
+                {t('vipAdmin.createFirst')}
               </Button>
             </GlassCard>
           )}
@@ -389,57 +389,57 @@ const AdminVipConteudo = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              {editingItem ? 'Editar Conteúdo VIP' : 'Novo Conteúdo VIP'}
+              {editingItem ? t('vipAdmin.editTitle') : t('vipAdmin.newTitle')}
             </DialogTitle>
             <DialogDescription>
-              Este conteúdo será visível apenas para assinantes VIP ativos.
+              {t('vipAdmin.dialogDesc')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Título</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldTitle')}</label>
               <Input
                 value={formTitle}
                 onChange={e => setFormTitle(e.target.value)}
-                placeholder="Título do conteúdo..."
+                placeholder={t('vipAdmin.fieldTitlePlaceholder')}
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Tipo</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldType')}</label>
               <Select value={formType} onValueChange={(val) => { setFormType(val); setFormMediaUrl(''); setUploadedFileName(''); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="post">📝 Post</SelectItem>
-                  <SelectItem value="video">🎥 Vídeo</SelectItem>
-                  <SelectItem value="audio">🎵 Áudio</SelectItem>
-                  <SelectItem value="image">🖼️ Imagem</SelectItem>
+                  <SelectItem value="post">📝 {t('vipAdmin.typePost')}</SelectItem>
+                  <SelectItem value="video">🎥 {t('vipAdmin.typeVideo')}</SelectItem>
+                  <SelectItem value="audio">🎵 {t('vipAdmin.typeAudio')}</SelectItem>
+                  <SelectItem value="image">🖼️ {t('vipAdmin.typeImage')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Conteúdo</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldContent')}</label>
               <Textarea
                 value={formContent}
                 onChange={e => setFormContent(e.target.value)}
-                placeholder="Escreva seu conteúdo exclusivo..."
+                placeholder={t('vipAdmin.fieldContentPlaceholder')}
                 className="min-h-[100px]"
               />
             </div>
 
             {/* Media upload section */}
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Mídia</label>
+              <label className="text-sm font-medium mb-1.5 block">{t('vipAdmin.fieldMedia')}</label>
               
               {formMediaUrl ? (
                 <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/50">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {uploadedFileName || 'Mídia anexada'}
+                      {uploadedFileName || t('vipAdmin.mediaAttached')}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">{formMediaUrl}</p>
                   </div>
@@ -457,41 +457,41 @@ const AdminVipConteudo = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {isUploading ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('vipAdmin.uploading')}</>
                     ) : (
-                      <><Upload className="w-4 h-4 mr-2" /> Fazer upload de arquivo</>
+                      <><Upload className="w-4 h-4 mr-2" /> {t('vipAdmin.uploadFile')}</>
                     )}
                   </Button>
                   
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">ou</span>
+                    <span className="text-xs text-muted-foreground">{t('vipAdmin.or')}</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
                   
                   <Input
                     value={formMediaUrl}
                     onChange={e => setFormMediaUrl(e.target.value)}
-                    placeholder="Cole uma URL de mídia..."
+                    placeholder={t('vipAdmin.mediaUrlPlaceholder')}
                     disabled={isUploading}
                   />
                 </div>
               )}
               
               <p className="text-xs text-muted-foreground mt-1.5">
-                Upload direto (até 100MB) ou cole um link externo
+                {t('vipAdmin.mediaHint')}
               </p>
             </div>
 
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={resetForm}>
-                Cancelar
+                {t('vipAdmin.cancel')}
               </Button>
               <Button className="flex-1" onClick={handleSave} disabled={isSaving || isUploading}>
                 {isSaving ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('vipAdmin.saving')}</>
                 ) : (
-                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? 'Atualizar' : 'Publicar'}</>
+                  <><Save className="w-4 h-4 mr-2" /> {editingItem ? t('vipAdmin.update') : t('vipAdmin.publish')}</>
                 )}
               </Button>
             </div>
