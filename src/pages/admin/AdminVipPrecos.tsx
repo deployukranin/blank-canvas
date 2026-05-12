@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
-  defaultVipConfig,
+  getDefaultVipConfig,
   saveVipConfig,
   type VipConfig,
   type VipPlan,
