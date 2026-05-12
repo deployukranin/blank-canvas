@@ -677,7 +677,7 @@ const VIPPage = () => {
               {chargeData?.amountCents && (
                 <div className="text-center">
                   <span className="text-2xl font-bold text-primary">
-                    {formatCurrency(chargeData.amountCents / 100)}
+                    {formatCurrency(chargeData.amountCents / 100, selectedPlan?.currency)}
                   </span>
                 </div>
               )}
