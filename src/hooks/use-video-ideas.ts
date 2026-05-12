@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { defaultContentSettings, type ContentSettings } from '@/pages/admin/AdminConfiguracoes';
 
 export interface VideoIdea {
   id: string;
   title: string;
   description: string;
   votes: number;
-  status: 'active' | 'reported' | 'removed';
+  status: 'active' | 'pending' | 'reported' | 'removed';
   user_id: string | null;
   created_at: string;
   hasVoted?: boolean;
