@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Sparkles,
   Play,
@@ -14,8 +15,23 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mytinglebox-logo.png";
 import heroMockup from "@/assets/landing-hero-mockup.jpg";
+
+interface PlatformPlanConfig {
+  id: string;
+  name_pt: string;
+  name_en: string;
+  name_es: string;
+  period: "monthly" | "quarterly" | "annual";
+  priceBRL: number;
+  priceUSD: number;
+  features_pt: string[];
+  features_en: string[];
+  features_es: string[];
+  highlight?: boolean;
+}
 
 const features = [
   {
@@ -50,54 +66,88 @@ const features = [
   },
 ];
 
-const plans = [
+const fallbackPlans: PlatformPlanConfig[] = [
   {
-    name: "Básico",
-    price: "R$ 49",
-    period: "/mês",
-    desc: "Para começar a monetizar.",
-    features: [
-      "Loja personalizada",
-      "Vídeos sob demanda",
-      "Pagamentos PIX & Stripe",
-      "Suporte por email",
-    ],
-    cta: "Começar grátis",
-    highlight: false,
+    id: "basic",
+    name_pt: "Básico", name_en: "Basic", name_es: "Básico",
+    period: "monthly",
+    priceBRL: 49.9, priceUSD: 9.9,
+    features_pt: ["Loja personalizada", "Vídeos sob demanda", "Pagamentos PIX & Stripe", "Suporte por email"],
+    features_en: ["Custom store", "On-demand videos", "PIX & Stripe payments", "Email support"],
+    features_es: ["Tienda personalizada", "Videos a pedido", "Pagos PIX & Stripe", "Soporte por email"],
   },
   {
-    name: "Profissional",
-    price: "R$ 99",
-    period: "/mês",
-    desc: "Para criadores em crescimento.",
-    features: [
-      "Tudo do Básico",
-      "Área VIP com assinaturas",
-      "Comunidade integrada",
-      "Domínio personalizado",
-      "Métricas avançadas",
-    ],
-    cta: "Testar 7 dias grátis",
+    id: "pro",
+    name_pt: "Profissional", name_en: "Professional", name_es: "Profesional",
+    period: "monthly",
+    priceBRL: 99.9, priceUSD: 19.9,
+    features_pt: ["Tudo do Básico", "Área VIP com assinaturas", "Comunidade integrada", "Domínio personalizado", "Métricas avançadas"],
+    features_en: ["All Basic features", "VIP subscriptions", "Integrated community", "Custom domain", "Advanced metrics"],
+    features_es: ["Todo del Básico", "Suscripciones VIP", "Comunidad integrada", "Dominio personalizado", "Métricas avanzadas"],
     highlight: true,
   },
   {
-    name: "Premium",
-    price: "R$ 199",
-    period: "/mês",
-    desc: "Para criadores estabelecidos.",
-    features: [
-      "Tudo do Profissional",
-      "Suporte prioritário",
-      "0% de taxa da plataforma",
-      "Branding white-label total",
-      "Onboarding dedicado",
-    ],
-    cta: "Falar com vendas",
-    highlight: false,
+    id: "premium",
+    name_pt: "Premium", name_en: "Premium", name_es: "Premium",
+    period: "monthly",
+    priceBRL: 199.9, priceUSD: 49.9,
+    features_pt: ["Tudo do Profissional", "Suporte prioritário", "0% de taxa da plataforma", "Branding white-label total", "Onboarding dedicado"],
+    features_en: ["All Professional features", "Priority support", "0% platform fee", "Full white-label", "Dedicated onboarding"],
+    features_es: ["Todo del Profesional", "Soporte prioritario", "0% de tarifa", "White-label total", "Onboarding dedicado"],
   },
 ];
 
 const Landing = () => {
+  const { i18n } = useTranslation();
+  const lang: "pt" | "en" | "es" = i18n.language?.startsWith("pt")
+    ? "pt"
+    : i18n.language?.startsWith("es")
+    ? "es"
+    : "en";
+  const isBR = lang === "pt";
+
+  const [plans, setPlans] = useState<PlatformPlanConfig[]>(fallbackPlans);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("app_configurations")
+        .select("config_value")
+        .eq("config_key", "platform_plans")
+        .is("store_id", null)
+        .maybeSingle();
+      const remote = data?.config_value as unknown;
+      if (!cancelled && Array.isArray(remote) && remote.length > 0) {
+        setPlans(remote as PlatformPlanConfig[]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatPrice = (p: PlatformPlanConfig) =>
+    new Intl.NumberFormat(isBR ? "pt-BR" : lang === "es" ? "es-ES" : "en-US", {
+      style: "currency",
+      currency: isBR ? "BRL" : "USD",
+      maximumFractionDigits: 0,
+    }).format(isBR ? p.priceBRL : p.priceUSD);
+
+  const periodLabel = useMemo(
+    () => ({
+      monthly: { pt: "/mês", en: "/mo", es: "/mes" }[lang],
+      quarterly: { pt: "/trimestre", en: "/quarter", es: "/trimestre" }[lang],
+      annual: { pt: "/ano", en: "/year", es: "/año" }[lang],
+    }),
+    [lang],
+  );
+
+  const ctaLabel = (highlight?: boolean) =>
+    highlight
+      ? { pt: "Testar 7 dias grátis", en: "Try 7 days free", es: "Prueba 7 días gratis" }[lang]
+      : { pt: "Começar grátis", en: "Get started", es: "Empezar gratis" }[lang];
+
   useEffect(() => {
     document.title = "TingleBox — A plataforma white-label para criadores ASMR";
     const meta = document.querySelector('meta[name="description"]');
@@ -277,62 +327,58 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((p, i) => (
-              <motion.div
-                key={p.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className={`relative rounded-2xl border p-7 ${
-                  p.highlight
-                    ? "border-purple-500/60 bg-gradient-to-b from-purple-600/20 to-purple-900/10 shadow-2xl shadow-purple-500/20 md:scale-105"
-                    : "border-white/10 bg-white/[0.03]"
-                }`}
-              >
-                {p.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold">
-                    Mais popular
+            {plans.map((p, i) => {
+              const name = p[`name_${lang}` as const] as string;
+              const features = p[`features_${lang}` as const] as string[];
+              return (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  className={`relative rounded-2xl border p-7 ${
+                    p.highlight
+                      ? "border-purple-500/60 bg-gradient-to-b from-purple-600/20 to-purple-900/10 shadow-2xl shadow-purple-500/20 md:scale-105"
+                      : "border-white/10 bg-white/[0.03]"
+                  }`}
+                >
+                  {p.highlight && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold">
+                      {{ pt: "Mais popular", en: "Most popular", es: "Más popular" }[lang]}
+                    </div>
+                  )}
+
+                  <h3 className="font-display text-xl font-bold text-white mb-1">{name}</h3>
+
+                  <div className="flex items-baseline gap-1 mb-6 mt-4">
+                    <span className="text-4xl font-bold text-white">{formatPrice(p)}</span>
+                    <span className="text-white/50 text-sm">{periodLabel[p.period]}</span>
                   </div>
-                )}
 
-                <h3 className="font-display text-xl font-bold text-white mb-1">
-                  {p.name}
-                </h3>
-                <p className="text-sm text-white/60 mb-5">{p.desc}</p>
-
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold text-white">
-                    {p.price}
-                  </span>
-                  <span className="text-white/50 text-sm">{p.period}</span>
-                </div>
-
-                <Link to="/auth">
-                  <Button
-                    className={`w-full rounded-full mb-6 ${
-                      p.highlight
-                        ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30"
-                        : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
-                    }`}
-                  >
-                    {p.cta}
-                  </Button>
-                </Link>
-
-                <ul className="space-y-3">
-                  {p.features.map((feat) => (
-                    <li
-                      key={feat}
-                      className="flex items-start gap-2 text-sm text-white/70"
+                  <Link to="/auth">
+                    <Button
+                      className={`w-full rounded-full mb-6 ${
+                        p.highlight
+                          ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/30"
+                          : "bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                      }`}
                     >
-                      <Check className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+                      {ctaLabel(p.highlight)}
+                    </Button>
+                  </Link>
+
+                  <ul className="space-y-3">
+                    {features?.map((feat) => (
+                      <li key={feat} className="flex items-start gap-2 text-sm text-white/70">
+                        <Check className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
