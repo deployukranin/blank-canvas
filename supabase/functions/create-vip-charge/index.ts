@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
 
       const params = new URLSearchParams({
         mode: 'subscription',
-        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][currency]': planCurrency,
         'line_items[0][price_data][product_data][name]': `${storeName} VIP ${body.planType}`.substring(0, 200),
         'line_items[0][price_data][unit_amount]': String(amountCents),
         'line_items[0][price_data][recurring][interval]': getPlanInterval(body.planType),
