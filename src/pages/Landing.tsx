@@ -66,54 +66,88 @@ const features = [
   },
 ];
 
-const plans = [
+const fallbackPlans: PlatformPlanConfig[] = [
   {
-    name: "Básico",
-    price: "R$ 49",
-    period: "/mês",
-    desc: "Para começar a monetizar.",
-    features: [
-      "Loja personalizada",
-      "Vídeos sob demanda",
-      "Pagamentos PIX & Stripe",
-      "Suporte por email",
-    ],
-    cta: "Começar grátis",
-    highlight: false,
+    id: "basic",
+    name_pt: "Básico", name_en: "Basic", name_es: "Básico",
+    period: "monthly",
+    priceBRL: 49.9, priceUSD: 9.9,
+    features_pt: ["Loja personalizada", "Vídeos sob demanda", "Pagamentos PIX & Stripe", "Suporte por email"],
+    features_en: ["Custom store", "On-demand videos", "PIX & Stripe payments", "Email support"],
+    features_es: ["Tienda personalizada", "Videos a pedido", "Pagos PIX & Stripe", "Soporte por email"],
   },
   {
-    name: "Profissional",
-    price: "R$ 99",
-    period: "/mês",
-    desc: "Para criadores em crescimento.",
-    features: [
-      "Tudo do Básico",
-      "Área VIP com assinaturas",
-      "Comunidade integrada",
-      "Domínio personalizado",
-      "Métricas avançadas",
-    ],
-    cta: "Testar 7 dias grátis",
+    id: "pro",
+    name_pt: "Profissional", name_en: "Professional", name_es: "Profesional",
+    period: "monthly",
+    priceBRL: 99.9, priceUSD: 19.9,
+    features_pt: ["Tudo do Básico", "Área VIP com assinaturas", "Comunidade integrada", "Domínio personalizado", "Métricas avançadas"],
+    features_en: ["All Basic features", "VIP subscriptions", "Integrated community", "Custom domain", "Advanced metrics"],
+    features_es: ["Todo del Básico", "Suscripciones VIP", "Comunidad integrada", "Dominio personalizado", "Métricas avanzadas"],
     highlight: true,
   },
   {
-    name: "Premium",
-    price: "R$ 199",
-    period: "/mês",
-    desc: "Para criadores estabelecidos.",
-    features: [
-      "Tudo do Profissional",
-      "Suporte prioritário",
-      "0% de taxa da plataforma",
-      "Branding white-label total",
-      "Onboarding dedicado",
-    ],
-    cta: "Falar com vendas",
-    highlight: false,
+    id: "premium",
+    name_pt: "Premium", name_en: "Premium", name_es: "Premium",
+    period: "monthly",
+    priceBRL: 199.9, priceUSD: 49.9,
+    features_pt: ["Tudo do Profissional", "Suporte prioritário", "0% de taxa da plataforma", "Branding white-label total", "Onboarding dedicado"],
+    features_en: ["All Professional features", "Priority support", "0% platform fee", "Full white-label", "Dedicated onboarding"],
+    features_es: ["Todo del Profesional", "Soporte prioritario", "0% de tarifa", "White-label total", "Onboarding dedicado"],
   },
 ];
 
 const Landing = () => {
+  const { i18n } = useTranslation();
+  const lang: "pt" | "en" | "es" = i18n.language?.startsWith("pt")
+    ? "pt"
+    : i18n.language?.startsWith("es")
+    ? "es"
+    : "en";
+  const isBR = lang === "pt";
+
+  const [plans, setPlans] = useState<PlatformPlanConfig[]>(fallbackPlans);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("app_configurations")
+        .select("config_value")
+        .eq("config_key", "platform_plans")
+        .is("store_id", null)
+        .maybeSingle();
+      const remote = data?.config_value as unknown;
+      if (!cancelled && Array.isArray(remote) && remote.length > 0) {
+        setPlans(remote as PlatformPlanConfig[]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatPrice = (p: PlatformPlanConfig) =>
+    new Intl.NumberFormat(isBR ? "pt-BR" : lang === "es" ? "es-ES" : "en-US", {
+      style: "currency",
+      currency: isBR ? "BRL" : "USD",
+      maximumFractionDigits: 0,
+    }).format(isBR ? p.priceBRL : p.priceUSD);
+
+  const periodLabel = useMemo(
+    () => ({
+      monthly: { pt: "/mês", en: "/mo", es: "/mes" }[lang],
+      quarterly: { pt: "/trimestre", en: "/quarter", es: "/trimestre" }[lang],
+      annual: { pt: "/ano", en: "/year", es: "/año" }[lang],
+    }),
+    [lang],
+  );
+
+  const ctaLabel = (highlight?: boolean) =>
+    highlight
+      ? { pt: "Testar 7 dias grátis", en: "Try 7 days free", es: "Prueba 7 días gratis" }[lang]
+      : { pt: "Começar grátis", en: "Get started", es: "Empezar gratis" }[lang];
+
   useEffect(() => {
     document.title = "TingleBox — A plataforma white-label para criadores ASMR";
     const meta = document.querySelector('meta[name="description"]');
