@@ -9,6 +9,32 @@ interface CreateVIPChargeRequest {
   planType: 'monthly' | 'quarterly' | 'yearly';
   customerName?: string;
   storeId?: string;
+  successUrl?: string;
+  cancelUrl?: string;
+}
+
+function jsonResponse(payload: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+function isSafeRedirectUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function getPlanInterval(planType: CreateVIPChargeRequest['planType']): 'month' | 'year' {
+  return planType === 'yearly' ? 'year' : 'month';
+}
+
+function getPlanIntervalCount(planType: CreateVIPChargeRequest['planType']): string {
+  return planType === 'quarterly' ? '3' : '1';
 }
 
 // ─── BRCode Generator (PIX Manual) ───
