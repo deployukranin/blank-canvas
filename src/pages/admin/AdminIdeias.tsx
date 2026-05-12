@@ -119,6 +119,8 @@ const AdminIdeias: React.FC = () => {
     switch (status) {
       case 'active':
         return <Badge className="bg-green-500/20 text-green-400">{t('ideasAdmin.active')}</Badge>;
+      case 'pending':
+        return <Badge className="bg-blue-500/20 text-blue-400">{t('ideasAdmin.pending', 'Pending')}</Badge>;
       case 'reported':
         return <Badge className="bg-yellow-500/20 text-yellow-400">{t('ideasAdmin.reported')}</Badge>;
       case 'removed':
