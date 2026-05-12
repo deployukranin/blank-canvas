@@ -42,7 +42,7 @@ const AdminIdeias: React.FC = () => {
       
       setIdeas((data || []).map(idea => ({
         ...idea,
-        status: idea.status as 'active' | 'reported' | 'removed',
+        status: idea.status as VideoIdea['status'],
       })));
     } catch (err) {
       console.error('Error fetching ideas:', err);
