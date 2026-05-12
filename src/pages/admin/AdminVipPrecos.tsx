@@ -45,6 +45,7 @@ const AdminVipPrecos = () => {
     localStorageKey: 'vipConfig',
     debounceMs: 2000,
     storeId: store?.id,
+    seedDefaultsIfMissing: true,
   });
 
   useEffect(() => {
