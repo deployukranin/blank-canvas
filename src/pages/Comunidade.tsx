@@ -255,6 +255,7 @@ interface IdeiaCardProps {
 }
 
 const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onReportComment, votedIdeas }: IdeiaCardProps) => {
+  const { t } = useTranslation();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const { user } = useAuth();
@@ -297,7 +298,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                 <span className="text-xs text-muted-foreground">{formatDate(idea.createdAt)}</span>
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs bg-accent/20 text-accent">
                   <Lightbulb className="w-3 h-3" />
-                  Ideia
+                  {t('storefront.ideaBadge')}
                 </span>
               </div>
               
@@ -315,7 +316,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       className="text-red-400 focus:text-red-400"
                     >
                       <Flag className="w-4 h-4 mr-2" />
-                      Denunciar
+                      {t('storefront.reportContent')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -376,7 +377,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                                 <button 
                                   onClick={() => onReportComment(comment, idea.title)}
                                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-500/20 rounded"
-                                  title="Denunciar comentário"
+                                  title={t('storefront.reportCommentTooltip')}
                                 >
                                   <Flag className="w-3 h-3 text-red-400" />
                                 </button>
@@ -388,7 +389,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground text-center py-2">Nenhum comentário ainda</p>
+                    <p className="text-xs text-muted-foreground text-center py-2">{t('storefront.noCommentsYet')}</p>
                   )}
 
                   {user && (
@@ -396,7 +397,7 @@ const IdeiaCard = ({ idea, index, rank, onVote, onAddComment, onReportIdea, onRe
                       <Input
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Adicione um comentário..."
+                        placeholder={t('storefront.addComment')}
                         className="text-xs h-8"
                         onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
                       />
@@ -672,7 +673,7 @@ const ComunidadePage = () => {
     } catch (error) {
       toast({
         title: t('storefront.reportError'),
-        description: error instanceof Error ? error.message : 'Não foi possível enviar a denúncia',
+        description: error instanceof Error ? error.message : t('storefront.reportSubmitErrorFallback'),
         variant: 'destructive',
       });
     }
@@ -735,7 +736,7 @@ const ComunidadePage = () => {
   };
 
   return (
-    <MobileLayout title="Comunidade" hideHeader>
+    <MobileLayout title={t('storefront.communityTitle')} hideHeader>
       <div className="px-4 py-6">
         {/* Header do fórum */}
         <div className="flex items-center justify-end mb-4">
@@ -856,7 +857,7 @@ const ComunidadePage = () => {
             {config.community.vipTabEnabled && (
               <TabsTrigger value="vip" className="flex-1 gap-2">
                 <Crown className="w-4 h-4" />
-                {config.community.vipTabLabel || 'Área VIP'}
+                {config.community.vipTabLabel || t('storefront.vipArea')}
               </TabsTrigger>
             )}
           </TabsList>
