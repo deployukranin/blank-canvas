@@ -59,7 +59,11 @@ const IdeiasPage = () => {
     if (result.success) {
       setNewIdea({ title: '', description: '' });
       trackEvent('idea_submitted', { ideaId: result.idea?.id });
-      toast({ title: t('storefront.ideaSent'), description: t('storefront.ideaSentDesc') });
+      if ((result as { pending?: boolean }).pending) {
+        toast({ title: t('storefront.ideaPendingTitle', 'Idea submitted!'), description: t('storefront.ideaPendingDesc', 'Your idea is awaiting approval before being shown.') });
+      } else {
+        toast({ title: t('storefront.ideaSent'), description: t('storefront.ideaSentDesc') });
+      }
     } else {
       toast({ title: t('storefront.errorSubmitting'), description: result.error, variant: 'destructive' });
     }
