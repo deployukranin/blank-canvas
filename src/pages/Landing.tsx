@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Sparkles,
   Play,
@@ -14,8 +15,23 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mytinglebox-logo.png";
 import heroMockup from "@/assets/landing-hero-mockup.jpg";
+
+interface PlatformPlanConfig {
+  id: string;
+  name_pt: string;
+  name_en: string;
+  name_es: string;
+  period: "monthly" | "quarterly" | "annual";
+  priceBRL: number;
+  priceUSD: number;
+  features_pt: string[];
+  features_en: string[];
+  features_es: string[];
+  highlight?: boolean;
+}
 
 const features = [
   {
