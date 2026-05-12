@@ -418,22 +418,22 @@ const AdminPagamentosPix = () => {
                 <div>
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <QrCode className="w-5 h-5 text-primary" />
-                    PIX Manual
+                    {t('adminPayments.pixManual')}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Um QR code com o valor da venda é gerado para o cliente. O pagamento vai direto para sua chave PIX. Você confirma manualmente.
+                    {t('adminPayments.pixManualDescription')}
                   </p>
                 </div>
                 {config.activeGateway === 'pix_manual' && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                    <Check className="w-3 h-3 mr-1" /> Ativo
+                    <Check className="w-3 h-3 mr-1" /> {t('adminPayments.active')}
                   </Badge>
                 )}
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label>Tipo de Chave PIX</Label>
+                  <Label>{t('adminPayments.pixKeyType')}</Label>
                   <div className="flex flex-wrap gap-2 mt-1.5">
                     {Object.entries(pixKeyLabels).map(([key, label]) => (
                       <button
@@ -458,9 +458,9 @@ const AdminPagamentosPix = () => {
                 </div>
 
                 <div>
-                  <Label>Chave PIX</Label>
+                  <Label>{t('adminPayments.pixKey')}</Label>
                   <Input
-                    placeholder={pixKeyPlaceholders[config.pixManual.keyType] || 'Digite sua chave PIX'}
+                    placeholder={pixKeyPlaceholders[config.pixManual.keyType] || t('adminPayments.pixKeyPlaceholderDefault')}
                     value={config.pixManual.key}
                     maxLength={pixKeyMaxLength[config.pixManual.keyType] || 77}
                     onChange={(e) => {
@@ -483,9 +483,9 @@ const AdminPagamentosPix = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Nome do Recebedor</Label>
+                    <Label>{t('adminPayments.receiverName')}</Label>
                     <Input
-                      placeholder="Nome completo"
+                      placeholder={t('adminPayments.fullName')}
                       value={config.pixManual.receiverName}
                       onChange={(e) => setConfig(prev => ({
                         ...prev,
@@ -496,7 +496,7 @@ const AdminPagamentosPix = () => {
                     />
                   </div>
                   <div>
-                    <Label>Estado</Label>
+                    <Label>{t('adminPayments.state')}</Label>
                     <Select
                       value={config.pixManual.city}
                       onValueChange={(value) => setConfig(prev => ({
@@ -505,7 +505,7 @@ const AdminPagamentosPix = () => {
                       }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Selecione o estado" />
+                        <SelectValue placeholder={t('adminPayments.selectState')} />
                       </SelectTrigger>
                       <SelectContent>
                         {[
@@ -524,7 +524,7 @@ const AdminPagamentosPix = () => {
               <div className="flex justify-end pt-2">
                 <Button onClick={handleSavePix} disabled={isSaving}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? 'Salvando...' : 'Salvar e Ativar'}
+                  {isSaving ? t('adminPayments.saving') : t('adminPayments.saveAndActivate')}
                 </Button>
               </div>
             </GlassCard>
@@ -537,12 +537,12 @@ const AdminPagamentosPix = () => {
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <Zap className="w-8 h-8 text-primary/50" />
                 </div>
-                <h3 className="text-lg font-semibold text-muted-foreground">PIX Automático</h3>
+                <h3 className="text-lg font-semibold text-muted-foreground">{t('adminPayments.pixAuto')}</h3>
                 <p className="text-sm text-muted-foreground/60 mt-2 max-w-sm">
-                  Confirmação automática de pagamento PIX com notificações instantâneas via webhook. Em breve.
+                  {t('adminPayments.pixAutoDescription')}
                 </p>
                 <Badge variant="outline" className="mt-4">
-                  <Clock className="w-3 h-3 mr-1" /> Em Breve
+                  <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.comingSoonBadge')}
                 </Badge>
               </div>
             </GlassCard>
