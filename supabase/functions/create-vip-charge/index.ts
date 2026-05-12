@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
         return jsonResponse({ success: false, error: 'Store has not connected Stripe yet' }, 400);
       }
       const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
-      const successUrl = body.successUrl || `${origin}${new URL(req.url).pathname.includes('/functions/v1') ? '' : ''}/vip?payment=success`;
+      const successUrl = body.successUrl || `${origin}/vip?payment=success`;
       const cancelUrl = body.cancelUrl || `${origin}/vip?payment=cancelled`;
       if (!isSafeRedirectUrl(successUrl) || !isSafeRedirectUrl(cancelUrl)) {
         return jsonResponse({ success: false, error: 'Invalid redirect URLs' }, 400);
