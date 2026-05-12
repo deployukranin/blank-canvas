@@ -265,10 +265,12 @@ Deno.serve(async (req) => {
         customer_email: userEmail !== 'User' ? userEmail : '',
         'metadata[store_id]': storeId || '',
         'metadata[user_id]': userId,
+        'metadata[correlation_id]': correlationID,
         'metadata[product_type]': 'vip_subscription',
         'metadata[plan_type]': body.planType,
         'subscription_data[metadata][store_id]': storeId || '',
         'subscription_data[metadata][user_id]': userId,
+        'subscription_data[metadata][correlation_id]': correlationID,
         'subscription_data[metadata][product_type]': 'vip_subscription',
         'subscription_data[metadata][plan_type]': body.planType,
       });
