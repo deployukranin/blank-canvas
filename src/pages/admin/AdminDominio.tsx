@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Globe, CheckCircle2, AlertCircle, Loader2, Trash2, RefreshCw, ExternalLink, Headset } from 'lucide-react';
+import { Globe, CheckCircle2, AlertCircle, Loader2, Trash2, RefreshCw, ExternalLink, Headset, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
