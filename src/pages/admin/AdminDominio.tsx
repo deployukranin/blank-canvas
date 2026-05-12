@@ -324,13 +324,13 @@ const AdminDominio: React.FC = () => {
               <Lock className="w-7 h-7 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-semibold text-foreground">
-              {t('admin.domain.trialLockedTitle', 'Recurso disponível após o período de teste')}
+              {trialCopy.title}
             </h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              {t('admin.domain.trialLockedDescription', 'O domínio personalizado é liberado após a contratação de um plano. Durante o trial, sua loja fica disponível pelo URL padrão.')}
+              {trialCopy.description}
             </p>
             <Button onClick={() => navigate(`${basePath}/admin/planos`)} className="mt-2">
-              {t('admin.domain.goToPlans', 'Ver planos de assinatura')}
+              {trialCopy.cta}
             </Button>
           </GlassCard>
         </div>
