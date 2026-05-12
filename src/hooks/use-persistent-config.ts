@@ -72,9 +72,17 @@ export function usePersistentConfig<T>({
               }
             } else {
               setConfigState(defaultValue);
+              if (seedDefaultsIfMissing) {
+                const seeded = await saveConfig(configKey, defaultValue, storeId);
+                if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+              }
             }
           } else {
             setConfigState(defaultValue);
+            if (seedDefaultsIfMissing) {
+              const seeded = await saveConfig(configKey, defaultValue, storeId);
+              if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+            }
           }
         }
       } catch (err) {
