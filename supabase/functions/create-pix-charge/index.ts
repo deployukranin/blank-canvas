@@ -365,8 +365,11 @@ Deno.serve(async (req) => {
         correlation_id: correlationID,
         qr_code_image: qrCodeImage,
         br_code: brCode,
+        checkout_url: checkoutUrl,
+        stripe_session_id: stripeSessionId,
         expires_at: chargeExpiresAt.toISOString(),
         amount_cents: amountCents,
+        payment_method: checkoutUrl ? 'stripe' : 'pix_manual',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
