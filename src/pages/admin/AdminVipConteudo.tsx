@@ -193,11 +193,11 @@ const AdminVipConteudo = () => {
 
   const handleSave = async () => {
     if (!formTitle.trim() || !formContent.trim()) {
-      toast({ title: 'Preencha título e conteúdo', variant: 'destructive' });
+      toast({ title: t('vipAdmin.fillRequired'), variant: 'destructive' });
       return;
     }
     if (!storeId) {
-      toast({ title: 'Loja não encontrada', variant: 'destructive' });
+      toast({ title: t('vipAdmin.storeNotFound'), variant: 'destructive' });
       return;
     }
 
