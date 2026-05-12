@@ -258,11 +258,18 @@ const CustomsPage = () => {
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
       storeId: store?.id,
-    });
+      successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
+      cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
+    } as any);
 
     setIsProcessing(false);
 
     if (result.success) {
+      // Stripe checkout: redirect to hosted page
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
       setAudioChargeData(result);
       setShowAudioOrderDialog(false);
       setShowAudioPixModal(true);
