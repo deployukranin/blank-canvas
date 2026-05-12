@@ -346,7 +346,7 @@ const AdminVipConteudo = () => {
                     <h3 className="font-semibold truncate">{item.title}</h3>
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{item.content}</p>
                     {item.media_url && (
-                      <p className="text-xs text-primary mt-2 truncate">📎 Mídia anexada</p>
+                      <p className="text-xs text-primary mt-2 truncate">📎 {t('vipAdmin.mediaAttached')}</p>
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
