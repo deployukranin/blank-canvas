@@ -236,20 +236,67 @@ Deno.serve(async (req) => {
       qrCodeImage = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(brCode)}&choe=UTF-8`;
       paymentMethod = 'pix_manual';
     }
-    // ─── Stripe: placeholder for future integration ───
+    // ─── Stripe Connect: create Checkout session as Direct Charge ───
     else if (activeGateway === 'stripe') {
-      // TODO: Create Stripe checkout session using store's stripe keys
-      return new Response(
-        JSON.stringify({ success: false, error: 'Stripe payments coming soon. Please configure Manual PIX for now.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (!stripeSecretKey) {
+        return jsonResponse({ success: false, error: 'Stripe is not configured on the platform' }, 500);
+      }
+      if (!stripeAccountId) {
+        return jsonResponse({ success: false, error: 'Store has not connected Stripe yet' }, 400);
+      }
+      const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
+      const successUrl = body.successUrl || `${origin}${new URL(req.url).pathname.includes('/functions/v1') ? '' : ''}/vip?payment=success`;
+      const cancelUrl = body.cancelUrl || `${origin}/vip?payment=cancelled`;
+      if (!isSafeRedirectUrl(successUrl) || !isSafeRedirectUrl(cancelUrl)) {
+        return jsonResponse({ success: false, error: 'Invalid redirect URLs' }, 400);
+      }
+
+      const params = new URLSearchParams({
+        mode: 'subscription',
+        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][product_data][name]': `${storeName} VIP ${body.planType}`.substring(0, 200),
+        'line_items[0][price_data][unit_amount]': String(amountCents),
+        'line_items[0][price_data][recurring][interval]': getPlanInterval(body.planType),
+        'line_items[0][price_data][recurring][interval_count]': getPlanIntervalCount(body.planType),
+        'line_items[0][quantity]': '1',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: userEmail !== 'User' ? userEmail : '',
+        'metadata[store_id]': storeId || '',
+        'metadata[user_id]': userId,
+        'metadata[product_type]': 'vip_subscription',
+        'metadata[plan_type]': body.planType,
+        'subscription_data[metadata][store_id]': storeId || '',
+        'subscription_data[metadata][user_id]': userId,
+        'subscription_data[metadata][product_type]': 'vip_subscription',
+        'subscription_data[metadata][plan_type]': body.planType,
+      });
+
+      const sessionRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Stripe-Account': stripeAccountId,
+        },
+        body: params,
+      });
+
+      if (!sessionRes.ok) {
+        const errBody = await sessionRes.text();
+        console.error('Stripe VIP checkout error:', errBody);
+        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session' }, 500);
+      }
+
+      const session = await sessionRes.json();
+      stripeCheckoutUrl = session.url;
+      stripeSessionId = session.id;
+      paymentMethod = 'stripe';
     }
     // ─── No payment configured ───
     else {
-      return new Response(
-        JSON.stringify({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ success: false, error: 'No payment method configured for this store. Ask the creator to set up payments.' }, 400);
     }
 
     // Create pending VIP subscription
