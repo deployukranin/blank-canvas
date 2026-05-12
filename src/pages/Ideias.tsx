@@ -20,7 +20,7 @@ const IdeiasPage = () => {
   const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const { ideas, isLoading, toggleVote, submitIdea, reportIdea } = useVideoIdeas();
+  const { ideas, isLoading, toggleVote, submitIdea, reportIdea, contentSettings } = useVideoIdeas();
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportingId, setReportingId] = useState<string | null>(null);
