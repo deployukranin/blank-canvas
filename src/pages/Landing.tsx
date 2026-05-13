@@ -80,7 +80,7 @@ const tr = {
       "Sell custom videos, monetize VIP content and build your community — all under your brand, no middlemen.",
     ctaStart: "Get started free",
     ctaSeeFeatures: "See features",
-    heroAlt: "Preview of the TingleBox platform for ASMR creators",
+    heroAlt: "Preview of the MyTingleBox platform for ASMR creators",
     featuresKicker: "Features",
     featuresTitle1: "Everything you need to",
     featuresTitle2: "live from your art",
