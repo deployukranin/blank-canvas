@@ -44,7 +44,7 @@ const tr = {
       "Venda vídeos personalizados, monetize conteúdo VIP e construa sua comunidade — tudo com sua marca, sem intermediários.",
     ctaStart: "Começar grátis",
     ctaSeeFeatures: "Ver recursos",
-    heroAlt: "Pré-visualização da plataforma TingleBox para criadores ASMR",
+    heroAlt: "Pré-visualização da plataforma MyTingleBox para criadores ASMR",
     featuresKicker: "Recursos",
     featuresTitle1: "Tudo que você precisa para",
     featuresTitle2: "viver da sua arte",
@@ -60,7 +60,7 @@ const tr = {
     ctaFinalSub:
       "Junte-se aos criadores que já estão transformando sua audiência em renda recorrente.",
     ctaFinalBtn: "Criar minha loja agora",
-    docTitle: "TingleBox — A plataforma white-label para criadores ASMR",
+    docTitle: "MyTingleBox — A plataforma white-label para criadores ASMR",
     docDesc:
       "Crie sua loja ASMR, venda vídeos personalizados, monetize conteúdo VIP e construa sua comunidade. Setup em minutos, sem código.",
     features: [
@@ -96,7 +96,7 @@ const tr = {
     ctaFinalSub:
       "Join the creators who are already turning their audience into recurring income.",
     ctaFinalBtn: "Create my store now",
-    docTitle: "TingleBox — The white-label platform for ASMR creators",
+    docTitle: "MyTingleBox — The white-label platform for ASMR creators",
     docDesc:
       "Build your ASMR store, sell custom videos, monetize VIP content and grow your community. Set up in minutes, no code.",
     features: [
@@ -116,7 +116,7 @@ const tr = {
       "Vende videos personalizados, monetiza contenido VIP y construye tu comunidad — todo con tu marca, sin intermediarios.",
     ctaStart: "Empezar gratis",
     ctaSeeFeatures: "Ver funciones",
-    heroAlt: "Vista previa de la plataforma TingleBox para creadores ASMR",
+    heroAlt: "Vista previa de la plataforma MyTingleBox para creadores ASMR",
     featuresKicker: "Funciones",
     featuresTitle1: "Todo lo que necesitas para",
     featuresTitle2: "vivir de tu arte",
@@ -132,7 +132,7 @@ const tr = {
     ctaFinalSub:
       "Únete a los creadores que ya están convirtiendo su audiencia en ingresos recurrentes.",
     ctaFinalBtn: "Crear mi tienda ahora",
-    docTitle: "TingleBox — La plataforma white-label para creadores ASMR",
+    docTitle: "MyTingleBox — La plataforma white-label para creadores ASMR",
     docDesc:
       "Crea tu tienda ASMR, vende videos personalizados, monetiza contenido VIP y construye tu comunidad. Configuración en minutos, sin código.",
     features: [
