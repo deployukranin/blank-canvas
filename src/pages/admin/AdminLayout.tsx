@@ -55,6 +55,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: `${base}/domain`, icon: Globe, label: t('admin.domain.title', 'Custom Domain') },
     { path: `${base}/plans`, icon: Gem, label: t('admin.plans.title') },
     { path: `${base}/settings`, icon: Settings, label: t('admin.settings') },
+    { path: `${base}/referrals`, icon: Gift, label: 'Indicações' },
     { path: `${base}/support`, icon: LifeBuoy, label: t('admin.supportLabel') },
   ];
 
