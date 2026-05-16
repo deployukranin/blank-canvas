@@ -1307,7 +1307,7 @@
       "cookieDays": "Cookie days",
       "holdingDays": "Holding days",
       "holdingHint": "Days after payment until the commission is released.",
-      "minPayout": "Minimum payout (R$)",
+      "minPayout": "Minimum payout (USD)",
       "rules": "Rules / notes (text shown to the affiliate)",
       "rulesPlaceholder": "E.g.: Payment via PIX within 5 business days after request...",
       "save": "Save",
