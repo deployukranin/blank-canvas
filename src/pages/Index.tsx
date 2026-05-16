@@ -30,6 +30,7 @@ const Index = () => {
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
   const quickActions = config.quickActions.filter(action => action.enabled);
+  const { posts: feedPosts } = useFeedPosts();
 
   const channelId = config.youtube?.channelId?.trim() || '';
   const youtubeEnabled = Boolean(config.youtube?.enabled) && Boolean(channelId);
