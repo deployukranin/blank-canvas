@@ -68,11 +68,11 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
 
               <p className="text-center text-xs text-muted-foreground mt-4">
                 Ao continuar, você concorda com nossos{' '}
-                <Link to={isTenantScope ? `${basePath}/terms` : "/terms"} className="underline underline-offset-2 hover:text-foreground">
+                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
                   Termos de Uso
                 </Link>{' '}
                 e{' '}
-                <Link to={isTenantScope ? `${basePath}/privacy` : "/privacy"} className="underline underline-offset-2 hover:text-foreground">
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
                   Política de Privacidade
                 </Link>
               </p>
