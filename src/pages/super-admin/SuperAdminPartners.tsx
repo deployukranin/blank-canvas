@@ -26,6 +26,8 @@ const fmtBRL = (cents: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 
 const SuperAdminPartners: React.FC = () => {
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`superAdmin.partners.${k}`, opts as any);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
