@@ -39,7 +39,7 @@ const ClientAffiliate: React.FC = () => {
         supabase.from('app_configurations').select('config_value').eq('store_id', store.id).eq('config_key', 'affiliate_config').maybeSingle(),
         supabase.from('store_affiliates').select('id, code, status').eq('store_id', store.id).eq('user_id', user.id).maybeSingle(),
       ]);
-      setConfig((cfgRes.data?.config_value as Config) || null);
+      setConfig((cfgRes.data?.config_value as unknown as Config) || null);
       const row = (affRes.data as AffRow) || null;
       setAff(row);
       if (row) {
