@@ -27,7 +27,7 @@ const fmtBRL = (cents: number) =>
 
 const SuperAdminPartners: React.FC = () => {
   const { t } = useTranslation();
-  const tp = (k: string, opts?: any) => t(`superAdmin.partners.${k}`, opts as any);
+  const tp = (k: string, opts?: any) => t(`superAdmin.partners.${k}`, opts as any) as string;
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
