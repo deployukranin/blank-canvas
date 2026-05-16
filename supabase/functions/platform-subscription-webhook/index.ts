@@ -182,6 +182,13 @@ Deno.serve(async (req) => {
             .update({ plan_type: "trial", status: "suspended" })
             .eq("id", storeId);
           if (error) console.error("Error cancelling subscription:", error);
+
+          // Cancel any pending referral commission tied to this store
+          await supabaseAdmin
+            .from("referral_commissions")
+            .update({ status: "cancelled", cancel_reason: "subscription_deleted" })
+            .eq("referred_store_id", storeId)
+            .in("status", ["pending"]);
         }
         break;
       }
