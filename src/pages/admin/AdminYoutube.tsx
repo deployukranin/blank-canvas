@@ -59,6 +59,22 @@ const AdminYoutube = () => {
   const { config, updateYouTube } = useWhiteLabel();
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
+  const [channelInput, setChannelInput] = useState(channelId);
+
+  useEffect(() => {
+    setChannelInput(channelId);
+  }, [channelId]);
+
+  const handleSaveChannel = () => {
+    const value = channelInput.trim();
+    updateYouTube({ ...(config.youtube || {}), channelId: value } as any);
+    toast({
+      title: t("common.save"),
+      description: value
+        ? t("youtubeAdmin.channelSaved", "Channel saved")
+        : t("youtubeAdmin.channelCleared", "Channel cleared"),
+    });
+  };
 
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: mergeWithDefaults(config.youtube?.categories),
