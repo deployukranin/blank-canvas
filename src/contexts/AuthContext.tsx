@@ -25,7 +25,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  requireAuth: (callback: () => void) => void;
+  requireAuth: (callback: () => void, authPath?: string) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
 
@@ -171,13 +171,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [signOut]);
 
   const requireAuth = useCallback(
-    (callback: () => void) => {
+    (callback: () => void, authPath = "/auth") => {
       if (user) {
         callback();
       } else {
         setPendingCallback(() => callback);
-        // Navigate to auth page
-        window.location.href = "/auth";
+        window.location.href = authPath;
       }
     },
     [user]
