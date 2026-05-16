@@ -9,6 +9,7 @@ import { TenantProvider } from "@/contexts/TenantContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
+import { PartnerRoute } from "@/components/auth/PartnerRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
