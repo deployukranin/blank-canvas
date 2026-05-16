@@ -176,13 +176,24 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { count: profilesCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: vipCount } = await supabase.from('vip_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active');
-        const { data: ordersData, count: ordersCount } = await supabase.from('custom_orders').select('*', { count: 'exact' });
+        let usersQuery = supabase.from('store_users').select('*', { count: 'exact', head: true });
+        let vipQuery = supabase.from('vip_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active');
+        let ordersQuery = supabase.from('custom_orders').select('*', { count: 'exact' });
+        let pendingQuery = supabase.from('custom_orders').select('id, customer_name, category_name, amount_cents').eq('status', 'pending').order('created_at', { ascending: false }).limit(5);
+
+        if (storeId) {
+          usersQuery = usersQuery.eq('store_id', storeId);
+          vipQuery = vipQuery.eq('store_id', storeId);
+          ordersQuery = ordersQuery.eq('store_id', storeId);
+          pendingQuery = pendingQuery.eq('store_id', storeId);
+        }
+
+        const [{ count: usersCount }, { count: vipCount }, { data: ordersData, count: ordersCount }, { data: pendingData, count: pendingCount }] = await Promise.all([
+          usersQuery, vipQuery, ordersQuery, pendingQuery,
+        ]);
         const paidOrders = ordersData?.filter(o => o.status === 'paid' || o.status === 'completed') || [];
         const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
-        const { data: pendingData, count: pendingCount } = await supabase.from('custom_orders').select('id, customer_name, category_name, amount_cents').eq('status', 'pending').order('created_at', { ascending: false }).limit(5);
-        setStats({ totalUsers: profilesCount || 0, totalVIP: vipCount || 0, totalOrders: ordersCount || 0, revenue: totalRevenue, pendingOrders: pendingCount || 0, newUsersToday: 0 });
+        setStats({ totalUsers: usersCount || 0, totalVIP: vipCount || 0, totalOrders: ordersCount || 0, revenue: totalRevenue, pendingOrders: pendingCount || 0, newUsersToday: 0 });
         setPendingOrders(pendingData || []);
       } catch (error) {
         console.error('Error fetching admin stats:', error);
@@ -191,7 +202,7 @@ const AdminDashboard: React.FC = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [storeId]);
 
   const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
   const chartData = dayKeys.map((key, i) => ({

@@ -20,7 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { mockFeedPosts, mockForumIdeas, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { mockFeedPosts, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { useVideoIdeas } from '@/hooks/use-video-ideas';
 import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
 // Content moderation removed - inline simple check
 const moderateContent = (content: string) => ({ isBlocked: false, blockedWords: [] as string[] });
@@ -469,8 +470,23 @@ const ComunidadePage = () => {
   })();
 
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [ideas, setIdeas] = useState<ForumIdea[]>(mockForumIdeas);
-  const [votedIdeas, setVotedIdeas] = useState<string[]>([]);
+  const { ideas: dbIdeas, toggleVote: dbToggleVote, submitIdea: dbSubmitIdea } = useVideoIdeas();
+  const [localComments, setLocalComments] = useState<Record<string, ForumComment[]>>({});
+  const ideas = useMemo<ForumIdea[]>(
+    () => dbIdeas.map(i => ({
+      id: i.id,
+      title: i.title,
+      description: i.description,
+      votes: i.votes,
+      authorUsername: i.authorName || 'user',
+      authorAvatar: '💡',
+      createdAt: i.created_at,
+      commentsCount: (localComments[i.id]?.length) || 0,
+      comments: localComments[i.id] || [],
+    })),
+    [dbIdeas, localComments]
+  );
+  const votedIdeas = useMemo(() => dbIdeas.filter(i => i.hasVoted).map(i => i.id), [dbIdeas]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });
   const [sortBy, setSortBy] = useState<'votes' | 'recent'>('votes');
@@ -534,39 +550,26 @@ const ComunidadePage = () => {
     return map;
   }, [ideas, reportedIds]);
 
-  const handleVote = (ideaId: string) => {
+  const handleVote = async (ideaId: string) => {
     if (!user) {
       requireAuth(() => handleVote(ideaId));
       return;
     }
 
     const idea = ideas.find(i => i.id === ideaId);
-    
-    if (votedIdeas.includes(ideaId)) {
-      setVotedIdeas(prev => prev.filter(id => id !== ideaId));
-      setIdeas(prev => prev.map(idea =>
-        idea.id === ideaId ? { ...idea, votes: idea.votes - 1 } : idea
-      ));
-    } else {
-      setVotedIdeas(prev => [...prev, ideaId]);
-      setIdeas(prev => prev.map(idea =>
-        idea.id === ideaId ? { ...idea, votes: idea.votes + 1 } : idea
-      ));
+    const wasVoted = votedIdeas.includes(ideaId);
+    const result = await dbToggleVote(ideaId);
 
-      if (idea && idea.authorUsername !== user.username) {
-        // Add notification
-        addNotification({
-          type: 'vote',
-          ideaId,
-          ideaTitle: idea.title,
-          fromUsername: user.username || 'user',
-          fromAvatar: '👍',
-         message: t('storefront.votedOnIdea'),
-        });
-
-        // Send push notification to idea author
-        notifyVote(idea.title, user.username || 'user');
-      }
+    if (result.success && !wasVoted && idea && idea.authorUsername !== user.username) {
+      addNotification({
+        type: 'vote',
+        ideaId,
+        ideaTitle: idea.title,
+        fromUsername: user.username || 'user',
+        fromAvatar: '👍',
+        message: t('storefront.votedOnIdea'),
+      });
+      notifyVote(idea.title, user.username || 'user');
     }
   };
 
@@ -598,15 +601,10 @@ const ComunidadePage = () => {
       createdAt: new Date().toISOString(),
     };
 
-    setIdeas(prev => prev.map(idea =>
-      idea.id === ideaId
-        ? {
-            ...idea,
-            comments: [...(idea.comments || []), newComment],
-            commentsCount: (idea.commentsCount || 0) + 1,
-          }
-        : idea
-    ));
+    setLocalComments(prev => ({
+      ...prev,
+      [ideaId]: [...(prev[ideaId] || []), newComment],
+    }));
 
     // Add reputation points for commenting
     addPoints('comment_given', ideaId);
@@ -688,7 +686,7 @@ const ComunidadePage = () => {
     setReportTarget(null);
   };
 
-  const handleCreateIdea = () => {
+  const handleCreateIdea = async () => {
     if (!user) {
       requireAuth(() => setIsCreateOpen(true));
       return;
@@ -703,10 +701,9 @@ const ComunidadePage = () => {
       return;
     }
 
-    // Check for blocked content in title and description
     const titleModeration = moderateContent(newIdea.title);
     const descModeration = moderateContent(newIdea.description);
-    
+
     if (titleModeration.isBlocked || descModeration.isBlocked) {
       const blockedWords = [...titleModeration.blockedWords, ...descModeration.blockedWords];
       toast({
@@ -717,28 +714,20 @@ const ComunidadePage = () => {
       return;
     }
 
-    const idea: ForumIdea = {
-      id: `idea-${Date.now()}`,
-      title: newIdea.title,
-      description: newIdea.description,
-      votes: 0,
-      authorUsername: user.username || 'user',
-      authorAvatar: '💡',
-      createdAt: new Date().toISOString(),
-      commentsCount: 0,
-      comments: [],
-    };
+    const result = await dbSubmitIdea(newIdea.title, newIdea.description);
+    if (!result.success) {
+      toast({ title: t('storefront.errorSubmitting'), description: result.error, variant: 'destructive' });
+      return;
+    }
 
-    setIdeas(prev => [idea, ...prev]);
     setNewIdea({ title: '', description: '' });
     setIsCreateOpen(false);
 
-    // Add reputation points for creating an idea
-    addPoints('idea_created', idea.id);
+    if (result.idea?.id) addPoints('idea_created', result.idea.id);
 
     toast({
-      title: t('storefront.ideaCreated'),
-      description: t('storefront.ideaCreatedDesc'),
+      title: (result as { pending?: boolean }).pending ? t('storefront.ideaPendingTitle', 'Idea submitted!') : t('storefront.ideaCreated'),
+      description: (result as { pending?: boolean }).pending ? t('storefront.ideaPendingDesc', 'Your idea is awaiting approval before being shown.') : t('storefront.ideaCreatedDesc'),
     });
   };
 
