@@ -147,27 +147,54 @@ Deno.serve(async (req) => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Email inválido" }, 400);
       if (password.length < 8) return json({ error: "Senha deve ter ao menos 8 caracteres" }, 400);
 
+      const promote = body.promote_if_exists !== false; // default true
+      const SRK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
       const createRes = await fetch(`${url}/auth/v1/admin/users`, {
         method: "POST",
         headers: {
-          apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!}`,
+          apikey: SRK,
+          Authorization: `Bearer ${SRK}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password, email_confirm: true }),
       });
       const createData = await createRes.json();
-      if (!createRes.ok) return json({ error: createData?.msg || createData?.message || "Falha ao criar usuário" }, 400);
-      const newUserId = createData?.id;
+      let newUserId: string | undefined = createData?.id;
+      let promoted = false;
+
+      if (!createRes.ok) {
+        const msg = String(createData?.msg || createData?.message || createData?.error || "").toLowerCase();
+        const alreadyExists = msg.includes("already") || msg.includes("registered") || msg.includes("exists");
+        if (!alreadyExists || !promote) {
+          return json({ error: createData?.msg || createData?.message || "Falha ao criar usuário", code: alreadyExists ? "email_exists" : undefined }, 400);
+        }
+        // Find existing user by email
+        const lookup = await fetch(`${url}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, {
+          headers: { apikey: SRK, Authorization: `Bearer ${SRK}` },
+        });
+        const lookupData = await lookup.json().catch(() => ({}));
+        const found = (lookupData?.users || []).find((u: any) => (u.email || "").toLowerCase() === email);
+        if (!found?.id) return json({ error: "Email já cadastrado mas usuário não encontrado" }, 400);
+        newUserId = found.id;
+        promoted = true;
+      }
+
       if (!newUserId) return json({ error: "Sem user id" }, 500);
+
+      // Check if already has partner role
+      const existing = await sb(`/rest/v1/user_roles?user_id=eq.${newUserId}&role=eq.partner&select=role&limit=1`);
+      if (existing.ok && Array.isArray(existing.data) && existing.data.length > 0) {
+        return json({ success: true, user_id: newUserId, email, promoted: true, already_partner: true });
+      }
 
       const insRes = await sb(`/rest/v1/user_roles`, {
         method: "POST",
         body: JSON.stringify({ user_id: newUserId, role: "partner" }),
       });
-      if (!insRes.ok) return json({ error: "Usuário criado mas role não atribuída" }, 500);
+      if (!insRes.ok) return json({ error: "Usuário encontrado mas role não atribuída" }, 500);
 
-      return json({ success: true, user_id: newUserId, email });
+      return json({ success: true, user_id: newUserId, email, promoted });
     }
 
     if (action === "delete") {
