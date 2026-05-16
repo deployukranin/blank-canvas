@@ -206,6 +206,9 @@ const SuperAdminPartners: React.FC = () => {
                     <Button size="sm" variant="outline" onClick={() => openAssign(p.user_id)} className="gap-1">
                       <Plus className="w-3 h-3" /> Atribuir loja
                     </Button>
+                    <Button size="sm" variant="outline" onClick={() => { setResetFor(p); setResetPwd(''); }} className="gap-1">
+                      <KeyRound className="w-3 h-3" /> Senha
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDelete(p)} className="text-red-400 hover:text-red-300">
                       <Trash2 className="w-4 h-4" />
                     </Button>
