@@ -58,6 +58,7 @@ export function useUserRole() {
     isSuperAdmin,
     isCreator,
     isClient,
+    isPartner,
     isStaff,
   };
 }
