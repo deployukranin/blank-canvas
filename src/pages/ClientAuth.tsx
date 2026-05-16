@@ -79,7 +79,7 @@ const ClientAuth = () => {
 
     setIsSubmitting(true);
     try {
-      const result = await signUp(signupEmail, signupPassword);
+      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`);
 
       if (!result.success) {
         toast.error(result.error || "Erro ao criar conta");
