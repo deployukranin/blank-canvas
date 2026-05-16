@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 import { VideoChat } from "@/components/video/VideoChat";
 import { VideoReactions } from "@/components/video/VideoReactions";
+import { useTenant } from "@/contexts/TenantContext";
 import type { YouTubeVideoItem } from "@/hooks/use-youtube-videos";
 
 interface VideoWatchModalProps {
@@ -29,6 +30,8 @@ export const VideoWatchModal = ({
   onSelectVideo,
   startAtSeconds,
 }: VideoWatchModalProps) => {
+  const { basePath, isTenantScope } = useTenant();
+  const customsPath = isTenantScope ? `${basePath}/customs` : '/customs';
   const otherVideos = useMemo(() => {
     if (!selectedVideo) return [];
     return videos
@@ -96,7 +99,7 @@ export const VideoWatchModal = ({
               </div>
 
               <div>
-                <Link to="/customs">
+                <Link to={customsPath}>
                   <Button className="w-full bg-gradient-to-r from-primary to-accent">
                     Peça um ASMR Personalizado
                   </Button>
