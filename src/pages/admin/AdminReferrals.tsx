@@ -105,6 +105,30 @@ const AdminReferrals: React.FC = () => {
         </div>
 
         <GlassCard className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold">{t('admin.referrals.signupsTitle')}</h3>
+            <Badge variant="outline">{t('admin.referrals.signupsCount', { count: signups.length })}</Badge>
+          </div>
+          {loading ? (
+            <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : signups.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">{t('admin.referrals.signupsEmpty')}</div>
+          ) : (
+            <div className="space-y-2">
+              {signups.map((s) => (
+                <div key={s.id} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{s.name}{s.slug ? <span className="text-xs text-muted-foreground ml-2">/{s.slug}</span> : null}</div>
+                    <div className="text-xs text-muted-foreground">{t('admin.referrals.signupsJoined', { date: fmtDate(s.created_at) })}</div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">{s.plan_type}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+
+        <GlassCard className="p-4">
           <h3 className="font-semibold mb-3">{t('admin.referrals.history')}</h3>
           {loading ? (
             <div className="py-8 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
