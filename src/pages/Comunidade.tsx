@@ -877,7 +877,7 @@ const ComunidadePage = () => {
           )}
 
           <TabsContent value="avisos" className="space-y-4 mt-0">
-            {mockFeedPosts.map((post, index) => (
+            {feedPosts.map((post, index) => (
               <AvisoCard key={post.id} post={post} index={index} />
             ))}
           </TabsContent>
