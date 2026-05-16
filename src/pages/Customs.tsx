@@ -28,7 +28,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { 
-  getVideoConfig, 
+  defaultVideoConfig,
   calculatePrice,
   calculateAudioPrice,
   type VideoConfig, 
@@ -37,6 +37,7 @@ import {
   type AudioCategory,
   type AudioDuration,
 } from '@/lib/video-config';
+import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import {
   Dialog,
   DialogContent,
