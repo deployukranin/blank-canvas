@@ -123,11 +123,12 @@ const AdminUsuarios: React.FC = () => {
   const toggleVIP = async (userId: string, currentlyVIP: boolean) => {
     try {
       if (currentlyVIP) {
-        const { error } = await supabase
+        const query = supabase
           .from('vip_subscriptions')
           .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
           .eq('user_id', userId)
           .eq('status', 'active');
+        const { error } = storeId ? await query.eq('store_id', storeId) : await query;
 
         if (error) throw error;
         toast.success(t('usersAdmin.vipCancelled'));
