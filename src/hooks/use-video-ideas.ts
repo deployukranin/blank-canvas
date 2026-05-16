@@ -30,6 +30,12 @@ export const useVideoIdeas = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchIdeas = useCallback(async () => {
+    if (!store?.id) {
+      setIdeas([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -38,6 +44,7 @@ export const useVideoIdeas = () => {
       const { data: ideasData, error: ideasError } = await supabase
         .from('video_ideas')
         .select('*')
+        .or(`store_id.eq.${store.id},store_id.is.null`)
         .eq('status', 'active')
         .order('votes', { ascending: false });
 
@@ -74,7 +81,7 @@ export const useVideoIdeas = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, store?.id]);
 
   useEffect(() => {
     fetchIdeas();
@@ -126,6 +133,7 @@ export const useVideoIdeas = () => {
           title,
           description,
           user_id: user.id,
+          store_id: store?.id ?? null,
           status: initialStatus,
         })
         .select()
@@ -155,7 +163,7 @@ export const useVideoIdeas = () => {
       console.error('Error submitting idea:', err);
       return { success: false, error: 'Erro ao enviar ideia' };
     }
-  }, [isAuthenticated, user?.id, user?.username, contentSettings.requireApprovalForIdeas]);
+  }, [isAuthenticated, user?.id, user?.username, store?.id, contentSettings.requireApprovalForIdeas]);
 
   const reportIdea = useCallback(async (ideaId: string, reason: string) => {
     console.log('[Report] Idea reported:', { ideaId, reason });
