@@ -240,6 +240,32 @@ const AdminPagamentosPix = () => {
           </div>
         </GlassCard>
 
+        {/* Currency selector */}
+        <GlassCard className="p-5">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h3 className="text-sm font-medium">{t('adminPayments.currency', 'Default currency')}</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t('adminPayments.currencyHint', 'Currency used for prices and Stripe charges. PIX manual always uses BRL.')}
+              </p>
+            </div>
+            <Select
+              value={config.currency || 'BRL'}
+              onValueChange={(value) => setConfig(prev => ({ ...prev, currency: value as PaymentCurrency }))}
+              disabled={config.activeGateway === 'pix_manual'}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BRL">BRL — Real (R$)</SelectItem>
+                <SelectItem value="USD">USD — Dollar ($)</SelectItem>
+                <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </GlassCard>
+
         {/* Payment Gateways */}
         <Tabs defaultValue={config.activeGateway === 'pix_manual' ? 'pix_manual' : 'stripe'} className="w-full">
           <TabsList className="w-full">
