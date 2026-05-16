@@ -249,22 +249,22 @@ const SuperAdminPartners: React.FC = () => {
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Novo parceiro</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('newPartnerTitle')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>Email</Label>
-              <Input type="email" value={createEmail} onChange={(e) => setCreateEmail(e.target.value)} placeholder="parceiro@exemplo.com" />
+              <Label>{tp('email')}</Label>
+              <Input type="email" value={createEmail} onChange={(e) => setCreateEmail(e.target.value)} placeholder={tp('emailPlaceholder')} />
             </div>
             <div>
-              <Label>Senha temporária</Label>
-              <Input type="text" value={createPwd} onChange={(e) => setCreatePwd(e.target.value)} placeholder="mínimo 8 caracteres" />
-              <p className="text-[11px] text-muted-foreground mt-1">O parceiro deve trocar essa senha no primeiro login.</p>
+              <Label>{tp('tempPassword')}</Label>
+              <Input type="text" value={createPwd} onChange={(e) => setCreatePwd(e.target.value)} placeholder={tp('minChars')} />
+              <p className="text-[11px] text-muted-foreground mt-1">{tp('firstLoginHint')}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>{tp('cancel')}</Button>
             <Button onClick={handleCreate} disabled={creating} className="bg-purple-600 hover:bg-purple-700">
-              {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Criar
+              {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} {tp('create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -273,11 +273,11 @@ const SuperAdminPartners: React.FC = () => {
       {/* Assign store dialog */}
       <Dialog open={!!assignTo} onOpenChange={(o) => { if (!o) setAssignTo(null); }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Atribuir loja ao parceiro</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('assignDialogTitle')}</DialogTitle></DialogHeader>
           {loadingAvail ? (
-            <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</p>
+            <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {tp('loading')}</p>
           ) : availableStores.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma loja disponível (todas já têm parceiro).</p>
+            <p className="text-sm text-muted-foreground">{tp('noAvailableStores')}</p>
           ) : (
             <div className="max-h-80 overflow-y-auto space-y-1">
               {availableStores.map((s) => (
@@ -293,18 +293,18 @@ const SuperAdminPartners: React.FC = () => {
       {/* Reset password dialog */}
       <Dialog open={!!resetFor} onOpenChange={(o) => { if (!o) { setResetFor(null); setResetPwd(''); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Redefinir senha</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('resetPasswordTitle')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Parceiro: <span className="text-foreground">{resetFor?.email}</span></p>
+            <p className="text-sm text-muted-foreground">{tp('partnerLabel')} <span className="text-foreground">{resetFor?.email}</span></p>
             <div>
-              <Label>Nova senha</Label>
-              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="mínimo 8 caracteres" />
+              <Label>{tp('newPassword')}</Label>
+              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder={tp('minChars')} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>Cancelar</Button>
+            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>{tp('cancel')}</Button>
             <Button onClick={handleResetPassword} disabled={resetting} className="bg-purple-600 hover:bg-purple-700">
-              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Redefinir
+              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} {tp('reset')}
             </Button>
           </DialogFooter>
         </DialogContent>
