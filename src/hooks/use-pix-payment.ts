@@ -15,6 +15,7 @@ export interface CreateChargeParams {
   preferences?: string;
   observations?: string;
   storeId?: string;
+  currency?: 'BRL' | 'USD' | 'EUR';
   successUrl?: string;
   cancelUrl?: string;
 }

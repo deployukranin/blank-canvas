@@ -90,13 +90,13 @@ const CustomsPage = () => {
   });
   const config: VideoConfig | null = isConfigLoading ? null : loadedConfig;
 
-  // Load store's payment_config to know which currency to display
-  const { config: paymentCfg } = usePersistentConfig<{ currency?: 'BRL' | 'USD' | 'EUR' }>({
-    configKey: 'payment_config',
-    defaultValue: { currency: 'BRL' },
-    storeId: store?.id ?? null,
-  });
-  const storeCurrency = paymentCfg?.currency || 'BRL';
+  // Currency follows the selected language: pt → BRL, en/es → USD
+  const currencyByLanguage = (lng: string): 'BRL' | 'USD' => {
+    const l = (lng || '').toLowerCase();
+    if (l.startsWith('pt')) return 'BRL';
+    return 'USD';
+  };
+  const storeCurrency = currencyByLanguage(i18n.language);
 
   const formatCurrency = (value: number) => {
     const localeByCurrency: Record<string, string> = { BRL: 'pt-BR', USD: 'en-US', EUR: 'de-DE' };
@@ -187,6 +187,7 @@ const CustomsPage = () => {
       script: personalizationData.script,
       observations: personalizationData.observations,
       storeId: store?.id,
+      currency: storeCurrency,
       successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
       cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
     } as any);
@@ -278,6 +279,7 @@ const CustomsPage = () => {
       preferences: audioFormData.preferences,
       observations: audioFormData.observations,
       storeId: store?.id,
+      currency: storeCurrency,
       successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
       cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
     } as any);
