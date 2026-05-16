@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, User, LogOut, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
+import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -26,9 +27,17 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { profile } = useProfile();
+  const { basePath, isTenantScope } = useTenant();
   const location = useLocation();
 
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
+  const resolvePath = (path: string) => {
+    if (!isTenantScope) return path;
+    if (path === '/') return basePath || '/';
+    return `${basePath}${path}`;
+  };
+  const loginPath = isTenantScope ? `${basePath}/login` : '/auth';
+  const signupPath = isTenantScope ? `${basePath}/login?tab=signup` : '/auth?tab=signup';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -36,7 +45,7 @@ export const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to={resolvePath('/')} className="flex items-center gap-2 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
@@ -50,9 +59,9 @@ export const Header = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.path}
-                  to={item.path}
+                  to={resolvePath(item.path)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location.pathname === item.path
+                   location.pathname === resolvePath(item.path)
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                   } ${item.isVIP ? 'text-vip' : ''}`}
@@ -95,12 +104,12 @@ export const Header = () => {
                 </DropdownMenu>
               ) : (
                 <div className="hidden sm:flex items-center gap-2">
-                  <Link to="/login">
+                  <Link to={loginPath}>
                     <Button variant="ghost" size="sm">
                       Entrar
                     </Button>
                   </Link>
-                  <Link to="/cadastro">
+                  <Link to={signupPath}>
                     <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
                       Cadastrar
                     </Button>
@@ -133,10 +142,10 @@ export const Header = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.path}
-                  to={item.path}
+                  to={resolvePath(item.path)}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location.pathname === item.path
+                    location.pathname === resolvePath(item.path)
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                   } ${item.isVIP ? 'text-vip' : ''}`}
@@ -148,12 +157,12 @@ export const Header = () => {
               
               {!isAuthenticated && (
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to={loginPath} onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full">
                       Entrar
                     </Button>
                   </Link>
-                  <Link to="/cadastro" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to={signupPath} onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
                       Cadastrar
                     </Button>
