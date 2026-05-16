@@ -47,13 +47,11 @@ const SuperAdminLogin = () => {
   // After login, check if user is super_admin
   useEffect(() => {
     if (isAuthenticated && !rolesLoading && session) {
-      if (isSuperAdmin()) {
-        navigate("/admin-master", { replace: true });
-      } else if (!authLoading) {
-        toast.error("Acesso negado: você não é Super Admin");
-      }
+      if (isSuperAdmin()) navigate("/admin-master", { replace: true });
+      else if (hasRole("partner")) navigate("/partner", { replace: true });
+      else if (!authLoading) toast.error("Acesso negado: você não tem permissão");
     }
-  }, [isAuthenticated, rolesLoading, isSuperAdmin, session, authLoading, navigate]);
+  }, [isAuthenticated, rolesLoading, isSuperAdmin, hasRole, session, authLoading, navigate]);
 
   if (authLoading) {
     return (
