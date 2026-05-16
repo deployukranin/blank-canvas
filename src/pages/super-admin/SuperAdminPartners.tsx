@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UserPlus, Users, Trash2, ChevronDown, ChevronRight, Loader2, Store, Plus, X, KeyRound } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -25,6 +26,8 @@ const fmtBRL = (cents: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 
 const SuperAdminPartners: React.FC = () => {
+  const { t } = useTranslation();
+  const tp = (k: string, opts?: any) => t(`superAdmin.partners.${k}`, opts as any) as string;
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -50,15 +53,15 @@ const SuperAdminPartners: React.FC = () => {
       if (data?.error) throw new Error(data.error);
       setPartners(data?.partners || []);
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao carregar parceiros');
+      toast.error(e.message || tp('loadErr'));
     } finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
   const handleCreate = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createEmail)) { toast.error('Email inválido'); return; }
-    if (createPwd.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createEmail)) { toast.error(tp('invalidEmail')); return; }
+    if (createPwd.length < 8) { toast.error(tp('pwdTooShort')); return; }
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
@@ -66,30 +69,30 @@ const SuperAdminPartners: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Parceiro criado');
+      toast.success(tp('created'));
       setCreateOpen(false); setCreateEmail(''); setCreatePwd('');
       load();
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao criar');
+      toast.error(e.message || tp('createErr'));
     } finally { setCreating(false); }
   };
 
   const handleDelete = async (p: Partner) => {
-    if (!confirm(`Excluir parceiro ${p.email}? Todas as lojas atribuídas serão desvinculadas.`)) return;
+    if (!confirm(tp('deleteConfirm', { email: p.email }))) return;
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
         body: { action: 'delete', user_id: p.user_id },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Parceiro removido');
+      toast.success(tp('deleted'));
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro ao remover'); }
+    } catch (e: any) { toast.error(e.message || tp('deleteErr')); }
   };
 
   const handleResetPassword = async () => {
     if (!resetFor) return;
-    if (resetPwd.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres'); return; }
+    if (resetPwd.length < 8) { toast.error(tp('pwdTooShort')); return; }
     setResetting(true);
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
@@ -97,10 +100,10 @@ const SuperAdminPartners: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Senha redefinida');
+      toast.success(tp('pwdReset'));
       setResetFor(null); setResetPwd('');
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao resetar senha');
+      toast.error(e.message || tp('pwdResetErr'));
     } finally { setResetting(false); }
   };
 
@@ -115,7 +118,7 @@ const SuperAdminPartners: React.FC = () => {
       if (data?.error) throw new Error(data.error);
       setAvailableStores(data?.stores || []);
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao carregar lojas');
+      toast.error(e.message || tp('storesLoadErr'));
     } finally { setLoadingAvail(false); }
   };
 
@@ -127,57 +130,57 @@ const SuperAdminPartners: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Loja atribuída');
+      toast.success(tp('assigned'));
       setAssignTo(null);
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro ao atribuir'); }
+    } catch (e: any) { toast.error(e.message || tp('assignErr')); }
   };
 
   const unassign = async (storeId: string) => {
-    if (!confirm('Desvincular loja deste parceiro?')) return;
+    if (!confirm(tp('unassignConfirm'))) return;
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
         body: { action: 'unassign', store_id: storeId },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Loja desvinculada');
+      toast.success(tp('unassigned'));
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro'); }
+    } catch (e: any) { toast.error(e.message || tp('unassignErr')); }
   };
 
   const totalRevenue = partners.reduce((a, p) => a + p.revenue_cents, 0);
   const totalAssigned = partners.reduce((a, p) => a + p.store_count, 0);
 
   return (
-    <SuperAdminLayout title="Parceiros">
+    <SuperAdminLayout title={tp('title')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold">{partners.length}</p>
-              <p className="text-xs text-muted-foreground">Parceiros</p>
+              <p className="text-xs text-muted-foreground">{tp('partners')}</p>
             </GlassCard>
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold text-purple-400">{totalAssigned}</p>
-              <p className="text-xs text-muted-foreground">Lojas atribuídas</p>
+              <p className="text-xs text-muted-foreground">{tp('assignedStores')}</p>
             </GlassCard>
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold text-green-400">{fmtBRL(totalRevenue)}</p>
-              <p className="text-xs text-muted-foreground">Receita atual</p>
+              <p className="text-xs text-muted-foreground">{tp('currentRevenue')}</p>
             </GlassCard>
           </div>
           <Button onClick={() => setCreateOpen(true)} className="gap-2 bg-purple-600 hover:bg-purple-700">
-            <UserPlus className="w-4 h-4" /> Novo parceiro
+            <UserPlus className="w-4 h-4" /> {tp('newPartner')}
           </Button>
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {tp('loading')}</p>
         ) : partners.length === 0 ? (
           <GlassCard className="p-8 text-center">
             <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground">Nenhum parceiro cadastrado</p>
+            <p className="text-muted-foreground">{tp('noPartners')}</p>
           </GlassCard>
         ) : (
           <div className="space-y-3">
@@ -199,15 +202,15 @@ const SuperAdminPartners: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{p.email}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {p.store_count} lojas</span>
-                        <span className="text-green-400">{fmtBRL(p.revenue_cents)}/mês</span>
+                        <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {tp('storesCount', { count: p.store_count })}</span>
+                        <span className="text-green-400">{fmtBRL(p.revenue_cents)}{tp('perMonth')}</span>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => openAssign(p.user_id)} className="gap-1">
-                      <Plus className="w-3 h-3" /> Atribuir loja
+                      <Plus className="w-3 h-3" /> {tp('assignStore')}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => { setResetFor(p); setResetPwd(''); }} className="gap-1">
-                      <KeyRound className="w-3 h-3" /> Senha
+                      <KeyRound className="w-3 h-3" /> {tp('password')}
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDelete(p)} className="text-red-400 hover:text-red-300">
                       <Trash2 className="w-4 h-4" />
@@ -217,7 +220,7 @@ const SuperAdminPartners: React.FC = () => {
                   {isOpen && (
                     <div className="border-t border-white/5">
                       {p.stores.length === 0 ? (
-                        <p className="p-4 text-sm text-muted-foreground">Nenhuma loja atribuída.</p>
+                        <p className="p-4 text-sm text-muted-foreground">{tp('noStoresAssigned')}</p>
                       ) : (
                         p.stores.map((s) => (
                           <div key={s.id} className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 last:border-0">
@@ -246,22 +249,22 @@ const SuperAdminPartners: React.FC = () => {
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Novo parceiro</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('newPartnerTitle')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>Email</Label>
-              <Input type="email" value={createEmail} onChange={(e) => setCreateEmail(e.target.value)} placeholder="parceiro@exemplo.com" />
+              <Label>{tp('email')}</Label>
+              <Input type="email" value={createEmail} onChange={(e) => setCreateEmail(e.target.value)} placeholder={tp('emailPlaceholder')} />
             </div>
             <div>
-              <Label>Senha temporária</Label>
-              <Input type="text" value={createPwd} onChange={(e) => setCreatePwd(e.target.value)} placeholder="mínimo 8 caracteres" />
-              <p className="text-[11px] text-muted-foreground mt-1">O parceiro deve trocar essa senha no primeiro login.</p>
+              <Label>{tp('tempPassword')}</Label>
+              <Input type="text" value={createPwd} onChange={(e) => setCreatePwd(e.target.value)} placeholder={tp('minChars')} />
+              <p className="text-[11px] text-muted-foreground mt-1">{tp('firstLoginHint')}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>{tp('cancel')}</Button>
             <Button onClick={handleCreate} disabled={creating} className="bg-purple-600 hover:bg-purple-700">
-              {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Criar
+              {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} {tp('create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -270,11 +273,11 @@ const SuperAdminPartners: React.FC = () => {
       {/* Assign store dialog */}
       <Dialog open={!!assignTo} onOpenChange={(o) => { if (!o) setAssignTo(null); }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Atribuir loja ao parceiro</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('assignDialogTitle')}</DialogTitle></DialogHeader>
           {loadingAvail ? (
-            <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</p>
+            <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {tp('loading')}</p>
           ) : availableStores.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma loja disponível (todas já têm parceiro).</p>
+            <p className="text-sm text-muted-foreground">{tp('noAvailableStores')}</p>
           ) : (
             <div className="max-h-80 overflow-y-auto space-y-1">
               {availableStores.map((s) => (
@@ -290,18 +293,18 @@ const SuperAdminPartners: React.FC = () => {
       {/* Reset password dialog */}
       <Dialog open={!!resetFor} onOpenChange={(o) => { if (!o) { setResetFor(null); setResetPwd(''); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Redefinir senha</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tp('resetPasswordTitle')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Parceiro: <span className="text-foreground">{resetFor?.email}</span></p>
+            <p className="text-sm text-muted-foreground">{tp('partnerLabel')} <span className="text-foreground">{resetFor?.email}</span></p>
             <div>
-              <Label>Nova senha</Label>
-              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="mínimo 8 caracteres" />
+              <Label>{tp('newPassword')}</Label>
+              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder={tp('minChars')} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>Cancelar</Button>
+            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>{tp('cancel')}</Button>
             <Button onClick={handleResetPassword} disabled={resetting} className="bg-purple-600 hover:bg-purple-700">
-              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Redefinir
+              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} {tp('reset')}
             </Button>
           </DialogFooter>
         </DialogContent>
