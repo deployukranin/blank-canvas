@@ -409,6 +409,89 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_commissions: {
+        Row: {
+          base_amount_cents: number
+          cancel_reason: string | null
+          commission_cents: number
+          commission_percent: number
+          created_at: string
+          eligible_at: string
+          id: string
+          paid_at: string | null
+          paid_by_user_id: string | null
+          payment_note: string | null
+          referred_store_id: string
+          referrer_store_id: string
+          status: string
+          triggered_by_payment_ref: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_amount_cents: number
+          cancel_reason?: string | null
+          commission_cents: number
+          commission_percent?: number
+          created_at?: string
+          eligible_at: string
+          id?: string
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          payment_note?: string | null
+          referred_store_id: string
+          referrer_store_id: string
+          status?: string
+          triggered_by_payment_ref?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_amount_cents?: number
+          cancel_reason?: string | null
+          commission_cents?: number
+          commission_percent?: number
+          created_at?: string
+          eligible_at?: string
+          id?: string
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          payment_note?: string | null
+          referred_store_id?: string
+          referrer_store_id?: string
+          status?: string
+          triggered_by_payment_ref?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_commissions_referred_store_id_fkey"
+            columns: ["referred_store_id"]
+            isOneToOne: true
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_referred_store_id_fkey"
+            columns: ["referred_store_id"]
+            isOneToOne: true
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_referrer_store_id_fkey"
+            columns: ["referrer_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_referrer_store_id_fkey"
+            columns: ["referrer_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_admins: {
         Row: {
           created_at: string
@@ -500,6 +583,8 @@ export type Database = {
           partner_id: string | null
           plan_expires_at: string | null
           plan_type: string
+          referral_code: string | null
+          referred_by_store_id: string | null
           slug: string | null
           status: string
           stripe_account_id: string | null
@@ -523,6 +608,8 @@ export type Database = {
           partner_id?: string | null
           plan_expires_at?: string | null
           plan_type?: string
+          referral_code?: string | null
+          referred_by_store_id?: string | null
           slug?: string | null
           status?: string
           stripe_account_id?: string | null
@@ -546,6 +633,8 @@ export type Database = {
           partner_id?: string | null
           plan_expires_at?: string | null
           plan_type?: string
+          referral_code?: string | null
+          referred_by_store_id?: string | null
           slug?: string | null
           status?: string
           stripe_account_id?: string | null
@@ -554,7 +643,22 @@ export type Database = {
           url?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stores_referred_by_store_id_fkey"
+            columns: ["referred_by_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stores_referred_by_store_id_fkey"
+            columns: ["referred_by_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_messages: {
         Row: {
@@ -1256,6 +1360,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_referral_code: { Args: never; Returns: string }
       get_admin_credentials_safe: {
         Args: never
         Returns: {
@@ -1284,6 +1389,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_eligible_commissions: { Args: never; Returns: number }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }
