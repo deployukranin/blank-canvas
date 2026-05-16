@@ -20,6 +20,15 @@ interface Commission {
   referred_store_id: string;
 }
 
+interface ReferredStore {
+  id: string;
+  name: string;
+  slug: string | null;
+  plan_type: string;
+  status: string;
+  created_at: string;
+}
+
 const AdminReferrals: React.FC = () => {
   const { store } = useTenant();
   const { t, i18n } = useTranslation();
