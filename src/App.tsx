@@ -160,6 +160,10 @@ const App = () => (
                 <Route path="/admin-master/plans" element={<SuperAdminRoute><SuperAdminPlanos /></SuperAdminRoute>} />
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
+                <Route path="/admin-master/partners" element={<SuperAdminRoute><SuperAdminPartners /></SuperAdminRoute>} />
+
+                {/* 🤝 Painel do Parceiro */}
+                <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
 
                 <Route path="*" element={<CustomDomainResolver fallback={<NotFound />}><NotFound /></CustomDomainResolver>} />
               </Routes>
