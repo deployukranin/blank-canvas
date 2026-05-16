@@ -113,6 +113,9 @@ const SuperAdminClients: React.FC = () => {
 
   const [copyingStore, setCopyingStore] = useState<string | null>(null);
   const [copyProgress, setCopyProgress] = useState<{ loaded: number; total: number } | null>(null);
+  const [copyFilter, setCopyFilter] = useState<'active' | 'all' | 'banned'>('active');
+
+  const filterLabel = copyFilter === 'active' ? 'ativos' : copyFilter === 'banned' ? 'banidos' : 'todos';
 
   const copyAllEmails = async (store: StoreRow) => {
     if (store.client_count === 0) {
@@ -121,7 +124,7 @@ const SuperAdminClients: React.FC = () => {
     }
     setCopyingStore(store.id);
     setCopyProgress({ loaded: 0, total: store.client_count });
-    const toastId = toast.loading(`Carregando 0/${store.client_count} emails...`);
+    const toastId = toast.loading(`Carregando 0/${store.client_count} emails (${filterLabel})...`);
     try {
       const all: string[] = [];
       let page = 1;
@@ -133,19 +136,24 @@ const SuperAdminClients: React.FC = () => {
         if (error) throw error;
         if (resp?.error) throw new Error(resp.error);
         const incoming = (resp?.clients as ClientRow[]) || [];
-        for (const c of incoming) if (c.email && c.email !== '(desconhecido)') all.push(c.email);
+        for (const c of incoming) {
+          if (!c.email || c.email === '(desconhecido)') continue;
+          if (copyFilter === 'active' && c.banned) continue;
+          if (copyFilter === 'banned' && !c.banned) continue;
+          all.push(c.email);
+        }
         hasMore = !!resp?.has_more;
         page++;
         setCopyProgress({ loaded: all.length, total: resp?.total || store.client_count });
-        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails...`, { id: toastId });
+        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails (${filterLabel})...`, { id: toastId });
         if (page > 500) break;
       }
       if (!all.length) {
-        toast.error('Nenhum email disponível', { id: toastId });
+        toast.error(`Nenhum email ${filterLabel} disponível`, { id: toastId });
         return;
       }
       await navigator.clipboard.writeText(all.join(', '));
-      toast.success(`${all.length} email(s) copiado(s)`, { id: toastId });
+      toast.success(`${all.length} email(s) ${filterLabel} copiado(s)`, { id: toastId });
     } catch (err: any) {
       toast.error(err.message || 'Erro ao copiar emails', { id: toastId });
     } finally {
