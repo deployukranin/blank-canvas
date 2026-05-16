@@ -150,16 +150,55 @@ const AdminYoutube = () => {
     }
   };
 
+  const channelConfigCard = (
+    <GlassCard className="p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+          <Youtube className="w-5 h-5 text-red-500" />
+        </div>
+        <div>
+          <h3 className="font-display font-semibold">{t('youtubeAdmin.channelConfigTitle', 'YouTube Channel')}</h3>
+          <p className="text-xs text-muted-foreground">
+            {t('youtubeAdmin.channelConfigDesc', 'Paste your channel ID, handle (@yourname) or channel URL')}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <Label htmlFor="yt-channel">{t('youtubeAdmin.channelIdLabel', 'Channel ID / Handle / URL')}</Label>
+        <div className="flex gap-2">
+          <Input
+            id="yt-channel"
+            value={channelInput}
+            onChange={(e) => setChannelInput(e.target.value)}
+            placeholder="UCxxxxxxxx or @handle"
+          />
+          <Button onClick={handleSaveChannel} className="gap-2">
+            <Save className="w-4 h-4" />
+            {t('common.save', 'Save')}
+          </Button>
+        </div>
+        {channelId && (
+          <p className="text-xs text-muted-foreground">
+            {t('youtubeAdmin.currentChannel', 'Current')}: <span className="font-mono">{channelId}</span>
+          </p>
+        )}
+      </div>
+    </GlassCard>
+  );
+
   if (!channelId) {
     return (
       <AdminLayout title="YouTube">
-        <GlassCard className="p-12 text-center">
-          <Youtube className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">{t('youtubeAdmin.channelNotConfigured')}</h3>
-          <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            {t('youtubeAdmin.channelNotConfiguredDesc')}
-          </p>
-        </GlassCard>
+        <div className="space-y-6">
+          {channelConfigCard}
+          <GlassCard className="p-12 text-center">
+            <Youtube className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">{t('youtubeAdmin.channelNotConfigured')}</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              {t('youtubeAdmin.channelNotConfiguredDesc')}
+            </p>
+          </GlassCard>
+        </div>
       </AdminLayout>
     );
   }
@@ -167,6 +206,7 @@ const AdminYoutube = () => {
   return (
     <AdminLayout title="YouTube">
       <div className="space-y-6">
+        {channelConfigCard}
         <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
