@@ -253,9 +253,13 @@ Deno.serve(async (req) => {
 
       const productLabel = `${storeRow.name || 'Custom'} - ${productType === 'audio' ? 'Áudio' : 'Vídeo'} ${String(rawBody.categoryName || category)} ${durationMinutes ? `(${durationMinutes}min)` : ''}`.trim().substring(0, 200);
 
+      const allowedCurrencies = ['brl', 'usd', 'eur'];
+      const storeCurrency = String(paymentConfig?.currency || 'BRL').toLowerCase();
+      const stripeCurrency = allowedCurrencies.includes(storeCurrency) ? storeCurrency : 'brl';
+
       const params = new URLSearchParams({
         mode: 'payment',
-        'line_items[0][price_data][currency]': 'brl',
+        'line_items[0][price_data][currency]': stripeCurrency,
         'line_items[0][price_data][product_data][name]': productLabel,
         'line_items[0][price_data][unit_amount]': String(amountCents),
         'line_items[0][quantity]': '1',
