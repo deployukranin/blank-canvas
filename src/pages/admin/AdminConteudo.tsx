@@ -162,7 +162,8 @@ const AdminConteudo: React.FC = () => {
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     {t('common.cancel')}
                   </Button>
-                  <Button onClick={handleCreate} disabled={!newPost.title || !newPost.content}>
+                  <Button onClick={handleCreate} disabled={!newPost.title || !newPost.content || isSubmitting}>
+                    {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                     {t('contentAdmin.publish')}
                   </Button>
                 </div>
