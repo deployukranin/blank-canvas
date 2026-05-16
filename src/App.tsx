@@ -9,6 +9,7 @@ import { TenantProvider } from "@/contexts/TenantContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
+import { PartnerRoute } from "@/components/auth/PartnerRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
@@ -65,6 +66,8 @@ import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes
 import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
 import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
+import SuperAdminPartners from "./pages/super-admin/SuperAdminPartners";
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -157,6 +160,10 @@ const App = () => (
                 <Route path="/admin-master/plans" element={<SuperAdminRoute><SuperAdminPlanos /></SuperAdminRoute>} />
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
+                <Route path="/admin-master/partners" element={<SuperAdminRoute><SuperAdminPartners /></SuperAdminRoute>} />
+
+                {/* 🤝 Painel do Parceiro */}
+                <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
 
                 <Route path="*" element={<CustomDomainResolver fallback={<NotFound />}><NotFound /></CustomDomainResolver>} />
               </Routes>

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const SuperAdminLogin = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading, signIn, session } = useAuth();
-  const { isSuperAdmin, isLoading: rolesLoading } = useUserRole();
+  const { isSuperAdmin, hasRole, isLoading: rolesLoading } = useUserRole();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,11 +20,10 @@ const SuperAdminLogin = () => {
 
   useEffect(() => {
     if (!authLoading && !rolesLoading && isAuthenticated && session) {
-      if (isSuperAdmin()) {
-        navigate("/admin-master", { replace: true });
-      }
+      if (isSuperAdmin()) navigate("/admin-master", { replace: true });
+      else if (hasRole("partner")) navigate("/partner", { replace: true });
     }
-  }, [isAuthenticated, authLoading, rolesLoading, session, isSuperAdmin, navigate]);
+  }, [isAuthenticated, authLoading, rolesLoading, session, isSuperAdmin, hasRole, navigate]);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -48,13 +47,11 @@ const SuperAdminLogin = () => {
   // After login, check if user is super_admin
   useEffect(() => {
     if (isAuthenticated && !rolesLoading && session) {
-      if (isSuperAdmin()) {
-        navigate("/admin-master", { replace: true });
-      } else if (!authLoading) {
-        toast.error("Acesso negado: você não é Super Admin");
-      }
+      if (isSuperAdmin()) navigate("/admin-master", { replace: true });
+      else if (hasRole("partner")) navigate("/partner", { replace: true });
+      else if (!authLoading) toast.error("Acesso negado: você não tem permissão");
     }
-  }, [isAuthenticated, rolesLoading, isSuperAdmin, session, authLoading, navigate]);
+  }, [isAuthenticated, rolesLoading, isSuperAdmin, hasRole, session, authLoading, navigate]);
 
   if (authLoading) {
     return (
