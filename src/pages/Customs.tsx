@@ -80,14 +80,6 @@ const CustomsPage = () => {
   const tAudioCategoryDesc = (id: string, fallback: string) => localize(`customs.audioCategories.${id}Desc`, fallback);
   const tDurationLabel = (id: string, fallback: string) => localize(`customs.durations.${id}`, fallback);
 
-  const formatCurrency = (value: number) => {
-    const isBR = i18n.language?.startsWith('pt');
-    return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
-      style: 'currency',
-      currency: isBR ? 'BRL' : 'USD',
-    }).format(value);
-  };
-
   const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
 
   // Load store's video_config from DB (so customers see the creator's actual prices/durations)
@@ -97,6 +89,23 @@ const CustomsPage = () => {
     storeId: store?.id ?? null,
   });
   const config: VideoConfig | null = isConfigLoading ? null : loadedConfig;
+
+  // Load store's payment_config to know which currency to display
+  const { config: paymentCfg } = usePersistentConfig<{ currency?: 'BRL' | 'USD' | 'EUR' }>({
+    configKey: 'payment_config',
+    defaultValue: { currency: 'BRL' },
+    storeId: store?.id ?? null,
+  });
+  const storeCurrency = paymentCfg?.currency || 'BRL';
+
+  const formatCurrency = (value: number) => {
+    const localeByCurrency: Record<string, string> = { BRL: 'pt-BR', USD: 'en-US', EUR: 'de-DE' };
+    return new Intl.NumberFormat(localeByCurrency[storeCurrency] || 'en-US', {
+      style: 'currency',
+      currency: storeCurrency,
+    }).format(value);
+  };
+
 
   // Video state
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory | null>(null);
