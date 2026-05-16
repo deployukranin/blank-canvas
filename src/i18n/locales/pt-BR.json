@@ -335,6 +335,20 @@
       "topicOther": "Outro assunto",
       "topicOtherDesc": "Qualquer outra dúvida ou problema",
       "topicOtherSubject": "Outro: Preciso de ajuda"
+    },
+    "settingsPage": {
+      "title": "Configurações",
+      "notifications": "Notificações",
+      "emailNotifications": "Notificações por e-mail",
+      "emailNotificationsDesc": "Receba alertas para novos pedidos",
+      "contentSettings": "Configurações de conteúdo",
+      "publicIdeas": "Ideias públicas",
+      "publicIdeasDesc": "Permitir que visitantes vejam ideias",
+      "approveIdeas": "Aprovar ideias",
+      "approveIdeasDesc": "Ideias precisam de aprovação antes de aparecer",
+      "save": "Salvar configurações",
+      "saved": "Configurações salvas!",
+      "savedDesc": "Alterações aplicadas com sucesso."
     }
   },
   "superAdmin": {
@@ -891,7 +905,6 @@
     "ideaBadge": "Ideia",
     "reportCommentTooltip": "Denunciar comentário",
     "reportSubmitErrorFallback": "Não foi possível enviar a denúncia",
-    "communityTitle": "Comunidade",
     "galleryTitle": "Galeria de Vídeos de {{name}}",
     "forYou": "Para Você",
     "watchOnPlatform": "Assista sem sair da plataforma.",

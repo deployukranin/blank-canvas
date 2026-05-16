@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Youtube, Globe } from "lucide-react";
+import { Youtube, Globe, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import AdminLayout from "./AdminLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
@@ -57,6 +59,22 @@ const AdminYoutube = () => {
   const { config, updateYouTube } = useWhiteLabel();
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
+  const [channelInput, setChannelInput] = useState(channelId);
+
+  useEffect(() => {
+    setChannelInput(channelId);
+  }, [channelId]);
+
+  const handleSaveChannel = () => {
+    const value = channelInput.trim();
+    updateYouTube({ ...(config.youtube || {}), channelId: value } as any);
+    toast({
+      title: t("common.save"),
+      description: value
+        ? t("youtubeAdmin.channelSaved", "Channel saved")
+        : t("youtubeAdmin.channelCleared", "Channel cleared"),
+    });
+  };
 
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: mergeWithDefaults(config.youtube?.categories),
@@ -132,16 +150,55 @@ const AdminYoutube = () => {
     }
   };
 
+  const channelConfigCard = (
+    <GlassCard className="p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+          <Youtube className="w-5 h-5 text-red-500" />
+        </div>
+        <div>
+          <h3 className="font-display font-semibold">{t('youtubeAdmin.channelConfigTitle', 'YouTube Channel')}</h3>
+          <p className="text-xs text-muted-foreground">
+            {t('youtubeAdmin.channelConfigDesc', 'Paste your channel ID, handle (@yourname) or channel URL')}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <Label htmlFor="yt-channel">{t('youtubeAdmin.channelIdLabel', 'Channel ID / Handle / URL')}</Label>
+        <div className="flex gap-2">
+          <Input
+            id="yt-channel"
+            value={channelInput}
+            onChange={(e) => setChannelInput(e.target.value)}
+            placeholder="UCxxxxxxxx or @handle"
+          />
+          <Button onClick={handleSaveChannel} className="gap-2">
+            <Save className="w-4 h-4" />
+            {t('common.save', 'Save')}
+          </Button>
+        </div>
+        {channelId && (
+          <p className="text-xs text-muted-foreground">
+            {t('youtubeAdmin.currentChannel', 'Current')}: <span className="font-mono">{channelId}</span>
+          </p>
+        )}
+      </div>
+    </GlassCard>
+  );
+
   if (!channelId) {
     return (
       <AdminLayout title="YouTube">
-        <GlassCard className="p-12 text-center">
-          <Youtube className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">{t('youtubeAdmin.channelNotConfigured')}</h3>
-          <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            {t('youtubeAdmin.channelNotConfiguredDesc')}
-          </p>
-        </GlassCard>
+        <div className="space-y-6">
+          {channelConfigCard}
+          <GlassCard className="p-12 text-center">
+            <Youtube className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">{t('youtubeAdmin.channelNotConfigured')}</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              {t('youtubeAdmin.channelNotConfiguredDesc')}
+            </p>
+          </GlassCard>
+        </div>
       </AdminLayout>
     );
   }
@@ -149,6 +206,7 @@ const AdminYoutube = () => {
   return (
     <AdminLayout title="YouTube">
       <div className="space-y-6">
+        {channelConfigCard}
         <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

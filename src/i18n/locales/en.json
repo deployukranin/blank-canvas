@@ -335,6 +335,20 @@
       "topicOther": "Other topic",
       "topicOtherDesc": "Any other question or issue",
       "topicOtherSubject": "Other: I need help"
+    },
+    "settingsPage": {
+      "title": "Settings",
+      "notifications": "Notifications",
+      "emailNotifications": "Email Notifications",
+      "emailNotificationsDesc": "Receive alerts for new orders",
+      "contentSettings": "Content Settings",
+      "publicIdeas": "Public Ideas",
+      "publicIdeasDesc": "Allow visitors to see ideas",
+      "approveIdeas": "Approve Ideas",
+      "approveIdeasDesc": "Ideas need approval before showing",
+      "save": "Save Settings",
+      "saved": "Settings saved!",
+      "savedDesc": "Changes applied successfully."
     }
   },
   "superAdmin": {
@@ -891,7 +905,6 @@
     "ideaBadge": "Idea",
     "reportCommentTooltip": "Report comment",
     "reportSubmitErrorFallback": "Could not send the report",
-    "communityTitle": "Community",
     "galleryTitle": "{{name}} Video Gallery",
     "forYou": "For You",
     "watchOnPlatform": "Watch without leaving the platform.",
