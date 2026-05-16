@@ -52,13 +52,26 @@ const Auth = () => {
   };
 
   const checkSlugAvailability = async (slug: string) => {
-    if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
-    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); return; }
+    if (!slug || slug.length < 3) { setSlugAvailable(null); setSlugChecking(false); return; }
+    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); setSlugChecking(false); return; }
     setSlugChecking(true);
     const { data } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle();
     setSlugAvailable(!data);
     setSlugChecking(false);
   };
+
+  // Debounced real-time slug validation
+  useEffect(() => {
+    if (!storeSlug) { setSlugAvailable(null); setSlugChecking(false); return; }
+    if (storeSlug.length < 3 || RESERVED_SLUGS.includes(storeSlug)) {
+      checkSlugAvailability(storeSlug);
+      return;
+    }
+    setSlugChecking(true);
+    const handle = setTimeout(() => { checkSlugAvailability(storeSlug); }, 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeSlug]);
 
   const features = [
     { icon: DollarSign, title: t("auth.featureNoFee"), desc: t("auth.featureNoFeeDesc") },
@@ -795,10 +808,10 @@ const Auth = () => {
                   <Button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
-                    {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    {t("auth.createAccount")}
+                    {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                    {slugChecking ? t("auth.slugChecking") || "Verificando slug..." : t("auth.createAccount")}
                   </Button>
                 </form>
               </TabsContent>
