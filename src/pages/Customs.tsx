@@ -88,10 +88,15 @@ const CustomsPage = () => {
     }).format(value);
   };
 
-  const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
-  
+  // Load store's video_config from DB (so customers see the creator's actual prices/durations)
+  const { config: loadedConfig, isLoading: isConfigLoading } = usePersistentConfig<VideoConfig>({
+    configKey: 'video_config',
+    defaultValue: defaultVideoConfig,
+    storeId: store?.id ?? null,
+  });
+  const config: VideoConfig | null = isConfigLoading ? null : loadedConfig;
+
   // Video state
-  const [config, setConfig] = useState<VideoConfig | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<VideoDuration | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -118,10 +123,6 @@ const CustomsPage = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
-
-  useEffect(() => {
-    setConfig(getVideoConfig());
-  }, []);
 
   // Video handlers
   const handleSelectCategory = (category: VideoCategory) => {
