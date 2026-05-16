@@ -35,9 +35,20 @@ const STATUS_TABS: Array<{ key: Commission['status']; label: string }> = [
   { key: 'cancelled', label: 'Canceladas' },
 ];
 
+interface ReferrerGroup {
+  referrer_id: string;
+  referrer: { name: string; slug: string | null; email: string | null } | null;
+  signups: Array<{ id: string; name: string; slug: string | null; plan_type: string; status: string; created_at: string; email: string | null }>;
+  commissions: Commission[];
+  totals: { pending: number; available: number; paid: number; cancelled: number; signups: number };
+}
+
 const SuperAdminReferrals: React.FC = () => {
+  const [view, setView] = useState<'by_status' | 'by_referrer'>('by_referrer');
   const [tab, setTab] = useState<Commission['status']>('available');
   const [items, setItems] = useState<Commission[]>([]);
+  const [groups, setGroups] = useState<ReferrerGroup[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<{ sum_cents: Record<string, number>; count: Record<string, number> } | null>(null);
   const [payOpen, setPayOpen] = useState<Commission | null>(null);
