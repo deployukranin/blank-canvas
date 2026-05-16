@@ -19,7 +19,7 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
+  signUp: (email: string, password: string, redirectTo?: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -90,9 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, [pendingCallback]);
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, redirectTo?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/auth`;
+      const redirectUrl = redirectTo || `${window.location.origin}/auth`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
