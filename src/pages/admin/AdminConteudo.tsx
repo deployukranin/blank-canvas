@@ -190,7 +190,7 @@ const AdminConteudo: React.FC = () => {
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="font-semibold">{post.title}</h3>
                         {getTypeBadge(post.type)}
-                        {post.isPinned && (
+                        {post.is_pinned && (
                           <Badge variant="outline" className="border-primary text-primary">
                             <Pin className="w-3 h-3 mr-1" />
                             {t('contentAdmin.pinned')}
@@ -201,7 +201,7 @@ const AdminConteudo: React.FC = () => {
                       <p className="text-sm text-muted-foreground mb-2">{post.content}</p>
                       
                       <p className="text-xs text-muted-foreground">
-                        {formatDate(post.createdAt)}
+                        {formatDate(post.created_at)}
                       </p>
                     </div>
                   </div>
@@ -209,8 +209,8 @@ const AdminConteudo: React.FC = () => {
                   <div className="flex gap-2 shrink-0">
                     <Button
                       size="sm"
-                      variant={post.isPinned ? 'default' : 'outline'}
-                      onClick={() => togglePin(post.id)}
+                      variant={post.is_pinned ? 'default' : 'outline'}
+                      onClick={() => handleTogglePin(post.id, post.is_pinned)}
                     >
                       <Pin className="w-4 h-4" />
                     </Button>
