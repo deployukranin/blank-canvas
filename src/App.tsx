@@ -69,6 +69,8 @@ import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
 import SuperAdminPartners from "./pages/super-admin/SuperAdminPartners";
 import SuperAdminReferrals from "./pages/super-admin/SuperAdminReferrals";
 import AdminReferrals from "./pages/admin/AdminReferrals";
+import AdminAffiliates from "./pages/admin/AdminAffiliates";
+import ClientAffiliate from "./pages/ClientAffiliate";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 const queryClient = new QueryClient();
@@ -121,6 +123,8 @@ const App = () => (
                 <Route path="/admin/social-links" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/domain" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/referrals" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminReferrals /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/affiliates" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminAffiliates /></AdminRoute></CustomDomainGate>} />
+                <Route path="/affiliate" element={<CustomDomainGate><ProtectedRoute><ClientAffiliate /></ProtectedRoute></CustomDomainGate>} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
@@ -154,6 +158,8 @@ const App = () => (
                 <Route path="/:slug/admin/social-links" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/domain" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/referrals" element={<TenantGate><AdminRoute requiredRole="admin"><AdminReferrals /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/affiliates" element={<TenantGate><AdminRoute requiredRole="admin"><AdminAffiliates /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/affiliate" element={<TenantGate><ProtectedRoute><ClientAffiliate /></ProtectedRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />

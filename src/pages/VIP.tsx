@@ -299,6 +299,7 @@ const VIPPage = () => {
         body: {
           planType: selectedPlan.type,
           storeId: resolvedStoreId,
+          affiliateCode: getAffiliateCode(resolvedStoreId) || undefined,
           successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
           cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
         },
