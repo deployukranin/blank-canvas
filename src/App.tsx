@@ -66,6 +66,8 @@ import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes
 import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
 import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
+import SuperAdminPartners from "./pages/super-admin/SuperAdminPartners";
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 const queryClient = new QueryClient();
 
