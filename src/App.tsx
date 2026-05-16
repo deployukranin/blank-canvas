@@ -67,6 +67,8 @@ import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
 import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
 import SuperAdminPartners from "./pages/super-admin/SuperAdminPartners";
+import SuperAdminReferrals from "./pages/super-admin/SuperAdminReferrals";
+import AdminReferrals from "./pages/admin/AdminReferrals";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 const queryClient = new QueryClient();
