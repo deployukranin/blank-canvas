@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLeft, LifeBuoy, Crown, Users, Handshake } from 'lucide-react';
+import { LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLeft, LifeBuoy, Crown, Users, Handshake, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +25,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
     { path: '/admin-master/tenants', icon: Store, label: t('superAdmin.platforms') },
     { path: '/admin-master/clients', icon: Users, label: 'Clientes' },
     { path: '/admin-master/partners', icon: Handshake, label: 'Parceiros' },
+    { path: '/admin-master/referrals', icon: Gift, label: 'Indicações' },
     { path: '/admin-master/plans', icon: Crown, label: t('superAdmin.planConfig.navLabel', 'Planos') },
     { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
     { path: '/admin-master/settings', icon: Settings, label: t('superAdmin.settings') },

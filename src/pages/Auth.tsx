@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
 
 
 const Auth = () => {
@@ -18,6 +19,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
+  const pendingReferral = useReferralCapture();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
@@ -159,9 +161,10 @@ const Auth = () => {
     let store: { id: string; slug: string } | null = existingOwn as any;
 
     if (!store) {
+      const ref = readPendingReferral();
       const { data: created, error: storeError } = await supabase
         .from('stores')
-        .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
+        .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId, referred_by_store_id: ref?.referrer_store_id ?? null } as any)
         .select('id, slug')
         .single();
 
@@ -198,6 +201,7 @@ const Auth = () => {
         }
       }
 
+      clearPendingReferral();
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
       navigate(`/${store.slug}/admin`, { replace: true });
     }
@@ -332,13 +336,15 @@ const Auth = () => {
       }
 
       // Create store
+      const ref = readPendingReferral();
       const { data: store, error: storeError } = await supabase
         .from('stores')
         .insert({
           name: storeName.trim(),
           slug: storeSlug,
           created_by: userId,
-        })
+          referred_by_store_id: ref?.referrer_store_id ?? null,
+        } as any)
         .select()
         .single();
 
@@ -386,6 +392,7 @@ const Auth = () => {
         }
       }
 
+      clearPendingReferral();
       toast.success(t("auth.accountCreated"));
       navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {
@@ -617,6 +624,11 @@ const Auth = () => {
               {/* Signup Tab */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {pendingReferral && (
+                    <div className="rounded-md border border-purple-500/40 bg-purple-500/10 px-3 py-2 text-sm text-purple-200">
+                      🎁 Você foi indicado por <strong>{pendingReferral.referrer_store_name}</strong>
+                    </div>
+                  )}
 
                   {/* Store Name */}
                   <div className="space-y-2">

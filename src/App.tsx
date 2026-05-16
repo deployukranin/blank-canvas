@@ -67,6 +67,8 @@ import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
 import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
 import SuperAdminPartners from "./pages/super-admin/SuperAdminPartners";
+import SuperAdminReferrals from "./pages/super-admin/SuperAdminReferrals";
+import AdminReferrals from "./pages/admin/AdminReferrals";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 const queryClient = new QueryClient();
@@ -118,6 +120,7 @@ const App = () => (
                 <Route path="/admin/support" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/social-links" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/domain" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/referrals" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminReferrals /></AdminRoute></CustomDomainGate>} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
