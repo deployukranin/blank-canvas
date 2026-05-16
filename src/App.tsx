@@ -153,6 +153,7 @@ const App = () => (
                 <Route path="/:slug/admin/support" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/social-links" element={<TenantGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/domain" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/referrals" element={<TenantGate><AdminRoute requiredRole="admin"><AdminReferrals /></AdminRoute></TenantGate>} />
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
@@ -164,6 +165,7 @@ const App = () => (
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
                 <Route path="/admin-master/partners" element={<SuperAdminRoute><SuperAdminPartners /></SuperAdminRoute>} />
+                <Route path="/admin-master/referrals" element={<SuperAdminRoute><SuperAdminReferrals /></SuperAdminRoute>} />
 
                 {/* 🤝 Painel do Parceiro */}
                 <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
