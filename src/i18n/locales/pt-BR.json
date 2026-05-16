@@ -349,6 +349,28 @@
       "save": "Salvar configurações",
       "saved": "Configurações salvas!",
       "savedDesc": "Alterações aplicadas com sucesso."
+    },
+    "referrals": {
+      "title": "Indicações",
+      "linkTitle": "Seu link de indicação",
+      "description": "Ganhe <strong>50%</strong> da primeira mensalidade de cada loja que assinar pelo seu link. Liberado após 30 dias.",
+      "loadingCode": "Carregando código…",
+      "copy": "Copiar",
+      "linkCopied": "Link copiado",
+      "loadError": "Erro ao carregar indicações",
+      "history": "Histórico",
+      "empty": "Nenhuma indicação ainda. Compartilhe seu link!",
+      "availableIn": "Disponível em {{date}}",
+      "awaitingPayment": "Aguardando pagamento",
+      "paidOn": "Paga em {{date}}",
+      "cancelled": "Cancelada",
+      "ofAmount": "de {{amount}}",
+      "status": {
+        "pending": "Em carência",
+        "available": "A receber",
+        "paid": "Paga",
+        "cancelled": "Cancelada"
+      }
     }
   },
   "superAdmin": {

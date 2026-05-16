@@ -349,6 +349,28 @@
       "save": "Save Settings",
       "saved": "Settings saved!",
       "savedDesc": "Changes applied successfully."
+    },
+    "referrals": {
+      "title": "Referrals",
+      "linkTitle": "Your referral link",
+      "description": "Earn <strong>50%</strong> of the first month from each store that subscribes via your link. Released after 30 days.",
+      "loadingCode": "Loading code…",
+      "copy": "Copy",
+      "linkCopied": "Link copied",
+      "loadError": "Failed to load referrals",
+      "history": "History",
+      "empty": "No referrals yet. Share your link!",
+      "availableIn": "Available on {{date}}",
+      "awaitingPayment": "Awaiting payment",
+      "paidOn": "Paid on {{date}}",
+      "cancelled": "Cancelled",
+      "ofAmount": "of {{amount}}",
+      "status": {
+        "pending": "In holding",
+        "available": "To receive",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      }
     }
   },
   "superAdmin": {
