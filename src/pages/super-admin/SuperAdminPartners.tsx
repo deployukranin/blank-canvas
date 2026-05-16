@@ -78,16 +78,16 @@ const SuperAdminPartners: React.FC = () => {
   };
 
   const handleDelete = async (p: Partner) => {
-    if (!confirm(`Excluir parceiro ${p.email}? Todas as lojas atribuídas serão desvinculadas.`)) return;
+    if (!confirm(tp('deleteConfirm', { email: p.email }))) return;
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
         body: { action: 'delete', user_id: p.user_id },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Parceiro removido');
+      toast.success(tp('deleted'));
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro ao remover'); }
+    } catch (e: any) { toast.error(e.message || tp('deleteErr')); }
   };
 
   const handleResetPassword = async () => {
