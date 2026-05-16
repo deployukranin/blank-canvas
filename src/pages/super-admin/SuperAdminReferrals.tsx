@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Loader2, Check, Ban, RefreshCw } from 'lucide-react';
+import { Loader2, Check, Ban, RefreshCw, Users, ChevronDown, ChevronRight } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -35,9 +35,20 @@ const STATUS_TABS: Array<{ key: Commission['status']; label: string }> = [
   { key: 'cancelled', label: 'Canceladas' },
 ];
 
+interface ReferrerGroup {
+  referrer_id: string;
+  referrer: { name: string; slug: string | null; email: string | null } | null;
+  signups: Array<{ id: string; name: string; slug: string | null; plan_type: string; status: string; created_at: string; email: string | null }>;
+  commissions: Commission[];
+  totals: { pending: number; available: number; paid: number; cancelled: number; signups: number };
+}
+
 const SuperAdminReferrals: React.FC = () => {
+  const [view, setView] = useState<'by_status' | 'by_referrer'>('by_referrer');
   const [tab, setTab] = useState<Commission['status']>('available');
   const [items, setItems] = useState<Commission[]>([]);
+  const [groups, setGroups] = useState<ReferrerGroup[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<{ sum_cents: Record<string, number>; count: Record<string, number> } | null>(null);
   const [payOpen, setPayOpen] = useState<Commission | null>(null);
@@ -49,14 +60,16 @@ const SuperAdminReferrals: React.FC = () => {
   const load = useCallback(async (status: Commission['status']) => {
     setLoading(true);
     try {
-      const [list, sum] = await Promise.all([
+      const [list, sum, grp] = await Promise.all([
         supabase.functions.invoke('super-admin-referrals', { body: { action: 'list', status } }),
         supabase.functions.invoke('super-admin-referrals', { body: { action: 'summary' } }),
+        supabase.functions.invoke('super-admin-referrals', { body: { action: 'by_referrer' } }),
       ]);
       if (list.error) throw list.error;
       if (list.data?.error) throw new Error(list.data.error);
       setItems(list.data?.commissions || []);
       if (!sum.error && !sum.data?.error) setSummary(sum.data);
+      if (!grp.error && !grp.data?.error) setGroups(grp.data?.groups || []);
     } catch (e: any) {
       toast.error(e.message || 'Erro ao carregar comissões');
     } finally { setLoading(false); }
@@ -123,6 +136,100 @@ const SuperAdminReferrals: React.FC = () => {
           </div>
         )}
 
+        <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+          <TabsList>
+            <TabsTrigger value="by_referrer"><Users className="h-3.5 w-3.5 mr-1" /> Por indicador</TabsTrigger>
+            <TabsTrigger value="by_status">Por status</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="by_referrer" className="mt-4">
+            {loading ? (
+              <div className="py-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+            ) : groups.length === 0 ? (
+              <GlassCard className="p-8 text-center text-muted-foreground">Nenhuma indicação ainda.</GlassCard>
+            ) : (
+              <div className="space-y-3">
+                {groups.map((g) => {
+                  const open = expanded[g.referrer_id] ?? true;
+                  return (
+                    <GlassCard key={g.referrer_id} className="p-4">
+                      <button
+                        type="button"
+                        onClick={() => setExpanded((e) => ({ ...e, [g.referrer_id]: !open }))}
+                        className="w-full flex items-center justify-between gap-3 text-left"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{g.referrer?.name || '—'}{g.referrer?.slug && <span className="text-xs text-muted-foreground ml-2">/{g.referrer.slug}</span>}</div>
+                            <div className="text-xs text-muted-foreground truncate">{g.referrer?.email || '—'}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                          <Badge variant="outline">{g.totals.signups} cadastros</Badge>
+                          {g.totals.available > 0 && <Badge>{fmtBRL(g.totals.available)} a pagar</Badge>}
+                          {g.totals.pending > 0 && <Badge variant="outline">{fmtBRL(g.totals.pending)} em carência</Badge>}
+                          {g.totals.paid > 0 && <Badge variant="secondary">{fmtBRL(g.totals.paid)} pago</Badge>}
+                        </div>
+                      </button>
+
+                      {open && (
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-xs uppercase text-muted-foreground mb-2">Contas indicadas ({g.signups.length})</div>
+                            {g.signups.length === 0 ? (
+                              <div className="text-xs text-muted-foreground">—</div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                {g.signups.map((s) => (
+                                  <div key={s.id} className="flex items-center justify-between border-b border-border/30 pb-1.5 last:border-0 text-sm">
+                                    <div className="min-w-0">
+                                      <div className="truncate font-medium">{s.name}</div>
+                                      <div className="text-xs text-muted-foreground truncate">{s.email || '—'} • {new Date(s.created_at).toLocaleDateString('pt-BR')}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-[10px]">{s.plan_type}</Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-xs uppercase text-muted-foreground mb-2">Comissões ({g.commissions.length})</div>
+                            {g.commissions.length === 0 ? (
+                              <div className="text-xs text-muted-foreground">Sem comissões geradas ainda.</div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                {g.commissions.map((c) => (
+                                  <div key={c.id} className="flex items-center justify-between border-b border-border/30 pb-1.5 last:border-0 text-sm gap-2">
+                                    <div className="min-w-0">
+                                      <div className="font-medium">{fmtBRL(c.commission_cents)} <span className="text-xs text-muted-foreground">de {fmtBRL(c.base_amount_cents)}</span></div>
+                                      <div className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Badge variant={c.status === 'paid' ? 'default' : c.status === 'cancelled' ? 'destructive' : 'outline'} className="text-[10px]">
+                                        {STATUS_TABS.find((t) => t.key === c.status)?.label || c.status}
+                                      </Badge>
+                                      {c.status === 'available' && (
+                                        <Button size="sm" variant="outline" className="h-6 px-2" onClick={() => { setPayOpen(c); setPayNote(''); }}>
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </GlassCard>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="by_status" className="mt-4">
         <Tabs value={tab} onValueChange={(v) => setTab(v as Commission['status'])}>
           <TabsList>
             {STATUS_TABS.map((s) => (
@@ -189,6 +296,8 @@ const SuperAdminReferrals: React.FC = () => {
               )}
             </TabsContent>
           ))}
+        </Tabs>
+          </TabsContent>
         </Tabs>
       </div>
 

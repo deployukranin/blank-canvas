@@ -365,6 +365,12 @@
       "paidOn": "Pagado el {{date}}",
       "cancelled": "Cancelado",
       "ofAmount": "de {{amount}}",
+      "signupsTitle": "Cuentas creadas desde tu enlace",
+      "signupsCount_one": "{{count}} tienda registrada",
+      "signupsCount_other": "{{count}} tiendas registradas",
+      "signupsEmpty": "Nadie se ha registrado con tu enlace aún.",
+      "signupsPlan": "Plan",
+      "signupsJoined": "Se unió el {{date}}",
       "status": {
         "pending": "En carencia",
         "available": "Por recibir",

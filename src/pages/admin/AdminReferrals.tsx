@@ -20,11 +20,21 @@ interface Commission {
   referred_store_id: string;
 }
 
+interface ReferredStore {
+  id: string;
+  name: string;
+  slug: string | null;
+  plan_type: string;
+  status: string;
+  created_at: string;
+}
+
 const AdminReferrals: React.FC = () => {
   const { store } = useTenant();
   const { t, i18n } = useTranslation();
   const [refCode, setRefCode] = useState<string>('');
   const [items, setItems] = useState<Commission[]>([]);
+  const [signups, setSignups] = useState<ReferredStore[]>([]);
   const [loading, setLoading] = useState(true);
 
   const locale = i18n.language?.startsWith('pt') ? 'pt-BR' : i18n.language?.startsWith('es') ? 'es-ES' : 'en-US';
@@ -39,12 +49,14 @@ const AdminReferrals: React.FC = () => {
     if (!store?.id) return;
     setLoading(true);
     try {
-      const [s, c] = await Promise.all([
+      const [s, c, r] = await Promise.all([
         supabase.from('stores').select('referral_code').eq('id', store.id).maybeSingle(),
         supabase.from('referral_commissions' as any).select('*').eq('referrer_store_id', store.id).order('created_at', { ascending: false }),
+        supabase.from('stores').select('id,name,slug,plan_type,status,created_at').eq('referred_by_store_id', store.id).order('created_at', { ascending: false }),
       ]);
       setRefCode((s.data as any)?.referral_code || '');
       setItems(((c.data as any) || []) as Commission[]);
+      setSignups(((r.data as any) || []) as ReferredStore[]);
     } catch {
       toast.error(t('admin.referrals.loadError'));
     } finally { setLoading(false); }
@@ -91,6 +103,30 @@ const AdminReferrals: React.FC = () => {
             </GlassCard>
           ))}
         </div>
+
+        <GlassCard className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold">{t('admin.referrals.signupsTitle')}</h3>
+            <Badge variant="outline">{t('admin.referrals.signupsCount', { count: signups.length })}</Badge>
+          </div>
+          {loading ? (
+            <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : signups.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">{t('admin.referrals.signupsEmpty')}</div>
+          ) : (
+            <div className="space-y-2">
+              {signups.map((s) => (
+                <div key={s.id} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{s.name}{s.slug ? <span className="text-xs text-muted-foreground ml-2">/{s.slug}</span> : null}</div>
+                    <div className="text-xs text-muted-foreground">{t('admin.referrals.signupsJoined', { date: fmtDate(s.created_at) })}</div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">{s.plan_type}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
 
         <GlassCard className="p-4">
           <h3 className="font-semibold mb-3">{t('admin.referrals.history')}</h3>
