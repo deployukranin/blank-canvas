@@ -88,6 +88,8 @@ const CustomsPage = () => {
     }).format(value);
   };
 
+  const { createCharge, isLoading: isPixLoading, chargeData, resetCharge } = usePixPayment();
+
   // Load store's video_config from DB (so customers see the creator's actual prices/durations)
   const { config: loadedConfig, isLoading: isConfigLoading } = usePersistentConfig<VideoConfig>({
     configKey: 'video_config',
