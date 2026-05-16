@@ -472,6 +472,17 @@ const ComunidadePage = () => {
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const { ideas: dbIdeas, toggleVote: dbToggleVote, submitIdea: dbSubmitIdea } = useVideoIdeas();
+  const { posts: dbFeedPosts } = useFeedPosts();
+  const feedPosts: FeedPost[] = dbFeedPosts.map((p) => ({
+    id: p.id,
+    type: p.type as FeedPost['type'],
+    title: p.title,
+    content: p.content,
+    isPinned: p.is_pinned,
+    createdAt: p.created_at,
+    authorUsername: '',
+    authorAvatar: '🌙',
+  }));
   const [localComments, setLocalComments] = useState<Record<string, ForumComment[]>>({});
   const ideas = useMemo<ForumIdea[]>(
     () => dbIdeas.map(i => ({
