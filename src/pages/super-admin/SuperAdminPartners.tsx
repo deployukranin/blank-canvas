@@ -35,6 +35,9 @@ const SuperAdminPartners: React.FC = () => {
 
   const [assignTo, setAssignTo] = useState<string | null>(null); // partner_id receiving the store
   const [availableStores, setAvailableStores] = useState<AvailableStore[]>([]);
+  const [resetFor, setResetFor] = useState<Partner | null>(null);
+  const [resetPwd, setResetPwd] = useState('');
+  const [resetting, setResetting] = useState(false);
   const [loadingAvail, setLoadingAvail] = useState(false);
 
   const load = useCallback(async () => {
