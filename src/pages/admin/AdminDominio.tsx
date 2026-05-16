@@ -329,7 +329,7 @@ const AdminDominio: React.FC = () => {
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
               {trialCopy.description}
             </p>
-            <Button onClick={() => navigate(`${basePath}/admin/planos`)} className="mt-2">
+            <Button onClick={() => navigate(`${basePath}/admin/plans`)} className="mt-2">
               {trialCopy.cta}
             </Button>
           </GlassCard>
