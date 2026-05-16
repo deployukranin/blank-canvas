@@ -153,34 +153,34 @@ const SuperAdminPartners: React.FC = () => {
   const totalAssigned = partners.reduce((a, p) => a + p.store_count, 0);
 
   return (
-    <SuperAdminLayout title="Parceiros">
+    <SuperAdminLayout title={tp('title')}>
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="grid grid-cols-3 gap-3 flex-1 min-w-0">
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold">{partners.length}</p>
-              <p className="text-xs text-muted-foreground">Parceiros</p>
+              <p className="text-xs text-muted-foreground">{tp('partners')}</p>
             </GlassCard>
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold text-purple-400">{totalAssigned}</p>
-              <p className="text-xs text-muted-foreground">Lojas atribuídas</p>
+              <p className="text-xs text-muted-foreground">{tp('assignedStores')}</p>
             </GlassCard>
             <GlassCard className="p-4 text-center">
               <p className="text-2xl font-bold text-green-400">{fmtBRL(totalRevenue)}</p>
-              <p className="text-xs text-muted-foreground">Receita atual</p>
+              <p className="text-xs text-muted-foreground">{tp('currentRevenue')}</p>
             </GlassCard>
           </div>
           <Button onClick={() => setCreateOpen(true)} className="gap-2 bg-purple-600 hover:bg-purple-700">
-            <UserPlus className="w-4 h-4" /> Novo parceiro
+            <UserPlus className="w-4 h-4" /> {tp('newPartner')}
           </Button>
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Carregando...</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {tp('loading')}</p>
         ) : partners.length === 0 ? (
           <GlassCard className="p-8 text-center">
             <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground">Nenhum parceiro cadastrado</p>
+            <p className="text-muted-foreground">{tp('noPartners')}</p>
           </GlassCard>
         ) : (
           <div className="space-y-3">
@@ -202,15 +202,15 @@ const SuperAdminPartners: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{p.email}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {p.store_count} lojas</span>
-                        <span className="text-green-400">{fmtBRL(p.revenue_cents)}/mês</span>
+                        <span className="flex items-center gap-1"><Store className="w-3 h-3" /> {tp('storesCount', { count: p.store_count })}</span>
+                        <span className="text-green-400">{fmtBRL(p.revenue_cents)}{tp('perMonth')}</span>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => openAssign(p.user_id)} className="gap-1">
-                      <Plus className="w-3 h-3" /> Atribuir loja
+                      <Plus className="w-3 h-3" /> {tp('assignStore')}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => { setResetFor(p); setResetPwd(''); }} className="gap-1">
-                      <KeyRound className="w-3 h-3" /> Senha
+                      <KeyRound className="w-3 h-3" /> {tp('password')}
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDelete(p)} className="text-red-400 hover:text-red-300">
                       <Trash2 className="w-4 h-4" />
@@ -220,7 +220,7 @@ const SuperAdminPartners: React.FC = () => {
                   {isOpen && (
                     <div className="border-t border-white/5">
                       {p.stores.length === 0 ? (
-                        <p className="p-4 text-sm text-muted-foreground">Nenhuma loja atribuída.</p>
+                        <p className="p-4 text-sm text-muted-foreground">{tp('noStoresAssigned')}</p>
                       ) : (
                         p.stores.map((s) => (
                           <div key={s.id} className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 last:border-0">
