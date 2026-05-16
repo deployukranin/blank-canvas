@@ -89,6 +89,20 @@ const QRCodeGenerator: React.FC = () => {
     gradientColor: '#a855f7',
   });
 
+  // Sync URL whenever store slug becomes available (avoid stale empty QR)
+  const lastAutoUrlRef = useRef(storeUrl);
+  useEffect(() => {
+    setConfig((prev) => {
+      // Only overwrite if user hasn't customized away from the previous auto URL
+      if (prev.url === lastAutoUrlRef.current || !prev.url) {
+        lastAutoUrlRef.current = storeUrl;
+        return { ...prev, url: storeUrl };
+      }
+      lastAutoUrlRef.current = storeUrl;
+      return prev;
+    });
+  }, [storeUrl]);
+
   useEffect(() => {
     renderQRCode();
   }, [config]);

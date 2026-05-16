@@ -59,7 +59,7 @@ const Index = () => {
         <HeroBanner
           images={[bannerStudio]}
           banners={config.banners}
-          greeting={user ? `${t('home.greeting').replace('ceo', displayName || '')}` : (config.heroGreeting || t('home.subtitle'))}
+          greeting={config.heroGreeting || (user ? `${t('home.greeting').replace('ceo', displayName || '')}` : t('home.subtitle'))}
           subtitle={config.heroSubtitle || t('home.subtitle')}
         />
       </motion.div>
