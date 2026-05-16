@@ -136,15 +136,31 @@ const Auth = () => {
   };
 
   const finalizeStoreCreation = async (userId: string, pending: { storeName: string; storeSlug: string; youtubeVerified: any }) => {
-    const { data: store, error: storeError } = await supabase
+    // If this user already owns a store (e.g. user reconfirmed email), reuse it
+    const { data: existingOwn } = await supabase
       .from('stores')
-      .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
-      .select()
-      .single();
+      .select('id, slug')
+      .eq('created_by', userId)
+      .maybeSingle();
 
-    if (storeError) {
-      toast.error("Erro ao criar loja: " + storeError.message);
-      return;
+    let store: { id: string; slug: string } | null = existingOwn as any;
+
+    if (!store) {
+      const { data: created, error: storeError } = await supabase
+        .from('stores')
+        .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
+        .select('id, slug')
+        .single();
+
+      if (storeError) {
+        if ((storeError as any).code === '23505') {
+          toast.error(`O slug "${pending.storeSlug}" já está em uso. Faça login ou escolha outro nome.`);
+        } else {
+          toast.error("Erro ao criar loja: " + storeError.message);
+        }
+        return;
+      }
+      store = created as any;
     }
 
     if (store) {
@@ -170,7 +186,7 @@ const Auth = () => {
       }
 
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
-      navigate(`/${pending.storeSlug}/admin`, { replace: true });
+      navigate(`/${store.slug}/admin`, { replace: true });
     }
   };
 
@@ -292,6 +308,16 @@ const Auth = () => {
         return;
       }
 
+      // Re-check slug availability immediately before insert (avoid race)
+      const { data: slugTaken } = await supabase
+        .from('stores').select('id').eq('slug', storeSlug).maybeSingle();
+      if (slugTaken) {
+        setSlugAvailable(false);
+        toast.error(`O slug "${storeSlug}" já está em uso. Escolha outro.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create store
       const { data: store, error: storeError } = await supabase
         .from('stores')
@@ -305,7 +331,12 @@ const Auth = () => {
 
       if (storeError) {
         console.error('Error creating store:', storeError);
-        toast.error("Erro ao criar loja: " + storeError.message);
+        if ((storeError as any).code === '23505') {
+          setSlugAvailable(false);
+          toast.error(`O slug "${storeSlug}" já está em uso. Escolha outro.`);
+        } else {
+          toast.error("Erro ao criar loja: " + storeError.message);
+        }
         setIsSubmitting(false);
         return;
       }
