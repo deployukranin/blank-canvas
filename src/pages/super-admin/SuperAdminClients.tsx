@@ -194,14 +194,35 @@ const SuperAdminClients: React.FC = () => {
           </GlassCard>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por loja, slug ou email do dono..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por loja, slug ou email do dono..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex gap-1 rounded-md border border-input p-1 bg-background" title="Filtro do botão 'Copiar todos'">
+            {([
+              { v: 'active', l: 'Ativos' },
+              { v: 'all', l: 'Todos' },
+              { v: 'banned', l: 'Banidos' },
+            ] as const).map((opt) => (
+              <button
+                key={opt.v}
+                onClick={() => setCopyFilter(opt.v)}
+                className={`px-3 h-8 text-xs rounded transition ${
+                  copyFilter === opt.v
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                {opt.l}
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
