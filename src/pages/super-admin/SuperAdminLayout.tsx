@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLeft, LifeBuoy, Crown, Users, Handshake } from 'lucide-react';
+import { LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLeft, LifeBuoy, Crown, Users, Handshake, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
