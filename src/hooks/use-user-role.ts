@@ -45,6 +45,7 @@ export function useUserRole() {
   const isSuperAdmin = (): boolean => hasRole("super_admin");
   const isCreator = (): boolean => hasRole("creator");
   const isClient = (): boolean => hasRole("client");
+  const isPartner = (): boolean => hasRole("partner");
   const isStaff = (): boolean => isAdmin() || isCEO() || isModerator() || isSuperAdmin();
 
   return {
