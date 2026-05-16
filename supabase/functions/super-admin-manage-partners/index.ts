@@ -197,6 +197,24 @@ Deno.serve(async (req) => {
       return json({ success: true, user_id: newUserId, email, promoted });
     }
 
+    if (action === "reset_password") {
+      const userId = String(body.user_id || "");
+      const password = String(body.password || "");
+      if (!userId) return json({ error: "user_id required" }, 400);
+      if (password.length < 8) return json({ error: "Senha deve ter ao menos 8 caracteres" }, 400);
+      const SRK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const r = await fetch(`${url}/auth/v1/admin/users/${userId}`, {
+        method: "PUT",
+        headers: { apikey: SRK, Authorization: `Bearer ${SRK}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ password, email_confirm: true }),
+      });
+      if (!r.ok) {
+        const t = await r.text();
+        return json({ error: `Falha ao resetar senha: ${t}` }, 500);
+      }
+      return json({ success: true });
+    }
+
     if (action === "delete") {
       const userId = String(body.user_id || "");
       if (!userId) return json({ error: "user_id required" }, 400);
