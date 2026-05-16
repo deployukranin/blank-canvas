@@ -94,6 +94,76 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "by_referrer") {
+      // All commissions
+      const cr = await sb(`/rest/v1/referral_commissions?select=*&order=created_at.desc&limit=2000`);
+      if (!cr.ok) return json({ error: "Failed" }, 500);
+      const commissions = (cr.data as Array<any>) || [];
+
+      // All referred stores (even those without commissions yet)
+      const rs = await sb(`/rest/v1/stores?referred_by_store_id=not.is.null&select=id,name,slug,plan_type,status,created_at,referred_by_store_id,created_by&order=created_at.desc&limit=2000`);
+      if (!rs.ok) return json({ error: "Failed" }, 500);
+      const referredStores = (rs.data as Array<any>) || [];
+
+      const referrerIds = [...new Set([
+        ...commissions.map((c) => c.referrer_store_id),
+        ...referredStores.map((s) => s.referred_by_store_id),
+      ].filter(Boolean))];
+
+      let referrers: Record<string, any> = {};
+      if (referrerIds.length) {
+        const sr = await sb(`/rest/v1/stores?id=in.(${referrerIds.join(",")})&select=id,name,slug,created_by`);
+        if (sr.ok) for (const s of sr.data as Array<any>) referrers[s.id] = s;
+      }
+
+      const userIds = [...new Set([
+        ...Object.values(referrers).map((s: any) => s.created_by),
+        ...referredStores.map((s) => s.created_by),
+      ].filter(Boolean))];
+      const emails: Record<string, string> = {};
+      for (const uid of userIds) {
+        const er = await fetch(`${sUrl}/auth/v1/admin/users/${uid}`, {
+          headers: {
+            apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!}`,
+          },
+        });
+        if (er.ok) { const u = await er.json(); if (u?.email) emails[uid] = u.email; }
+      }
+
+      // Group: referrerId -> { referrer, signups[], commissions[] , totals }
+      const groups: Record<string, any> = {};
+      const ensure = (rid: string) => {
+        if (!groups[rid]) {
+          const r = referrers[rid];
+          groups[rid] = {
+            referrer_id: rid,
+            referrer: r ? { ...r, email: emails[r.created_by] || null } : null,
+            signups: [],
+            commissions: [],
+            totals: { pending: 0, available: 0, paid: 0, cancelled: 0, signups: 0 },
+          };
+        }
+        return groups[rid];
+      };
+
+      for (const s of referredStores) {
+        const g = ensure(s.referred_by_store_id);
+        g.signups.push({ ...s, email: emails[s.created_by] || null });
+        g.totals.signups += 1;
+      }
+      for (const c of commissions) {
+        const g = ensure(c.referrer_store_id);
+        g.commissions.push(c);
+        (g.totals as any)[c.status] += c.commission_cents;
+      }
+
+      const list = Object.values(groups).sort((a: any, b: any) =>
+        (b.totals.available + b.totals.pending) - (a.totals.available + a.totals.pending) || b.totals.signups - a.totals.signups
+      );
+      return json({ groups: list });
+    }
+
     if (action === "summary") {
       const r = await sb(`/rest/v1/referral_commissions?select=status,commission_cents`);
       if (!r.ok) return json({ error: "Failed" }, 500);
