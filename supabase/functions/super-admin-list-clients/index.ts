@@ -45,68 +45,139 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all stores
-    const { data: stores } = await adminClient
-      .from("stores")
-      .select("id, name, slug, status, plan_type, created_at, created_by")
-      .order("created_at", { ascending: false });
+    // Parse body for mode
+    let body: any = {};
+    if (req.method === "POST") {
+      try { body = await req.json(); } catch { /* ignore */ }
+    }
+    const mode = body.mode || "stores"; // "stores" | "clients"
 
-    // Fetch all memberships
-    const { data: memberships } = await adminClient
-      .from("store_users")
-      .select("store_id, user_id, created_at, banned_at");
+    // -----------------------------------------------------------------
+    // MODE: "stores" — return only stores list + client counts (fast)
+    // -----------------------------------------------------------------
+    if (mode === "stores") {
+      const { data: stores } = await adminClient
+        .from("stores")
+        .select("id, name, slug, status, plan_type, created_at, created_by")
+        .order("created_at", { ascending: false });
 
-    // Collect all user ids (members + owners)
-    const userIds = new Set<string>();
-    (memberships || []).forEach((m) => userIds.add(m.user_id));
-    (stores || []).forEach((s) => s.created_by && userIds.add(s.created_by));
+      const storeIds = (stores || []).map((s) => s.id);
 
-    // Resolve emails by paginating auth users
-    const emailMap = new Map<string, { email: string; created_at: string }>();
-    let page = 1;
-    const perPage = 1000;
-    while (true) {
-      const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
-      if (error) break;
-      for (const u of data.users) {
-        if (userIds.has(u.id)) {
-          emailMap.set(u.id, { email: u.email || "(sem email)", created_at: u.created_at });
+      // Count clients per store via grouped query
+      const counts = new Map<string, number>();
+      if (storeIds.length) {
+        const { data: memberships } = await adminClient
+          .from("store_users")
+          .select("store_id")
+          .in("store_id", storeIds);
+        for (const m of memberships || []) {
+          counts.set(m.store_id, (counts.get(m.store_id) || 0) + 1);
         }
       }
-      if (data.users.length < perPage) break;
-      page++;
-      if (page > 50) break; // safety
-    }
 
-    const result = (stores || []).map((s) => {
-      const owner = s.created_by ? emailMap.get(s.created_by) : null;
-      const clients = (memberships || [])
-        .filter((m) => m.store_id === s.id)
-        .map((m) => {
-          const info = emailMap.get(m.user_id);
-          return {
-            user_id: m.user_id,
-            email: info?.email || "(desconhecido)",
-            joined_at: m.created_at,
-            banned: !!m.banned_at,
-          };
-        })
-        .sort((a, b) => (a.joined_at < b.joined_at ? 1 : -1));
+      // Resolve owner emails in a single paged scan only if owners exist
+      const ownerIds = new Set<string>();
+      (stores || []).forEach((s) => s.created_by && ownerIds.add(s.created_by));
+      const emailMap = new Map<string, string>();
+      if (ownerIds.size > 0) {
+        let page = 1;
+        const perPage = 1000;
+        while (ownerIds.size > emailMap.size) {
+          const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+          if (error || !data?.users?.length) break;
+          for (const u of data.users) {
+            if (ownerIds.has(u.id)) emailMap.set(u.id, u.email || "(sem email)");
+          }
+          if (data.users.length < perPage) break;
+          page++;
+          if (page > 20) break;
+        }
+      }
 
-      return {
+      const result = (stores || []).map((s) => ({
         id: s.id,
         name: s.name,
         slug: s.slug,
         status: s.status,
         plan_type: s.plan_type,
         created_at: s.created_at,
-        owner_email: owner?.email || null,
-        clients,
-      };
-    });
+        owner_email: s.created_by ? emailMap.get(s.created_by) || null : null,
+        client_count: counts.get(s.id) || 0,
+      }));
 
-    return new Response(JSON.stringify({ stores: result }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ stores: result }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // -----------------------------------------------------------------
+    // MODE: "clients" — paginated clients for a single store
+    // -----------------------------------------------------------------
+    if (mode === "clients") {
+      const storeId = body.store_id as string;
+      const page = Math.max(1, Number(body.page) || 1);
+      const pageSize = Math.min(200, Math.max(10, Number(body.page_size) || 50));
+      const search = (body.search || "").toString().trim().toLowerCase();
+
+      if (!storeId) {
+        return new Response(JSON.stringify({ error: "store_id required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data: memberships, count } = await adminClient
+        .from("store_users")
+        .select("user_id, created_at, banned_at", { count: "exact" })
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      const ids = new Set((memberships || []).map((m) => m.user_id));
+      const emailMap = new Map<string, string>();
+
+      // Resolve emails — paged listUsers, stop early when all found
+      if (ids.size > 0) {
+        let p = 1;
+        const perPage = 1000;
+        while (emailMap.size < ids.size) {
+          const { data, error } = await adminClient.auth.admin.listUsers({ page: p, perPage });
+          if (error || !data?.users?.length) break;
+          for (const u of data.users) {
+            if (ids.has(u.id)) emailMap.set(u.id, u.email || "(sem email)");
+          }
+          if (data.users.length < perPage) break;
+          p++;
+          if (p > 50) break;
+        }
+      }
+
+      let clients = (memberships || []).map((m) => ({
+        user_id: m.user_id,
+        email: emailMap.get(m.user_id) || "(desconhecido)",
+        joined_at: m.created_at,
+        banned: !!m.banned_at,
+      }));
+
+      if (search) {
+        clients = clients.filter((c) => c.email.toLowerCase().includes(search));
+      }
+
+      return new Response(JSON.stringify({
+        clients,
+        page,
+        page_size: pageSize,
+        total: count || 0,
+        has_more: (count || 0) > to + 1,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Unknown mode" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), {
