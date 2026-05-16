@@ -60,8 +60,8 @@ const SuperAdminPartners: React.FC = () => {
   useEffect(() => { load(); }, [load]);
 
   const handleCreate = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createEmail)) { toast.error('Email inválido'); return; }
-    if (createPwd.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createEmail)) { toast.error(tp('invalidEmail')); return; }
+    if (createPwd.length < 8) { toast.error(tp('pwdTooShort')); return; }
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
@@ -69,11 +69,11 @@ const SuperAdminPartners: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Parceiro criado');
+      toast.success(tp('created'));
       setCreateOpen(false); setCreateEmail(''); setCreatePwd('');
       load();
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao criar');
+      toast.error(e.message || tp('createErr'));
     } finally { setCreating(false); }
   };
 
