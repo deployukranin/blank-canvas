@@ -133,7 +133,7 @@ const AdminConteudo: React.FC = () => {
                     <label className="text-sm font-medium mb-2 block">{t('contentAdmin.type')}</label>
                     <Select 
                       value={newPost.type} 
-                      onValueChange={(v) => setNewPost({ ...newPost, type: v as FeedPost['type'] })}
+                      onValueChange={(v) => setNewPost({ ...newPost, type: v as FeedPostType })}
                     >
                       <SelectTrigger>
                         <SelectValue />
