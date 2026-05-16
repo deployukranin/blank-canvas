@@ -308,6 +308,16 @@ const Auth = () => {
         return;
       }
 
+      // Re-check slug availability immediately before insert (avoid race)
+      const { data: slugTaken } = await supabase
+        .from('stores').select('id').eq('slug', storeSlug).maybeSingle();
+      if (slugTaken) {
+        setSlugAvailable(false);
+        toast.error(`O slug "${storeSlug}" já está em uso. Escolha outro.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create store
       const { data: store, error: storeError } = await supabase
         .from('stores')
@@ -321,7 +331,12 @@ const Auth = () => {
 
       if (storeError) {
         console.error('Error creating store:', storeError);
-        toast.error("Erro ao criar loja: " + storeError.message);
+        if ((storeError as any).code === '23505') {
+          setSlugAvailable(false);
+          toast.error(`O slug "${storeSlug}" já está em uso. Escolha outro.`);
+        } else {
+          toast.error("Erro ao criar loja: " + storeError.message);
+        }
         setIsSubmitting(false);
         return;
       }
