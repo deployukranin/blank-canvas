@@ -111,10 +111,47 @@ const SuperAdminClients: React.FC = () => {
     });
   };
 
-  const copyAll = (emails: string[]) => {
-    if (!emails.length) return;
-    navigator.clipboard.writeText(emails.join(', '));
-    toast.success(`${emails.length} email(s) copiado(s)`);
+  const [copyingStore, setCopyingStore] = useState<string | null>(null);
+  const [copyProgress, setCopyProgress] = useState<{ loaded: number; total: number } | null>(null);
+
+  const copyAllEmails = async (store: StoreRow) => {
+    if (store.client_count === 0) {
+      toast.info('Loja sem clientes');
+      return;
+    }
+    setCopyingStore(store.id);
+    setCopyProgress({ loaded: 0, total: store.client_count });
+    const toastId = toast.loading(`Carregando 0/${store.client_count} emails...`);
+    try {
+      const all: string[] = [];
+      let page = 1;
+      let hasMore = true;
+      while (hasMore) {
+        const { data: resp, error } = await supabase.functions.invoke('super-admin-list-clients', {
+          body: { mode: 'clients', store_id: store.id, page, page_size: 200 },
+        });
+        if (error) throw error;
+        if (resp?.error) throw new Error(resp.error);
+        const incoming = (resp?.clients as ClientRow[]) || [];
+        for (const c of incoming) if (c.email && c.email !== '(desconhecido)') all.push(c.email);
+        hasMore = !!resp?.has_more;
+        page++;
+        setCopyProgress({ loaded: all.length, total: resp?.total || store.client_count });
+        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails...`, { id: toastId });
+        if (page > 500) break;
+      }
+      if (!all.length) {
+        toast.error('Nenhum email disponível', { id: toastId });
+        return;
+      }
+      await navigator.clipboard.writeText(all.join(', '));
+      toast.success(`${all.length} email(s) copiado(s)`, { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao copiar emails', { id: toastId });
+    } finally {
+      setCopyingStore(null);
+      setCopyProgress(null);
+    }
   };
 
   const filteredStores = useMemo(() => {
