@@ -808,10 +808,10 @@ const Auth = () => {
                   <Button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
-                    {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    {t("auth.createAccount")}
+                    {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                    {slugChecking ? t("auth.slugChecking") || "Verificando slug..." : t("auth.createAccount")}
                   </Button>
                 </form>
               </TabsContent>
