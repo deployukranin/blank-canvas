@@ -39,7 +39,11 @@
     "privacy": "Privacidade",
     "notifications": "Notificações",
     "myOrders": "Meus Pedidos",
-    "subscriptions": "Assinaturas"
+    "subscriptions": "Assinaturas",
+    "clients": "Clientes",
+    "partners": "Parceiros",
+    "referrals": "Indicações",
+    "affiliates": "Afiliados"
   },
   "profile": {
     "language": "Idioma",
