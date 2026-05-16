@@ -20,7 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { mockFeedPosts, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { useFeedPosts } from '@/hooks/use-feed-posts';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
 import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
 // Content moderation removed - inline simple check
@@ -471,6 +472,17 @@ const ComunidadePage = () => {
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const { ideas: dbIdeas, toggleVote: dbToggleVote, submitIdea: dbSubmitIdea } = useVideoIdeas();
+  const { posts: dbFeedPosts } = useFeedPosts();
+  const feedPosts: FeedPost[] = dbFeedPosts.map((p) => ({
+    id: p.id,
+    type: p.type as FeedPost['type'],
+    title: p.title,
+    content: p.content,
+    isPinned: p.is_pinned,
+    createdAt: p.created_at,
+    authorUsername: '',
+    authorAvatar: '🌙',
+  }));
   const [localComments, setLocalComments] = useState<Record<string, ForumComment[]>>({});
   const ideas = useMemo<ForumIdea[]>(
     () => dbIdeas.map(i => ({
@@ -865,7 +877,7 @@ const ComunidadePage = () => {
           )}
 
           <TabsContent value="avisos" className="space-y-4 mt-0">
-            {mockFeedPosts.map((post, index) => (
+            {feedPosts.map((post, index) => (
               <AvisoCard key={post.id} post={post} index={index} />
             ))}
           </TabsContent>

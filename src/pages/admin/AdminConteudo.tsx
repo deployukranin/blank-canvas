@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, Pin, Megaphone, Newspaper, Star } from 'lucide-react';
+import { Plus, Trash2, Pin, Megaphone, Newspaper, Star, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -9,42 +9,49 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockFeedPosts, FeedPost } from '@/lib/mock-data';
+import { toast } from 'sonner';
+import { useFeedPosts, type FeedPostType } from '@/hooks/use-feed-posts';
 
 const AdminConteudo: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [posts, setPosts] = useState<FeedPost[]>(mockFeedPosts);
+  const { posts, isLoading, createPost, togglePin, deletePost } = useFeedPosts();
   const [isCreating, setIsCreating] = useState(false);
-  const [newPost, setNewPost] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newPost, setNewPost] = useState<{ title: string; content: string; type: FeedPostType; isPinned: boolean }>({
     title: '',
     content: '',
-    type: 'news' as FeedPost['type'],
-    isPinned: false
+    type: 'news',
+    isPinned: false,
   });
 
   const isBR = i18n.language?.startsWith('pt');
 
-  const handleCreate = () => {
-    const post: FeedPost = {
-      id: Date.now().toString(),
-      ...newPost,
-      createdAt: new Date().toISOString(),
-      authorUsername: 'luna_asmr',
-      authorAvatar: '🌙'
-    };
-    setPosts([post, ...posts]);
-    setNewPost({ title: '', content: '', type: 'news', isPinned: false });
-    setIsCreating(false);
+  const handleCreate = async () => {
+    if (!newPost.title.trim() || !newPost.content.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await createPost({
+        title: newPost.title.trim(),
+        content: newPost.content.trim(),
+        type: newPost.type,
+        is_pinned: newPost.isPinned,
+      });
+      setNewPost({ title: '', content: '', type: 'news', isPinned: false });
+      setIsCreating(false);
+      toast.success(t('contentAdmin.published', 'Post published'));
+    } catch (e: any) {
+      toast.error(e?.message || 'Error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setPosts(posts.filter(p => p.id !== id));
+  const handleDelete = async (id: string) => {
+    try { await deletePost(id); } catch (e: any) { toast.error(e?.message || 'Error'); }
   };
 
-  const togglePin = (id: string) => {
-    setPosts(posts.map(post => 
-      post.id === id ? { ...post, isPinned: !post.isPinned } : post
-    ));
+  const handleTogglePin = async (id: string, current: boolean) => {
+    try { await togglePin(id, !current); } catch (e: any) { toast.error(e?.message || 'Error'); }
   };
 
   const getTypeBadge = (type: string) => {
@@ -126,7 +133,7 @@ const AdminConteudo: React.FC = () => {
                     <label className="text-sm font-medium mb-2 block">{t('contentAdmin.type')}</label>
                     <Select 
                       value={newPost.type} 
-                      onValueChange={(v) => setNewPost({ ...newPost, type: v as FeedPost['type'] })}
+                      onValueChange={(v) => setNewPost({ ...newPost, type: v as FeedPostType })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -155,7 +162,8 @@ const AdminConteudo: React.FC = () => {
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     {t('common.cancel')}
                   </Button>
-                  <Button onClick={handleCreate} disabled={!newPost.title || !newPost.content}>
+                  <Button onClick={handleCreate} disabled={!newPost.title || !newPost.content || isSubmitting}>
+                    {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                     {t('contentAdmin.publish')}
                   </Button>
                 </div>
@@ -183,7 +191,7 @@ const AdminConteudo: React.FC = () => {
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="font-semibold">{post.title}</h3>
                         {getTypeBadge(post.type)}
-                        {post.isPinned && (
+                        {post.is_pinned && (
                           <Badge variant="outline" className="border-primary text-primary">
                             <Pin className="w-3 h-3 mr-1" />
                             {t('contentAdmin.pinned')}
@@ -194,7 +202,7 @@ const AdminConteudo: React.FC = () => {
                       <p className="text-sm text-muted-foreground mb-2">{post.content}</p>
                       
                       <p className="text-xs text-muted-foreground">
-                        {formatDate(post.createdAt)}
+                        {formatDate(post.created_at)}
                       </p>
                     </div>
                   </div>
@@ -202,8 +210,8 @@ const AdminConteudo: React.FC = () => {
                   <div className="flex gap-2 shrink-0">
                     <Button
                       size="sm"
-                      variant={post.isPinned ? 'default' : 'outline'}
-                      onClick={() => togglePin(post.id)}
+                      variant={post.is_pinned ? 'default' : 'outline'}
+                      onClick={() => handleTogglePin(post.id, post.is_pinned)}
                     >
                       <Pin className="w-4 h-4" />
                     </Button>

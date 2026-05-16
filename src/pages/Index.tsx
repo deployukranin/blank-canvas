@@ -17,7 +17,7 @@ import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { useVideoFavorites } from '@/hooks/use-video-favorites';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
-import { mockFeedPosts } from '@/lib/mock-data';
+import { useFeedPosts } from '@/hooks/use-feed-posts';
 import bannerStudio from '@/assets/banner-studio.jpg';
 
 const Index = () => {
@@ -30,6 +30,7 @@ const Index = () => {
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
   const quickActions = config.quickActions.filter(action => action.enabled);
+  const { posts: feedPosts } = useFeedPosts();
 
   const channelId = config.youtube?.channelId?.trim() || '';
   const youtubeEnabled = Boolean(config.youtube?.enabled) && Boolean(channelId);
@@ -142,7 +143,7 @@ const Index = () => {
             </Link>
           </div>
           <div className="space-y-3">
-            {mockFeedPosts.slice(0, 2).map((post, index) => (
+            {feedPosts.slice(0, 2).map((post, index) => (
               <motion.div key={post.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + index * 0.1 }}>
                 <GlassCard className="p-4" hover={false}>
                   <div className="flex gap-3">

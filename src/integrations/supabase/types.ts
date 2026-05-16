@@ -221,6 +221,42 @@ export type Database = {
           },
         ]
       }
+      feed_posts: {
+        Row: {
+          author_user_id: string | null
+          content: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          store_id: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          store_id?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          store_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invite_codes: {
         Row: {
           code: string
