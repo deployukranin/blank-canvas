@@ -118,7 +118,7 @@ const SuperAdminPartners: React.FC = () => {
       if (data?.error) throw new Error(data.error);
       setAvailableStores(data?.stores || []);
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao carregar lojas');
+      toast.error(e.message || tp('storesLoadErr'));
     } finally { setLoadingAvail(false); }
   };
 
@@ -130,23 +130,23 @@ const SuperAdminPartners: React.FC = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Loja atribuída');
+      toast.success(tp('assigned'));
       setAssignTo(null);
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro ao atribuir'); }
+    } catch (e: any) { toast.error(e.message || tp('assignErr')); }
   };
 
   const unassign = async (storeId: string) => {
-    if (!confirm('Desvincular loja deste parceiro?')) return;
+    if (!confirm(tp('unassignConfirm'))) return;
     try {
       const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
         body: { action: 'unassign', store_id: storeId },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.success('Loja desvinculada');
+      toast.success(tp('unassigned'));
       load();
-    } catch (e: any) { toast.error(e.message || 'Erro'); }
+    } catch (e: any) { toast.error(e.message || tp('unassignErr')); }
   };
 
   const totalRevenue = partners.reduce((a, p) => a + p.revenue_cents, 0);
