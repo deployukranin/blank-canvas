@@ -120,6 +120,7 @@ const App = () => (
                 <Route path="/admin/support" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSuporte /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/social-links" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminSocialLinks /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/domain" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDominio /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/referrals" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminReferrals /></AdminRoute></CustomDomainGate>} />
 
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
