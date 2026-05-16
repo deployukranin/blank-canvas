@@ -297,6 +297,8 @@ const SuperAdminReferrals: React.FC = () => {
             </TabsContent>
           ))}
         </Tabs>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Dialog open={!!payOpen} onOpenChange={(o) => !o && setPayOpen(null)}>
