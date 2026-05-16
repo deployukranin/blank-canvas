@@ -16,7 +16,7 @@ export const AuthModal = ({ isOpen, onClose, message }: AuthModalProps) => {
 
   const handleGoToAuth = () => {
     onClose();
-    navigate(isTenantScope ? `${basePath}/login` : '/login');
+    navigate(isTenantScope ? `${basePath}/login` : '/auth');
   };
 
   return (

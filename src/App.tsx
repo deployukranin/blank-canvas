@@ -89,11 +89,11 @@ const App = () => (
 
                 {/* 🌐 Rotas slug-free para domínios personalizados */}
                 <Route path="/login" element={<CustomDomainGate><ClientAuth /></CustomDomainGate>} />
-                <Route path="/customs" element={<CustomDomainGate><ProtectedRoute><Customs /></ProtectedRoute></CustomDomainGate>} />
-                <Route path="/community" element={<CustomDomainGate><ProtectedRoute><Comunidade /></ProtectedRoute></CustomDomainGate>} />
-                <Route path="/ideas" element={<CustomDomainGate><ProtectedRoute><Ideias /></ProtectedRoute></CustomDomainGate>} />
-                <Route path="/vip" element={<CustomDomainGate><ProtectedRoute><VIP /></ProtectedRoute></CustomDomainGate>} />
-                <Route path="/gallery" element={<CustomDomainGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></CustomDomainGate>} />
+                <Route path="/customs" element={<CustomDomainGate><Customs /></CustomDomainGate>} />
+                <Route path="/community" element={<CustomDomainGate><Comunidade /></CustomDomainGate>} />
+                <Route path="/ideas" element={<CustomDomainGate><Ideias /></CustomDomainGate>} />
+                <Route path="/vip" element={<CustomDomainGate><VIP /></CustomDomainGate>} />
+                <Route path="/gallery" element={<CustomDomainGate><GaleriaVideos /></CustomDomainGate>} />
                 <Route path="/profile" element={<CustomDomainGate><ProtectedRoute><Perfil /></ProtectedRoute></CustomDomainGate>} />
                 <Route path="/notifications" element={<CustomDomainGate><ProtectedRoute><Notificacoes /></ProtectedRoute></CustomDomainGate>} />
                 <Route path="/admin" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></CustomDomainGate>} />
@@ -118,11 +118,11 @@ const App = () => (
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
                 <Route path="/:slug/login" element={<TenantGate><ClientAuth /></TenantGate>} />
-                <Route path="/:slug/customs" element={<TenantGate><ProtectedRoute><Customs /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/community" element={<TenantGate><ProtectedRoute><Comunidade /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/ideas" element={<TenantGate><ProtectedRoute><Ideias /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/vip" element={<TenantGate><ProtectedRoute><VIP /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/gallery" element={<TenantGate><ProtectedRoute><GaleriaVideos /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/customs" element={<TenantGate><Customs /></TenantGate>} />
+                <Route path="/:slug/community" element={<TenantGate><Comunidade /></TenantGate>} />
+                <Route path="/:slug/ideas" element={<TenantGate><Ideias /></TenantGate>} />
+                <Route path="/:slug/vip" element={<TenantGate><VIP /></TenantGate>} />
+                <Route path="/:slug/gallery" element={<TenantGate><GaleriaVideos /></TenantGate>} />
                 <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />

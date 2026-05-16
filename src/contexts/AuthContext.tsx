@@ -19,13 +19,13 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
+  signUp: (email: string, password: string, redirectTo?: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  requireAuth: (callback: () => void) => void;
+  requireAuth: (callback: () => void, authPath?: string) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
 
@@ -90,9 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, [pendingCallback]);
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, redirectTo?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/auth`;
+      const redirectUrl = redirectTo || `${window.location.origin}/auth`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -171,13 +171,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [signOut]);
 
   const requireAuth = useCallback(
-    (callback: () => void) => {
+    (callback: () => void, authPath = "/auth") => {
       if (user) {
         callback();
       } else {
         setPendingCallback(() => callback);
-        // Navigate to auth page
-        window.location.href = "/auth";
+        window.location.href = authPath;
       }
     },
     [user]

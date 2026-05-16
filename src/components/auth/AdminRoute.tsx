@@ -14,7 +14,7 @@ interface AdminRouteProps {
 export const AdminRoute = ({ children, requiredRole = "admin" }: AdminRouteProps) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const { isLoading: isLoadingRoles, isAdmin, isCEO, isSuperAdmin, isCreator } = useUserRole();
-  const { store, isLoading: isLoadingTenant, isTenantScope } = useTenant();
+  const { store, isLoading: isLoadingTenant, isTenantScope, basePath } = useTenant();
   const location = useLocation();
 
   const hasGlobalAdminRole = isAdmin() || isCEO() || isSuperAdmin() || isCreator();
@@ -41,7 +41,8 @@ export const AdminRoute = ({ children, requiredRole = "admin" }: AdminRouteProps
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+    const authPath = isTenantScope ? `${basePath}/login` : "/auth";
+    return <Navigate to={authPath} state={{ from: location.pathname }} replace />;
   }
 
   if (requiredRole === "ceo" && !hasCeoAccess) {
