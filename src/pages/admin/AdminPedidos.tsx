@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
 import { OrderChat } from '@/components/orders/OrderChat';
+import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
 
 interface Order {
