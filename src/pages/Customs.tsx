@@ -60,17 +60,24 @@ const CustomsPage = () => {
   const { isAuthenticated } = useAuth();
   const { store } = useTenant();
 
-  // Helpers to translate default category/duration names via i18n
-  const tCategoryName = (id: string, fallback: string) =>
-    t(`customs.categories.${id}`, { defaultValue: fallback });
-  const tCategoryDesc = (id: string, fallback: string) =>
-    t(`customs.categories.${id}Desc`, { defaultValue: fallback });
-  const tAudioCategoryName = (id: string, fallback: string) =>
-    t(`customs.audioCategories.${id}`, { defaultValue: fallback });
-  const tAudioCategoryDesc = (id: string, fallback: string) =>
-    t(`customs.audioCategories.${id}Desc`, { defaultValue: fallback });
-  const tDurationLabel = (id: string, fallback: string) =>
-    t(`customs.durations.${id}`, { defaultValue: fallback });
+  // Translate only if the saved value still equals the default translation in another supported language.
+  // This preserves custom admin-entered names while still translating untouched defaults.
+  const supportedLanguages = ['pt-BR', 'en', 'es'] as const;
+  const localize = (key: string, raw: string) => {
+    const trimmed = (raw || '').trim();
+    if (!trimmed) return t(key, { defaultValue: raw });
+    const known = new Set(
+      supportedLanguages
+        .map((lng) => i18n.getFixedT(lng)(key))
+        .filter((v) => v && v !== key)
+    );
+    return known.has(trimmed) ? t(key, { defaultValue: raw }) : raw;
+  };
+  const tCategoryName = (id: string, fallback: string) => localize(`customs.categories.${id}`, fallback);
+  const tCategoryDesc = (id: string, fallback: string) => localize(`customs.categories.${id}Desc`, fallback);
+  const tAudioCategoryName = (id: string, fallback: string) => localize(`customs.audioCategories.${id}`, fallback);
+  const tAudioCategoryDesc = (id: string, fallback: string) => localize(`customs.audioCategories.${id}Desc`, fallback);
+  const tDurationLabel = (id: string, fallback: string) => localize(`customs.durations.${id}`, fallback);
 
   const formatCurrency = (value: number) => {
     const isBR = i18n.language?.startsWith('pt');
