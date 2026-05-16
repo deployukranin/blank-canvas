@@ -60,14 +60,16 @@ const SuperAdminReferrals: React.FC = () => {
   const load = useCallback(async (status: Commission['status']) => {
     setLoading(true);
     try {
-      const [list, sum] = await Promise.all([
+      const [list, sum, grp] = await Promise.all([
         supabase.functions.invoke('super-admin-referrals', { body: { action: 'list', status } }),
         supabase.functions.invoke('super-admin-referrals', { body: { action: 'summary' } }),
+        supabase.functions.invoke('super-admin-referrals', { body: { action: 'by_referrer' } }),
       ]);
       if (list.error) throw list.error;
       if (list.data?.error) throw new Error(list.data.error);
       setItems(list.data?.commissions || []);
       if (!sum.error && !sum.data?.error) setSummary(sum.data);
+      if (!grp.error && !grp.data?.error) setGroups(grp.data?.groups || []);
     } catch (e: any) {
       toast.error(e.message || 'Erro ao carregar comissões');
     } finally { setLoading(false); }
