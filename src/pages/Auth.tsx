@@ -624,6 +624,11 @@ const Auth = () => {
               {/* Signup Tab */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {pendingReferral && (
+                    <div className="rounded-md border border-purple-500/40 bg-purple-500/10 px-3 py-2 text-sm text-purple-200">
+                      🎁 Você foi indicado por <strong>{pendingReferral.referrer_store_name}</strong>
+                    </div>
+                  )}
 
                   {/* Store Name */}
                   <div className="space-y-2">
