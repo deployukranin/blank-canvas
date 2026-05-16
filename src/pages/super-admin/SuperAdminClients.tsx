@@ -111,10 +111,47 @@ const SuperAdminClients: React.FC = () => {
     });
   };
 
-  const copyAll = (emails: string[]) => {
-    if (!emails.length) return;
-    navigator.clipboard.writeText(emails.join(', '));
-    toast.success(`${emails.length} email(s) copiado(s)`);
+  const [copyingStore, setCopyingStore] = useState<string | null>(null);
+  const [copyProgress, setCopyProgress] = useState<{ loaded: number; total: number } | null>(null);
+
+  const copyAllEmails = async (store: StoreRow) => {
+    if (store.client_count === 0) {
+      toast.info('Loja sem clientes');
+      return;
+    }
+    setCopyingStore(store.id);
+    setCopyProgress({ loaded: 0, total: store.client_count });
+    const toastId = toast.loading(`Carregando 0/${store.client_count} emails...`);
+    try {
+      const all: string[] = [];
+      let page = 1;
+      let hasMore = true;
+      while (hasMore) {
+        const { data: resp, error } = await supabase.functions.invoke('super-admin-list-clients', {
+          body: { mode: 'clients', store_id: store.id, page, page_size: 200 },
+        });
+        if (error) throw error;
+        if (resp?.error) throw new Error(resp.error);
+        const incoming = (resp?.clients as ClientRow[]) || [];
+        for (const c of incoming) if (c.email && c.email !== '(desconhecido)') all.push(c.email);
+        hasMore = !!resp?.has_more;
+        page++;
+        setCopyProgress({ loaded: all.length, total: resp?.total || store.client_count });
+        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails...`, { id: toastId });
+        if (page > 500) break;
+      }
+      if (!all.length) {
+        toast.error('Nenhum email disponível', { id: toastId });
+        return;
+      }
+      await navigator.clipboard.writeText(all.join(', '));
+      toast.success(`${all.length} email(s) copiado(s)`, { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao copiar emails', { id: toastId });
+    } finally {
+      setCopyingStore(null);
+      setCopyProgress(null);
+    }
   };
 
   const filteredStores = useMemo(() => {
@@ -204,14 +241,22 @@ const SuperAdminClients: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    {isOpen && emails.length > 0 && (
+                    {s.client_count > 0 && (
                       <span
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => { e.stopPropagation(); copyAll(emails); }}
+                        aria-disabled={copyingStore === s.id}
+                        onClick={(e) => { e.stopPropagation(); if (copyingStore !== s.id) copyAllEmails(s); }}
                         className="inline-flex items-center justify-center gap-1 h-8 px-3 rounded-md text-xs border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
                       >
-                        <Copy className="w-3 h-3" /> Copiar carregados
+                        {copyingStore === s.id ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {copyProgress ? `${copyProgress.loaded}/${copyProgress.total}` : 'Carregando...'}
+                          </>
+                        ) : (
+                          <><Copy className="w-3 h-3" /> Copiar todos ({s.client_count})</>
+                        )}
                       </span>
                     )}
                   </button>
