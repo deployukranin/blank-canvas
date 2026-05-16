@@ -139,9 +139,11 @@ const AdminUsuarios: React.FC = () => {
           .from('vip_subscriptions')
           .insert({
             user_id: userId,
+            store_id: storeId,
             status: 'active',
             plan_type: 'monthly',
             price_cents: 0,
+            started_at: new Date().toISOString(),
             expires_at: expiresAt.toISOString(),
           });
 
