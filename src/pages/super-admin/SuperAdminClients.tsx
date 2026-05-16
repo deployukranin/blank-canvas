@@ -284,7 +284,7 @@ const SuperAdminClients: React.FC = () => {
                             {copyProgress ? `${copyProgress.loaded}/${copyProgress.total}` : 'Carregando...'}
                           </>
                         ) : (
-                          <><Copy className="w-3 h-3" /> Copiar todos ({s.client_count})</>
+                          <><Copy className="w-3 h-3" /> Copiar {filterLabel} ({s.client_count})</>
                         )}
                       </span>
                     )}
