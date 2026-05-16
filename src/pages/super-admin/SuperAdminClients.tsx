@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Store, Users, Search, Mail, Copy, ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { Store, Users, Search, Mail, Copy, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,44 +14,99 @@ interface ClientRow {
   joined_at: string;
   banned: boolean;
 }
-interface StoreClients {
+interface StoreRow {
   id: string;
   name: string;
   slug: string | null;
   status: string;
   plan_type: string;
   owner_email: string | null;
+  client_count: number;
+}
+interface StoreClientsState {
   clients: ClientRow[];
+  page: number;
+  total: number;
+  hasMore: boolean;
+  loading: boolean;
 }
 
+const PAGE_SIZE = 50;
+
 const SuperAdminClients: React.FC = () => {
-  const [data, setData] = useState<StoreClients[]>([]);
+  const [stores, setStores] = useState<StoreRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [clientState, setClientState] = useState<Record<string, StoreClientsState>>({});
 
-  const load = useCallback(async () => {
+  const loadStores = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: resp, error } = await supabase.functions.invoke('super-admin-list-clients', { body: {} });
+      const { data: resp, error } = await supabase.functions.invoke('super-admin-list-clients', {
+        body: { mode: 'stores' },
+      });
       if (error) throw error;
       if (resp?.error) throw new Error(resp.error);
-      setData((resp?.stores as StoreClients[]) || []);
-      // expand all by default
-      setExpanded(new Set((resp?.stores || []).map((s: StoreClients) => s.id)));
+      setStores((resp?.stores as StoreRow[]) || []);
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao carregar clientes');
+      toast.error(err.message || 'Erro ao carregar lojas');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadStores(); }, [loadStores]);
 
-  const toggle = (id: string) => {
+  const loadClients = useCallback(async (storeId: string, page: number, append: boolean) => {
+    setClientState((prev) => ({
+      ...prev,
+      [storeId]: {
+        clients: prev[storeId]?.clients || [],
+        page: prev[storeId]?.page || 0,
+        total: prev[storeId]?.total || 0,
+        hasMore: prev[storeId]?.hasMore || false,
+        loading: true,
+      },
+    }));
+    try {
+      const { data: resp, error } = await supabase.functions.invoke('super-admin-list-clients', {
+        body: { mode: 'clients', store_id: storeId, page, page_size: PAGE_SIZE },
+      });
+      if (error) throw error;
+      if (resp?.error) throw new Error(resp.error);
+      setClientState((prev) => {
+        const existing = prev[storeId]?.clients || [];
+        const incoming = (resp?.clients as ClientRow[]) || [];
+        return {
+          ...prev,
+          [storeId]: {
+            clients: append ? [...existing, ...incoming] : incoming,
+            page: resp?.page || page,
+            total: resp?.total || 0,
+            hasMore: !!resp?.has_more,
+            loading: false,
+          },
+        };
+      });
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao carregar clientes');
+      setClientState((prev) => ({
+        ...prev,
+        [storeId]: { ...(prev[storeId] || { clients: [], page: 0, total: 0, hasMore: false }), loading: false },
+      }));
+    }
+  }, []);
+
+  const toggle = (storeId: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(storeId)) {
+        next.delete(storeId);
+      } else {
+        next.add(storeId);
+        if (!clientState[storeId]) loadClients(storeId, 1, false);
+      }
       return next;
     });
   };
@@ -62,26 +117,24 @@ const SuperAdminClients: React.FC = () => {
     toast.success(`${emails.length} email(s) copiado(s)`);
   };
 
-  const filtered = data
-    .map((s) => {
-      if (!search) return s;
-      const q = search.toLowerCase();
-      const matchStore = s.name.toLowerCase().includes(q) || s.slug?.toLowerCase().includes(q);
-      const matchedClients = s.clients.filter((c) => c.email.toLowerCase().includes(q));
-      if (matchStore) return s;
-      if (matchedClients.length) return { ...s, clients: matchedClients };
-      return null;
-    })
-    .filter(Boolean) as StoreClients[];
+  const filteredStores = useMemo(() => {
+    if (!search) return stores;
+    const q = search.toLowerCase();
+    return stores.filter((s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.slug?.toLowerCase().includes(q) ||
+      s.owner_email?.toLowerCase().includes(q),
+    );
+  }, [stores, search]);
 
-  const totalClients = data.reduce((a, s) => a + s.clients.length, 0);
+  const totalClients = stores.reduce((a, s) => a + s.client_count, 0);
 
   return (
     <SuperAdminLayout title="Clientes por Loja">
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <GlassCard className="p-4 text-center">
-            <p className="text-2xl font-bold">{data.length}</p>
+            <p className="text-2xl font-bold">{stores.length}</p>
             <p className="text-xs text-muted-foreground">Lojas</p>
           </GlassCard>
           <GlassCard className="p-4 text-center">
@@ -90,7 +143,7 @@ const SuperAdminClients: React.FC = () => {
           </GlassCard>
           <GlassCard className="p-4 text-center col-span-2 sm:col-span-1">
             <p className="text-2xl font-bold text-green-400">
-              {data.filter((s) => s.clients.length > 0).length}
+              {stores.filter((s) => s.client_count > 0).length}
             </p>
             <p className="text-xs text-muted-foreground">Lojas com clientes</p>
           </GlassCard>
@@ -99,7 +152,7 @@ const SuperAdminClients: React.FC = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por loja, slug ou email..."
+            placeholder="Buscar por loja, slug ou email do dono..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -107,17 +160,20 @@ const SuperAdminClients: React.FC = () => {
         </div>
 
         {loading ? (
-          <p className="text-muted-foreground text-sm">Carregando...</p>
-        ) : filtered.length === 0 ? (
+          <p className="text-muted-foreground text-sm flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando lojas...
+          </p>
+        ) : filteredStores.length === 0 ? (
           <GlassCard className="p-8 text-center">
             <Store className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Nenhum resultado</p>
+            <p className="text-muted-foreground">Nenhuma loja encontrada</p>
           </GlassCard>
         ) : (
           <div className="space-y-3">
-            {filtered.map((s) => {
+            {filteredStores.map((s) => {
               const isOpen = expanded.has(s.id);
-              const emails = s.clients.map((c) => c.email);
+              const state = clientState[s.id];
+              const emails = state?.clients.map((c) => c.email) || [];
               return (
                 <GlassCard key={s.id} className="overflow-hidden">
                   <button
@@ -139,7 +195,7 @@ const SuperAdminClients: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" /> {s.clients.length} clientes
+                          <Users className="w-3 h-3" /> {s.client_count} clientes
                         </span>
                         {s.owner_email && (
                           <span className="flex items-center gap-1 truncate">
@@ -148,45 +204,70 @@ const SuperAdminClients: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    {s.clients.length > 0 && (
+                    {isOpen && emails.length > 0 && (
                       <span
                         role="button"
                         tabIndex={0}
                         onClick={(e) => { e.stopPropagation(); copyAll(emails); }}
                         className="inline-flex items-center justify-center gap-1 h-8 px-3 rounded-md text-xs border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
                       >
-                        <Copy className="w-3 h-3" /> Copiar emails
+                        <Copy className="w-3 h-3" /> Copiar carregados
                       </span>
                     )}
                   </button>
 
                   {isOpen && (
                     <div className="border-t border-white/5 divide-y divide-white/5">
-                      {s.clients.length === 0 ? (
+                      {!state || state.loading && state.clients.length === 0 ? (
+                        <p className="p-4 text-sm text-muted-foreground flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" /> Carregando clientes...
+                        </p>
+                      ) : state.clients.length === 0 ? (
                         <p className="p-4 text-sm text-muted-foreground">Nenhum cliente cadastrado.</p>
                       ) : (
-                        s.clients.map((c) => (
-                          <div key={c.user_id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-white/[0.02]">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm truncate">{c.email}</p>
-                              <p className="text-[11px] text-muted-foreground">
-                                desde {new Date(c.joined_at).toLocaleDateString('pt-BR')}
-                                {c.banned && <span className="ml-2 text-red-400">banido</span>}
-                              </p>
+                        <>
+                          {state.clients.map((c) => (
+                            <div key={c.user_id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-white/[0.02]">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm truncate">{c.email}</p>
+                                <p className="text-[11px] text-muted-foreground">
+                                  desde {new Date(c.joined_at).toLocaleDateString('pt-BR')}
+                                  {c.banned && <span className="ml-2 text-red-400">banido</span>}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(c.email);
+                                  toast.success('Email copiado');
+                                }}
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-xs"
-                              onClick={() => {
-                                navigator.clipboard.writeText(c.email);
-                                toast.success('Email copiado');
-                              }}
-                            >
-                              <Copy className="w-3 h-3" />
-                            </Button>
+                          ))}
+                          <div className="p-3 flex items-center justify-between gap-2 bg-white/[0.02]">
+                            <p className="text-xs text-muted-foreground">
+                              {state.clients.length} de {state.total}
+                            </p>
+                            {state.hasMore && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={state.loading}
+                                onClick={() => loadClients(s.id, state.page + 1, true)}
+                              >
+                                {state.loading ? (
+                                  <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Carregando</>
+                                ) : (
+                                  <>Carregar mais {Math.min(PAGE_SIZE, state.total - state.clients.length)}</>
+                                )}
+                              </Button>
+                            )}
                           </div>
-                        ))
+                        </>
                       )}
                     </div>
                   )}
