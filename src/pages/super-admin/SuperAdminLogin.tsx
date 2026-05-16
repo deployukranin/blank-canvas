@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const SuperAdminLogin = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading, signIn, session } = useAuth();
-  const { isSuperAdmin, isLoading: rolesLoading } = useUserRole();
+  const { isSuperAdmin, hasRole, isLoading: rolesLoading } = useUserRole();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
