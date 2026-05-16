@@ -241,14 +241,22 @@ const SuperAdminClients: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    {isOpen && emails.length > 0 && (
+                    {s.client_count > 0 && (
                       <span
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => { e.stopPropagation(); copyAll(emails); }}
+                        aria-disabled={copyingStore === s.id}
+                        onClick={(e) => { e.stopPropagation(); if (copyingStore !== s.id) copyAllEmails(s); }}
                         className="inline-flex items-center justify-center gap-1 h-8 px-3 rounded-md text-xs border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
                       >
-                        <Copy className="w-3 h-3" /> Copiar carregados
+                        {copyingStore === s.id ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {copyProgress ? `${copyProgress.loaded}/${copyProgress.total}` : 'Carregando...'}
+                          </>
+                        ) : (
+                          <><Copy className="w-3 h-3" /> Copiar todos ({s.client_count})</>
+                        )}
                       </span>
                     )}
                   </button>
