@@ -356,6 +356,7 @@ Deno.serve(async (req) => {
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
         store_id: storeId,
+        affiliate_id: affiliateId,
       });
 
     return jsonResponse({
