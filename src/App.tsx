@@ -64,6 +64,7 @@ import SuperAdminRanking from "./pages/super-admin/SuperAdminRanking";
 import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
 import SuperAdminSuporte from "./pages/super-admin/SuperAdminSuporte";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
+import SuperAdminClients from "./pages/super-admin/SuperAdminClients";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +152,7 @@ const App = () => (
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
                 <Route path="/admin-master" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
+                <Route path="/admin-master/clients" element={<SuperAdminRoute><SuperAdminClients /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
                 <Route path="/admin-master/plans" element={<SuperAdminRoute><SuperAdminPlanos /></SuperAdminRoute>} />
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
