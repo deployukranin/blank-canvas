@@ -20,7 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { mockFeedPosts, type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
+import { useFeedPosts } from '@/hooks/use-feed-posts';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
 import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
 // Content moderation removed - inline simple check
