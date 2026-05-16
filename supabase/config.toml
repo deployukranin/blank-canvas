@@ -28,3 +28,6 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.affiliate-validate]
+verify_jwt = false
