@@ -53,6 +53,7 @@ import {
 } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePixPayment } from '@/hooks/use-pix-payment';
+import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {

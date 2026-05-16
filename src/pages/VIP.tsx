@@ -12,6 +12,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getVipMediaSignedUrl } from '@/lib/external-storage';
+import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import {
   Dialog,
   DialogContent,
