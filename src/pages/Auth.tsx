@@ -161,9 +161,10 @@ const Auth = () => {
     let store: { id: string; slug: string } | null = existingOwn as any;
 
     if (!store) {
+      const ref = readPendingReferral();
       const { data: created, error: storeError } = await supabase
         .from('stores')
-        .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId })
+        .insert({ name: pending.storeName, slug: pending.storeSlug, created_by: userId, referred_by_store_id: ref?.referrer_store_id ?? null } as any)
         .select('id, slug')
         .single();
 
