@@ -26,19 +26,12 @@ export function useReferralCapture() {
 
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('referral-validate', {
-          body: null,
-          method: 'GET' as any,
+        // Edge functions.invoke doesn't support GET query strings; use fetch directly
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/referral-validate?code=${encodeURIComponent(code)}`;
+        const r = await fetch(url, {
+          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
         });
-        // Edge functions invoke doesn't support query strings cleanly; fall back to fetch
-        let resp: any = data;
-        if (error || !resp) {
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/referral-validate?code=${encodeURIComponent(code)}`;
-          const r = await fetch(url, {
-            headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-          });
-          resp = await r.json().catch(() => null);
-        }
+        const resp = await r.json().catch(() => null);
         if (resp?.valid) {
           const next: PendingReferral = {
             code,
