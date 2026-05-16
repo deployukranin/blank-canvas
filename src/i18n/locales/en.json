@@ -365,6 +365,12 @@
       "paidOn": "Paid on {{date}}",
       "cancelled": "Cancelled",
       "ofAmount": "of {{amount}}",
+      "signupsTitle": "Accounts created from your link",
+      "signupsCount_one": "{{count}} store signed up",
+      "signupsCount_other": "{{count}} stores signed up",
+      "signupsEmpty": "No one has signed up using your link yet.",
+      "signupsPlan": "Plan",
+      "signupsJoined": "Joined on {{date}}",
       "status": {
         "pending": "In holding",
         "available": "To receive",
