@@ -76,6 +76,7 @@ const VIPPage = () => {
   const tenantStoreId = store?.id;
 
   const [resolvedStoreId, setResolvedStoreId] = useState<string | undefined>(tenantStoreId);
+  useAffiliateCapture(resolvedStoreId);
   const [isLoading, setIsLoading] = useState(true);
   const [isVIP, setIsVIP] = useState(false);
   const [subscription, setSubscription] = useState<VipSub | null>(null);
