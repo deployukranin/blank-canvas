@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { UserPlus, Users, Trash2, ChevronDown, ChevronRight, Loader2, Store, Plus, X } from 'lucide-react';
+import { UserPlus, Users, Trash2, ChevronDown, ChevronRight, Loader2, Store, Plus, X, KeyRound } from 'lucide-react';
 import SuperAdminLayout from './SuperAdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,9 @@ const SuperAdminPartners: React.FC = () => {
 
   const [assignTo, setAssignTo] = useState<string | null>(null); // partner_id receiving the store
   const [availableStores, setAvailableStores] = useState<AvailableStore[]>([]);
+  const [resetFor, setResetFor] = useState<Partner | null>(null);
+  const [resetPwd, setResetPwd] = useState('');
+  const [resetting, setResetting] = useState(false);
   const [loadingAvail, setLoadingAvail] = useState(false);
 
   const load = useCallback(async () => {
@@ -82,6 +85,23 @@ const SuperAdminPartners: React.FC = () => {
       toast.success('Parceiro removido');
       load();
     } catch (e: any) { toast.error(e.message || 'Erro ao remover'); }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetFor) return;
+    if (resetPwd.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres'); return; }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
+        body: { action: 'reset_password', user_id: resetFor.user_id, password: resetPwd },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('Senha redefinida');
+      setResetFor(null); setResetPwd('');
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao resetar senha');
+    } finally { setResetting(false); }
   };
 
   const openAssign = async (partnerId: string) => {
@@ -186,6 +206,9 @@ const SuperAdminPartners: React.FC = () => {
                     <Button size="sm" variant="outline" onClick={() => openAssign(p.user_id)} className="gap-1">
                       <Plus className="w-3 h-3" /> Atribuir loja
                     </Button>
+                    <Button size="sm" variant="outline" onClick={() => { setResetFor(p); setResetPwd(''); }} className="gap-1">
+                      <KeyRound className="w-3 h-3" /> Senha
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDelete(p)} className="text-red-400 hover:text-red-300">
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -264,6 +287,26 @@ const SuperAdminPartners: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Reset password dialog */}
+      <Dialog open={!!resetFor} onOpenChange={(o) => { if (!o) { setResetFor(null); setResetPwd(''); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Redefinir senha</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Parceiro: <span className="text-foreground">{resetFor?.email}</span></p>
+            <div>
+              <Label>Nova senha</Label>
+              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="mínimo 8 caracteres" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>Cancelar</Button>
+            <Button onClick={handleResetPassword} disabled={resetting} className="bg-purple-600 hover:bg-purple-700">
+              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Redefinir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </SuperAdminLayout>
   );
 };
