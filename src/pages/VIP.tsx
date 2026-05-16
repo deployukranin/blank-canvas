@@ -477,15 +477,6 @@ const VIPPage = () => {
             </div>
           </div>
 
-          {/* Cancel */}
-          <GlassCard className="p-4">
-            <p className="text-xs text-muted-foreground mb-3">
-              Need to cancel? You'll keep access until your paid period ends.
-            </p>
-            <Button variant="outline" size="sm" className="w-full" onClick={handleCancelSubscription}>
-              Cancel Subscription
-            </Button>
-          </GlassCard>
         </div>
       {adultWarningDialog}
       </MobileLayout>
