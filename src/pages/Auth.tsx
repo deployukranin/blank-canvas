@@ -392,6 +392,7 @@ const Auth = () => {
         }
       }
 
+      clearPendingReferral();
       toast.success(t("auth.accountCreated"));
       navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {
