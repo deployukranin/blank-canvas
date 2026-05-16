@@ -40,6 +40,8 @@ interface Order {
 
 const AdminPedidos: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -60,15 +62,27 @@ const AdminPedidos: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
 
   const fetchOrders = async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('custom_orders')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (storeId) {
+        query = query.eq('store_id', storeId);
+      } else {
+        // No store context — show nothing (avoids leaking other stores' history)
+        setOrders([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
