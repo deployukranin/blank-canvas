@@ -17,7 +17,7 @@ import { useYouTubeVideos } from '@/hooks/use-youtube-videos';
 import { useVideoFavorites } from '@/hooks/use-video-favorites';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
-import { mockFeedPosts } from '@/lib/mock-data';
+import { useFeedPosts } from '@/hooks/use-feed-posts';
 import bannerStudio from '@/assets/banner-studio.jpg';
 
 const Index = () => {
