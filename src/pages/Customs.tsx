@@ -187,6 +187,7 @@ const CustomsPage = () => {
       script: personalizationData.script,
       observations: personalizationData.observations,
       storeId: store?.id,
+      currency: storeCurrency,
       successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
       cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
     } as any);
