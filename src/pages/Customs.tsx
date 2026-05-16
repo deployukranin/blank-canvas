@@ -61,6 +61,7 @@ const CustomsPage = () => {
   const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { store } = useTenant();
+  useAffiliateCapture(store?.id);
 
   // Translate only if the saved value still equals the default translation in another supported language.
   // This preserves custom admin-entered names while still translating untouched defaults.
