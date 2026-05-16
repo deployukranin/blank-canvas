@@ -41,14 +41,14 @@ const AdminConfiguracoes: React.FC = () => {
   const handleSave = async () => {
     await saveNow();
     toast({
-      title: t('admin.settings.saved', 'Settings saved!'),
-      description: t('admin.settings.savedDesc', 'Changes applied successfully.'),
+      title: t('admin.settingsPage.saved', 'Settings saved!'),
+      description: t('admin.settingsPage.savedDesc', 'Changes applied successfully.'),
     });
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title={t('admin.settings.title', 'Settings')}>
+      <AdminLayout title={t('admin.settingsPage.title', 'Settings')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
@@ -57,20 +57,20 @@ const AdminConfiguracoes: React.FC = () => {
   }
 
   return (
-    <AdminLayout title={t('admin.settings.title', 'Settings')}>
+    <AdminLayout title={t('admin.settingsPage.title', 'Settings')}>
       <div className="space-y-6 max-w-2xl">
         {/* Notifications */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <GlassCard className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Bell className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">{t('admin.settings.notifications', 'Notifications')}</h3>
+              <h3 className="font-semibold">{t('admin.settingsPage.notifications', 'Notifications')}</h3>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>{t('admin.settings.emailNotifications', 'Email Notifications')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('admin.settings.emailNotificationsDesc', 'Receive alerts for new orders')}</p>
+                  <Label>{t('admin.settingsPage.emailNotifications', 'Email Notifications')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('admin.settingsPage.emailNotificationsDesc', 'Receive alerts for new orders')}</p>
                 </div>
                 <Switch
                   checked={settings.emailNotifications}
@@ -86,13 +86,13 @@ const AdminConfiguracoes: React.FC = () => {
           <GlassCard className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">{t('admin.settings.contentSettings', 'Content Settings')}</h3>
+              <h3 className="font-semibold">{t('admin.settingsPage.contentSettings', 'Content Settings')}</h3>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>{t('admin.settings.publicIdeas', 'Public Ideas')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('admin.settings.publicIdeasDesc', 'Allow visitors to see ideas')}</p>
+                  <Label>{t('admin.settingsPage.publicIdeas', 'Public Ideas')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('admin.settingsPage.publicIdeasDesc', 'Allow visitors to see ideas')}</p>
                 </div>
                 <Switch
                   checked={settings.publicIdeas}
@@ -102,8 +102,8 @@ const AdminConfiguracoes: React.FC = () => {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>{t('admin.settings.approveIdeas', 'Approve Ideas')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('admin.settings.approveIdeasDesc', 'Ideas need approval before showing')}</p>
+                  <Label>{t('admin.settingsPage.approveIdeas', 'Approve Ideas')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('admin.settingsPage.approveIdeasDesc', 'Ideas need approval before showing')}</p>
                 </div>
                 <Switch
                   checked={settings.requireApprovalForIdeas}
@@ -117,7 +117,7 @@ const AdminConfiguracoes: React.FC = () => {
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={isSaving} className="gap-2">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {t('admin.settings.save', 'Save Settings')}
+            {t('admin.settingsPage.save', 'Save Settings')}
           </Button>
         </div>
       </div>
