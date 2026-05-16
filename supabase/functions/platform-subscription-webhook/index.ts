@@ -105,6 +105,48 @@ Deno.serve(async (req) => {
 
           if (error) console.error("Error updating store plan:", error);
           else console.log(`Store ${storeId} upgraded to ${planId} (sub: ${subscriptionId})`);
+
+          // === Referral commission: create on first paid checkout ===
+          try {
+            const { data: store } = await supabaseAdmin
+              .from("stores")
+              .select("id, referred_by_store_id")
+              .eq("id", storeId)
+              .maybeSingle();
+
+            if (store?.referred_by_store_id) {
+              const { data: existing } = await supabaseAdmin
+                .from("referral_commissions")
+                .select("id")
+                .eq("referred_store_id", storeId)
+                .maybeSingle();
+
+              if (!existing) {
+                const amountCents = Number(session.amount_total ?? session.amount_subtotal ?? 0);
+                if (amountCents > 0) {
+                  const percent = 50;
+                  const commissionCents = Math.round((amountCents * percent) / 100);
+                  const eligibleAt = new Date();
+                  eligibleAt.setDate(eligibleAt.getDate() + 30);
+
+                  const { error: rcErr } = await supabaseAdmin.from("referral_commissions").insert({
+                    referrer_store_id: store.referred_by_store_id,
+                    referred_store_id: storeId,
+                    base_amount_cents: amountCents,
+                    commission_cents: commissionCents,
+                    commission_percent: percent,
+                    status: "pending",
+                    eligible_at: eligibleAt.toISOString(),
+                    triggered_by_payment_ref: session.id ?? null,
+                  });
+                  if (rcErr) console.error("Referral commission insert failed:", rcErr);
+                  else console.log(`Referral commission created for store ${storeId}`);
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Referral commission error:", e);
+          }
         }
         break;
       }
