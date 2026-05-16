@@ -186,7 +186,7 @@ const Auth = () => {
       }
 
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
-      navigate(`/${pending.storeSlug}/admin`, { replace: true });
+      navigate(`/${store.slug}/admin`, { replace: true });
     }
   };
 
