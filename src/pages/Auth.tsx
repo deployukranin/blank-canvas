@@ -52,13 +52,26 @@ const Auth = () => {
   };
 
   const checkSlugAvailability = async (slug: string) => {
-    if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
-    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); return; }
+    if (!slug || slug.length < 3) { setSlugAvailable(null); setSlugChecking(false); return; }
+    if (RESERVED_SLUGS.includes(slug)) { setSlugAvailable(false); setSlugChecking(false); return; }
     setSlugChecking(true);
     const { data } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle();
     setSlugAvailable(!data);
     setSlugChecking(false);
   };
+
+  // Debounced real-time slug validation
+  useEffect(() => {
+    if (!storeSlug) { setSlugAvailable(null); setSlugChecking(false); return; }
+    if (storeSlug.length < 3 || RESERVED_SLUGS.includes(storeSlug)) {
+      checkSlugAvailability(storeSlug);
+      return;
+    }
+    setSlugChecking(true);
+    const handle = setTimeout(() => { checkSlugAvailability(storeSlug); }, 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeSlug]);
 
   const features = [
     { icon: DollarSign, title: t("auth.featureNoFee"), desc: t("auth.featureNoFeeDesc") },
