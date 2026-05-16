@@ -201,6 +201,7 @@ const Auth = () => {
         }
       }
 
+      clearPendingReferral();
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
       navigate(`/${store.slug}/admin`, { replace: true });
     }
