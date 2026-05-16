@@ -26,6 +26,11 @@ const Index = () => {
   const { profile } = useProfile();
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope } = useTenant();
+  const withBase = (path: string) => {
+    if (!isTenantScope) return path;
+    if (path === '/') return basePath || '/';
+    return `${basePath}${path}`;
+  };
 
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
 
@@ -115,7 +120,7 @@ const Index = () => {
                 <Heart className="w-4 h-4 fill-primary text-primary" />
                 {t('storefront.myFavorites')}
               </h3>
-              <Link to="/gallery" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+              <Link to={withBase('/gallery')} className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 {t('storefront.viewAll')}
               </Link>
             </div>
@@ -127,7 +132,7 @@ const Index = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-semibold text-foreground">{t('storefront.recentVideos')}</h3>
-              <Link to="/gallery" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+              <Link to={withBase('/gallery')} className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                 {t('storefront.viewAll')}
               </Link>
             </div>
@@ -138,7 +143,7 @@ const Index = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display font-semibold text-foreground">{t('storefront.news')}</h3>
-            <Link to="/community" className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
+            <Link to={withBase('/community')} className="text-primary text-sm font-medium hover:text-primary/80 transition-colors">
               {t('storefront.viewAllNews')}
             </Link>
           </div>
