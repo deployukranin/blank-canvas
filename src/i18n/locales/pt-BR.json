@@ -1285,5 +1285,61 @@
       "invalidRandom": "Chave aleatória deve ser um UUID válido"
     },
     "pixManualConfigured": "PIX Manual configurado e ativado!"
+  },
+  "adminAffiliates": {
+    "title": "Afiliados",
+    "totals": {
+      "available": "Disponível",
+      "pending": "Pendente",
+      "paid": "Pago",
+      "cancelled": "Cancelado"
+    },
+    "tabs": {
+      "config": "Configuração",
+      "payouts": "Saques",
+      "affiliates": "Afiliados",
+      "commissions": "Comissões"
+    },
+    "config": {
+      "enabled": "Programa ativo",
+      "enabledHint": "Permite que clientes virem afiliados.",
+      "commissionPercent": "% Comissão",
+      "cookieDays": "Dias do cookie",
+      "holdingDays": "Dias de carência",
+      "holdingHint": "Dias após pagamento até a comissão liberar.",
+      "minPayout": "Mínimo para saque (R$)",
+      "rules": "Regras / observações (texto exibido ao afiliado)",
+      "rulesPlaceholder": "Ex: Pagamento via PIX em até 5 dias úteis após solicitação...",
+      "save": "Salvar",
+      "saved": "Configuração salva"
+    },
+    "payouts": {
+      "empty": "Sem solicitações de saque.",
+      "markPaid": "Marcar como pago",
+      "amount": "Valor",
+      "noteLabel": "Observação (ex: comprovante PIX)",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "reject": "Rejeitar saque",
+      "reason": "Motivo",
+      "rejectBtn": "Rejeitar",
+      "markedPaid": "Marcado como pago",
+      "rejected": "Rejeitado"
+    },
+    "affiliates": {
+      "empty": "Nenhum afiliado ainda.",
+      "paid": "Pago",
+      "available": "Disponível",
+      "pending": "Pendente"
+    },
+    "commissions": {
+      "empty": "Nenhuma comissão.",
+      "from": "de",
+      "vip": "VIP",
+      "custom": "Custom"
+    },
+    "errors": {
+      "generic": "Erro"
+    }
   }
 }
