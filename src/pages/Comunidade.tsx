@@ -28,6 +28,7 @@ import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/l
 const moderateContent = (content: string) => ({ isBlocked: false, blockedWords: [] as string[] });
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useUserReputation } from '@/hooks/use-user-reputation';
@@ -527,6 +528,8 @@ const ComunidadePage = () => {
   } | null>(null);
 
   const { user, requireAuth } = useAuth();
+  const { basePath, isTenantScope } = useTenant();
+  const authPath = isTenantScope ? `${basePath}/login` : '/auth';
   const { toast } = useToast();
   const { notifications, unreadCount, addNotification, markAsRead, markAllAsRead } = useCommunityNotifications();
   const { reputation, leaderboard, addPoints } = useUserReputation(user?.username);
@@ -564,7 +567,7 @@ const ComunidadePage = () => {
 
   const handleVote = async (ideaId: string) => {
     if (!user) {
-      requireAuth(() => handleVote(ideaId));
+      requireAuth(() => handleVote(ideaId), authPath);
       return;
     }
 
@@ -587,7 +590,7 @@ const ComunidadePage = () => {
 
   const handleAddComment = (ideaId: string, content: string) => {
     if (!user) {
-      requireAuth(() => handleAddComment(ideaId, content));
+      requireAuth(() => handleAddComment(ideaId, content), authPath);
       return;
     }
 
@@ -643,7 +646,7 @@ const ComunidadePage = () => {
 
   const handleReportIdea = (idea: ForumIdea) => {
     if (!user) {
-      requireAuth(() => handleReportIdea(idea));
+      requireAuth(() => handleReportIdea(idea), authPath);
       return;
     }
     setReportTarget({
@@ -657,7 +660,7 @@ const ComunidadePage = () => {
 
   const handleReportComment = (comment: ForumComment, ideaTitle: string) => {
     if (!user) {
-      requireAuth(() => handleReportComment(comment, ideaTitle));
+      requireAuth(() => handleReportComment(comment, ideaTitle), authPath);
       return;
     }
     setReportTarget({
@@ -700,7 +703,7 @@ const ComunidadePage = () => {
 
   const handleCreateIdea = async () => {
     if (!user) {
-      requireAuth(() => setIsCreateOpen(true));
+      requireAuth(() => setIsCreateOpen(true), authPath);
       return;
     }
 
