@@ -497,6 +497,7 @@ export type Database = {
           id: string
           name: string
           onboarding_completed: boolean
+          partner_id: string | null
           plan_expires_at: string | null
           plan_type: string
           slug: string | null
@@ -519,6 +520,7 @@ export type Database = {
           id?: string
           name: string
           onboarding_completed?: boolean
+          partner_id?: string | null
           plan_expires_at?: string | null
           plan_type?: string
           slug?: string | null
@@ -541,6 +543,7 @@ export type Database = {
           id?: string
           name?: string
           onboarding_completed?: boolean
+          partner_id?: string | null
           plan_expires_at?: string | null
           plan_type?: string
           slug?: string | null
@@ -1226,6 +1229,10 @@ export type Database = {
     Functions: {
       assign_client_role: { Args: { p_store_id: string }; Returns: Json }
       assign_creator_role: { Args: { p_store_id: string }; Returns: Json }
+      assign_store_partner: {
+        Args: { p_partner_user_id: string; p_store_id: string }
+        Returns: Json
+      }
       cancel_vip_subscription: {
         Args: { p_subscription_id: string }
         Returns: Json
