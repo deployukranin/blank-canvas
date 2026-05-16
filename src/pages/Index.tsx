@@ -143,7 +143,7 @@ const Index = () => {
             </Link>
           </div>
           <div className="space-y-3">
-            {mockFeedPosts.slice(0, 2).map((post, index) => (
+            {feedPosts.slice(0, 2).map((post, index) => (
               <motion.div key={post.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + index * 0.1 }}>
                 <GlassCard className="p-4" hover={false}>
                   <div className="flex gap-3">
