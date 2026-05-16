@@ -87,6 +87,23 @@ const SuperAdminPartners: React.FC = () => {
     } catch (e: any) { toast.error(e.message || 'Erro ao remover'); }
   };
 
+  const handleResetPassword = async () => {
+    if (!resetFor) return;
+    if (resetPwd.length < 8) { toast.error('Senha deve ter ao menos 8 caracteres'); return; }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('super-admin-manage-partners', {
+        body: { action: 'reset_password', user_id: resetFor.user_id, password: resetPwd },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('Senha redefinida');
+      setResetFor(null); setResetPwd('');
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao resetar senha');
+    } finally { setResetting(false); }
+  };
+
   const openAssign = async (partnerId: string) => {
     setAssignTo(partnerId);
     setLoadingAvail(true);
