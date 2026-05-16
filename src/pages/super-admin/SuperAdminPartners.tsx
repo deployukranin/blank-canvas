@@ -53,9 +53,9 @@ const SuperAdminPartners: React.FC = () => {
       if (data?.error) throw new Error(data.error);
       setPartners(data?.partners || []);
     } catch (e: any) {
-      toast.error(e.message || 'Erro ao carregar parceiros');
+      toast.error(e.message || tp('loadErr'));
     } finally { setLoading(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
