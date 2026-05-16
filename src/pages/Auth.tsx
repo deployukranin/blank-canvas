@@ -19,6 +19,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
+  const pendingReferral = useReferralCapture();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
