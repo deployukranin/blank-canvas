@@ -349,6 +349,28 @@
       "save": "Guardar configuración",
       "saved": "¡Configuración guardada!",
       "savedDesc": "Cambios aplicados con éxito."
+    },
+    "referrals": {
+      "title": "Referidos",
+      "linkTitle": "Tu enlace de referido",
+      "description": "Gana el <strong>50%</strong> de la primera mensualidad de cada tienda que se suscriba por tu enlace. Liberado tras 30 días.",
+      "loadingCode": "Cargando código…",
+      "copy": "Copiar",
+      "linkCopied": "Enlace copiado",
+      "loadError": "Error al cargar referidos",
+      "history": "Historial",
+      "empty": "Aún no hay referidos. ¡Comparte tu enlace!",
+      "availableIn": "Disponible el {{date}}",
+      "awaitingPayment": "Esperando pago",
+      "paidOn": "Pagado el {{date}}",
+      "cancelled": "Cancelado",
+      "ofAmount": "de {{amount}}",
+      "status": {
+        "pending": "En carencia",
+        "available": "Por recibir",
+        "paid": "Pagado",
+        "cancelled": "Cancelado"
+      }
     }
   },
   "superAdmin": {

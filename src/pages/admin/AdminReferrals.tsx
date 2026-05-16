@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Copy, Gift, Loader2 } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -7,9 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
-
-const fmtBRL = (cents: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 
 interface Commission {
   id: string;
@@ -22,18 +20,20 @@ interface Commission {
   referred_store_id: string;
 }
 
-const STATUS_LABEL: Record<Commission['status'], string> = {
-  pending: 'Em carência',
-  available: 'A receber',
-  paid: 'Paga',
-  cancelled: 'Cancelada',
-};
-
 const AdminReferrals: React.FC = () => {
   const { store } = useTenant();
+  const { t, i18n } = useTranslation();
   const [refCode, setRefCode] = useState<string>('');
   const [items, setItems] = useState<Commission[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const locale = i18n.language?.startsWith('pt') ? 'pt-BR' : i18n.language?.startsWith('es') ? 'es-ES' : 'en-US';
+  const currency = i18n.language?.startsWith('pt') ? 'BRL' : 'USD';
+  const fmtMoney = useMemo(
+    () => (cents: number) => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100),
+    [locale, currency]
+  );
+  const fmtDate = (d: string) => new Date(d).toLocaleDateString(locale);
 
   const load = useCallback(async () => {
     if (!store?.id) return;
@@ -45,10 +45,10 @@ const AdminReferrals: React.FC = () => {
       ]);
       setRefCode((s.data as any)?.referral_code || '');
       setItems(((c.data as any) || []) as Commission[]);
-    } catch (e: any) {
-      toast.error('Erro ao carregar indicações');
+    } catch {
+      toast.error(t('admin.referrals.loadError'));
     } finally { setLoading(false); }
-  }, [store?.id]);
+  }, [store?.id, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -59,25 +59,25 @@ const AdminReferrals: React.FC = () => {
   }, {} as Record<string, number>);
 
   return (
-    <AdminLayout title="Indicações">
+    <AdminLayout title={t('admin.referrals.title')}>
       <div className="space-y-6">
         <GlassCard className="p-5">
           <div className="flex items-start gap-3">
             <Gift className="h-5 w-5 text-primary mt-0.5" />
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold">Seu link de indicação</h2>
+              <h2 className="text-lg font-semibold">{t('admin.referrals.linkTitle')}</h2>
               <p className="text-sm text-muted-foreground">
-                Ganhe <strong>50%</strong> da primeira mensalidade de cada loja que assinar pelo seu link. Liberado após 30 dias.
+                <Trans i18nKey="admin.referrals.description" components={{ strong: <strong /> }} />
               </p>
               {refLink ? (
                 <div className="mt-3 flex items-center gap-2">
                   <code className="flex-1 truncate rounded-md bg-muted px-3 py-2 text-xs">{refLink}</code>
-                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(refLink); toast.success('Link copiado'); }}>
-                    <Copy className="h-4 w-4 mr-1" /> Copiar
+                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(refLink); toast.success(t('admin.referrals.linkCopied')); }}>
+                    <Copy className="h-4 w-4 mr-1" /> {t('admin.referrals.copy')}
                   </Button>
                 </div>
               ) : (
-                <div className="mt-3 text-sm text-muted-foreground">Carregando código…</div>
+                <div className="mt-3 text-sm text-muted-foreground">{t('admin.referrals.loadingCode')}</div>
               )}
             </div>
           </div>
@@ -86,33 +86,36 @@ const AdminReferrals: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {(['available','pending','paid','cancelled'] as Commission['status'][]).map((k) => (
             <GlassCard key={k} className="p-4">
-              <div className="text-xs uppercase text-muted-foreground">{STATUS_LABEL[k]}</div>
-              <div className="text-xl font-semibold mt-1">{fmtBRL(totals[k] || 0)}</div>
+              <div className="text-xs uppercase text-muted-foreground">{t(`admin.referrals.status.${k}`)}</div>
+              <div className="text-xl font-semibold mt-1">{fmtMoney(totals[k] || 0)}</div>
             </GlassCard>
           ))}
         </div>
 
         <GlassCard className="p-4">
-          <h3 className="font-semibold mb-3">Histórico</h3>
+          <h3 className="font-semibold mb-3">{t('admin.referrals.history')}</h3>
           {loading ? (
             <div className="py-8 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
           ) : items.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">Nenhuma indicação ainda. Compartilhe seu link!</div>
+            <div className="py-8 text-center text-sm text-muted-foreground">{t('admin.referrals.empty')}</div>
           ) : (
             <div className="space-y-2">
               {items.map((c) => (
                 <div key={c.id} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
                   <div>
-                    <div className="text-sm font-medium">{fmtBRL(c.commission_cents)} <span className="text-xs text-muted-foreground">de {fmtBRL(c.base_amount_cents)}</span></div>
+                    <div className="text-sm font-medium">
+                      {fmtMoney(c.commission_cents)}{' '}
+                      <span className="text-xs text-muted-foreground">{t('admin.referrals.ofAmount', { amount: fmtMoney(c.base_amount_cents) })}</span>
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      {c.status === 'pending' && <>Disponível em {new Date(c.eligible_at).toLocaleDateString('pt-BR')}</>}
-                      {c.status === 'available' && <>Aguardando pagamento</>}
-                      {c.status === 'paid' && c.paid_at && <>Paga em {new Date(c.paid_at).toLocaleDateString('pt-BR')}</>}
-                      {c.status === 'cancelled' && <>Cancelada</>}
+                      {c.status === 'pending' && t('admin.referrals.availableIn', { date: fmtDate(c.eligible_at) })}
+                      {c.status === 'available' && t('admin.referrals.awaitingPayment')}
+                      {c.status === 'paid' && c.paid_at && t('admin.referrals.paidOn', { date: fmtDate(c.paid_at) })}
+                      {c.status === 'cancelled' && t('admin.referrals.cancelled')}
                     </div>
                   </div>
                   <Badge variant={c.status === 'paid' ? 'default' : c.status === 'cancelled' ? 'destructive' : 'outline'}>
-                    {STATUS_LABEL[c.status]}
+                    {t(`admin.referrals.status.${c.status}`)}
                   </Badge>
                 </div>
               ))}
