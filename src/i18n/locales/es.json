@@ -1307,7 +1307,7 @@
       "cookieDays": "Días de cookie",
       "holdingDays": "Días de retención",
       "holdingHint": "Días después del pago hasta que se libere la comisión.",
-      "minPayout": "Mínimo para retiro (R$)",
+      "minPayout": "Mínimo para retiro (USD)",
       "rules": "Reglas / observaciones (texto mostrado al afiliado)",
       "rulesPlaceholder": "Ej.: Pago vía PIX en hasta 5 días hábiles tras la solicitud...",
       "save": "Guardar",
