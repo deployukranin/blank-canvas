@@ -1285,5 +1285,61 @@
       "invalidRandom": "Random key must be a valid UUID"
     },
     "pixManualConfigured": "Manual PIX configured and activated!"
+  },
+  "adminAffiliates": {
+    "title": "Affiliates",
+    "totals": {
+      "available": "Available",
+      "pending": "Pending",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "tabs": {
+      "config": "Settings",
+      "payouts": "Payouts",
+      "affiliates": "Affiliates",
+      "commissions": "Commissions"
+    },
+    "config": {
+      "enabled": "Program active",
+      "enabledHint": "Allow clients to become affiliates.",
+      "commissionPercent": "Commission %",
+      "cookieDays": "Cookie days",
+      "holdingDays": "Holding days",
+      "holdingHint": "Days after payment until the commission is released.",
+      "minPayout": "Minimum payout (R$)",
+      "rules": "Rules / notes (text shown to the affiliate)",
+      "rulesPlaceholder": "E.g.: Payment via PIX within 5 business days after request...",
+      "save": "Save",
+      "saved": "Settings saved"
+    },
+    "payouts": {
+      "empty": "No payout requests.",
+      "markPaid": "Mark as paid",
+      "amount": "Amount",
+      "noteLabel": "Note (e.g. PIX receipt)",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "reject": "Reject payout",
+      "reason": "Reason",
+      "rejectBtn": "Reject",
+      "markedPaid": "Marked as paid",
+      "rejected": "Rejected"
+    },
+    "affiliates": {
+      "empty": "No affiliates yet.",
+      "paid": "Paid",
+      "available": "Available",
+      "pending": "Pending"
+    },
+    "commissions": {
+      "empty": "No commissions.",
+      "from": "of",
+      "vip": "VIP",
+      "custom": "Custom"
+    },
+    "errors": {
+      "generic": "Error"
+    }
   }
 }
