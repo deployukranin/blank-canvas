@@ -83,12 +83,13 @@ const Auth = () => {
     { icon: Sparkles, title: t("auth.featureYoutube"), desc: t("auth.featureYoutubeDesc") },
   ];
 
-  // Redirect if already authenticated — find their store slug
+  // Redirect if already authenticated — but skip when user opened a signup/referral link
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    const hasSignupIntent = searchParams.get('tab') === 'signup' || !!searchParams.get('ref');
+    if (isAuthenticated && !authLoading && !hasSignupIntent) {
       redirectToAdminWithSlug();
     }
-  }, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading, searchParams]);
 
   const getStoreSlug = async (userId: string): Promise<string | null> => {
     // 1) Check stores.created_by (most reliable, no join)
