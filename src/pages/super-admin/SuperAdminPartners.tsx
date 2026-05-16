@@ -287,6 +287,26 @@ const SuperAdminPartners: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Reset password dialog */}
+      <Dialog open={!!resetFor} onOpenChange={(o) => { if (!o) { setResetFor(null); setResetPwd(''); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Redefinir senha</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Parceiro: <span className="text-foreground">{resetFor?.email}</span></p>
+            <div>
+              <Label>Nova senha</Label>
+              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="mínimo 8 caracteres" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setResetFor(null); setResetPwd(''); }}>Cancelar</Button>
+            <Button onClick={handleResetPassword} disabled={resetting} className="bg-purple-600 hover:bg-purple-700">
+              {resetting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Redefinir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </SuperAdminLayout>
   );
 };
