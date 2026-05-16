@@ -20,11 +20,10 @@ const SuperAdminLogin = () => {
 
   useEffect(() => {
     if (!authLoading && !rolesLoading && isAuthenticated && session) {
-      if (isSuperAdmin()) {
-        navigate("/admin-master", { replace: true });
-      }
+      if (isSuperAdmin()) navigate("/admin-master", { replace: true });
+      else if (hasRole("partner")) navigate("/partner", { replace: true });
     }
-  }, [isAuthenticated, authLoading, rolesLoading, session, isSuperAdmin, navigate]);
+  }, [isAuthenticated, authLoading, rolesLoading, session, isSuperAdmin, hasRole, navigate]);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
