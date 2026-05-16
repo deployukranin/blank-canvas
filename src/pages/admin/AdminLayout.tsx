@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
-  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles, AlertTriangle, Gift
+  Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles, AlertTriangle, Gift, Handshake
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -56,6 +56,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: `${base}/plans`, icon: Gem, label: t('admin.plans.title') },
     { path: `${base}/settings`, icon: Settings, label: t('admin.settings') },
     { path: `${base}/referrals`, icon: Gift, label: 'Indicações' },
+    { path: `${base}/affiliates`, icon: Handshake, label: 'Afiliados' },
     { path: `${base}/support`, icon: LifeBuoy, label: t('admin.supportLabel') },
   ];
 

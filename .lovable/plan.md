@@ -1,104 +1,114 @@
 ## Objetivo
 
-Sistema de indicação loja → loja. Toda loja recebe automaticamente um link único. Quando a loja indicada paga a **primeira mensalidade da plataforma** e completa **30 dias pagante** (carência anti-fraude), o indicador ganha **50% do valor da primeira mensalidade** como comissão.
+Cada loja ganha seu próprio programa de afiliados. **Clientes** da loja ativam modo afiliado (opt-in livre), recebem link único, e ganham comissão sobre **customs pagos** e **assinaturas VIP** originadas pelo link. O **dono da loja** define todas as regras (% comissão, duração do cookie, valor mínimo de saque, carência) e paga manualmente cada solicitação fora da plataforma (PIX/transferência).
 
-Pagamento da comissão é **manual** pelo admin-master (PIX/transferência fora do sistema), com registro de status `pending` → `available` → `paid`.
+Importante: é **independente** do referral loja→loja (`referral_commissions`), que continua existindo só para indicação entre criadores.
 
-## Modelo (resumo)
+## Modelo
 
-- **Quem indica:** toda loja, automaticamente (código gerado no signup).
-- **Comissão:** 50% da primeira mensalidade da plataforma paga pela loja indicada.
-- **Carência:** 30 dias pagante após o pagamento (proteção contra chargeback/cancelamento).
-- **Pagamento ao indicador:** manual, marcado no admin-master.
+- **Quem indica:** qualquer cliente cadastrado na loja (`store_users`). Opt-in pelo próprio cliente em `/:slug/affiliate`.
+- **O que gera comissão:** pedidos customs pagos (PIX + Stripe) e **primeira** mensalidade VIP. Recorrência VIP fica fora desta fase.
+- **Atribuição:** link `?aff=CODE` → grava cookie `aff_<storeId>` com TTL definido pelo dono (default 30 dias). Última atribuição vence (last-click).
+- **Comissão:** % configurado pelo dono por loja, aplicado sobre valor bruto pago.
+- **Carência:** dias após pagamento para virar `available` (default 14d, dono ajusta). Refund/chargeback cancela.
+- **Saque:** afiliado solicita quando saldo `available ≥ min_payout_cents`. Dono vê pedido em `/:slug/admin/affiliates`, paga fora da plataforma, marca como pago com observação.
 
-## Banco de dados (migration)
+## Banco
 
-1. `stores.referral_code text unique` — gerado no signup (6 chars, ex: `A3K9PQ`). Backfill para lojas existentes.
-2. `stores.referred_by_store_id uuid` — preenchido no onboarding se houver `?ref=` válido. Trigger impede auto-indicação (`referred_by_store_id != id`).
-3. Nova tabela `referral_commissions`:
-   - `referrer_store_id` (quem indicou)
-   - `referred_store_id` (indicada — unique, 1 comissão por loja)
-   - `base_amount_cents` (valor da 1ª mensalidade)
-   - `commission_cents` (50% do base)
-   - `commission_percent` (snapshot do %)
-   - `status` enum: `pending` (aguardando 30d), `available` (pronta para pagar), `paid`, `cancelled` (chargeback/refund)
-   - `eligible_at` (paid_at + 30d)
-   - `paid_at`, `paid_by_user_id`, `payment_note` (texto livre — comprovante/observação)
-   - `triggered_by_payment_ref` (id do evento Stripe que gerou)
-4. **RLS:**
-   - Dono da loja vê comissões onde `referrer_store_id` está em suas lojas.
-   - Super admin vê tudo.
-   - Apenas service role escreve.
-5. Função `mark_eligible_commissions()` (SQL): muda `pending` → `available` quando `eligible_at <= now()` e a loja indicada ainda está ativa/pagante. Roda via `pg_cron` 1×/dia.
-6. Função `generate_referral_code()` para gerar código único (loop até não colidir).
+1. **`stores`**: nada novo (config fica em `app_configurations`).
+2. **`app_configurations`** novo `config_key = 'affiliate_config'` por `store_id`:
+   ```
+   { enabled: bool, commission_percent: int, cookie_days: int,
+     holding_days: int, min_payout_cents: int, rules_md: string }
+   ```
+3. **`store_affiliates`** (cliente afiliado em uma loja):
+   - `store_id`, `user_id`, `code` (6 chars único por loja), `status` (`active`|`banned`), timestamps.
+   - Unique `(store_id, user_id)` e `(store_id, code)`.
+4. **`affiliate_attributions`** (clique/atribuição):
+   - `store_id`, `affiliate_id`, `visitor_id` (cookie anon) opcional, `user_id` opcional (preenchido no login/signup), `expires_at`.
+5. **`affiliate_commissions`**:
+   - `store_id`, `affiliate_id`, `source_type` (`custom_order`|`vip_subscription`), `source_id`, `base_amount_cents`, `commission_percent`, `commission_cents`, `status` (`pending`|`available`|`paid`|`cancelled`), `eligible_at`, `paid_at`, `paid_by_user_id`, `payment_note`, `cancel_reason`, `payout_request_id` (nullable).
+   - Unique `(source_type, source_id)` — uma comissão por venda.
+6. **`affiliate_payouts`** (solicitações de saque):
+   - `store_id`, `affiliate_id`, `amount_cents`, `status` (`requested`|`paid`|`rejected`), `requested_at`, `paid_at`, `paid_by_user_id`, `note`, `reject_reason`.
+7. **`custom_orders`**: adicionar `affiliate_id uuid null` (gravado no momento da criação a partir do cookie).
+8. **`vip_subscriptions`**: adicionar `affiliate_id uuid null` idem.
+9. **RLS:**
+   - Afiliado vê apenas suas próprias linhas (`affiliate_id` em `store_affiliates` do user).
+   - Dono/admin da loja vê tudo da sua loja.
+   - Super admin tudo.
+   - Service role escreve comissões e atribuições.
+10. **Função** `affiliate_mark_eligible()` cron-diária: `pending` → `available` quando `eligible_at <= now()` e venda não foi reembolsada.
 
-## Edge Functions
+## Edge functions
 
-### Modificar `platform-subscription-webhook`
-Ao confirmar pagamento de mensalidade da plataforma:
-- Se é a **primeira** mensalidade paga pela loja (sem comissão prévia) E `referred_by_store_id` está preenchido → inserir `referral_commissions` com `status='pending'`, `eligible_at = now() + 30 days`, `commission_cents = round(amount * 0.5)`.
+Novas:
+- **`affiliate-validate`** (público GET `?store_id&code`) — valida code, retorna nome do afiliado p/ banner.
+- **`affiliate-track`** (público POST) — registra clique e retorna cookie (server-side fallback; cliente também grava localmente).
+- **`affiliate-request-payout`** (auth, cliente) — cria `affiliate_payouts` se saldo `available ≥ min`.
+- **`store-affiliate-admin`** (auth, dono/admin) — actions: `list_affiliates`, `list_commissions`, `list_payouts`, `mark_payout_paid`, `reject_payout`, `cancel_commission`, `ban_affiliate`, `update_config`.
 
-### Nova `super-admin-referrals` (POST, super_admin)
-- `action: "list"` → comissões agrupadas por status, com filtros.
-- `action: "mark_paid"` → muda `available` → `paid`, grava `paid_at`, `paid_by_user_id`, `payment_note`.
-- `action: "cancel"` → muda para `cancelled` com motivo (uso: chargeback, fraude detectada).
-- `action: "summary"` → totais (pendente, disponível, paga no mês).
+Editar:
+- **`create-pix-charge`** + **`stripe-create-checkout`** + **`create-vip-charge`**: aceitar `affiliate_code` (lido do cookie no front), resolver `affiliate_id` e gravar no pedido/assinatura.
+- **`stripe-webhook`** + **`platform-subscription-webhook`** (e PIX webhook): no `paid`, se `affiliate_id` presente e `affiliate_config.enabled`, inserir `affiliate_commissions` com `eligible_at = paid_at + holding_days`. No `refund`/`chargeback`, marcar comissão como `cancelled`.
 
-### Nova `referral-validate` (GET, público)
-- Recebe `?code=ABC123` → retorna `{ valid, referrer_store_name }` para mostrar "Você foi indicado por X" no signup.
-
-### Modificar onboarding de criador
-- No fluxo de criação de loja: ler `?ref=` da URL (persistido em localStorage até o signup completar), validar via `referral-validate`, gravar `referred_by_store_id` no insert da `stores`.
-
-### Cron job
-- `pg_cron` 1×/dia chamando `mark_eligible_commissions()`.
+Cron: chamar `affiliate_mark_eligible()` 1×/dia.
 
 ## Frontend
 
-### `/:slug/admin/referrals` (nova página, dono da loja)
-- Banner com link de indicação: `https://<domínio>/signup?ref=ABC123` + botão copiar + QR opcional.
-- Cards de resumo: total indicados, virou pagante, comissão acumulada, a receber, paga.
-- Tabela de indicações: loja indicada (slug ofuscado por privacidade ou só primeira letra + ID), status, valor, data prevista de liberação.
-- Item de menu "Indicações" no `AdminLayout`.
+### Cliente
+- **`/:slug/affiliate`** — página única:
+  - Se não-afiliado: card "Vire afiliado", botão Ativar (cria `store_affiliates`).
+  - Se afiliado: link `https://<domínio>/<slug>?aff=CODE` + copiar/QR, regras da loja (`rules_md`), saldo (pending/available/paid), histórico de comissões, botão **Solicitar saque** (desabilitado abaixo do mínimo), histórico de saques.
+- **Captura do cookie:** hook `use-affiliate-capture` (espelho do `use-referral-code`) que lê `?aff` em qualquer rota `/:slug/*`, valida e grava em `localStorage` com TTL.
+- **Checkout (Customs/VIP):** ler cookie e enviar `affiliate_code` ao criar charge.
+- Item "Afiliados" no menu cliente (`/:slug` layout).
 
-### `/admin-master/referrals` (nova página, super admin)
-- Abas: **Disponíveis para pagar** | Pendentes (em carência) | Pagas | Canceladas.
-- Linha: indicador (loja + email), indicada (loja + email), valor base, comissão, eligible_at, ações.
-- Botão **"Marcar como paga"** → modal com campo de observação/comprovante PIX → confirma.
-- Botão **"Cancelar"** → modal com motivo.
-- Item de menu "Indicações" no `SuperAdminLayout`.
+### Dono da loja
+- **`/:slug/admin/affiliates`** com abas:
+  1. **Configuração** — switch enabled, % comissão, cookie days, holding days, mínimo de saque, texto livre de regras.
+  2. **Afiliados** — lista de clientes afiliados, total vendido, comissões, ações banir/reativar.
+  3. **Comissões** — filtros por status, ver venda origem.
+  4. **Saques** — solicitações pendentes com **Marcar como pago** (modal com observação/comprovante) e **Rejeitar** (motivo).
+- Item "Afiliados" no `AdminLayout`.
 
-### `/signup?ref=ABC123`
-- Componente lê `ref` da URL → valida → mostra banner "🎁 Você foi indicado por **X**" → persiste em `sessionStorage` até completar o onboarding.
+### Super admin
+- Adicionar contador "Afiliados ativos" no dashboard da loja (opcional, fase 2).
 
-## Anti-fraude (implementado)
+## Antifraude
 
-1. **Carência de 30 dias** antes de virar pagável.
-2. **Trigger DB** impede auto-indicação.
-3. **Unique constraint** em `referred_store_id` (1 comissão por loja indicada).
-4. **Cancelamento automático** se loja indicada faz refund/chargeback no webhook do Stripe.
-5. **Pagamento manual** pelo admin-master — você revisa cada caso antes de pagar.
-6. **Reaproveitar `invite_codes`?** Não nesta fase — referral é um sistema paralelo. Reavaliar depois.
+- Carência configurável antes de virar pagável.
+- Cancelamento automático no refund/chargeback Stripe.
+- Unique `(source_type, source_id)` em comissões — 1 por venda.
+- Auto-compra bloqueada: se `auth.uid()` do comprador == `user_id` do afiliado, não cria comissão.
+- Pagamento sempre manual pelo dono — ele revisa antes de pagar.
 
 ## Arquivos
 
-Criar:
-- `supabase/functions/super-admin-referrals/index.ts`
-- `supabase/functions/referral-validate/index.ts`
-- `src/pages/admin/AdminReferrals.tsx`
-- `src/pages/super-admin/SuperAdminReferrals.tsx`
-- `src/hooks/use-referral-code.ts` (lê `?ref` e persiste)
+**Criar**
+- `supabase/functions/affiliate-validate/index.ts`
+- `supabase/functions/affiliate-track/index.ts`
+- `supabase/functions/affiliate-request-payout/index.ts`
+- `supabase/functions/store-affiliate-admin/index.ts`
+- `src/pages/ClientAffiliate.tsx` (rota `/:slug/affiliate`)
+- `src/pages/admin/AdminAffiliates.tsx` (rota `/:slug/admin/affiliates`)
+- `src/hooks/use-affiliate-capture.ts`
+- `src/hooks/use-affiliate-config.ts`
 
-Editar:
-- `supabase/functions/platform-subscription-webhook/index.ts` (criar comissão)
-- Onboarding do criador (gravar `referred_by_store_id`)
+**Editar**
+- `supabase/functions/create-pix-charge/index.ts`
+- `supabase/functions/stripe-create-checkout/index.ts`
+- `supabase/functions/create-vip-charge/index.ts`
+- `supabase/functions/stripe-webhook/index.ts`
 - `src/App.tsx` (rotas)
-- `src/pages/admin/AdminLayout.tsx` e `SuperAdminLayout.tsx` (menu)
+- `src/pages/admin/AdminLayout.tsx` (menu)
+- Layout cliente da loja (menu)
+- `src/pages/Customs.tsx` + fluxo VIP (passar `affiliate_code`)
 
 ## Fora de escopo (fase 2)
 
-- Pagamento automático via Stripe Connect Transfers.
-- Comissão recorrente / multi-níveis (MLM).
-- Notificação por email ao indicador quando a comissão fica disponível.
-- Dashboard público de top indicadores.
-- Saque solicitado pelo indicador (por ora, super admin decide quando pagar).
+- Comissão recorrente em renovações VIP.
+- Multi-níveis / sub-afiliados.
+- Saque automático via Stripe Connect Transfers.
+- Notificação por email/push ao afiliado quando comissão libera.
+- Dashboard público top-afiliados da loja.

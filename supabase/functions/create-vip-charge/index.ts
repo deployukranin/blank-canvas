@@ -129,13 +129,28 @@ Deno.serve(async (req) => {
     if (rlResult && !rlResult.allowed) {
       return jsonResponse({ success: false, error: 'Too many requests, try again later' }, 429);
     }
-    const body: CreateVIPChargeRequest = await req.json();
+    const body: CreateVIPChargeRequest & { affiliateCode?: string } = await req.json();
 
     if (!body.planType || !['monthly', 'quarterly', 'yearly'].includes(body.planType)) {
       return jsonResponse({ success: false, error: 'Invalid plan type' }, 400);
     }
 
     const storeId = body.storeId || null;
+    const affiliateCode = typeof body.affiliateCode === 'string'
+      ? body.affiliateCode.trim().toUpperCase().substring(0, 6)
+      : '';
+    let affiliateId: string | null = null;
+    if (affiliateCode && storeId && affiliateCode.length === 6) {
+      const { data: affRow } = await supabase
+        .from('store_affiliates')
+        .select('id, user_id, status')
+        .eq('store_id', storeId)
+        .eq('code', affiliateCode)
+        .maybeSingle();
+      if (affRow && affRow.status === 'active' && affRow.user_id !== userId) {
+        affiliateId = affRow.id;
+      }
+    }
 
     // Check existing active subscription
     let existingSubQuery = supabase
@@ -314,6 +329,7 @@ Deno.serve(async (req) => {
         expires_at: subscriptionExpiresAt.toISOString(),
         status: 'pending_payment',
         store_id: storeId,
+        affiliate_id: affiliateId,
       })
       .select()
       .single();
@@ -340,6 +356,7 @@ Deno.serve(async (req) => {
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
         store_id: storeId,
+        affiliate_id: affiliateId,
       });
 
     return jsonResponse({

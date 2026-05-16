@@ -145,6 +145,23 @@ Deno.serve(async (req) => {
     const customerName = String(rawBody.customerName || '').trim();
     const durationMinutes = Number(rawBody.durationMinutes) || 0;
     const storeId = rawBody.storeId || null;
+    const affiliateCode = typeof rawBody.affiliateCode === 'string'
+      ? rawBody.affiliateCode.trim().toUpperCase().substring(0, 6)
+      : '';
+
+    // Resolve affiliate id from code (if provided and store has affiliates enabled)
+    let affiliateId: string | null = null;
+    if (affiliateCode && storeId && affiliateCode.length === 6) {
+      const { data: affRow } = await supabase
+        .from('store_affiliates')
+        .select('id, user_id, status')
+        .eq('store_id', storeId)
+        .eq('code', affiliateCode)
+        .maybeSingle();
+      if (affRow && affRow.status === 'active' && affRow.user_id !== userId) {
+        affiliateId = affRow.id;
+      }
+    }
 
     if (!category || !customerName) {
       return new Response(
@@ -346,6 +363,7 @@ Deno.serve(async (req) => {
         expires_at: chargeExpiresAt.toISOString(),
         status: 'pending',
         store_id: storeId,
+        affiliate_id: affiliateId,
         script,
         observations,
         preferences,

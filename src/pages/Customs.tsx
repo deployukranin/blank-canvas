@@ -53,6 +53,7 @@ import {
 } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePixPayment } from '@/hooks/use-pix-payment';
+import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import { PixPaymentModal } from '@/components/payment/PixPaymentModal';
 
 const CustomsPage = () => {
@@ -188,6 +189,7 @@ const CustomsPage = () => {
       observations: personalizationData.observations,
       storeId: store?.id,
       currency: storeCurrency,
+      affiliateCode: getAffiliateCode(store?.id) || undefined,
       successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
       cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
     } as any);
@@ -280,6 +282,7 @@ const CustomsPage = () => {
       observations: audioFormData.observations,
       storeId: store?.id,
       currency: storeCurrency,
+      affiliateCode: getAffiliateCode(store?.id) || undefined,
       successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
       cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
     } as any);

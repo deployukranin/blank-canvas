@@ -41,6 +41,127 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_commissions: {
+        Row: {
+          affiliate_id: string
+          base_amount_cents: number
+          cancel_reason: string | null
+          commission_cents: number
+          commission_percent: number
+          created_at: string
+          eligible_at: string
+          id: string
+          paid_at: string | null
+          paid_by_user_id: string | null
+          payment_note: string | null
+          payout_id: string | null
+          source_id: string
+          source_type: string
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          base_amount_cents: number
+          cancel_reason?: string | null
+          commission_cents: number
+          commission_percent: number
+          created_at?: string
+          eligible_at: string
+          id?: string
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          payment_note?: string | null
+          payout_id?: string | null
+          source_id: string
+          source_type: string
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          base_amount_cents?: number
+          cancel_reason?: string | null
+          commission_cents?: number
+          commission_percent?: number
+          created_at?: string
+          eligible_at?: string
+          id?: string
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          payment_note?: string | null
+          payout_id?: string | null
+          source_id?: string
+          source_type?: string
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commissions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "store_affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_payouts: {
+        Row: {
+          affiliate_id: string
+          amount_cents: number
+          created_at: string
+          id: string
+          note: string | null
+          paid_at: string | null
+          paid_by_user_id: string | null
+          reject_reason: string | null
+          requested_at: string
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_cents: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          reject_reason?: string | null
+          requested_at?: string
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          paid_by_user_id?: string | null
+          reject_reason?: string | null
+          requested_at?: string
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "store_affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_configurations: {
         Row: {
           config_key: string
@@ -115,6 +236,7 @@ export type Database = {
       }
       custom_orders: {
         Row: {
+          affiliate_id: string | null
           amount_cents: number
           br_code: string | null
           category: string
@@ -145,6 +267,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          affiliate_id?: string | null
           amount_cents: number
           br_code?: string | null
           category: string
@@ -175,6 +298,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          affiliate_id?: string | null
           amount_cents?: number
           br_code?: string | null
           category?: string
@@ -527,6 +651,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      store_affiliates: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          status: string
+          store_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          status?: string
+          store_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          status?: string
+          store_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       store_users: {
         Row: {
@@ -1011,6 +1165,7 @@ export type Database = {
       }
       vip_subscriptions: {
         Row: {
+          affiliate_id: string | null
           cancelled_at: string | null
           created_at: string
           expires_at: string
@@ -1024,6 +1179,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affiliate_id?: string | null
           cancelled_at?: string | null
           created_at?: string
           expires_at: string
@@ -1037,6 +1193,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affiliate_id?: string | null
           cancelled_at?: string | null
           created_at?: string
           expires_at?: string
@@ -1331,6 +1488,7 @@ export type Database = {
       }
     }
     Functions: {
+      affiliate_mark_eligible: { Args: never; Returns: number }
       assign_client_role: { Args: { p_store_id: string }; Returns: Json }
       assign_creator_role: { Args: { p_store_id: string }; Returns: Json }
       assign_store_partner: {
@@ -1360,6 +1518,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_affiliate_code: { Args: { p_store_id: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_admin_credentials_safe: {
         Args: never
