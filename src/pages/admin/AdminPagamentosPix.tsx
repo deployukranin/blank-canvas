@@ -26,8 +26,11 @@ import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 
+export type PaymentCurrency = 'BRL' | 'USD' | 'EUR';
+
 export interface PaymentConfig {
   activeGateway: 'stripe' | 'pix_manual' | null;
+  currency: PaymentCurrency;
   pixManual: {
     keyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
     key: string;
@@ -38,6 +41,7 @@ export interface PaymentConfig {
 
 const defaultPaymentConfig: PaymentConfig = {
   activeGateway: null,
+  currency: 'BRL',
   pixManual: { keyType: 'cpf', key: '', receiverName: '', city: '' },
 };
 
