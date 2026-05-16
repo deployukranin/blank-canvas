@@ -34,6 +34,7 @@ const AdminReferrals: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [refCode, setRefCode] = useState<string>('');
   const [items, setItems] = useState<Commission[]>([]);
+  const [signups, setSignups] = useState<ReferredStore[]>([]);
   const [loading, setLoading] = useState(true);
 
   const locale = i18n.language?.startsWith('pt') ? 'pt-BR' : i18n.language?.startsWith('es') ? 'es-ES' : 'en-US';
@@ -48,12 +49,14 @@ const AdminReferrals: React.FC = () => {
     if (!store?.id) return;
     setLoading(true);
     try {
-      const [s, c] = await Promise.all([
+      const [s, c, r] = await Promise.all([
         supabase.from('stores').select('referral_code').eq('id', store.id).maybeSingle(),
         supabase.from('referral_commissions' as any).select('*').eq('referrer_store_id', store.id).order('created_at', { ascending: false }),
+        supabase.from('stores').select('id,name,slug,plan_type,status,created_at').eq('referred_by_store_id', store.id).order('created_at', { ascending: false }),
       ]);
       setRefCode((s.data as any)?.referral_code || '');
       setItems(((c.data as any) || []) as Commission[]);
+      setSignups(((r.data as any) || []) as ReferredStore[]);
     } catch {
       toast.error(t('admin.referrals.loadError'));
     } finally { setLoading(false); }
