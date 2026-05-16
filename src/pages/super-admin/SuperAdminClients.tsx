@@ -113,6 +113,9 @@ const SuperAdminClients: React.FC = () => {
 
   const [copyingStore, setCopyingStore] = useState<string | null>(null);
   const [copyProgress, setCopyProgress] = useState<{ loaded: number; total: number } | null>(null);
+  const [copyFilter, setCopyFilter] = useState<'active' | 'all' | 'banned'>('active');
+
+  const filterLabel = copyFilter === 'active' ? 'ativos' : copyFilter === 'banned' ? 'banidos' : 'todos';
 
   const copyAllEmails = async (store: StoreRow) => {
     if (store.client_count === 0) {
@@ -121,7 +124,7 @@ const SuperAdminClients: React.FC = () => {
     }
     setCopyingStore(store.id);
     setCopyProgress({ loaded: 0, total: store.client_count });
-    const toastId = toast.loading(`Carregando 0/${store.client_count} emails...`);
+    const toastId = toast.loading(`Carregando 0/${store.client_count} emails (${filterLabel})...`);
     try {
       const all: string[] = [];
       let page = 1;
@@ -133,19 +136,24 @@ const SuperAdminClients: React.FC = () => {
         if (error) throw error;
         if (resp?.error) throw new Error(resp.error);
         const incoming = (resp?.clients as ClientRow[]) || [];
-        for (const c of incoming) if (c.email && c.email !== '(desconhecido)') all.push(c.email);
+        for (const c of incoming) {
+          if (!c.email || c.email === '(desconhecido)') continue;
+          if (copyFilter === 'active' && c.banned) continue;
+          if (copyFilter === 'banned' && !c.banned) continue;
+          all.push(c.email);
+        }
         hasMore = !!resp?.has_more;
         page++;
         setCopyProgress({ loaded: all.length, total: resp?.total || store.client_count });
-        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails...`, { id: toastId });
+        toast.loading(`Carregando ${all.length}/${resp?.total || store.client_count} emails (${filterLabel})...`, { id: toastId });
         if (page > 500) break;
       }
       if (!all.length) {
-        toast.error('Nenhum email disponível', { id: toastId });
+        toast.error(`Nenhum email ${filterLabel} disponível`, { id: toastId });
         return;
       }
       await navigator.clipboard.writeText(all.join(', '));
-      toast.success(`${all.length} email(s) copiado(s)`, { id: toastId });
+      toast.success(`${all.length} email(s) ${filterLabel} copiado(s)`, { id: toastId });
     } catch (err: any) {
       toast.error(err.message || 'Erro ao copiar emails', { id: toastId });
     } finally {
@@ -186,14 +194,35 @@ const SuperAdminClients: React.FC = () => {
           </GlassCard>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por loja, slug ou email do dono..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por loja, slug ou email do dono..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex gap-1 rounded-md border border-input p-1 bg-background" title="Filtro do botão 'Copiar todos'">
+            {([
+              { v: 'active', l: 'Ativos' },
+              { v: 'all', l: 'Todos' },
+              { v: 'banned', l: 'Banidos' },
+            ] as const).map((opt) => (
+              <button
+                key={opt.v}
+                onClick={() => setCopyFilter(opt.v)}
+                className={`px-3 h-8 text-xs rounded transition ${
+                  copyFilter === opt.v
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                {opt.l}
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
@@ -255,7 +284,7 @@ const SuperAdminClients: React.FC = () => {
                             {copyProgress ? `${copyProgress.loaded}/${copyProgress.total}` : 'Carregando...'}
                           </>
                         ) : (
-                          <><Copy className="w-3 h-3" /> Copiar todos ({s.client_count})</>
+                          <><Copy className="w-3 h-3" /> Copiar {filterLabel} ({s.client_count})</>
                         )}
                       </span>
                     )}
