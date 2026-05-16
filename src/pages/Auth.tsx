@@ -335,13 +335,15 @@ const Auth = () => {
       }
 
       // Create store
+      const ref = readPendingReferral();
       const { data: store, error: storeError } = await supabase
         .from('stores')
         .insert({
           name: storeName.trim(),
           slug: storeSlug,
           created_by: userId,
-        })
+          referred_by_store_id: ref?.referrer_store_id ?? null,
+        } as any)
         .select()
         .single();
 
