@@ -285,6 +285,17 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
+      // Re-check slug availability in DB BEFORE creating the account
+      // to avoid orphaned auth users when the slug is taken.
+      const { data: slugTakenPre } = await supabase
+        .from('stores').select('id').eq('slug', storeSlug).maybeSingle();
+      if (slugTakenPre) {
+        setSlugAvailable(false);
+        toast.error(`O slug "${storeSlug}" já está em uso. Escolha outro.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       const result = await signUp(signupEmail, signupPassword);
 
       if (!result.success) {
