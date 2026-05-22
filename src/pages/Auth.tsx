@@ -435,7 +435,7 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           <div className="flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-10 w-auto" />
+            <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
