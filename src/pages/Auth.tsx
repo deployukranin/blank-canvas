@@ -435,7 +435,7 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           <div className="flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-10 w-auto" />
+            <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
@@ -480,7 +480,7 @@ const Auth = () => {
             transition={{ duration: 0.7 }}
           >
             <div className="flex items-center mb-8">
-              <img src={platformLogo} alt="TingleBox" className="h-11 w-auto" />
+              <img src={platformLogo} alt="TingleBox" className="h-24 w-auto" />
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
@@ -531,7 +531,7 @@ const Auth = () => {
         >
           {/* Mobile branding */}
           <div className="lg:hidden flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-9 w-auto" />
+            <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
           </div>
 
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
