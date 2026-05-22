@@ -530,11 +530,8 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           {/* Mobile branding */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-bold text-lg font-['Space_Grotesk']">Creator Platform</span>
+          <div className="lg:hidden flex items-center mb-8 justify-center">
+            <img src={platformLogo} alt="TingleBox" className="h-9 w-auto" />
           </div>
 
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
