@@ -531,7 +531,7 @@ const Auth = () => {
         >
           {/* Mobile branding */}
           <div className="lg:hidden flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-9 w-auto" />
+            <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
           </div>
 
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
