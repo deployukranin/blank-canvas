@@ -12,6 +12,7 @@ import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
+import platformLogo from "@/assets/mytinglebox-logo.png";
 
 
 const Auth = () => {
@@ -433,11 +434,8 @@ const Auth = () => {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md"
         >
-          <div className="flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight font-['Space_Grotesk']">Creator Platform</span>
+          <div className="flex items-center mb-8 justify-center">
+            <img src={platformLogo} alt="TingleBox" className="h-10 w-auto" />
           </div>
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
@@ -481,13 +479,8 @@ const Auth = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white font-bold text-xl tracking-tight font-['Space_Grotesk']">
-                Creator Platform
-              </span>
+            <div className="flex items-center mb-8">
+              <img src={platformLogo} alt="TingleBox" className="h-11 w-auto" />
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
@@ -537,11 +530,8 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           {/* Mobile branding */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-bold text-lg font-['Space_Grotesk']">Creator Platform</span>
+          <div className="lg:hidden flex items-center mb-8 justify-center">
+            <img src={platformLogo} alt="TingleBox" className="h-9 w-auto" />
           </div>
 
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
