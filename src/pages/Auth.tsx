@@ -480,7 +480,7 @@ const Auth = () => {
             transition={{ duration: 0.7 }}
           >
             <div className="flex items-center mb-8">
-              <img src={platformLogo} alt="TingleBox" className="h-11 w-auto" />
+              <img src={platformLogo} alt="TingleBox" className="h-24 w-auto" />
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
