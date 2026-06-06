@@ -90,28 +90,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, [pendingCallback]);
 
-  const signUp = useCallback(async (email: string, password: string, redirectTo?: string) => {
+  const signUp = useCallback(async (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => {
     try {
       const redirectUrl = redirectTo || `${window.location.origin}/auth`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
+
+      // Create the (unconfirmed) user and send the confirmation email via Resend.
+      const { data, error } = await supabase.functions.invoke("send-auth-email", {
+        body: {
+          type: "signup",
+          email,
+          password,
+          redirect_to: redirectUrl,
+          metadata,
         },
       });
 
+      // Edge function returns a non-2xx for "already registered" (409) etc.
+      const ctx = (error as any)?.context;
       if (error) {
-        if (error.message.includes("already registered")) {
-          return { success: false, error: "Este email já está cadastrado" };
+        let parsed: any = null;
+        try { parsed = ctx ? await ctx.json() : null; } catch { /* ignore */ }
+        if (parsed?.alreadyRegistered) {
+          return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
         }
-        return { success: false, error: error.message };
+        return { success: false, error: parsed?.error || "Erro ao criar conta" };
       }
 
-      // If no session is returned, email confirmation is required
-      const needsConfirmation = !data.session;
-      return { success: true, needsConfirmation };
+      if (!data?.success) {
+        if (data?.alreadyRegistered) {
+          return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
+        }
+        return { success: false, error: data?.error || "Erro ao criar conta" };
+      }
+
+      // The user must always confirm via the emailed link before getting a session.
+      return { success: true, needsConfirmation: true };
     } catch (err) {
       return { success: false, error: "Erro ao criar conta" };
     }
@@ -120,10 +133,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = useCallback(async (email: string) => {
     try {
       const redirectUrl = `${window.location.origin}/reset-password`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
+      const { data, error } = await supabase.functions.invoke("send-auth-email", {
+        body: {
+          type: "recovery",
+          email,
+          redirect_to: redirectUrl,
+        },
       });
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: "Erro ao enviar email de recuperação" };
+      if (!data?.success) return { success: false, error: data?.error || "Erro ao enviar email de recuperação" };
       return { success: true };
     } catch (err) {
       return { success: false, error: "Erro ao enviar email de recuperação" };
