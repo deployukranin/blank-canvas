@@ -32,7 +32,7 @@ function baseTemplate(opts: { title: string; intro: string; cta: string; link: s
   <body style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:480px;margin:0 auto;padding:40px 24px;">
       <div style="background-color:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px 32px;text-align:center;">
-        <img src="${LOGO_URL}" alt="TingleBox" width="140" style="display:block;margin:0 auto 24px;max-width:140px;height:auto;" />>
+        <img src="${LOGO_URL}" alt="TingleBox" width="140" style="display:block;margin:0 auto 24px;max-width:140px;height:auto;" />
         <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 12px;">${opts.title}</h1>
         <p style="font-size:14px;line-height:22px;color:#a1a1aa;margin:0 0 28px;">${opts.intro}</p>
         <a href="${opts.link}" style="display:inline-block;background-color:#7c3aed;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:13px 32px;border-radius:10px;">${opts.cta}</a>
