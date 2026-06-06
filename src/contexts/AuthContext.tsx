@@ -19,7 +19,7 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string, redirectTo?: string) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
+  signUp: (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean; alreadyRegistered?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
