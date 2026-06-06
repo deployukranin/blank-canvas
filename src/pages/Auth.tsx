@@ -724,12 +724,27 @@ const Auth = () => {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+                       </button>
+                     </div>
+                     {signupPassword.length > 0 && (
+                       <ul className="mt-2 space-y-1 text-xs">
+                         {[
+                           { ok: signupPassword.length >= 8, label: "Pelo menos 8 caracteres" },
+                           { ok: /[a-zA-Z]/.test(signupPassword), label: "Contém letras" },
+                           { ok: /[0-9]/.test(signupPassword), label: "Contém números" },
+                           { ok: /[^a-zA-Z0-9]/.test(signupPassword), label: "Contém símbolos (!@#$...)" },
+                         ].map((c) => (
+                           <li key={c.label} className={`flex items-center gap-2 ${c.ok ? "text-green-400" : "text-gray-500"}`}>
+                             {c.ok ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                             <span>{c.label}</span>
+                           </li>
+                         ))}
+                       </ul>
+                     )}
+                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm" className="text-gray-300 text-sm">{t("auth.confirmPassword")}</Label>
+                   <div className="space-y-2">
+                     <Label htmlFor="signup-confirm" className="text-gray-300 text-sm">{t("auth.confirmPassword")}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                       <Input
