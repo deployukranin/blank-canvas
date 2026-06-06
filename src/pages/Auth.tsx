@@ -164,7 +164,12 @@ const Auth = () => {
     const slug = await getStoreSlug(authUser.id);
     if (slug) {
       navigate(`/${slug}/admin`, { replace: true });
-    } else {
+      return;
+    }
+
+    // No store: check for platform roles (super_admin/ceo/partner) before erroring
+    const redirected = await redirectByPlatformRole(authUser.id);
+    if (!redirected) {
       toast.error('Nenhuma loja encontrada para esta conta. Crie uma nova loja ou entre com outra conta.');
     }
   };
