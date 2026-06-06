@@ -51,15 +51,22 @@ const ClientAuth = () => {
     const result = await signIn(loginEmail, loginPassword);
 
     if (result.success) {
-      // If in tenant context, ensure user is linked to this store
-      if (store?.id) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // Link to store if not already
+      // Ensure account setup (role, profile, store link) after email is confirmed
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        if (store?.id) {
           await supabase.from("store_users").upsert(
             { store_id: store.id, user_id: user.id },
             { onConflict: "store_id,user_id" }
           ).select();
+          await supabase.rpc("assign_client_role" as any, { p_store_id: store.id });
+        }
+        const displayName = (user.user_metadata?.full_name as string) || undefined;
+        if (displayName) {
+          await supabase.from("profiles").upsert(
+            { user_id: user.id, display_name: displayName },
+            { onConflict: "user_id" }
+          );
         }
       }
       toast.success("Bem-vindo de volta! 🎉");
@@ -79,7 +86,9 @@ const ClientAuth = () => {
 
     setIsSubmitting(true);
     try {
-      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`);
+      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`, {
+        full_name: signupName.trim(),
+      });
 
       if (!result.success) {
         toast.error(result.error || "Erro ao criar conta");
@@ -87,53 +96,8 @@ const ClientAuth = () => {
         return;
       }
 
-      // Wait for session
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      let userId: string | null = null;
-      for (let i = 0; i < 3; i++) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id) {
-          userId = session.user.id;
-          break;
-        }
-        if (i === 1) {
-          const { data } = await supabase.auth.signInWithPassword({
-            email: signupEmail, password: signupPassword,
-          });
-          if (data?.session?.user?.id) {
-            userId = data.session.user.id;
-            break;
-          }
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      if (!userId) {
-        toast.error("Erro ao obter sessão. Tente fazer login.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Assign 'client' role
-      await supabase.from("user_roles").insert({ user_id: userId, role: "client" as any });
-
-      // Create profile with display name
-      await supabase.from("profiles").upsert({
-        user_id: userId,
-        display_name: signupName.trim(),
-      }, { onConflict: "user_id" });
-
-      // Link to store if in tenant context
-      if (store?.id) {
-        await supabase.from("store_users").upsert(
-          { store_id: store.id, user_id: userId },
-          { onConflict: "store_id,user_id" }
-        ).select();
-      }
-
-      toast.success("Conta criada com sucesso! 🎉");
-      navigate(homePath, { replace: true });
+      toast.success("Conta criada! Verifique seu email para confirmar e fazer login.", { duration: 8000 });
+      setSignupConfirmationSent(true);
     } catch (err) {
       console.error("Signup error:", err);
       toast.error("Erro ao criar conta");
