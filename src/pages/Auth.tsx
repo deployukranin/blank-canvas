@@ -297,7 +297,9 @@ const Auth = () => {
         return;
       }
 
-      const result = await signUp(signupEmail, signupPassword);
+      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}/auth`, {
+        full_name: storeName.trim(),
+      });
 
       if (!result.success) {
         toast.error(result.error || t("auth.errorCreatingAccount"));

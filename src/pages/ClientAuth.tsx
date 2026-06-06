@@ -21,6 +21,7 @@ const ClientAuth = () => {
   const { config } = useWhiteLabel();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
   const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
 
   // Form states
@@ -51,15 +52,22 @@ const ClientAuth = () => {
     const result = await signIn(loginEmail, loginPassword);
 
     if (result.success) {
-      // If in tenant context, ensure user is linked to this store
-      if (store?.id) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // Link to store if not already
+      // Ensure account setup (role, profile, store link) after email is confirmed
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        if (store?.id) {
           await supabase.from("store_users").upsert(
             { store_id: store.id, user_id: user.id },
             { onConflict: "store_id,user_id" }
           ).select();
+          await supabase.rpc("assign_client_role" as any, { p_store_id: store.id });
+        }
+        const displayName = (user.user_metadata?.full_name as string) || undefined;
+        if (displayName) {
+          await supabase.from("profiles").upsert(
+            { user_id: user.id, display_name: displayName },
+            { onConflict: "user_id" }
+          );
         }
       }
       toast.success("Bem-vindo de volta! 🎉");
@@ -79,7 +87,9 @@ const ClientAuth = () => {
 
     setIsSubmitting(true);
     try {
-      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`);
+      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`, {
+        full_name: signupName.trim(),
+      });
 
       if (!result.success) {
         toast.error(result.error || "Erro ao criar conta");
@@ -87,53 +97,8 @@ const ClientAuth = () => {
         return;
       }
 
-      // Wait for session
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      let userId: string | null = null;
-      for (let i = 0; i < 3; i++) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id) {
-          userId = session.user.id;
-          break;
-        }
-        if (i === 1) {
-          const { data } = await supabase.auth.signInWithPassword({
-            email: signupEmail, password: signupPassword,
-          });
-          if (data?.session?.user?.id) {
-            userId = data.session.user.id;
-            break;
-          }
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      if (!userId) {
-        toast.error("Erro ao obter sessão. Tente fazer login.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Assign 'client' role
-      await supabase.from("user_roles").insert({ user_id: userId, role: "client" as any });
-
-      // Create profile with display name
-      await supabase.from("profiles").upsert({
-        user_id: userId,
-        display_name: signupName.trim(),
-      }, { onConflict: "user_id" });
-
-      // Link to store if in tenant context
-      if (store?.id) {
-        await supabase.from("store_users").upsert(
-          { store_id: store.id, user_id: userId },
-          { onConflict: "store_id,user_id" }
-        ).select();
-      }
-
-      toast.success("Conta criada com sucesso! 🎉");
-      navigate(homePath, { replace: true });
+      toast.success("Conta criada! Verifique seu email para confirmar e fazer login.", { duration: 8000 });
+      setSignupConfirmationSent(true);
     } catch (err) {
       console.error("Signup error:", err);
       toast.error("Erro ao criar conta");
@@ -150,6 +115,35 @@ const ClientAuth = () => {
   }
 
   const storeName = store?.name || "a comunidade";
+
+  if (signupConfirmationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <div className="glass rounded-2xl p-8 border border-primary/10 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+              <Mail className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">Confirme seu email</h2>
+            <p className="text-muted-foreground text-sm">
+              Enviamos um link de confirmação para <span className="text-foreground">{signupEmail}</span>.
+              Clique no link para ativar sua conta e fazer login.
+            </p>
+            <button
+              onClick={() => setSignupConfirmationSent(false)}
+              className="text-primary hover:underline text-sm pt-2"
+            >
+              Voltar
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
