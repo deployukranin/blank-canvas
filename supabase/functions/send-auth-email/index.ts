@@ -8,9 +8,17 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 const FROM = 'TingleBox <verified@mytinglebox.com>'
 // Logo shown at the top of every auth email. Configurable via the EMAIL_LOGO_URL
-// secret/env var; falls back to the default TingleBox logo in public storage.
-const LOGO_URL = Deno.env.get('EMAIL_LOGO_URL') ||
-  'https://lkwvlzcapuptcxvwukcm.supabase.co/storage/v1/object/public/email-assets/tinglebox-logo.png'
+// secret/env var. When it is not set, we fall back to a text wordmark instead of
+// a broken image (the storage bucket is private, so its URL would not load).
+const LOGO_URL = Deno.env.get('EMAIL_LOGO_URL')?.trim() || ''
+
+// Renders either the configured logo image or a text wordmark fallback.
+function renderLogo(): string {
+  if (LOGO_URL) {
+    return `<img src="${LOGO_URL}" alt="TingleBox" width="140" style="display:block;margin:0 auto 24px;max-width:140px;height:auto;" />`
+  }
+  return `<div style="font-size:24px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;margin:0 auto 24px;">Tingle<span style="color:#a78bfa;">Box</span></div>`
+}
 
 type AuthEmailType = 'signup' | 'recovery'
 
@@ -32,7 +40,7 @@ function baseTemplate(opts: { title: string; intro: string; cta: string; link: s
   <body style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:480px;margin:0 auto;padding:40px 24px;">
       <div style="background-color:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px 32px;text-align:center;">
-        <img src="${LOGO_URL}" alt="TingleBox" width="140" style="display:block;margin:0 auto 24px;max-width:140px;height:auto;" />
+        ${renderLogo()}
         <h1 style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 12px;">${opts.title}</h1>
         <p style="font-size:14px;line-height:22px;color:#a1a1aa;margin:0 0 28px;">${opts.intro}</p>
         <a href="${opts.link}" style="display:inline-block;background-color:#7c3aed;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:13px 32px;border-radius:10px;">${opts.cta}</a>
