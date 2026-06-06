@@ -56,6 +56,14 @@ const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
   return baseUser;
 };
 
+const getFriendlyAuthEmailError = (error?: string) => {
+  const normalized = (error || "").toLowerCase();
+  if (normalized.includes("weak") || normalized.includes("easy to guess") || normalized.includes("password")) {
+    return "Essa senha é muito fraca ou já apareceu em vazamentos. Use letras, números e símbolos.";
+  }
+  return error || "Erro ao criar conta";
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -113,14 +121,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parsed?.alreadyRegistered) {
           return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
         }
-        return { success: false, error: parsed?.error || "Erro ao criar conta" };
+        return { success: false, error: getFriendlyAuthEmailError(parsed?.error) };
       }
 
       if (!data?.success) {
         if (data?.alreadyRegistered) {
           return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
         }
-        return { success: false, error: data?.error || "Erro ao criar conta" };
+        return { success: false, error: getFriendlyAuthEmailError(data?.error) };
       }
 
       // The user must always confirm via the emailed link before getting a session.
