@@ -116,6 +116,35 @@ const ClientAuth = () => {
 
   const storeName = store?.name || "a comunidade";
 
+  if (signupConfirmationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <div className="glass rounded-2xl p-8 border border-primary/10 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+              <Mail className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">Confirme seu email</h2>
+            <p className="text-muted-foreground text-sm">
+              Enviamos um link de confirmação para <span className="text-foreground">{signupEmail}</span>.
+              Clique no link para ativar sua conta e fazer login.
+            </p>
+            <button
+              onClick={() => setSignupConfirmationSent(false)}
+              className="text-primary hover:underline text-sm pt-2"
+            >
+              Voltar
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
       <motion.div
