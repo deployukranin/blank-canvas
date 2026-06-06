@@ -286,7 +286,10 @@ const Auth = () => {
           toast.success(t("auth.welcomeAdmin"));
           navigate(`/${slug}/admin`, { replace: true });
         } else {
-          toast.error('Nenhuma loja encontrada para esta conta.');
+          const redirected = await redirectByPlatformRole(user.id);
+          if (!redirected) {
+            toast.error('Nenhuma loja encontrada para esta conta.');
+          }
         }
       } else {
         toast.error('Erro ao obter sessão. Tente novamente.');
