@@ -123,9 +123,26 @@ const Auth = () => {
     return null;
   };
 
+  // Returns true if the user was redirected based on a platform role
+  // (super_admin/ceo → /admin-master, partner → /partner).
+  const redirectByPlatformRole = async (userId: string): Promise<boolean> => {
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const roles = data?.map((r) => r.role) || [];
+    if (roles.includes("super_admin") || roles.includes("ceo")) {
+      navigate("/admin-master", { replace: true });
+      return true;
+    }
+    if (roles.includes("partner")) {
+      navigate("/partner", { replace: true });
+      return true;
+    }
+    return false;
+  };
+
   const redirectToAdminWithSlug = async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
+
 
     // Check for pending store setup (user just confirmed email)
     const pendingRaw = sessionStorage.getItem('pending_store_setup');
