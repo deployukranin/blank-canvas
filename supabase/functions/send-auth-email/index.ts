@@ -8,9 +8,17 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 const FROM = 'TingleBox <verified@mytinglebox.com>'
 // Logo shown at the top of every auth email. Configurable via the EMAIL_LOGO_URL
-// secret/env var; falls back to the default TingleBox logo in public storage.
-const LOGO_URL = Deno.env.get('EMAIL_LOGO_URL') ||
-  'https://lkwvlzcapuptcxvwukcm.supabase.co/storage/v1/object/public/email-assets/tinglebox-logo.png'
+// secret/env var. When it is not set, we fall back to a text wordmark instead of
+// a broken image (the storage bucket is private, so its URL would not load).
+const LOGO_URL = Deno.env.get('EMAIL_LOGO_URL')?.trim() || ''
+
+// Renders either the configured logo image or a text wordmark fallback.
+function renderLogo(): string {
+  if (LOGO_URL) {
+    return `<img src="${LOGO_URL}" alt="TingleBox" width="140" style="display:block;margin:0 auto 24px;max-width:140px;height:auto;" />`
+  }
+  return `<div style="font-size:24px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;margin:0 auto 24px;">Tingle<span style="color:#a78bfa;">Box</span></div>`
+}
 
 type AuthEmailType = 'signup' | 'recovery'
 
