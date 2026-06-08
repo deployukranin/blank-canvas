@@ -167,11 +167,9 @@ const Auth = () => {
       return;
     }
 
-    // No store: check for platform roles (super_admin/ceo/partner) before erroring
-    const redirected = await redirectByPlatformRole(authUser.id);
-    if (!redirected) {
-      toast.error('Nenhuma loja encontrada para esta conta. Crie uma nova loja ou entre com outra conta.');
-    }
+    // No store: check for platform roles (super_admin/ceo/partner).
+    // If none, stay on /auth silently (no error toast).
+    await redirectByPlatformRole(authUser.id);
   };
 
   const finalizeStoreCreation = async (userId: string, pending: { storeName: string; storeSlug: string; youtubeVerified: any }) => {
@@ -286,10 +284,7 @@ const Auth = () => {
           toast.success(t("auth.welcomeAdmin"));
           navigate(`/${slug}/admin`, { replace: true });
         } else {
-          const redirected = await redirectByPlatformRole(user.id);
-          if (!redirected) {
-            toast.error('Nenhuma loja encontrada para esta conta.');
-          }
+          await redirectByPlatformRole(user.id);
         }
       } else {
         toast.error('Erro ao obter sessão. Tente novamente.');
