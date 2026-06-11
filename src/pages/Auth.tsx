@@ -472,33 +472,34 @@ const Auth = () => {
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
         </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md relative z-10"
-        >
-          <div className="flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
-          </div>
-          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
-            <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
-              <Mail className="w-7 h-7 text-purple-400" />
+        <Container width="form" className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center mb-8 justify-center">
+              <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
             </div>
-            <h2 className="font-display text-2xl font-bold text-white">Confirme seu email</h2>
-            <p className="text-gray-400 text-sm">
-              Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
-              Clique no link para ativar sua conta — sua loja será criada automaticamente.
-            </p>
-            <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
-            <Button
-              onClick={() => { setSignupConfirmationSent(false); }}
-              variant="ghost"
-              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-            >
-              Voltar
-            </Button>
-          </div>
-        </motion.div>
+            <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
+              <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
+                <Mail className="w-7 h-7 text-purple-400" />
+              </div>
+              <h2 className="font-display text-2xl font-bold text-white">Confirme seu email</h2>
+              <p className="text-gray-400 text-sm">
+                Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
+                Clique no link para ativar sua conta — sua loja será criada automaticamente.
+              </p>
+              <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
+              <Button
+                onClick={() => { setSignupConfirmationSent(false); }}
+                variant="ghost"
+                className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+              >
+                Voltar
+              </Button>
+            </div>
+          </motion.div>
+        </Container>
       </div>
     );
   }
