@@ -901,6 +901,7 @@ const Auth = () => {
             </p>
           </div>
         </motion.div>
+        </Container>
       </div>
     </div>
   );
