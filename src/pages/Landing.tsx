@@ -730,7 +730,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.pricingSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Grid cols="3-md" gap={6}>
             {plans.map((p, i) => {
               const name = p[`name_${lang}` as const] as string;
               const features = p[`features_${lang}` as const] as string[];
