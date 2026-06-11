@@ -13,8 +13,23 @@ import {
   Zap,
   Check,
   ArrowRight,
+  Menu,
+  Instagram,
+  Youtube,
+  Twitter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mytinglebox-logo.png";
 import heroMockup from "@/assets/landing-hero-mockup.jpg";
@@ -71,6 +86,52 @@ const tr = {
       { title: "Marca Própria", desc: "Domínio personalizado, cores, logo e identidade 100% sua." },
       { title: "Setup em Minutos", desc: "Crie sua loja, configure e publique no mesmo dia. Sem código." },
     ],
+    navFeatures: "Recursos",
+    navPricing: "Planos",
+    navHow: "Como funciona",
+    navFaq: "Dúvidas",
+    menu: "Menu",
+    howKicker: "Como funciona",
+    howTitle1: "Da ideia à sua loja",
+    howTitle2: "em 3 passos",
+    howSub: "Sem código, sem complicação. Você pode publicar hoje mesmo.",
+    steps: [
+      { title: "Crie sua conta", desc: "Cadastre-se grátis e escolha o nome da sua loja em segundos." },
+      { title: "Personalize tudo", desc: "Adicione sua marca, cores, conteúdos VIP e vídeos personalizados." },
+      { title: "Comece a vender", desc: "Compartilhe seu link e receba pagamentos direto na sua conta." },
+    ],
+    statsTitle: "Criadores já confiam no MyTingleBox",
+    stats: [
+      { value: "0%", label: "de taxa no plano Premium" },
+      { value: "3 min", label: "para publicar sua loja" },
+      { value: "+30", label: "países atendidos" },
+      { value: "24/7", label: "suporte e disponibilidade" },
+    ],
+    faqKicker: "Dúvidas frequentes",
+    faqTitle1: "Tudo o que você",
+    faqTitle2: "precisa saber",
+    faqs: [
+      { q: "Preciso saber programar?", a: "Não. Você cria e configura toda a sua loja por uma interface simples, sem escrever uma linha de código." },
+      { q: "Como recebo os pagamentos?", a: "Via Stripe e PIX integrados. O dinheiro cai direto na sua conta, sem intermediários." },
+      { q: "Posso usar minha própria marca?", a: "Sim. Domínio personalizado, cores, logo e identidade 100% suas em todos os planos." },
+      { q: "Existe período de teste?", a: "Sim, você começa com 7 dias grátis e sem precisar de cartão de crédito." },
+      { q: "Posso cancelar quando quiser?", a: "Claro. Não há fidelidade — você cancela a qualquer momento direto no painel." },
+    ],
+    footerTagline: "A plataforma white-label para criadores ASMR viverem da sua arte.",
+    footerProduct: "Produto",
+    footerResources: "Recursos",
+    footerLegal: "Legal",
+    footerRights: "Todos os direitos reservados.",
+    footerLinks: {
+      features: "Recursos",
+      pricing: "Planos",
+      how: "Como funciona",
+      faq: "Dúvidas",
+      start: "Começar grátis",
+      help: "Ajuda",
+      terms: "Termos de uso",
+      privacy: "Privacidade",
+    },
   },
   en: {
     badge: "The most complete ASMR creator platform in the world",
@@ -107,6 +168,52 @@ const tr = {
       { title: "Your Own Brand", desc: "Custom domain, colors, logo and 100% your identity." },
       { title: "Setup in Minutes", desc: "Create your store, configure and publish the same day. No code." },
     ],
+    navFeatures: "Features",
+    navPricing: "Plans",
+    navHow: "How it works",
+    navFaq: "FAQ",
+    menu: "Menu",
+    howKicker: "How it works",
+    howTitle1: "From idea to your store",
+    howTitle2: "in 3 steps",
+    howSub: "No code, no hassle. You can go live today.",
+    steps: [
+      { title: "Create your account", desc: "Sign up free and pick your store name in seconds." },
+      { title: "Customize everything", desc: "Add your brand, colors, VIP content and custom videos." },
+      { title: "Start selling", desc: "Share your link and get paid directly to your account." },
+    ],
+    statsTitle: "Creators already trust MyTingleBox",
+    stats: [
+      { value: "0%", label: "fee on the Premium plan" },
+      { value: "3 min", label: "to publish your store" },
+      { value: "30+", label: "countries served" },
+      { value: "24/7", label: "support and uptime" },
+    ],
+    faqKicker: "Frequently asked",
+    faqTitle1: "Everything you",
+    faqTitle2: "need to know",
+    faqs: [
+      { q: "Do I need to code?", a: "No. You build and configure your entire store through a simple interface, without writing a single line of code." },
+      { q: "How do I get paid?", a: "Via integrated Stripe and PIX. Money goes straight to your account, no middlemen." },
+      { q: "Can I use my own brand?", a: "Yes. Custom domain, colors, logo and 100% your identity on every plan." },
+      { q: "Is there a trial period?", a: "Yes, you start with a free 7-day trial, no credit card required." },
+      { q: "Can I cancel anytime?", a: "Of course. No lock-in — cancel anytime right from your dashboard." },
+    ],
+    footerTagline: "The white-label platform for ASMR creators to live from their art.",
+    footerProduct: "Product",
+    footerResources: "Resources",
+    footerLegal: "Legal",
+    footerRights: "All rights reserved.",
+    footerLinks: {
+      features: "Features",
+      pricing: "Plans",
+      how: "How it works",
+      faq: "FAQ",
+      start: "Get started free",
+      help: "Help",
+      terms: "Terms of use",
+      privacy: "Privacy",
+    },
   },
   es: {
     badge: "La plataforma de creadores ASMR más completa del mundo",
@@ -143,6 +250,52 @@ const tr = {
       { title: "Marca Propia", desc: "Dominio personalizado, colores, logo e identidad 100% tuya." },
       { title: "Configuración en Minutos", desc: "Crea tu tienda, configúrala y publícala el mismo día. Sin código." },
     ],
+    navFeatures: "Funciones",
+    navPricing: "Planes",
+    navHow: "Cómo funciona",
+    navFaq: "FAQ",
+    menu: "Menú",
+    howKicker: "Cómo funciona",
+    howTitle1: "De la idea a tu tienda",
+    howTitle2: "en 3 pasos",
+    howSub: "Sin código, sin complicaciones. Puedes publicar hoy mismo.",
+    steps: [
+      { title: "Crea tu cuenta", desc: "Regístrate gratis y elige el nombre de tu tienda en segundos." },
+      { title: "Personaliza todo", desc: "Añade tu marca, colores, contenido VIP y videos personalizados." },
+      { title: "Empieza a vender", desc: "Comparte tu enlace y recibe pagos directo en tu cuenta." },
+    ],
+    statsTitle: "Los creadores ya confían en MyTingleBox",
+    stats: [
+      { value: "0%", label: "de tarifa en el plan Premium" },
+      { value: "3 min", label: "para publicar tu tienda" },
+      { value: "+30", label: "países atendidos" },
+      { value: "24/7", label: "soporte y disponibilidad" },
+    ],
+    faqKicker: "Preguntas frecuentes",
+    faqTitle1: "Todo lo que",
+    faqTitle2: "necesitas saber",
+    faqs: [
+      { q: "¿Necesito saber programar?", a: "No. Creas y configuras toda tu tienda con una interfaz simple, sin escribir una línea de código." },
+      { q: "¿Cómo recibo los pagos?", a: "Vía Stripe y PIX integrados. El dinero llega directo a tu cuenta, sin intermediarios." },
+      { q: "¿Puedo usar mi propia marca?", a: "Sí. Dominio personalizado, colores, logo e identidad 100% tuya en todos los planes." },
+      { q: "¿Hay período de prueba?", a: "Sí, empiezas con 7 días gratis y sin necesidad de tarjeta de crédito." },
+      { q: "¿Puedo cancelar cuando quiera?", a: "Claro. Sin permanencia — cancela en cualquier momento desde el panel." },
+    ],
+    footerTagline: "La plataforma white-label para que los creadores ASMR vivan de su arte.",
+    footerProduct: "Producto",
+    footerResources: "Recursos",
+    footerLegal: "Legal",
+    footerRights: "Todos los derechos reservados.",
+    footerLinks: {
+      features: "Funciones",
+      pricing: "Planes",
+      how: "Cómo funciona",
+      faq: "FAQ",
+      start: "Empezar gratis",
+      help: "Ayuda",
+      terms: "Términos de uso",
+      privacy: "Privacidad",
+    },
   },
 } as const;
 
@@ -249,6 +402,39 @@ const Landing = () => {
     try { localStorage.setItem("i18n_lang", target); } catch {}
   };
 
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navItems = [
+    { href: "#features", label: t.navFeatures },
+    { href: "#how", label: t.navHow },
+    { href: "#pricing", label: t.navPricing },
+    { href: "#faq", label: t.navFaq },
+  ];
+
+  const LangSwitcher = ({ className = "" }: { className?: string }) => (
+    <div className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs ${className}`}>
+      {(["pt", "en", "es"] as Lang[]).map((l) => (
+        <button
+          key={l}
+          onClick={() => changeLang(l)}
+          className={`px-3 py-1 rounded-full transition-colors ${
+            lang === l ? "bg-purple-600 text-white" : "text-white/60 hover:text-white"
+          }`}
+          aria-label={`Switch language to ${l.toUpperCase()}`}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#0a0418] text-foreground overflow-x-hidden relative">
       {/* Starfield background */}
@@ -272,28 +458,77 @@ const Landing = () => {
         />
       </div>
 
-      {/* Language switcher */}
-      <div className="relative z-20 flex justify-end px-6 pt-6">
-        <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs">
-          {(["pt", "en", "es"] as Lang[]).map((l) => (
-            <button
-              key={l}
-              onClick={() => changeLang(l)}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                lang === l
-                  ? "bg-purple-600 text-white"
-                  : "text-white/60 hover:text-white"
-              }`}
-              aria-label={`Switch language to ${l.toUpperCase()}`}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
+      {/* Header */}
+      <header
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-[#0a0418]/80 backdrop-blur-xl border-b border-white/10"
+            : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
+          <a href="#top" className="flex items-center gap-2">
+            <img src={logo} alt="MyTingleBox" className="h-8 w-auto" />
+          </a>
+
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-3 py-2 text-sm text-white/70 hover:text-white transition-colors rounded-full"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <LangSwitcher className="hidden sm:inline-flex" />
+            <Link to="/auth" className="hidden sm:block">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-5 h-9 gap-1.5 shadow-lg shadow-purple-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t.ctaStart}
+              </Button>
+            </Link>
+
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="outline" size="icon" className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full h-9 w-9">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-[#0a0418] border-white/10 text-white w-72">
+                <div className="flex flex-col gap-1 mt-10">
+                  {navItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="px-3 py-3 text-base text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                  <Link to="/auth" onClick={() => setMenuOpen(false)} className="mt-4">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full gap-1.5">
+                      <Sparkles className="w-4 h-4" />
+                      {t.ctaStart}
+                    </Button>
+                  </Link>
+                  <div className="mt-6">
+                    <LangSwitcher />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Hero */}
-      <section className="relative z-10 px-6 pt-10 pb-24 text-center">
+      <span id="top" />
+      <section className="relative z-10 px-6 pt-32 md:pt-36 pb-24 text-center scroll-mt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -368,8 +603,34 @@ const Landing = () => {
         </motion.div>
       </section>
 
+      {/* Stats band */}
+      <section className="relative z-10 px-6 pt-8 pb-20">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-white/50 text-sm uppercase tracking-wider mb-8">
+            {t.statsTitle}
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {t.stats.map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center"
+              >
+                <div className="font-display text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                  {s.value}
+                </div>
+                <div className="text-xs md:text-sm text-white/50 mt-2">{s.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="relative z-10 px-6 py-24">
+      <section id="features" className="relative z-10 px-6 py-24 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
@@ -411,8 +672,48 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* How it works */}
+      <section id="how" className="relative z-10 px-6 py-24 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+              {t.howKicker}
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+              {t.howTitle1}
+              <br />
+              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                {t.howTitle2}
+              </span>
+            </h2>
+            <p className="text-white/60 max-w-2xl mx-auto">{t.howSub}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {t.steps.map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-7"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600 text-white font-display text-xl font-bold shadow-lg shadow-purple-500/30 mb-5">
+                  {i + 1}
+                </div>
+                <h3 className="font-display text-lg font-semibold text-white mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-white/60 leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
-      <section id="pricing" className="relative z-10 px-6 py-24">
+      <section id="pricing" className="relative z-10 px-6 py-24 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
@@ -485,6 +786,40 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="relative z-10 px-6 py-24 scroll-mt-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+              {t.faqKicker}
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3">
+              {t.faqTitle1}{" "}
+              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                {t.faqTitle2}
+              </span>
+            </h2>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-3">
+            {t.faqs.map((faq, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] px-5"
+              >
+                <AccordionTrigger className="text-left text-white hover:no-underline">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-white/60 leading-relaxed">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section id="cta" className="relative z-10 px-6 py-24">
         <div className="max-w-4xl mx-auto">
@@ -518,6 +853,64 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 px-6 pt-16 pb-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="col-span-2 md:col-span-1">
+              <img src={logo} alt="MyTingleBox" className="h-8 w-auto mb-4" />
+              <p className="text-sm text-white/50 max-w-xs leading-relaxed">
+                {t.footerTagline}
+              </p>
+              <div className="flex items-center gap-3 mt-5">
+                <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="YouTube" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Youtube className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="X" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Twitter className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerProduct}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#features" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.features}</a></li>
+                <li><a href="#pricing" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.pricing}</a></li>
+                <li><Link to="/auth" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.start}</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerResources}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#how" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.how}</a></li>
+                <li><a href="#faq" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.faq}</a></li>
+                <li><Link to="/help" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.help}</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerLegal}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="/terms" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.terms}</Link></li>
+                <li><Link to="/privacy" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.privacy}</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-white/40">
+              © {new Date().getFullYear()} MyTingleBox. {t.footerRights}
+            </p>
+            <LangSwitcher />
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
