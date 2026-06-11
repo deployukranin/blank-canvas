@@ -709,9 +709,9 @@ const Landing = () => {
                 <p className="text-sm text-white/60 leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* Pricing */}
       <section id="pricing" className="relative z-10 px-6 py-24 scroll-mt-20">
