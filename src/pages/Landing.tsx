@@ -818,12 +818,12 @@ const Landing = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* Final CTA */}
-      <section id="cta" className="relative z-10 px-6 py-24">
-        <div className="max-w-4xl mx-auto">
+      <Section id="cta" py="py-24">
+        <Container width="md">
           <div className="relative rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-600/20 via-purple-700/10 to-transparent p-12 md:p-16 text-center overflow-hidden">
             <div
               className="absolute inset-0 opacity-30"
