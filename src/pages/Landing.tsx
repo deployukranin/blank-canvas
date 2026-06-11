@@ -783,13 +783,13 @@ const Landing = () => {
                 </motion.div>
               );
             })}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* FAQ */}
-      <section id="faq" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-3xl mx-auto">
+      <Section id="faq">
+        <Container width="sm">
           <div className="text-center mb-12">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.faqKicker}
