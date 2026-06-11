@@ -672,8 +672,48 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* How it works */}
+      <section id="how" className="relative z-10 px-6 py-24 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+              {t.howKicker}
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+              {t.howTitle1}
+              <br />
+              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                {t.howTitle2}
+              </span>
+            </h2>
+            <p className="text-white/60 max-w-2xl mx-auto">{t.howSub}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {t.steps.map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-7"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600 text-white font-display text-xl font-bold shadow-lg shadow-purple-500/30 mb-5">
+                  {i + 1}
+                </div>
+                <h3 className="font-display text-lg font-semibold text-white mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-white/60 leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
-      <section id="pricing" className="relative z-10 px-6 py-24">
+      <section id="pricing" className="relative z-10 px-6 py-24 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
