@@ -466,7 +466,7 @@ const Auth = () => {
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 md:py-16 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
         <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
@@ -479,11 +479,11 @@ const Auth = () => {
           <div className="flex items-center mb-8 justify-center">
             <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
-          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
+          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
               <Mail className="w-7 h-7 text-purple-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Confirme seu email</h2>
+            <h2 className="font-display text-2xl font-bold text-white">Confirme seu email</h2>
             <p className="text-gray-400 text-sm">
               Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
               Clique no link para ativar sua conta — sua loja será criada automaticamente.
