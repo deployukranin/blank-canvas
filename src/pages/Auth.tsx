@@ -566,7 +566,7 @@ const Auth = () => {
       </div>
 
       {/* Right side — Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-16 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -578,9 +578,9 @@ const Auth = () => {
             <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
           </div>
 
-          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-purple-500/10">
+          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 shadow-2xl shadow-purple-500/10">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">
+              <h2 className="font-display text-2xl font-bold text-white">
                 {defaultTab === "signup" ? t("auth.creatorSignup") : t("auth.creatorLogin")}
               </h2>
               <p className="text-gray-500 text-sm mt-1">
