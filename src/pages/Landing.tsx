@@ -527,7 +527,8 @@ const Landing = () => {
       </header>
 
       {/* Hero */}
-      <section className="relative z-10 px-6 pt-10 pb-24 text-center">
+      <span id="top" />
+      <section className="relative z-10 px-6 pt-32 md:pt-36 pb-24 text-center scroll-mt-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
