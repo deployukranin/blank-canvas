@@ -55,8 +55,11 @@ const AdminBanners: React.FC = () => {
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
 
     try {
+      if (!store?.id) {
+        throw new Error('Loja não encontrada. Recarregue a página.');
+      }
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${bannerId}/${variant}-${Date.now()}.${ext}`;
+      const path = `${store.id}/${bannerId}/${variant}-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
