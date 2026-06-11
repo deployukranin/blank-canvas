@@ -631,8 +631,8 @@ const Landing = () => {
       </Section>
 
       {/* Features */}
-      <section id="features" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-6xl mx-auto">
+      <Section id="features">
+        <Container width="xl">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.featuresKicker}
