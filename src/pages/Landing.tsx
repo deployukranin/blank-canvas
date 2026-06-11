@@ -853,8 +853,66 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 px-6 pt-16 pb-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="col-span-2 md:col-span-1">
+              <img src={logo} alt="MyTingleBox" className="h-8 w-auto mb-4" />
+              <p className="text-sm text-white/50 max-w-xs leading-relaxed">
+                {t.footerTagline}
+              </p>
+              <div className="flex items-center gap-3 mt-5">
+                <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="YouTube" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Youtube className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="X" className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:border-purple-500/40 transition-colors">
+                  <Twitter className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerProduct}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#features" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.features}</a></li>
+                <li><a href="#pricing" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.pricing}</a></li>
+                <li><Link to="/auth" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.start}</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerResources}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#how" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.how}</a></li>
+                <li><a href="#faq" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.faq}</a></li>
+                <li><Link to="/help" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.help}</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-white mb-4">{t.footerLegal}</h4>
+              <ul className="space-y-3 text-sm">
+                <li><Link to="/terms" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.terms}</Link></li>
+                <li><Link to="/privacy" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.privacy}</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-white/40">
+              © {new Date().getFullYear()} MyTingleBox. {t.footerRights}
+            </p>
+            <LangSwitcher />
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
+}
 
 export default Landing;
