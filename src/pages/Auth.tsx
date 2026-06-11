@@ -14,6 +14,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
+const Starfield = () => (
+  <div className="pointer-events-none absolute inset-0 z-0">
+    <div
+      className="absolute inset-0 opacity-[0.35]"
+      style={{
+        backgroundImage:
+          "radial-gradient(1px 1px at 20% 30%, hsl(270 80% 80%) 50%, transparent), radial-gradient(1px 1px at 70% 60%, hsl(280 80% 85%) 50%, transparent), radial-gradient(1.5px 1.5px at 40% 80%, hsl(260 80% 75%) 50%, transparent), radial-gradient(1px 1px at 90% 20%, hsl(290 80% 85%) 50%, transparent), radial-gradient(1px 1px at 10% 70%, hsl(270 70% 80%) 50%, transparent)",
+        backgroundSize: "600px 600px",
+        backgroundRepeat: "repeat",
+      }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0418]/40 to-[#0a0418]" />
+    <div
+      className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+      style={{ background: "radial-gradient(circle, hsl(270 90% 60% / 0.4) 0%, transparent 70%)" }}
+    />
+  </div>
+);
+
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -439,7 +458,7 @@ const Auth = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418]">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
       </div>
     );
@@ -447,19 +466,20 @@ const Auth = () => {
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6 py-12" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+        <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
         </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md relative z-10"
         >
           <div className="flex items-center mb-8 justify-center">
             <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
               <Mail className="w-7 h-7 text-purple-400" />
             </div>
@@ -483,7 +503,8 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a] relative" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
+    <div className="min-h-screen flex bg-[#0a0418] relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
+      <Starfield />
       {/* Language selector — top right */}
       <div className="absolute top-4 right-4 z-20">
         <LanguageSelector variant="minimal" />
@@ -491,7 +512,7 @@ const Auth = () => {
 
       {/* Left side — Branding / Features */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0a0a] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0418] to-[#0a0418]" />
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
 
@@ -508,7 +529,7 @@ const Auth = () => {
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
               {t("auth.heroTitle1")}
               <br />
-              <span className="text-purple-400">{t("auth.heroTitle2")}</span>
+              <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
             </h1>
 
             <p className="text-gray-400 text-lg mb-6 max-w-md">
@@ -544,7 +565,7 @@ const Auth = () => {
       </div>
 
       {/* Right side — Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -556,7 +577,7 @@ const Auth = () => {
             <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
           </div>
 
-          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-purple-500/10">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">
                 {defaultTab === "signup" ? t("auth.creatorSignup") : t("auth.creatorLogin")}
@@ -636,7 +657,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
                     disabled={isSubmitting}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -858,7 +879,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
                     disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
                     {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
