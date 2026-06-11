@@ -852,13 +852,13 @@ const Landing = () => {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 px-6 pt-16 pb-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+      <Section as="footer" py="pt-16 pb-10" className="border-t border-white/10">
+        <Container width="xl">
+          <Grid cols="4" gap={10}>
             <div className="col-span-2 md:col-span-1">
               <img src={logo} alt="MyTingleBox" className="h-8 w-auto mb-4" />
               <p className="text-sm text-white/50 max-w-xs leading-relaxed">
