@@ -466,7 +466,7 @@ const Auth = () => {
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 md:py-16 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
         <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
@@ -479,11 +479,11 @@ const Auth = () => {
           <div className="flex items-center mb-8 justify-center">
             <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
-          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
+          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
               <Mail className="w-7 h-7 text-purple-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">Confirme seu email</h2>
+            <h2 className="font-display text-2xl font-bold text-white">Confirme seu email</h2>
             <p className="text-gray-400 text-sm">
               Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
               Clique no link para ativar sua conta — sua loja será criada automaticamente.
@@ -516,23 +516,24 @@ const Auth = () => {
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
 
-        <div className="relative z-10 flex flex-col justify-center px-16 py-12 w-full">
+        <div className="relative z-10 flex flex-col justify-center px-6 py-12 md:py-16 w-full">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
+            className="w-full max-w-xl mx-auto"
           >
             <div className="flex items-center mb-8">
               <img src={platformLogo} alt="TingleBox" className="h-24 w-auto" />
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
+            <h1 className="font-display text-4xl font-bold text-white mb-4 leading-tight">
               {t("auth.heroTitle1")}
               <br />
               <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
             </h1>
 
-            <p className="text-gray-400 text-lg mb-6 max-w-md">
+            <p className="text-white/60 text-lg mb-6 max-w-md">
               {t("auth.heroDesc")}
             </p>
 
@@ -541,7 +542,7 @@ const Auth = () => {
               <span className="text-green-400 font-semibold text-sm">{t("auth.trialBadge")}</span>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {features.map((feature, i) => (
                 <motion.div
                   key={feature.title}
@@ -555,7 +556,7 @@ const Auth = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-medium text-sm">{feature.title}</h3>
-                    <p className="text-gray-500 text-sm">{feature.desc}</p>
+                    <p className="text-white/50 text-sm">{feature.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -565,7 +566,7 @@ const Auth = () => {
       </div>
 
       {/* Right side — Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-16 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -577,9 +578,9 @@ const Auth = () => {
             <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
           </div>
 
-          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-purple-500/10">
+          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 shadow-2xl shadow-purple-500/10">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white font-['Space_Grotesk']">
+              <h2 className="font-display text-2xl font-bold text-white">
                 {defaultTab === "signup" ? t("auth.creatorSignup") : t("auth.creatorLogin")}
               </h2>
               <p className="text-gray-500 text-sm mt-1">
