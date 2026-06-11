@@ -510,7 +510,7 @@ const Auth = () => {
             <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
               {t("auth.heroTitle1")}
               <br />
-              <span className="text-purple-400">{t("auth.heroTitle2")}</span>
+              <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
             </h1>
 
             <p className="text-gray-400 text-lg mb-6 max-w-md">
