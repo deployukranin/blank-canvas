@@ -402,6 +402,39 @@ const Landing = () => {
     try { localStorage.setItem("i18n_lang", target); } catch {}
   };
 
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navItems = [
+    { href: "#features", label: t.navFeatures },
+    { href: "#how", label: t.navHow },
+    { href: "#pricing", label: t.navPricing },
+    { href: "#faq", label: t.navFaq },
+  ];
+
+  const LangSwitcher = ({ className = "" }: { className?: string }) => (
+    <div className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs ${className}`}>
+      {(["pt", "en", "es"] as Lang[]).map((l) => (
+        <button
+          key={l}
+          onClick={() => changeLang(l)}
+          className={`px-3 py-1 rounded-full transition-colors ${
+            lang === l ? "bg-purple-600 text-white" : "text-white/60 hover:text-white"
+          }`}
+          aria-label={`Switch language to ${l.toUpperCase()}`}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#0a0418] text-foreground overflow-x-hidden relative">
       {/* Starfield background */}
