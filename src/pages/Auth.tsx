@@ -14,6 +14,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
+const Starfield = () => (
+  <div className="pointer-events-none absolute inset-0 z-0">
+    <div
+      className="absolute inset-0 opacity-[0.35]"
+      style={{
+        backgroundImage:
+          "radial-gradient(1px 1px at 20% 30%, hsl(270 80% 80%) 50%, transparent), radial-gradient(1px 1px at 70% 60%, hsl(280 80% 85%) 50%, transparent), radial-gradient(1.5px 1.5px at 40% 80%, hsl(260 80% 75%) 50%, transparent), radial-gradient(1px 1px at 90% 20%, hsl(290 80% 85%) 50%, transparent), radial-gradient(1px 1px at 10% 70%, hsl(270 70% 80%) 50%, transparent)",
+        backgroundSize: "600px 600px",
+        backgroundRepeat: "repeat",
+      }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0418]/40 to-[#0a0418]" />
+    <div
+      className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
+      style={{ background: "radial-gradient(circle, hsl(270 90% 60% / 0.4) 0%, transparent 70%)" }}
+    />
+  </div>
+);
+
 
 const Auth = () => {
   const navigate = useNavigate();
