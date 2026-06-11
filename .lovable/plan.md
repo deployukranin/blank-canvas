@@ -1,33 +1,42 @@
-# Melhorias na Landing Page
+# Alinhar o layout do /auth com a landing page
 
-A imagem enviada será usada apenas como **referência de estilo** (dashboard ASMR roxo/dark). Vou gerar um novo mockup do dashboard com a marca **MyTingleBox** nesse mesmo estilo e aplicar as 4 melhorias solicitadas.
+## Objetivo
+Fazer a página `/auth` usar o mesmo sistema de espaçamento, grid e estilo de cards da landing page, garantindo alinhamento consistente nas três telas do arquivo (loading, confirmação de email e o formulário principal de login/cadastro).
 
-## 1. Novo mockup do hero
-- Gerar uma imagem de dashboard no mesmo estilo da referência (sidebar escura, cards de métricas, gráfico roxo, badge "Welcome back"), porém com a marca MyTingleBox.
-- Salvar como novo asset e substituir `landing-hero-mockup.jpg` no hero.
+## Padrões de referência da landing (`src/pages/Landing.tsx`)
+- Container central: `max-w-6xl mx-auto px-6` (gutter horizontal de 6).
+- Ritmo de seção: `py-24` com `scroll-mt-20`.
+- Cards: `rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6`.
+- Grids com `gap-5` / `gap-6`.
+- Tipografia: `font-display`, kicker em `text-sm uppercase tracking-wider text-purple-300`, títulos com gradiente roxo.
 
-## 2. Header fixo com navegação
-- Barra fixa no topo com efeito blur ao rolar: logo MyTingleBox à esquerda; links âncora (Recursos, Planos) ao centro; seletor de idioma + botão "Começar grátis" à direita.
-- Menu responsivo (drawer/colapsado) no mobile.
-- Mover o seletor de idioma atual para dentro do header.
+## Mudanças em `src/pages/Auth.tsx`
 
-## 3. Novas seções
-- **Como funciona**: 3 passos (Crie sua loja → Configure conteúdo → Comece a vender), com ícones numerados.
-- **Prova social / estatísticas**: faixa com números de destaque (criadores, países, 0% de taxa, etc.).
-- **FAQ**: accordion com perguntas comuns (usando o componente `accordion` existente).
-- Todas as seções com textos traduzidos (PT/EN/ES), seguindo o padrão do objeto `tr`.
+### 1. Container e gutters consistentes
+- Trocar o padding lateral assimétrico do lado esquerdo (`px-16`) por um gutter alinhado ao da landing (`px-6` com um container interno `max-w-xl`), de modo que branding e formulário compartilhem o mesmo eixo de alinhamento.
+- Padronizar o padding vertical das telas para o mesmo ritmo (`py-12 md:py-16`), igual nas três telas.
 
-## 4. Mais animações e polish
-- Animações de entrada por scroll (`whileInView`) nas novas seções.
-- Brilho/gradientes mais ricos e efeito hover nos cards.
-- Border/glow sutil no mockup do hero e nos cards de pricing.
-- Microinterações nos botões.
+### 2. Grid do split-screen
+- Manter o split `lg:w-1/2 / lg:w-1/2`, mas garantir que ambos os lados centralizem o conteúdo no mesmo container de largura máxima e alinhem verticalmente (mesmo `justify-center` e mesma `max-w`).
+- A lista de features no lado esquerdo passa a usar o mesmo espaçamento vertical do grid da landing (`gap`/`space-y` equivalente a `gap-5/6`).
 
-## 5. Footer
-- Rodapé com logo, breve descrição, colunas de links (Produto, Recursos, Legal), redes sociais e linha de copyright.
+### 3. Estilo dos cards
+- Uniformizar o raio dos cards: usar `rounded-2xl` (igual à landing) em vez de `rounded-3xl`, nas três telas (form, confirmação e branding boxes).
+- Padronizar o fundo dos cards para `border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent` (mesmo token dos cards da landing), mantendo o `backdrop-blur` e a sombra roxa.
+- Padding interno do card padronizado em `p-8` (alinhado ao espaçamento da landing).
 
-## Detalhes técnicos
-- Todas as alterações em `src/pages/Landing.tsx` (mais um novo arquivo de header/footer se ficar grande, ex.: `src/components/landing/`).
-- Reaproveitar tokens de design existentes (tema roxo, `font-display`, classes utilitárias) e o componente `accordion` do shadcn.
-- Manter i18n com o mesmo padrão atual (objeto `tr` com pt/en/es).
-- Sem mudanças de backend.
+### 4. Tipografia e kickers
+- Aplicar `font-display` aos títulos das telas para casar com a landing.
+- Manter o título do hero com gradiente roxo já existente; alinhar os subtítulos ao tom `text-white/60`.
+
+### 5. Consistência entre as três telas
+- Tela de loading: fundo `#0a0418` (já ajustado), centralização idêntica.
+- Tela de confirmação de email: aplicar mesmo container (`max-w-md`/`max-w-xl`), mesmo card (`rounded-2xl`, gradiente, `p-8`) e mesmo padding vertical das demais.
+- Tela principal: aplicar todos os pontos acima.
+
+## Fora de escopo
+- Nenhuma mudança de lógica de autenticação, validação, i18n ou backend.
+- Sem alteração nos textos/traduções.
+
+## Verificação
+- Conferir o preview do `/auth` em desktop, tablet e mobile, validando que gutters, alinhamento vertical, raios de card e espaçamento batem visualmente com a landing.
