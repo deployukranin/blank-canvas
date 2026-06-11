@@ -603,8 +603,34 @@ const Landing = () => {
         </motion.div>
       </section>
 
+      {/* Stats band */}
+      <section className="relative z-10 px-6 pt-8 pb-20">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-white/50 text-sm uppercase tracking-wider mb-8">
+            {t.statsTitle}
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {t.stats.map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center"
+              >
+                <div className="font-display text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                  {s.value}
+                </div>
+                <div className="text-xs md:text-sm text-white/50 mt-2">{s.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="relative z-10 px-6 py-24">
+      <section id="features" className="relative z-10 px-6 py-24 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
