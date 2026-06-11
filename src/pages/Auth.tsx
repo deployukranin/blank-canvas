@@ -516,23 +516,24 @@ const Auth = () => {
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
 
-        <div className="relative z-10 flex flex-col justify-center px-16 py-12 w-full">
+        <div className="relative z-10 flex flex-col justify-center px-6 py-12 md:py-16 w-full">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
+            className="w-full max-w-xl mx-auto"
           >
             <div className="flex items-center mb-8">
               <img src={platformLogo} alt="TingleBox" className="h-24 w-auto" />
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-4 leading-tight font-['Space_Grotesk']">
+            <h1 className="font-display text-4xl font-bold text-white mb-4 leading-tight">
               {t("auth.heroTitle1")}
               <br />
               <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
             </h1>
 
-            <p className="text-gray-400 text-lg mb-6 max-w-md">
+            <p className="text-white/60 text-lg mb-6 max-w-md">
               {t("auth.heroDesc")}
             </p>
 
@@ -541,7 +542,7 @@ const Auth = () => {
               <span className="text-green-400 font-semibold text-sm">{t("auth.trialBadge")}</span>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {features.map((feature, i) => (
                 <motion.div
                   key={feature.title}
@@ -555,7 +556,7 @@ const Auth = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-medium text-sm">{feature.title}</h3>
-                    <p className="text-gray-500 text-sm">{feature.desc}</p>
+                    <p className="text-white/50 text-sm">{feature.desc}</p>
                   </div>
                 </motion.div>
               ))}
