@@ -602,15 +602,15 @@ const Landing = () => {
             }}
           />
         </motion.div>
-      </section>
+      </Section>
 
       {/* Stats band */}
-      <section className="relative z-10 px-6 pt-8 pb-20">
-        <div className="max-w-5xl mx-auto">
+      <Section py="pt-8 pb-20">
+        <Container width="lg">
           <p className="text-center text-white/50 text-sm uppercase tracking-wider mb-8">
             {t.statsTitle}
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Grid cols="4" gap={4}>
             {t.stats.map((s, i) => (
               <motion.div
                 key={s.label}
@@ -626,9 +626,9 @@ const Landing = () => {
                 <div className="text-xs md:text-sm text-white/50 mt-2">{s.label}</div>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* Features */}
       <section id="features" className="relative z-10 px-6 py-24 scroll-mt-20">
