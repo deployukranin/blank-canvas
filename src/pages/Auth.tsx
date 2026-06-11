@@ -484,7 +484,8 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a] relative" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
+    <div className="min-h-screen flex bg-[#0a0418] relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
+      <Starfield />
       {/* Language selector — top right */}
       <div className="absolute top-4 right-4 z-20">
         <LanguageSelector variant="minimal" />
@@ -492,7 +493,7 @@ const Auth = () => {
 
       {/* Left side — Branding / Features */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0a0a] to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0418] to-[#0a0418]" />
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
 
