@@ -570,12 +570,12 @@ const Auth = () => {
 
       {/* Right side — Auth Form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-16 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full max-w-md"
-        >
+        <Container width="form">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
           {/* Mobile branding */}
           <div className="lg:hidden flex items-center mb-8 justify-center">
             <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
