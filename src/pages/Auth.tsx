@@ -657,7 +657,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
                     disabled={isSubmitting}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -879,7 +879,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-11"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
                     disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
                     {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
