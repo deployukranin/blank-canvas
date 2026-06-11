@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +21,7 @@ const AdminBanners: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { config, setConfig } = useWhiteLabel();
+  const { store } = useTenant();
 
   const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
   const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
@@ -53,8 +55,11 @@ const AdminBanners: React.FC = () => {
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
 
     try {
+      if (!store?.id) {
+        throw new Error('Loja não encontrada. Recarregue a página.');
+      }
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${bannerId}/${variant}-${Date.now()}.${ext}`;
+      const path = `${store.id}/${bannerId}/${variant}-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
