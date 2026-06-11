@@ -647,7 +647,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.featuresSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Grid cols="3" gap={5}>
             {t.features.map((f, i) => {
               const Icon = featureIcons[i];
               return (
