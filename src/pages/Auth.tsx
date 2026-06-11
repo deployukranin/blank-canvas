@@ -439,7 +439,7 @@ const Auth = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418]">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
       </div>
     );
@@ -447,19 +447,20 @@ const Auth = () => {
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-6 py-12" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+        <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
         </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md relative z-10"
         >
           <div className="flex items-center mb-8 justify-center">
             <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8 text-center space-y-4">
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
               <Mail className="w-7 h-7 text-purple-400" />
             </div>
