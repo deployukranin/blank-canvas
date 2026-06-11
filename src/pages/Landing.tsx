@@ -690,7 +690,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.howSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Grid cols="3-md" gap={6}>
             {t.steps.map((step, i) => (
               <motion.div
                 key={step.title}
