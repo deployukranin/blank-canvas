@@ -21,6 +21,7 @@ const AdminBanners: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { config, setConfig } = useWhiteLabel();
+  const { store } = useTenant();
 
   const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
   const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
