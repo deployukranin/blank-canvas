@@ -31,6 +31,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { Section, Container, Grid } from "@/components/layout/primitives";
 import logo from "@/assets/mytinglebox-logo.png";
 import heroMockup from "@/assets/landing-hero-mockup.jpg";
 
