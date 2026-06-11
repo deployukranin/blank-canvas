@@ -529,7 +529,7 @@ const Landing = () => {
 
       {/* Hero */}
       <span id="top" />
-      <section className="relative z-10 px-6 pt-32 md:pt-36 pb-24 text-center scroll-mt-20">
+      <Section py="pt-32 md:pt-36 pb-24" className="text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
