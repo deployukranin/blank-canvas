@@ -31,6 +31,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { Section, Container, Grid } from "@/components/layout/primitives";
 import logo from "@/assets/mytinglebox-logo.png";
 import heroMockup from "@/assets/landing-hero-mockup.jpg";
 
@@ -528,7 +529,7 @@ const Landing = () => {
 
       {/* Hero */}
       <span id="top" />
-      <section className="relative z-10 px-6 pt-32 md:pt-36 pb-24 text-center scroll-mt-20">
+      <Section py="pt-32 md:pt-36 pb-24" className="text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -601,15 +602,15 @@ const Landing = () => {
             }}
           />
         </motion.div>
-      </section>
+      </Section>
 
       {/* Stats band */}
-      <section className="relative z-10 px-6 pt-8 pb-20">
-        <div className="max-w-5xl mx-auto">
+      <Section py="pt-8 pb-20">
+        <Container width="lg">
           <p className="text-center text-white/50 text-sm uppercase tracking-wider mb-8">
             {t.statsTitle}
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Grid cols="4" gap={4}>
             {t.stats.map((s, i) => (
               <motion.div
                 key={s.label}
@@ -625,13 +626,13 @@ const Landing = () => {
                 <div className="text-xs md:text-sm text-white/50 mt-2">{s.label}</div>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* Features */}
-      <section id="features" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-6xl mx-auto">
+      <Section id="features">
+        <Container width="xl">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.featuresKicker}
@@ -646,7 +647,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.featuresSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Grid cols="3" gap={5}>
             {t.features.map((f, i) => {
               const Icon = featureIcons[i];
               return (
@@ -668,13 +669,13 @@ const Landing = () => {
                 </motion.div>
               );
             })}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* How it works */}
-      <section id="how" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-6xl mx-auto">
+      <Section id="how">
+        <Container width="xl">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.howKicker}
@@ -689,7 +690,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.howSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Grid cols="3-md" gap={6}>
             {t.steps.map((step, i) => (
               <motion.div
                 key={step.title}
@@ -708,13 +709,13 @@ const Landing = () => {
                 <p className="text-sm text-white/60 leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* Pricing */}
-      <section id="pricing" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-6xl mx-auto">
+      <Section id="pricing">
+        <Container width="xl">
           <div className="text-center mb-16">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.pricingKicker}
@@ -729,7 +730,7 @@ const Landing = () => {
             <p className="text-white/60 max-w-2xl mx-auto">{t.pricingSub}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Grid cols="3-md" gap={6}>
             {plans.map((p, i) => {
               const name = p[`name_${lang}` as const] as string;
               const features = p[`features_${lang}` as const] as string[];
@@ -782,13 +783,13 @@ const Landing = () => {
                 </motion.div>
               );
             })}
-          </div>
-        </div>
-      </section>
+          </Grid>
+        </Container>
+      </Section>
 
       {/* FAQ */}
-      <section id="faq" className="relative z-10 px-6 py-24 scroll-mt-20">
-        <div className="max-w-3xl mx-auto">
+      <Section id="faq">
+        <Container width="sm">
           <div className="text-center mb-12">
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.faqKicker}
@@ -817,12 +818,12 @@ const Landing = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* Final CTA */}
-      <section id="cta" className="relative z-10 px-6 py-24">
-        <div className="max-w-4xl mx-auto">
+      <Section id="cta" py="py-24">
+        <Container width="md">
           <div className="relative rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-600/20 via-purple-700/10 to-transparent p-12 md:p-16 text-center overflow-hidden">
             <div
               className="absolute inset-0 opacity-30"
@@ -851,13 +852,13 @@ const Landing = () => {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 px-6 pt-16 pb-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+      <Section as="footer" py="pt-16 pb-10" className="border-t border-white/10">
+        <Container width="xl">
+          <Grid cols="4" gap={10}>
             <div className="col-span-2 md:col-span-1">
               <img src={logo} alt="MyTingleBox" className="h-8 w-auto mb-4" />
               <p className="text-sm text-white/50 max-w-xs leading-relaxed">
@@ -901,7 +902,7 @@ const Landing = () => {
                 <li><Link to="/privacy" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.privacy}</Link></li>
               </ul>
             </div>
-          </div>
+          </Grid>
 
           <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/40">
@@ -909,8 +910,8 @@ const Landing = () => {
             </p>
             <LangSwitcher />
           </div>
-        </div>
-      </footer>
+        </Container>
+      </Section>
     </div>
   );
 };
