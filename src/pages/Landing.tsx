@@ -913,6 +913,6 @@ const Landing = () => {
       </footer>
     </div>
   );
-}
+};
 
 export default Landing;
