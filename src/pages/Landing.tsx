@@ -458,25 +458,73 @@ const Landing = () => {
         />
       </div>
 
-      {/* Language switcher */}
-      <div className="relative z-20 flex justify-end px-6 pt-6">
-        <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs">
-          {(["pt", "en", "es"] as Lang[]).map((l) => (
-            <button
-              key={l}
-              onClick={() => changeLang(l)}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                lang === l
-                  ? "bg-purple-600 text-white"
-                  : "text-white/60 hover:text-white"
-              }`}
-              aria-label={`Switch language to ${l.toUpperCase()}`}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
+      {/* Header */}
+      <header
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-[#0a0418]/80 backdrop-blur-xl border-b border-white/10"
+            : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
+          <a href="#top" className="flex items-center gap-2">
+            <img src={logo} alt="MyTingleBox" className="h-8 w-auto" />
+          </a>
+
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-3 py-2 text-sm text-white/70 hover:text-white transition-colors rounded-full"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <LangSwitcher className="hidden sm:inline-flex" />
+            <Link to="/auth" className="hidden sm:block">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-5 h-9 gap-1.5 shadow-lg shadow-purple-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t.ctaStart}
+              </Button>
+            </Link>
+
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="outline" size="icon" className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full h-9 w-9">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-[#0a0418] border-white/10 text-white w-72">
+                <div className="flex flex-col gap-1 mt-10">
+                  {navItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="px-3 py-3 text-base text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                  <Link to="/auth" onClick={() => setMenuOpen(false)} className="mt-4">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full gap-1.5">
+                      <Sparkles className="w-4 h-4" />
+                      {t.ctaStart}
+                    </Button>
+                  </Link>
+                  <div className="mt-6">
+                    <LangSwitcher />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Hero */}
       <section className="relative z-10 px-6 pt-10 pb-24 text-center">
