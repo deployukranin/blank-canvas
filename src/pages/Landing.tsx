@@ -902,7 +902,7 @@ const Landing = () => {
                 <li><Link to="/privacy" className="text-white/50 hover:text-white transition-colors">{t.footerLinks.privacy}</Link></li>
               </ul>
             </div>
-          </div>
+          </Grid>
 
           <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/40">
@@ -910,8 +910,8 @@ const Landing = () => {
             </p>
             <LangSwitcher />
           </div>
-        </div>
-      </footer>
+        </Container>
+      </Section>
     </div>
   );
 };
