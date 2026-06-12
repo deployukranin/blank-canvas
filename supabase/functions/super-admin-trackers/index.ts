@@ -104,8 +104,15 @@ Deno.serve(async (req) => {
       }
       case "delete_tracker": {
         if (!p.id) return json({ error: "id required" }, 400);
+        // remove linked auth user + role first
+        const { data: tr } = await admin
+          .from("trackers").select("owner_user_id").eq("id", p.id).maybeSingle();
         const { error } = await admin.from("trackers").delete().eq("id", p.id);
         if (error) return json({ error: error.message }, 400);
+        if (tr?.owner_user_id) {
+          await admin.from("user_roles").delete().eq("user_id", tr.owner_user_id).eq("role", "tracker");
+          await admin.auth.admin.deleteUser(tr.owner_user_id).catch(() => {});
+        }
         return json({ ok: true });
       }
       case "create_link": {
