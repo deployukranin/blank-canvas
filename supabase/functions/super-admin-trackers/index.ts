@@ -77,7 +77,13 @@ Deno.serve(async (req) => {
           email_confirm: true,
           user_metadata: { username: name, is_tracker: true },
         });
-        if (createErr || !created?.user) return json({ error: createErr?.message || "could not create user" }, 400);
+        if (createErr || !created?.user) {
+          const msg = (createErr?.message || "").toLowerCase();
+          if (msg.includes("already") || msg.includes("email_exists")) {
+            return json({ error: "Este email já está cadastrado. Use outro email." }, 400);
+          }
+          return json({ error: createErr?.message || "could not create user" }, 400);
+        }
         const newUserId = created.user.id;
 
         // 2. assign tracker role
