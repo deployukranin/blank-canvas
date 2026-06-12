@@ -72,6 +72,9 @@ import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminAffiliates from "./pages/admin/AdminAffiliates";
 import ClientAffiliate from "./pages/ClientAffiliate";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import TrackRedirect from "./pages/TrackRedirect";
+import TrackDashboard from "./pages/TrackDashboard";
+import SuperAdminTracking from "./pages/super-admin/SuperAdminTracking";
 
 const queryClient = new QueryClient();
 
