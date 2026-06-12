@@ -97,6 +97,7 @@ const ClientAuth = () => {
         return;
       }
 
+      await trackConversion({ type: "client_signup", storeId: store?.id ?? null, email: signupEmail, name: signupName.trim() });
       toast.success("Conta criada! Verifique seu email para confirmar e fazer login.", { duration: 8000 });
       setSignupConfirmationSent(true);
     } catch (err) {
