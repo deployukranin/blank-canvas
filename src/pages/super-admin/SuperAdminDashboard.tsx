@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from 'react-i18next';
+import { useUserRole } from '@/hooks/use-user-role';
+import TrackerDashboard from './TrackerDashboard';
 
 const PURPLE = '#8b5cf6';
 const PURPLE_LIGHT = '#a78bfa';
@@ -84,6 +86,10 @@ interface MonthlyGrowth {
 
 const SuperAdminDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const { isSuperAdmin, isTracker, isLoading: rolesLoading } = useUserRole();
+  if (!rolesLoading && isTracker() && !isSuperAdmin()) {
+    return <TrackerDashboard />;
+  }
   const [global, setGlobal] = useState<GlobalMetrics | null>(null);
   const [perStore, setPerStore] = useState<StoreMetrics[]>([]);
   const [monthlyGrowth, setMonthlyGrowth] = useState<MonthlyGrowth[]>([]);
