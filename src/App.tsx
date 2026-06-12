@@ -59,7 +59,7 @@ import AdminDominio from "./pages/admin/AdminDominio";
 
 // Super Admin Pages
 import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
-import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
+
 import SuperAdminTenants from "./pages/super-admin/SuperAdminTenants";
 import SuperAdminRanking from "./pages/super-admin/SuperAdminRanking";
 import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
