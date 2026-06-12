@@ -173,14 +173,14 @@ const App = () => (
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
                 <Route path="/admin-master" element={<AdminMasterRoute><AdminMasterHome /></AdminMasterRoute>} />
-                <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
-                <Route path="/admin-master/clients" element={<SuperAdminRoute><SuperAdminClients /></SuperAdminRoute>} />
-                <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
+                <Route path="/admin-master/tenants" element={<AdminMasterRoute><TenantsSection /></AdminMasterRoute>} />
+                <Route path="/admin-master/clients" element={<AdminMasterRoute><ClientsSection /></AdminMasterRoute>} />
+                <Route path="/admin-master/ranking" element={<AdminMasterRoute><RankingSection /></AdminMasterRoute>} />
                 <Route path="/admin-master/plans" element={<SuperAdminRoute><SuperAdminPlanos /></SuperAdminRoute>} />
                 <Route path="/admin-master/settings" element={<SuperAdminRoute><SuperAdminConfiguracoes /></SuperAdminRoute>} />
-                <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
-                <Route path="/admin-master/partners" element={<SuperAdminRoute><SuperAdminPartners /></SuperAdminRoute>} />
-                <Route path="/admin-master/referrals" element={<SuperAdminRoute><SuperAdminReferrals /></SuperAdminRoute>} />
+                <Route path="/admin-master/support" element={<AdminMasterRoute><SupportSection /></AdminMasterRoute>} />
+                <Route path="/admin-master/partners" element={<AdminMasterRoute><PartnersSection /></AdminMasterRoute>} />
+                <Route path="/admin-master/referrals" element={<AdminMasterRoute><ReferralsSection /></AdminMasterRoute>} />
                 <Route path="/admin-master/tracking" element={<SuperAdminRoute><SuperAdminTracking /></SuperAdminRoute>} />
 
                 {/* 🤝 Painel do Parceiro */}
