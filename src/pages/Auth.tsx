@@ -450,6 +450,7 @@ const Auth = () => {
       }
 
       clearPendingReferral();
+      if (store) await trackConversion({ type: "store_signup", subjectId: store.id, storeId: store.id, email: signupEmail, name: storeName.trim() });
       toast.success(t("auth.accountCreated"));
       navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {
