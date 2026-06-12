@@ -98,6 +98,10 @@ const App = () => (
                 <Route path="/privacy" element={<Privacidade />} />
                 <Route path="/orders" element={<MyOrdersRedirect />} />
 
+                {/* 📊 Tracking isolado (público) */}
+                <Route path="/t/:code" element={<TrackRedirect />} />
+                <Route path="/track/:token" element={<TrackDashboard />} />
+
                 {/* 🌐 Rotas slug-free para domínios personalizados */}
                 <Route path="/login" element={<CustomDomainGate><ClientAuth /></CustomDomainGate>} />
                 <Route path="/customs" element={<CustomDomainGate><Customs /></CustomDomainGate>} />
