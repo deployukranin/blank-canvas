@@ -57,13 +57,41 @@ Deno.serve(async (req) => {
         return json({ ok: true, trackers: trackers || [], links: links || [] });
       }
       case "create_tracker": {
-        if (!p.name || String(p.name).trim().length < 2) return json({ error: "name required" }, 400);
+        const name = String(p.name || "").trim();
+        const email = String(p.email || "").trim().toLowerCase();
+        const password = String(p.password || "");
+        if (name.length < 2) return json({ error: "name required" }, 400);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "valid email required" }, 400);
+        if (password.length < 6) return json({ error: "password must be at least 6 chars" }, 400);
+
+        // 1. create auth user (already confirmed so they can log in immediately)
+        const { data: created, error: createErr } = await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { username: name, is_tracker: true },
+        });
+        if (createErr || !created?.user) return json({ error: createErr?.message || "could not create user" }, 400);
+        const newUserId = created.user.id;
+
+        // 2. assign tracker role
+        const { error: roleErr } = await admin
+          .from("user_roles").insert({ user_id: newUserId, role: "tracker" });
+        if (roleErr) {
+          await admin.auth.admin.deleteUser(newUserId);
+          return json({ error: roleErr.message }, 400);
+        }
+
+        // 3. create tracker row linked to the user
         const { data, error } = await admin
           .from("trackers")
-          .insert({ name: String(p.name).trim(), dashboard_token: randToken() })
+          .insert({ name, dashboard_token: randToken(), owner_user_id: newUserId })
           .select().single();
-        if (error) return json({ error: error.message }, 400);
-        return json({ ok: true, tracker: data });
+        if (error) {
+          await admin.auth.admin.deleteUser(newUserId);
+          return json({ error: error.message }, 400);
+        }
+        return json({ ok: true, tracker: { ...data, email } });
       }
       case "update_tracker": {
         if (!p.id) return json({ error: "id required" }, 400);
