@@ -12,6 +12,7 @@ import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
+import { trackConversion } from "@/lib/tracking";
 import { Container, Grid } from "@/components/layout/primitives";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
@@ -244,6 +245,7 @@ const Auth = () => {
       }
 
       clearPendingReferral();
+      await trackConversion({ type: "store_signup", subjectId: store.id, storeId: store.id, name: pending.storeName });
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
       navigate(`/${store.slug}/admin`, { replace: true });
     }
@@ -448,6 +450,7 @@ const Auth = () => {
       }
 
       clearPendingReferral();
+      if (store) await trackConversion({ type: "store_signup", subjectId: store.id, storeId: store.id, email: signupEmail, name: storeName.trim() });
       toast.success(t("auth.accountCreated"));
       navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {

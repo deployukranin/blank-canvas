@@ -903,6 +903,176 @@ export type Database = {
           },
         ]
       }
+      tracker_clicks: {
+        Row: {
+          id: string
+          ip_hash: string | null
+          link_id: string
+          occurred_at: string
+          referrer: string | null
+          tracker_id: string
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          id?: string
+          ip_hash?: string | null
+          link_id: string
+          occurred_at?: string
+          referrer?: string | null
+          tracker_id: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          id?: string
+          ip_hash?: string | null
+          link_id?: string
+          occurred_at?: string
+          referrer?: string | null
+          tracker_id?: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_clicks_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_conversions: {
+        Row: {
+          email: string | null
+          id: string
+          link_id: string
+          name: string | null
+          occurred_at: string
+          store_id: string | null
+          subject_id: string | null
+          tracker_id: string
+          type: string
+        }
+        Insert: {
+          email?: string | null
+          id?: string
+          link_id: string
+          name?: string | null
+          occurred_at?: string
+          store_id?: string | null
+          subject_id?: string | null
+          tracker_id: string
+          type: string
+        }
+        Update: {
+          email?: string | null
+          id?: string
+          link_id?: string
+          name?: string | null
+          occurred_at?: string
+          store_id?: string | null
+          subject_id?: string | null
+          tracker_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_conversions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_conversions_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_links: {
+        Row: {
+          channel: string
+          code: string
+          created_at: string
+          destination: string
+          id: string
+          is_active: boolean
+          label: string
+          tracker_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          code: string
+          created_at?: string
+          destination?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          tracker_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          code?: string
+          created_at?: string
+          destination?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          tracker_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_links_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trackers: {
+        Row: {
+          created_at: string
+          dashboard_token: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dashboard_token: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dashboard_token?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

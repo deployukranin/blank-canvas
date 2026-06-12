@@ -72,6 +72,9 @@ import AdminReferrals from "./pages/admin/AdminReferrals";
 import AdminAffiliates from "./pages/admin/AdminAffiliates";
 import ClientAffiliate from "./pages/ClientAffiliate";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import TrackRedirect from "./pages/TrackRedirect";
+import TrackDashboard from "./pages/TrackDashboard";
+import SuperAdminTracking from "./pages/super-admin/SuperAdminTracking";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +97,10 @@ const App = () => (
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />
                 <Route path="/orders" element={<MyOrdersRedirect />} />
+
+                {/* 📊 Tracking isolado (público) */}
+                <Route path="/t/:code" element={<TrackRedirect />} />
+                <Route path="/track/:token" element={<TrackDashboard />} />
 
                 {/* 🌐 Rotas slug-free para domínios personalizados */}
                 <Route path="/login" element={<CustomDomainGate><ClientAuth /></CustomDomainGate>} />
@@ -172,6 +179,7 @@ const App = () => (
                 <Route path="/admin-master/support" element={<SuperAdminRoute><SuperAdminSuporte /></SuperAdminRoute>} />
                 <Route path="/admin-master/partners" element={<SuperAdminRoute><SuperAdminPartners /></SuperAdminRoute>} />
                 <Route path="/admin-master/referrals" element={<SuperAdminRoute><SuperAdminReferrals /></SuperAdminRoute>} />
+                <Route path="/admin-master/tracking" element={<SuperAdminRoute><SuperAdminTracking /></SuperAdminRoute>} />
 
                 {/* 🤝 Painel do Parceiro */}
                 <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />

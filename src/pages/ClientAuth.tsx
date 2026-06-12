@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { trackConversion } from "@/lib/tracking";
 
 const ClientAuth = () => {
   const navigate = useNavigate();
@@ -97,6 +98,7 @@ const ClientAuth = () => {
         return;
       }
 
+      await trackConversion({ type: "client_signup", storeId: store?.id ?? null, email: signupEmail, name: signupName.trim() });
       toast.success("Conta criada! Verifique seu email para confirmar e fazer login.", { duration: 8000 });
       setSignupConfirmationSent(true);
     } catch (err) {
