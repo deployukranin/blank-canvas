@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface Tracker {
-  id: string; name: string; dashboard_token: string; is_active: boolean; created_at: string;
+  id: string; name: string; dashboard_token: string; is_active: boolean; created_at: string; email?: string | null;
 }
 interface TrackerLink {
   id: string; tracker_id: string; code: string; label: string; channel: string; destination: string; is_active: boolean;
@@ -20,6 +20,8 @@ const SuperAdminTracking: React.FC = () => {
   const [links, setLinks] = useState<TrackerLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -49,11 +51,13 @@ const SuperAdminTracking: React.FC = () => {
   useEffect(() => { load(); }, []);
 
   const createTracker = async () => {
-    if (newName.trim().length < 2) return;
+    if (newName.trim().length < 2) { toast.error("Informe um nome"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) { toast.error("Email inválido"); return; }
+    if (newPassword.length < 6) { toast.error("Senha deve ter ao menos 6 caracteres"); return; }
     setCreating(true);
     try {
-      await call("create_tracker", { name: newName.trim() });
-      setNewName("");
+      await call("create_tracker", { name: newName.trim(), email: newEmail.trim(), password: newPassword });
+      setNewName(""); setNewEmail(""); setNewPassword("");
       toast.success("Tracker criado");
       await load();
     } catch (e: any) {
