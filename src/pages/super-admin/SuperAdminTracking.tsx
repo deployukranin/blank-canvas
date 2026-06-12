@@ -100,20 +100,36 @@ const SuperAdminTracking: React.FC = () => {
     <SuperAdminLayout title="Tracking">
       <div className="max-w-4xl space-y-6">
         <p className="text-white/50 text-sm">
-          Crie admins de tráfego isolados. Cada um recebe um dashboard via URL secreta e pode ter vários links por canal.
+          Crie admins de tráfego isolados. Cada um faz login com email e senha em <span className="text-white/70">/admin-master/login</span> e vê apenas o próprio dashboard de trackeamento.
         </p>
 
         {/* Create tracker */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Nome do admin de tráfego (ex: João Ads)"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && createTracker()}
-            className="bg-white/5 border-white/10"
-          />
-          <Button onClick={createTracker} disabled={creating} className="gap-2 shrink-0">
-            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Criar
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+          <p className="text-sm font-medium text-white/80">Novo admin de tráfego</p>
+          <div className="grid sm:grid-cols-3 gap-2">
+            <Input
+              placeholder="Nome (ex: João Ads)"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+            <Input
+              type="email"
+              placeholder="Email de login"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+            <Input
+              type="text"
+              placeholder="Senha (mín. 6)"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+          </div>
+          <Button onClick={createTracker} disabled={creating} className="gap-2">
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Criar tracker
           </Button>
         </div>
 
