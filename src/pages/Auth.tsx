@@ -12,6 +12,7 @@ import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
+import { trackConversion } from "@/lib/tracking";
 import { Container, Grid } from "@/components/layout/primitives";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
