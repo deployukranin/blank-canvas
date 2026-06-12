@@ -223,51 +223,5 @@ const TrackerDashboard: React.FC = () => {
   );
 };
 
-const LinkCreator: React.FC<{ trackerId?: string; onCreated: () => void }> = ({ trackerId, onCreated }) => {
-  const [label, setLabel] = useState("");
-  const [channel, setChannel] = useState("ads");
-  const [destination, setDestination] = useState("/");
-  const [busy, setBusy] = useState(false);
-
-  const create = async () => {
-    if (!trackerId) { toast.error("Tracker não encontrado"); return; }
-    if (label.trim().length < 2) { toast.error("Informe um rótulo"); return; }
-    setBusy(true);
-    try {
-      let code = "";
-      for (let i = 0; i < 6; i++) {
-        const candidate = (slugify(label) || "lnk") + randCode(4);
-        const { data: exists } = await supabase.from("tracker_links").select("id").eq("code", candidate).maybeSingle();
-        if (!exists) { code = candidate; break; }
-      }
-      if (!code) code = "lnk" + randCode(8);
-      const { error } = await supabase.from("tracker_links").insert({
-        tracker_id: trackerId,
-        label: label.trim(),
-        channel,
-        destination: destination.trim() || "/",
-        code,
-      });
-      if (error) throw error;
-      setLabel("");
-      onCreated();
-      toast.success("Link criado");
-    } catch (e: any) { toast.error(e.message || "Erro"); }
-    finally { setBusy(false); }
-  };
-
-  return (
-    <div className="flex flex-col sm:flex-row gap-2">
-      <Input placeholder="Rótulo (ex: Campanha Black Friday)" value={label} onChange={(e) => setLabel(e.target.value)} className="bg-white/5 border-white/10 text-sm" />
-      <select value={channel} onChange={(e) => setChannel(e.target.value)} className="bg-white/5 border border-white/10 rounded-md px-3 text-sm text-white h-10 capitalize">
-        {CHANNELS.map((c) => <option key={c} value={c} className="bg-[#0a0a0a] capitalize">{c}</option>)}
-      </select>
-      <Input placeholder="Destino (ex: / ou /loja)" value={destination} onChange={(e) => setDestination(e.target.value)} className="bg-white/5 border-white/10 text-sm sm:w-40" />
-      <Button onClick={create} disabled={busy} size="sm" className="gap-1.5 shrink-0">
-        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Link
-      </Button>
-    </div>
-  );
-};
 
 export default TrackerDashboard;
