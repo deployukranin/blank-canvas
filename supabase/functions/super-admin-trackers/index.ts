@@ -54,7 +54,13 @@ Deno.serve(async (req) => {
           .from("trackers").select("*").order("created_at", { ascending: false });
         const { data: links } = await admin
           .from("tracker_links").select("*").order("created_at", { ascending: false });
-        return json({ ok: true, trackers: trackers || [], links: links || [] });
+        // attach emails from auth users
+        const withEmail = await Promise.all((trackers || []).map(async (t: any) => {
+          if (!t.owner_user_id) return { ...t, email: null };
+          const { data: u } = await admin.auth.admin.getUserById(t.owner_user_id);
+          return { ...t, email: u?.user?.email ?? null };
+        }));
+        return json({ ok: true, trackers: withEmail, links: links || [] });
       }
       case "create_tracker": {
         const name = String(p.name || "").trim();
