@@ -1053,6 +1053,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          owner_user_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1061,6 +1062,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          owner_user_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1069,6 +1071,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          owner_user_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1719,6 +1722,7 @@ export type Database = {
         Returns: undefined
       }
       mark_eligible_commissions: { Args: never; Returns: number }
+      owns_tracker: { Args: { _tracker_id: string }; Returns: boolean }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }
