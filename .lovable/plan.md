@@ -1,67 +1,50 @@
-# Sistema de Tracking Isolado (Admin Masters de Tráfego)
+# Trackers com login próprio acessando /admin-master
 
-Cria uma entidade nova e independente — "trackers" (admin masters de tráfego) — sem cadastro de email/senha. Cada tracker é gerenciado pelo Super Admin em `/admin-master`, recebe um **dashboard via URL secreta** (token) com dados 100% isolados, e gera **vários links de tracking** (um por canal: email, ads, dm, etc). Cada link rastreia cliques e conversões (cadastro de loja E de cliente final), com métricas de conversão por canal.
+## Objetivo
+Transformar os "trackers" (admins de tráfego) em **contas com login email/senha** que acessam o **mesmo painel `/admin-master`**, mas onde o dashboard é a **página de trackeamento** mostrando apenas os **links e métricas do próprio usuário**. O Super Admin continua com o painel completo.
 
-## Como funciona (fluxo)
+## Como vai funcionar
 
 ```text
-Super Admin (/admin-master/tracking)
-   └── cria Tracker "João Tráfego"  ──► gera URL do dashboard: /track/<token>
-          └── cria links por canal:
-                 /t/<code1>  (canal: ads)
-                 /t/<code2>  (canal: email)
-                 /t/<code3>  (canal: dm)
-
-Visitante clica /t/<code2>
-   1. registra 1 clique (canal email)
-   2. salva o code em cookie/localStorage (atribuição, 30 dias)
-   3. redireciona para a landing / loja
-
-Visitante se cadastra (loja OU cliente)
-   4. lê o code salvo e registra 1 conversão (tipo + email/nome)
-
-Dashboard /track/<token>
-   └── mostra métricas isoladas só daquele tracker
+Super Admin  → login /admin-master/login → /admin-master (painel completo: tenants, clientes, tracking, etc.)
+Tracker      → login /admin-master/login → /admin-master (dashboard = SUA página de trackeamento)
 ```
 
-## Banco de dados (nova migration)
+- Mesma URL `/admin-master`. A única diferença é quem fez login.
+- Tracker vê: criar/copiar seus links por canal (ads, email, dm…) + métricas isoladas (cliques únicos, conversões, taxa de conversão, quebra por canal, série de 30 dias, lista de cadastros).
+- Tracker **não** vê os menus de plataforma (tenants, clientes, parceiros, planos…), pois não é Super Admin.
 
-- **trackers**: `name`, `dashboard_token` (secreto, único), `is_active`. Gerenciado só pelo Super Admin.
-- **tracker_links**: `tracker_id`, `code` (slug curto único), `label`, `channel` (ex: ads/email/dm/livre), `is_active`.
-- **tracker_clicks**: `link_id`, `tracker_id`, `occurred_at`, `referrer`, `user_agent`, `ip_hash`, `visitor_id` (para cliques únicos).
-- **tracker_conversions**: `link_id`, `tracker_id`, `type` (`store_signup` | `client_signup`), `subject_id` (id da loja/usuário), `email`, `name`, `store_id`, `occurred_at`.
+## Mudanças
 
-RLS estrita: nenhum acesso anônimo direto. Toda leitura/escrita passa por Edge Functions com `service_role` (o dashboard é autenticado pelo token, não por login). Super Admin gerencia via função RBAC.
+### 1. Banco de dados
+- Adicionar valor `tracker` ao enum `app_role`.
+- Adicionar coluna `owner_user_id uuid` em `public.trackers` (referência ao usuário dono). Cada conta de tracker = 1 linha em `trackers`.
+- Atualizar RLS para que um tracker leia/gerencie **somente** seus próprios `trackers`, `tracker_links`, `tracker_clicks`, `tracker_conversions` (filtrando por `owner_user_id = auth.uid()`), mantendo o acesso total do Super Admin.
 
-## Edge Functions (todas com Fetch API, sem SDK)
+### 2. Login dos trackers
+- Reutilizar `/admin-master/login` (email/senha já existente). Ajustar o redirect: se o usuário tem role `tracker`, vai para `/admin-master`; se `super_admin`, idem; senão, acesso negado.
 
-- **tracker-click** (público): recebe `code`, grava clique + retorna destino para redirecionar.
-- **tracker-convert** (público): recebe `code` + tipo + dados do cadastro, grava conversão.
-- **tracker-dashboard** (token): recebe `token`, valida, retorna métricas isoladas e lista de cadastros.
-- **super-admin-trackers** (RBAC super_admin): CRUD de trackers e links, gera tokens/codes.
+### 3. Criação de contas de tracker (Super Admin)
+- Na tela `/admin-master/tracking` do Super Admin, ao criar um tracker passar a pedir **nome, email e senha**.
+- A edge function `super-admin-trackers` cria o usuário (auth admin), atribui a role `tracker` em `user_roles`, e cria a linha `trackers` com `owner_user_id`.
 
-## Frontend
+### 4. Guard de rota
+- Trocar `SuperAdminRoute` em `/admin-master` por um guard que aceita `super_admin` **ou** `tracker`. As demais rotas `/admin-master/*` continuam restritas a `super_admin`.
 
-- **`/t/:code`** — página leve que chama `tracker-click`, salva atribuição (cookie 30d) e redireciona.
-- **`/track/:token`** — dashboard público isolado (sem login): cards de métricas + tabela de cadastros + filtro por canal.
-- **`/admin-master/tracking`** — nova tela no Super Admin: criar/listar trackers, gerar e copiar URLs (dashboard + links por canal), ver resumo. Item novo no menu do `SuperAdminLayout`.
-- **Hook de atribuição** lido no cadastro de criador (`Auth.tsx`) e de cliente (`ClientAuth.tsx`): após criar a loja/cliente, dispara `tracker-convert`. Captura também `?t=<code>` na URL além do cookie.
+### 5. Dashboard / Layout
+- `/admin-master` (componente de dashboard): se o usuário for `tracker`, renderiza a **página de trackeamento do próprio usuário** (criar links + métricas). Se for `super_admin`, mantém o dashboard atual.
+- `SuperAdminLayout`: quando o usuário for `tracker`, o menu lateral mostra apenas "Tracking"/Dashboard; para `super_admin` mostra tudo como hoje.
 
-## Métricas no dashboard
-
-- Total de cliques e **cliques únicos** (por `visitor_id`).
-- Conversões totais, separadas por tipo (lojas vs clientes).
-- **Taxa de conversão** = conversões ÷ cliques (por tracker e por canal).
-- Quebra por canal (tabela: canal · cliques · conversões · taxa).
-- Série temporal (cliques/conversões por dia) e lista dos cadastros (nome/email/canal/data).
-
-### Observação sobre CTR
-CTR real = cliques ÷ impressões. Como não temos as impressões dos anúncios/emails do admin, o dashboard pode incluir um campo opcional para o admin informar impressões por link e então calcular o CTR; caso contrário a métrica principal de qualidade é a **taxa de conversão** (cliques → cadastros). Confirmo essa abordagem na implementação.
+### 6. Métricas do próprio tracker
+- Reaproveitar a agregação já existente (`tracker-dashboard`), porém escopada pelo usuário logado (via sessão), em vez de token público. As métricas aparecem embutidas no `/admin-master` do tracker.
 
 ## Detalhes técnicos
+- Edge functions usam Fetch API, `auth.getClaims(token)` para validar e descobrir o `user_id` do tracker.
+- A criação de usuário usa o `SUPABASE_SERVICE_ROLE_KEY` dentro de `super-admin-trackers` (somente Super Admin pode chamar a ação de criar).
+- Links continuam públicos em `/t/:code`; conversões seguem ligadas via atribuição (cookie/localStorage `tb_track`) como já implementado.
+- i18n (EN/PT-BR/ES) para os textos novos.
 
-- Atribuição: cookie/localStorage `tb_track` (last-click, 30 dias) + suporte a `?t=<code>` no link.
-- `visitor_id`: uuid em localStorage para deduplicar cliques únicos.
-- `ip_hash`: hash do IP (privacidade) feito na Edge Function.
-- Convenção de rotas mantida: `/t/:code` e `/track/:token` (palavras únicas).
-- i18n: textos novos em EN/PT-BR/ES.
+## Pontos definidos
+- Trackers entram com email/senha e caem em `/admin-master`.
+- O dashboard deles é a própria página de trackeamento, isolada por usuário.
+- Sem acesso aos menus administrativos da plataforma.

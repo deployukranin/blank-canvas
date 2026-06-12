@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface Tracker {
-  id: string; name: string; dashboard_token: string; is_active: boolean; created_at: string;
+  id: string; name: string; dashboard_token: string; is_active: boolean; created_at: string; email?: string | null;
 }
 interface TrackerLink {
   id: string; tracker_id: string; code: string; label: string; channel: string; destination: string; is_active: boolean;
@@ -20,6 +20,8 @@ const SuperAdminTracking: React.FC = () => {
   const [links, setLinks] = useState<TrackerLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -49,11 +51,13 @@ const SuperAdminTracking: React.FC = () => {
   useEffect(() => { load(); }, []);
 
   const createTracker = async () => {
-    if (newName.trim().length < 2) return;
+    if (newName.trim().length < 2) { toast.error("Informe um nome"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) { toast.error("Email inválido"); return; }
+    if (newPassword.length < 6) { toast.error("Senha deve ter ao menos 6 caracteres"); return; }
     setCreating(true);
     try {
-      await call("create_tracker", { name: newName.trim() });
-      setNewName("");
+      await call("create_tracker", { name: newName.trim(), email: newEmail.trim(), password: newPassword });
+      setNewName(""); setNewEmail(""); setNewPassword("");
       toast.success("Tracker criado");
       await load();
     } catch (e: any) {
@@ -96,20 +100,36 @@ const SuperAdminTracking: React.FC = () => {
     <SuperAdminLayout title="Tracking">
       <div className="max-w-4xl space-y-6">
         <p className="text-white/50 text-sm">
-          Crie admins de tráfego isolados. Cada um recebe um dashboard via URL secreta e pode ter vários links por canal.
+          Crie admins de tráfego isolados. Cada um faz login com email e senha em <span className="text-white/70">/admin-master/login</span> e vê apenas o próprio dashboard de trackeamento.
         </p>
 
         {/* Create tracker */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Nome do admin de tráfego (ex: João Ads)"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && createTracker()}
-            className="bg-white/5 border-white/10"
-          />
-          <Button onClick={createTracker} disabled={creating} className="gap-2 shrink-0">
-            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Criar
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+          <p className="text-sm font-medium text-white/80">Novo admin de tráfego</p>
+          <div className="grid sm:grid-cols-3 gap-2">
+            <Input
+              placeholder="Nome (ex: João Ads)"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+            <Input
+              type="email"
+              placeholder="Email de login"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+            <Input
+              type="text"
+              placeholder="Senha (mín. 6)"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-white/5 border-white/10"
+            />
+          </div>
+          <Button onClick={createTracker} disabled={creating} className="gap-2">
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Criar tracker
           </Button>
         </div>
 
@@ -130,7 +150,7 @@ const SuperAdminTracking: React.FC = () => {
                   {isOpen ? <ChevronDown className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
                   <div>
                     <p className="font-medium text-white">{t.name}</p>
-                    <p className="text-xs text-white/40">{tLinks.length} link(s)</p>
+                    <p className="text-xs text-white/40">{t.email || "sem email"} · {tLinks.length} link(s)</p>
                   </div>
                 </button>
                 <div className="flex items-center gap-1">
