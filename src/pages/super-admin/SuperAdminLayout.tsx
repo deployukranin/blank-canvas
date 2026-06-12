@@ -5,6 +5,7 @@ import { LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLef
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/use-user-role';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
