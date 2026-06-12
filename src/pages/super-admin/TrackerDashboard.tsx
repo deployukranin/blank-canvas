@@ -27,14 +27,9 @@ interface DashboardData {
 interface TrackerRow { id: string; name: string; }
 interface LinkRow { id: string; tracker_id: string; code: string; label: string; channel: string; destination: string; is_active: boolean; }
 
-const CHANNELS = ["ads", "email", "dm", "organic", "influencer", "other"];
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
 
-const randCode = (n = 6) =>
-  Array.from({ length: n }, () => "abcdefghijkmnpqrstuvwxyz23456789"[Math.floor(Math.random() * 32)]).join("");
-const slugify = (s: string) =>
-  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "").slice(0, 24);
 
 const Stat = ({ icon: Icon, label, value, hint }: { icon: any; label: string; value: string; hint?: string }) => (
   <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-5">
