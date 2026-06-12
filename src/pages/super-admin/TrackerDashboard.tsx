@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Loader2, MousePointerClick, Users, Store, Percent, TrendingUp,
-  Plus, Copy, Trash2, Link2,
+  Copy, Link2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "./SuperAdminLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface DashboardData {
