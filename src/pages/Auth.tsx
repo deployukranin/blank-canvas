@@ -245,6 +245,7 @@ const Auth = () => {
       }
 
       clearPendingReferral();
+      await trackConversion({ type: "store_signup", subjectId: store.id, storeId: store.id, name: pending.storeName });
       toast.success("Email confirmado! Sua loja foi criada. 🎉");
       navigate(`/${store.slug}/admin`, { replace: true });
     }
