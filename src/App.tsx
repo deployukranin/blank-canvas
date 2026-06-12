@@ -75,6 +75,8 @@ import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import TrackRedirect from "./pages/TrackRedirect";
 import TrackDashboard from "./pages/TrackDashboard";
 import SuperAdminTracking from "./pages/super-admin/SuperAdminTracking";
+import AdminMasterHome from "./pages/super-admin/AdminMasterHome";
+import { AdminMasterRoute } from "@/components/auth/AdminMasterRoute";
 
 const queryClient = new QueryClient();
 
@@ -170,7 +172,7 @@ const App = () => (
 
                 {/* ⚡ Rotas SUPER ADMIN (Minha Visão Global) */}
                 <Route path="/admin-master/login" element={<SuperAdminLogin />} />
-                <Route path="/admin-master" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
+                <Route path="/admin-master" element={<AdminMasterRoute><AdminMasterHome /></AdminMasterRoute>} />
                 <Route path="/admin-master/tenants" element={<SuperAdminRoute><SuperAdminTenants /></SuperAdminRoute>} />
                 <Route path="/admin-master/clients" element={<SuperAdminRoute><SuperAdminClients /></SuperAdminRoute>} />
                 <Route path="/admin-master/ranking" element={<SuperAdminRoute><SuperAdminRanking /></SuperAdminRoute>} />
