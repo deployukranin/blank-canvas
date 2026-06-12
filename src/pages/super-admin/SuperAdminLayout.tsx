@@ -26,6 +26,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
     { path: '/admin-master/clients', icon: Users, label: t('nav.clients') },
     { path: '/admin-master/partners', icon: Handshake, label: t('nav.partners') },
     { path: '/admin-master/referrals', icon: Gift, label: t('nav.referrals') },
+    { path: '/admin-master/tracking', icon: Radar, label: t('superAdmin.tracking', 'Tracking') },
     { path: '/admin-master/plans', icon: Crown, label: t('superAdmin.planConfig.navLabel', 'Planos') },
     { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
     { path: '/admin-master/settings', icon: Settings, label: t('superAdmin.settings') },
