@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Loader2, MousePointerClick, Users, Store, Percent, TrendingUp,
-  Plus, Copy, Trash2, Link2,
+  Copy, Link2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "./SuperAdminLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface DashboardData {
@@ -28,14 +27,9 @@ interface DashboardData {
 interface TrackerRow { id: string; name: string; }
 interface LinkRow { id: string; tracker_id: string; code: string; label: string; channel: string; destination: string; is_active: boolean; }
 
-const CHANNELS = ["ads", "email", "dm", "organic", "influencer", "other"];
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
 
-const randCode = (n = 6) =>
-  Array.from({ length: n }, () => "abcdefghijkmnpqrstuvwxyz23456789"[Math.floor(Math.random() * 32)]).join("");
-const slugify = (s: string) =>
-  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "").slice(0, 24);
 
 const Stat = ({ icon: Icon, label, value, hint }: { icon: any; label: string; value: string; hint?: string }) => (
   <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-5">
@@ -109,9 +103,8 @@ const TrackerDashboard: React.FC = () => {
         <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
           <div>
             <h2 className="text-sm font-medium text-white/80">Meus links de trackeamento</h2>
-            <p className="text-xs text-white/40 mt-1">Crie um link por canal e compartilhe nos seus anúncios, emails ou DMs.</p>
+            <p className="text-xs text-white/40 mt-1">Crie um link por canal e compartilhe nos seus anúncios, emails ou DMs. Os links são criados e gerenciados pelo administrador da plataforma.</p>
           </div>
-          <LinkCreator trackerId={tracker?.id} onCreated={async () => { await Promise.all([loadLinks(), loadMetrics()]); }} />
           <div className="space-y-2">
             {links.map((l) => {
               const url = `${origin}/t/${l.code}`;
@@ -126,20 +119,11 @@ const TrackerDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button variant="ghost" size="icon" onClick={() => copy(url, "Link")} className="text-white/40 hover:text-white"><Copy className="w-4 h-4" /></Button>
-                    <Button
-                      variant="ghost" size="icon"
-                      onClick={async () => {
-                        if (!confirm("Excluir este link?")) return;
-                        const { error } = await supabase.from("tracker_links").delete().eq("id", l.id);
-                        if (error) { toast.error(error.message); return; }
-                        await Promise.all([loadLinks(), loadMetrics()]);
-                      }}
-                      className="text-red-400/50 hover:text-red-400"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               );
             })}
-            {!links.length && <p className="text-xs text-white/30 py-2">Nenhum link ainda. Crie o primeiro acima.</p>}
+            {!links.length && <p className="text-xs text-white/30 py-2">Nenhum link ainda. Solicite ao administrador a criação dos seus links.</p>}
           </div>
         </section>
 
@@ -233,51 +217,5 @@ const TrackerDashboard: React.FC = () => {
   );
 };
 
-const LinkCreator: React.FC<{ trackerId?: string; onCreated: () => void }> = ({ trackerId, onCreated }) => {
-  const [label, setLabel] = useState("");
-  const [channel, setChannel] = useState("ads");
-  const [destination, setDestination] = useState("/");
-  const [busy, setBusy] = useState(false);
-
-  const create = async () => {
-    if (!trackerId) { toast.error("Tracker não encontrado"); return; }
-    if (label.trim().length < 2) { toast.error("Informe um rótulo"); return; }
-    setBusy(true);
-    try {
-      let code = "";
-      for (let i = 0; i < 6; i++) {
-        const candidate = (slugify(label) || "lnk") + randCode(4);
-        const { data: exists } = await supabase.from("tracker_links").select("id").eq("code", candidate).maybeSingle();
-        if (!exists) { code = candidate; break; }
-      }
-      if (!code) code = "lnk" + randCode(8);
-      const { error } = await supabase.from("tracker_links").insert({
-        tracker_id: trackerId,
-        label: label.trim(),
-        channel,
-        destination: destination.trim() || "/",
-        code,
-      });
-      if (error) throw error;
-      setLabel("");
-      onCreated();
-      toast.success("Link criado");
-    } catch (e: any) { toast.error(e.message || "Erro"); }
-    finally { setBusy(false); }
-  };
-
-  return (
-    <div className="flex flex-col sm:flex-row gap-2">
-      <Input placeholder="Rótulo (ex: Campanha Black Friday)" value={label} onChange={(e) => setLabel(e.target.value)} className="bg-white/5 border-white/10 text-sm" />
-      <select value={channel} onChange={(e) => setChannel(e.target.value)} className="bg-white/5 border border-white/10 rounded-md px-3 text-sm text-white h-10 capitalize">
-        {CHANNELS.map((c) => <option key={c} value={c} className="bg-[#0a0a0a] capitalize">{c}</option>)}
-      </select>
-      <Input placeholder="Destino (ex: / ou /loja)" value={destination} onChange={(e) => setDestination(e.target.value)} className="bg-white/5 border-white/10 text-sm sm:w-40" />
-      <Button onClick={create} disabled={busy} size="sm" className="gap-1.5 shrink-0">
-        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Link
-      </Button>
-    </div>
-  );
-};
 
 export default TrackerDashboard;

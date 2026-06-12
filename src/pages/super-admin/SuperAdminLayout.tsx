@@ -26,7 +26,13 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
 
   const menuItems = trackerOnly
     ? [
-        { path: '/admin-master', icon: Radar, label: t('superAdmin.tracking', 'Tracking') },
+        { path: '/admin-master', icon: LayoutDashboard, label: t('superAdmin.dashboard') },
+        { path: '/admin-master/tenants', icon: Store, label: t('superAdmin.platforms') },
+        { path: '/admin-master/clients', icon: Users, label: t('nav.clients') },
+        { path: '/admin-master/partners', icon: Handshake, label: t('nav.partners') },
+        { path: '/admin-master/referrals', icon: Gift, label: t('nav.referrals') },
+        { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
+        { path: '/admin-master/support', icon: LifeBuoy, label: t('superAdmin.supportNav') },
       ]
     : [
         { path: '/admin-master', icon: LayoutDashboard, label: t('superAdmin.dashboard') },
