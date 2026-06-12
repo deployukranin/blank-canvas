@@ -109,9 +109,8 @@ const TrackerDashboard: React.FC = () => {
         <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
           <div>
             <h2 className="text-sm font-medium text-white/80">Meus links de trackeamento</h2>
-            <p className="text-xs text-white/40 mt-1">Crie um link por canal e compartilhe nos seus anúncios, emails ou DMs.</p>
+            <p className="text-xs text-white/40 mt-1">Crie um link por canal e compartilhe nos seus anúncios, emails ou DMs. Os links são criados e gerenciados pelo administrador da plataforma.</p>
           </div>
-          <LinkCreator trackerId={tracker?.id} onCreated={async () => { await Promise.all([loadLinks(), loadMetrics()]); }} />
           <div className="space-y-2">
             {links.map((l) => {
               const url = `${origin}/t/${l.code}`;
@@ -126,20 +125,11 @@ const TrackerDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button variant="ghost" size="icon" onClick={() => copy(url, "Link")} className="text-white/40 hover:text-white"><Copy className="w-4 h-4" /></Button>
-                    <Button
-                      variant="ghost" size="icon"
-                      onClick={async () => {
-                        if (!confirm("Excluir este link?")) return;
-                        const { error } = await supabase.from("tracker_links").delete().eq("id", l.id);
-                        if (error) { toast.error(error.message); return; }
-                        await Promise.all([loadLinks(), loadMetrics()]);
-                      }}
-                      className="text-red-400/50 hover:text-red-400"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               );
             })}
-            {!links.length && <p className="text-xs text-white/30 py-2">Nenhum link ainda. Crie o primeiro acima.</p>}
+            {!links.length && <p className="text-xs text-white/30 py-2">Nenhum link ainda. Solicite ao administrador a criação dos seus links.</p>}
           </div>
         </section>
 
