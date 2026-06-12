@@ -1733,6 +1733,7 @@ export type Database = {
         | "creator"
         | "client"
         | "partner"
+        | "tracker"
       video_reaction_type: "relaxante" | "dormi" | "arrepios" | "favorito"
     }
     CompositeTypes: {
@@ -1870,6 +1871,7 @@ export const Constants = {
         "creator",
         "client",
         "partner",
+        "tracker",
       ],
       video_reaction_type: ["relaxante", "dormi", "arrepios", "favorito"],
     },
