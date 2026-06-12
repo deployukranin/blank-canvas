@@ -23,18 +23,44 @@ const rest = (path: string) =>
     },
   }).then((r) => r.json());
 
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+// Resolve the tracker id either by public dashboard token or by the logged-in user's session.
+async function resolveTracker(
+  token: string,
+  authHeader: string | null,
+): Promise<{ id: string; name: string; is_active: boolean } | null> {
+  if (token && token.length >= 10) {
+    const rows = (await rest(
+      `trackers?dashboard_token=eq.${encodeURIComponent(token)}&select=id,name,is_active&limit=1`,
+    )) as Array<{ id: string; name: string; is_active: boolean }>;
+    return rows.length ? rows[0] : null;
+  }
+  if (authHeader) {
+    const jwt = authHeader.replace("Bearer ", "");
+    const verifyRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}` },
+    });
+    if (!verifyRes.ok) return null;
+    const user = await verifyRes.json();
+    const uid = user?.id;
+    if (!uid) return null;
+    const rows = (await rest(
+      `trackers?owner_user_id=eq.${encodeURIComponent(uid)}&select=id,name,is_active&limit=1`,
+    )) as Array<{ id: string; name: string; is_active: boolean }>;
+    return rows.length ? rows[0] : null;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const body = await req.json().catch(() => ({}));
     const token = String(body.token || "").trim();
-    if (!token || token.length < 10) return json({ ok: false, error: "invalid token" }, 401);
-
-    const trackers = (await rest(
-      `trackers?dashboard_token=eq.${encodeURIComponent(token)}&select=id,name,is_active&limit=1`,
-    )) as Array<{ id: string; name: string; is_active: boolean }>;
-    if (!trackers.length) return json({ ok: false, error: "not found" }, 404);
-    const tracker = trackers[0];
+    const authHeader = req.headers.get("Authorization");
+    const tracker = await resolveTracker(token, authHeader);
+    if (!tracker) return json({ ok: false, error: "not found" }, 404);
     const tid = tracker.id;
 
     const [links, clicks, conversions] = await Promise.all([
