@@ -77,6 +77,10 @@ import TrackDashboard from "./pages/TrackDashboard";
 import SuperAdminTracking from "./pages/super-admin/SuperAdminTracking";
 import AdminMasterHome from "./pages/super-admin/AdminMasterHome";
 import { AdminMasterRoute } from "@/components/auth/AdminMasterRoute";
+import {
+  TenantsSection, ClientsSection, PartnersSection,
+  ReferralsSection, RankingSection, SupportSection,
+} from "./pages/super-admin/AdminMasterSections";
 
 const queryClient = new QueryClient();
 
