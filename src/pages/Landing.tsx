@@ -541,7 +541,7 @@ const Landing = () => {
             <span className="text-sm text-purple-100">{t.badge}</span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.05]">
+          <h1 className="font-display text-[2rem] sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.1] md:leading-[1.05] break-words">
             {t.heroTitle1}
             <br />
             <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">
@@ -637,7 +637,7 @@ const Landing = () => {
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.featuresKicker}
             </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
               {t.featuresTitle1}
               <br />
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
@@ -680,7 +680,7 @@ const Landing = () => {
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.howKicker}
             </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
               {t.howTitle1}
               <br />
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
@@ -720,7 +720,7 @@ const Landing = () => {
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.pricingKicker}
             </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
               {t.pricingTitle1}
               <br />
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
@@ -794,7 +794,7 @@ const Landing = () => {
             <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
               {t.faqKicker}
             </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mt-3">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3">
               {t.faqTitle1}{" "}
               <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
                 {t.faqTitle2}
@@ -833,7 +833,7 @@ const Landing = () => {
               }}
             />
             <div className="relative">
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                 {t.ctaFinalTitle1}
                 <br />
                 <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
