@@ -391,37 +391,37 @@ const SuperAdminDashboard: React.FC = () => {
                 <tbody>
                   {perStore.map(s => (
                     <tr key={s.store_id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                      <td className="py-2.5">
+                      <td className="py-2.5 whitespace-nowrap">
                         <div>
                           <span className="font-medium text-white/90">{s.name}</span>
                           {s.slug && <span className="text-[10px] text-white/30 ml-1.5">/{s.slug}</span>}
                         </div>
                       </td>
-                      <td className="py-2.5 text-center">
+                      <td className="py-2.5 text-center whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 text-[11px] ${s.status === 'active' ? 'text-green-400' : 'text-white/30'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-green-400' : 'bg-white/20'}`} />
                           {s.plan_type === 'trial' ? 'Trial' : t('superAdmin.metrics.statusPaid')}
                         </span>
                       </td>
-                      <td className="py-2.5 text-right text-white/70">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">
                         {s.users_count}
                         {s.recent_users_30d > 0 && (
                           <span className="text-[10px] text-green-400 ml-1">+{s.recent_users_30d}</span>
                         )}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">{s.orders_paid}/{s.orders_total}</td>
-                      <td className="py-2.5 text-right font-medium text-green-400">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.orders_paid}/{s.orders_total}</td>
+                      <td className="py-2.5 text-right font-medium text-green-400 whitespace-nowrap">
                         R$ {s.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">
                         {s.vip_active}
                         {s.vip_revenue > 0 && (
                           <span className="text-[10px] text-amber-400 ml-1">R${s.vip_revenue.toFixed(0)}</span>
                         )}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">{s.content_count}</td>
-                      <td className="py-2.5 text-right text-white/70">{s.chat_messages}</td>
-                      <td className="py-2.5 text-right">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.content_count}</td>
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.chat_messages}</td>
+                      <td className="py-2.5 text-right whitespace-nowrap">
                         {s.tickets_open > 0 ? (
                           <Badge variant="outline" className="text-[10px] border-rose-500/30 text-rose-400">
                             {s.tickets_open} {t('superAdmin.metrics.open')}
