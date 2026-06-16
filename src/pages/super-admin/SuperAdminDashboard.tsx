@@ -373,55 +373,55 @@ const SuperAdminDashboard: React.FC = () => {
             ) : perStore.length === 0 ? (
               <p className="text-white/30 text-sm">{t('superAdmin.metrics.noPlatforms')}</p>
             ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-5 px-5">
+              <table className="w-full min-w-[680px] text-sm">
                 <thead>
                   <tr className="border-b border-white/5 text-left">
-                     <th className="pb-2 font-medium text-white/30 text-[11px]">{t('superAdmin.metrics.colPlatform')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">{t('superAdmin.metrics.colStatus')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colUsers')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colOrders')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colRevenue')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colVIP')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colContent')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colChat')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colTickets')}</th>
+                     <th className="pb-2 font-medium text-white/30 text-[11px] whitespace-nowrap">{t('superAdmin.metrics.colPlatform')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center whitespace-nowrap">{t('superAdmin.metrics.colStatus')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colUsers')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colOrders')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colRevenue')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colVIP')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colContent')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colChat')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colTickets')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {perStore.map(s => (
                     <tr key={s.store_id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                      <td className="py-2.5">
+                      <td className="py-2.5 whitespace-nowrap">
                         <div>
                           <span className="font-medium text-white/90">{s.name}</span>
                           {s.slug && <span className="text-[10px] text-white/30 ml-1.5">/{s.slug}</span>}
                         </div>
                       </td>
-                      <td className="py-2.5 text-center">
+                      <td className="py-2.5 text-center whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 text-[11px] ${s.status === 'active' ? 'text-green-400' : 'text-white/30'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-green-400' : 'bg-white/20'}`} />
                           {s.plan_type === 'trial' ? 'Trial' : t('superAdmin.metrics.statusPaid')}
                         </span>
                       </td>
-                      <td className="py-2.5 text-right text-white/70">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">
                         {s.users_count}
                         {s.recent_users_30d > 0 && (
                           <span className="text-[10px] text-green-400 ml-1">+{s.recent_users_30d}</span>
                         )}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">{s.orders_paid}/{s.orders_total}</td>
-                      <td className="py-2.5 text-right font-medium text-green-400">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.orders_paid}/{s.orders_total}</td>
+                      <td className="py-2.5 text-right font-medium text-green-400 whitespace-nowrap">
                         R$ {s.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">
                         {s.vip_active}
                         {s.vip_revenue > 0 && (
                           <span className="text-[10px] text-amber-400 ml-1">R${s.vip_revenue.toFixed(0)}</span>
                         )}
                       </td>
-                      <td className="py-2.5 text-right text-white/70">{s.content_count}</td>
-                      <td className="py-2.5 text-right text-white/70">{s.chat_messages}</td>
-                      <td className="py-2.5 text-right">
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.content_count}</td>
+                      <td className="py-2.5 text-right text-white/70 whitespace-nowrap">{s.chat_messages}</td>
+                      <td className="py-2.5 text-right whitespace-nowrap">
                         {s.tickets_open > 0 ? (
                           <Badge variant="outline" className="text-[10px] border-rose-500/30 text-rose-400">
                             {s.tickets_open} {t('superAdmin.metrics.open')}
