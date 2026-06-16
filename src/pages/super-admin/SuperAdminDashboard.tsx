@@ -373,19 +373,19 @@ const SuperAdminDashboard: React.FC = () => {
             ) : perStore.length === 0 ? (
               <p className="text-white/30 text-sm">{t('superAdmin.metrics.noPlatforms')}</p>
             ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-5 px-5">
+              <table className="w-full min-w-[680px] text-sm">
                 <thead>
                   <tr className="border-b border-white/5 text-left">
-                     <th className="pb-2 font-medium text-white/30 text-[11px]">{t('superAdmin.metrics.colPlatform')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center">{t('superAdmin.metrics.colStatus')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colUsers')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colOrders')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colRevenue')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colVIP')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colContent')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colChat')}</th>
-                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right">{t('superAdmin.metrics.colTickets')}</th>
+                     <th className="pb-2 font-medium text-white/30 text-[11px] whitespace-nowrap">{t('superAdmin.metrics.colPlatform')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-center whitespace-nowrap">{t('superAdmin.metrics.colStatus')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colUsers')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colOrders')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colRevenue')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colVIP')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colContent')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colChat')}</th>
+                    <th className="pb-2 font-medium text-white/30 text-[11px] text-right whitespace-nowrap">{t('superAdmin.metrics.colTickets')}</th>
                   </tr>
                 </thead>
                 <tbody>
