@@ -541,7 +541,7 @@ const Landing = () => {
             <span className="text-sm text-purple-100">{t.badge}</span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.05]">
+          <h1 className="font-display text-[2rem] xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.1] md:leading-[1.05] break-words">
             {t.heroTitle1}
             <br />
             <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">
