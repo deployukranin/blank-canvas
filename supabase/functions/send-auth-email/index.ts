@@ -285,54 +285,64 @@ Deno.serve(async (req) => {
       rl(`email:${email}`, 3, 60),
     ])
     if (!ipOk || !emailOk) {
+      slogErr('rate_limited', { ip, email: maskEmail(email), type, ipOk, emailOk })
       return jsonResponse(
         { success: false, error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' },
         429,
       )
     }
 
+    slog('request_received', { type, email: maskEmail(email), ip })
+
     // For signup, proactively clear an orphan (unconfirmed + no store) so the
     // user isn't blocked by a previous failed attempt with the same email.
     if (type === 'signup') {
-      await clearOrphanIfAny(email)
+      const cleared = await clearOrphanIfAny(email)
+      if (cleared) slog('preflight_orphan_cleared', { email: maskEmail(email) })
     }
 
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
 
     if (linkResult.alreadyRegistered) {
+      slog('already_registered', { type, email: maskEmail(email) })
       // This is a user-facing validation state, not an operational function error.
       // Return 200 so the app can render the inline/toast message without the
       // preview/runtime treating the invocation as a crashing Edge Function error.
       return jsonResponse({ success: false, alreadyRegistered: true, error: linkResult.error })
     }
     if (linkResult.error || !linkResult.actionLink) {
-      console.error('generateLink error:', linkResult.error)
+      slogErr('generate_link_failed', { type, email: maskEmail(email), error: linkResult.error, had_user_id: !!linkResult.userId })
       // If the user was created but link generation partially failed, clean up
       // so the email isn't left in a limbo state for the next attempt.
       if (type === 'signup' && linkResult.userId) {
-        await deleteUser(linkResult.userId)
+        await deleteUser(linkResult.userId, 'rollback_generate_link')
       }
       // For recovery, do not leak whether the email exists
       if (type === 'recovery') return jsonResponse({ success: true })
       return jsonResponse({ success: false, error: linkResult.error || 'Falha ao gerar link' }, 400)
     }
 
+    if (type === 'signup' && linkResult.userId) {
+      slog('user_created', { user_id: linkResult.userId, email: maskEmail(email) })
+    }
+
     const { subject, html } = buildEmail(type, linkResult.actionLink)
     const sendResult = await sendViaResend(email, subject, html)
 
     if (sendResult.error) {
-      console.error('Resend error:', sendResult.error)
+      slogErr('resend_failed', { type, email: maskEmail(email), error: sendResult.error })
       // Rollback the just-created user so a retry doesn't hit "already registered".
       if (type === 'signup' && linkResult.userId) {
-        await deleteUser(linkResult.userId)
+        await deleteUser(linkResult.userId, 'rollback_resend_failure')
       }
       return jsonResponse({ success: false, error: 'Falha ao enviar o email. Tente novamente.' }, 502)
     }
 
+    slog('email_sent', { type, email: maskEmail(email), user_id: linkResult.userId })
     return jsonResponse({ success: true, userId: linkResult.userId })
 
   } catch (err) {
-    console.error('send-auth-email error:', err)
+    slogErr('crashed', { error: (err as Error).message })
     return jsonResponse({ success: false, error: 'Erro interno' }, 500)
   }
 })
