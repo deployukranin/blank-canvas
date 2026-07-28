@@ -136,7 +136,7 @@ const AdminYoutube = () => {
         autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
       } as any);
 
-      await saveConfig("global_default_categories", categorizationDraft.categories);
+      await saveConfig("global_default_categories", categorizationDraft.categories, storeId);
 
       toast({
         title: t("common.save"),
