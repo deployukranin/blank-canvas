@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { loadConfig, saveConfig } from "@/lib/config-storage";
 import {
   YouTubeCategoryManager,
@@ -57,6 +58,8 @@ const AdminYoutube = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { config, updateYouTube } = useWhiteLabel();
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
   const [channelInput, setChannelInput] = useState(channelId);
@@ -84,7 +87,7 @@ const AdminYoutube = () => {
 
   useEffect(() => {
     const loadGlobalDefaults = async () => {
-      const globalCats = await loadConfig<YouTubeCategorizationDraft["categories"]>("global_default_categories");
+      const globalCats = await loadConfig<YouTubeCategorizationDraft["categories"]>("global_default_categories", storeId);
       if (globalCats && globalCats.length > 0) {
         setCategorizationDraft((prev) => {
           const merged = mergeWithDefaults(prev.categories.length > 0 ? prev.categories : globalCats);
@@ -101,7 +104,7 @@ const AdminYoutube = () => {
       }
     };
     loadGlobalDefaults();
-  }, []);
+  }, [storeId]);
 
   useEffect(() => {
     setCategorizationDraft((prev) => ({
@@ -133,7 +136,7 @@ const AdminYoutube = () => {
         autoCategorizeEnabled: categorizationDraft.autoCategorizeEnabled,
       } as any);
 
-      await saveConfig("global_default_categories", categorizationDraft.categories);
+      await saveConfig("global_default_categories", categorizationDraft.categories, storeId);
 
       toast({
         title: t("common.save"),
