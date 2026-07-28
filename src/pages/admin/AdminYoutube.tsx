@@ -104,7 +104,7 @@ const AdminYoutube = () => {
       }
     };
     loadGlobalDefaults();
-  }, []);
+  }, [storeId]);
 
   useEffect(() => {
     setCategorizationDraft((prev) => ({
