@@ -980,7 +980,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             const merged = mergeConfig(defaultConfig, parsed);
             setConfig(merged);
             
-            await saveConfig('white_label_config', merged, storeId);
+            if (storeId) await saveConfig('white_label_config', merged, storeId);
             localStorage.removeItem(STORAGE_KEY);
             console.log('Migrated whitelabel config to database');
           }
