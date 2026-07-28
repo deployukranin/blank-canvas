@@ -2,9 +2,9 @@
 // - Never caches authenticated/API/Supabase/edge-function requests
 // - Cache-first only for static assets we control
 // - Network-first for navigations to avoid stale HTML/theme
-const CACHE_NAME = 'mytinglebox-sw-v4';
+const CACHE_NAME = 'mytinglebox-sw-v5';
 const STATIC_ASSETS = [
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/icon-192.png',
 ];
 
