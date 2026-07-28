@@ -305,6 +305,7 @@ Deno.serve(async (req) => {
           Authorization: `Bearer ${stripeSecretKey}`,
           'Content-Type': 'application/x-www-form-urlencoded',
           'Stripe-Account': stripeAccountId,
+          'Idempotency-Key': `vip_${correlationID}`,
         },
         body: params,
       });
