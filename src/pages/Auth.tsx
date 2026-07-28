@@ -344,6 +344,18 @@ const Auth = () => {
       });
 
       if (!result.success) {
+        // Frontend safety-net: if signup failed, verify no orphan user was left
+        // behind. If it was, invoke cleanup so the next attempt is clean.
+        try {
+          const { data: cleanupData } = await supabase.functions.invoke('cleanup-orphan-signup', {
+            body: { email: signupEmail },
+          });
+          if (cleanupData?.cleaned) {
+            console.info('[signup] orphan user cleaned after failure', { email: signupEmail });
+          }
+        } catch (cleanupErr) {
+          console.warn('[signup] cleanup-orphan-signup invocation failed', cleanupErr);
+        }
         toast.error(result.error || t("auth.errorCreatingAccount"));
         setIsSubmitting(false);
         return;
