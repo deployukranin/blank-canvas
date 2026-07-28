@@ -73,29 +73,30 @@ Deno.serve(async (req) => {
 
     const body = await req.text();
 
-    // Verify Stripe signature if webhook secret is configured
+    // Verify Stripe signature — REQUIRED. Without a configured secret an
+    // attacker could POST forged events to mark orders as paid.
     const stripeWebhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET");
     const sigHeader = req.headers.get("stripe-signature");
 
-    if (stripeWebhookSecret) {
-      if (!sigHeader) {
-        console.error("Missing stripe-signature header");
-        return new Response(JSON.stringify({ error: "Missing signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const valid = await verifyStripeSignature(body, sigHeader, stripeWebhookSecret);
-      if (!valid) {
-        console.error("Invalid Stripe webhook signature");
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    } else {
-      console.warn("Stripe webhook secret not set — signature verification SKIPPED. Configure it for production!");
+    if (!stripeWebhookSecret) {
+      console.error("Stripe webhook secret not configured — refusing to process events.");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!sigHeader) {
+      return new Response(JSON.stringify({ error: "Missing signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const valid = await verifyStripeSignature(body, sigHeader, stripeWebhookSecret);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const event = JSON.parse(body);
