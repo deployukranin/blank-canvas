@@ -54,6 +54,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate return_url — must be https and belong to a known app host.
+    try {
+      const u = new URL(return_url);
+      const allowedHosts = new Set<string>([
+        "mytinglebox.com",
+        "www.mytinglebox.com",
+        "cozy-corner-seed.lovable.app",
+      ]);
+      const isLovablePreview = /\.lovable\.app$/.test(u.hostname);
+      const isAllowed = allowedHosts.has(u.hostname) || isLovablePreview;
+      if (u.protocol !== "https:" || !isAllowed) {
+        throw new Error("host not allowed");
+      }
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid return_url" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Verify user is admin of this store
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { data: store } = await supabaseAdmin

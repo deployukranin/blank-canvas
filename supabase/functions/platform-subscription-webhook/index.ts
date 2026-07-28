@@ -85,6 +85,19 @@ Deno.serve(async (req) => {
     const event = JSON.parse(body);
     console.log("Platform subscription webhook event:", event.type, event.id);
 
+    // Idempotency guard
+    if (event.id) {
+      const { error: dupErr } = await supabaseAdmin
+        .from("stripe_webhook_events")
+        .insert({ event_id: event.id, event_type: event.type, source: "platform-subscription-webhook" });
+      if (dupErr) {
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;

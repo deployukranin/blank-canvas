@@ -100,8 +100,22 @@ Deno.serve(async (req) => {
     }
 
     const event = JSON.parse(body);
-
     console.log("Stripe webhook event:", event.type, event.id);
+
+    // Idempotency guard — reject duplicate deliveries.
+    if (event.id) {
+      const { error: dupErr } = await supabaseAdmin
+        .from("stripe_webhook_events")
+        .insert({ event_id: event.id, event_type: event.type, source: "stripe-webhook" });
+      if (dupErr) {
+        // Unique-violation ⇒ already processed. Ack 200 so Stripe stops retrying.
+        console.log("Duplicate event, skipping:", event.id);
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     switch (event.type) {
       case "checkout.session.completed": {
@@ -110,41 +124,103 @@ Deno.serve(async (req) => {
         const orderId = session.metadata?.order_id;
         const correlationId = session.metadata?.correlation_id;
 
-        console.log("Payment completed for store:", storeId, "order:", orderId);
+        // Only trust events for fully paid sessions.
+        if (session.payment_status && session.payment_status !== "paid" && session.mode !== "subscription") {
+          console.log("Session not paid, skipping:", session.id, session.payment_status);
+          break;
+        }
 
         let paidOrder: { product_id: string | null } | null = null;
         if ((orderId || correlationId) && storeId) {
           let updateQuery = supabaseAdmin
             .from("custom_orders")
             .update({ status: "paid", paid_at: new Date().toISOString() })
-            .eq("store_id", storeId);
+            .eq("store_id", storeId)
+            .neq("status", "paid"); // don't re-stamp paid_at on retries
 
           updateQuery = orderId ? updateQuery.eq("id", orderId) : updateQuery.eq("correlation_id", correlationId);
 
           const { data, error } = await updateQuery.select("product_id").maybeSingle();
           paidOrder = data;
-
-          if (error) {
-            console.error("Error updating order:", error);
-          } else {
-            console.log("Order updated to paid:", orderId || correlationId);
-          }
+          if (error) console.error("Error updating order:", error);
         }
 
-        // Handle VIP subscription activation
         const subscriptionId = session.metadata?.subscription_id || paidOrder?.product_id;
         if (subscriptionId && storeId && session.metadata?.product_type === "vip_subscription") {
           const { error } = await supabaseAdmin
             .from("vip_subscriptions")
             .update({ status: "active", started_at: new Date().toISOString() })
             .eq("id", subscriptionId)
-            .eq("store_id", storeId);
+            .eq("store_id", storeId)
+            .neq("status", "active");
+          if (error) console.error("Error activating VIP subscription:", error);
+        }
+        break;
+      }
 
-          if (error) {
-            console.error("Error activating VIP subscription:", error);
-          } else {
-            console.log("VIP subscription activated:", subscriptionId);
+      case "customer.subscription.updated":
+      case "customer.subscription.created": {
+        const sub = event.data.object;
+        const correlationId = sub.metadata?.correlation_id;
+        const storeId = sub.metadata?.store_id;
+        if (correlationId && storeId) {
+          const active = sub.status === "active" || sub.status === "trialing";
+          const expiresAt = sub.current_period_end
+            ? new Date(sub.current_period_end * 1000).toISOString()
+            : null;
+          // Resolve vip_subscriptions.id via custom_orders.correlation_id → product_id
+          const { data: order } = await supabaseAdmin
+            .from("custom_orders")
+            .select("product_id")
+            .eq("correlation_id", correlationId)
+            .eq("store_id", storeId)
+            .maybeSingle();
+          if (order?.product_id) {
+            const patch: Record<string, unknown> = { status: active ? "active" : "cancelled" };
+            if (expiresAt) patch.expires_at = expiresAt;
+            await supabaseAdmin
+              .from("vip_subscriptions")
+              .update(patch)
+              .eq("id", order.product_id)
+              .eq("store_id", storeId);
           }
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object;
+        const correlationId = sub.metadata?.correlation_id;
+        const storeId = sub.metadata?.store_id;
+        if (correlationId && storeId) {
+          const { data: order } = await supabaseAdmin
+            .from("custom_orders")
+            .select("product_id")
+            .eq("correlation_id", correlationId)
+            .eq("store_id", storeId)
+            .maybeSingle();
+          if (order?.product_id) {
+            await supabaseAdmin
+              .from("vip_subscriptions")
+              .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+              .eq("id", order.product_id)
+              .eq("store_id", storeId);
+          }
+        }
+        break;
+      }
+
+      case "charge.refunded":
+      case "charge.dispute.created": {
+        const obj = event.data.object;
+        const correlationId = obj.metadata?.correlation_id;
+        const storeId = obj.metadata?.store_id;
+        if (correlationId && storeId) {
+          await supabaseAdmin
+            .from("custom_orders")
+            .update({ status: "refunded" })
+            .eq("correlation_id", correlationId)
+            .eq("store_id", storeId);
         }
         break;
       }
