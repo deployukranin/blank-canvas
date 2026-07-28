@@ -114,11 +114,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // Edge function returns a non-2xx for "already registered" (409) etc.
-      const ctx = (error as any)?.context;
       if (error) {
+        const ctx = (error as any)?.context;
         let parsed: any = null;
-        try { parsed = ctx ? await ctx.json() : null; } catch { /* ignore */ }
-        if (parsed?.alreadyRegistered) {
+        try {
+          if (ctx && typeof ctx.clone === "function") {
+            parsed = await ctx.clone().json();
+          } else if (ctx && typeof ctx.text === "function") {
+            const txt = await ctx.text();
+            try { parsed = JSON.parse(txt); } catch { /* ignore */ }
+          } else if (ctx && typeof ctx === "object") {
+            parsed = ctx;
+          }
+        } catch { /* ignore */ }
+        if (parsed?.alreadyRegistered || /already.*registered|já.*cadastrad/i.test(String((error as any)?.message || ""))) {
           return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
         }
         return { success: false, error: getFriendlyAuthEmailError(parsed?.error) };
