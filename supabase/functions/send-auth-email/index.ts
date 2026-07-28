@@ -274,6 +274,12 @@ Deno.serve(async (req) => {
       )
     }
 
+    // For signup, proactively clear an orphan (unconfirmed + no store) so the
+    // user isn't blocked by a previous failed attempt with the same email.
+    if (type === 'signup') {
+      await clearOrphanIfAny(email)
+    }
+
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
 
     if (linkResult.alreadyRegistered) {
@@ -284,6 +290,11 @@ Deno.serve(async (req) => {
     }
     if (linkResult.error || !linkResult.actionLink) {
       console.error('generateLink error:', linkResult.error)
+      // If the user was created but link generation partially failed, clean up
+      // so the email isn't left in a limbo state for the next attempt.
+      if (type === 'signup' && linkResult.userId) {
+        await deleteUser(linkResult.userId)
+      }
       // For recovery, do not leak whether the email exists
       if (type === 'recovery') return jsonResponse({ success: true })
       return jsonResponse({ success: false, error: linkResult.error || 'Falha ao gerar link' }, 400)
@@ -294,10 +305,15 @@ Deno.serve(async (req) => {
 
     if (sendResult.error) {
       console.error('Resend error:', sendResult.error)
+      // Rollback the just-created user so a retry doesn't hit "already registered".
+      if (type === 'signup' && linkResult.userId) {
+        await deleteUser(linkResult.userId)
+      }
       return jsonResponse({ success: false, error: 'Falha ao enviar o email. Tente novamente.' }, 502)
     }
 
-    return jsonResponse({ success: true })
+    return jsonResponse({ success: true, userId: linkResult.userId })
+
   } catch (err) {
     console.error('send-auth-email error:', err)
     return jsonResponse({ success: false, error: 'Erro interno' }, 500)
