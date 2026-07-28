@@ -1728,6 +1728,7 @@ export type Database = {
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }
+      users_share_store: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       app_role:
