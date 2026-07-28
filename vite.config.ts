@@ -19,4 +19,14 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom"],
   },
+  build: {
+    // Disable sourcemaps in production to avoid leaking source code / paths
+    sourcemap: mode === "development",
+    // Drop console/debugger from production bundles (keeps console.error/warn)
+    minify: "esbuild",
+  },
+  esbuild: mode === "production"
+    ? { drop: ["debugger"], pure: ["console.log", "console.info", "console.debug"] }
+    : undefined,
 }));
+
