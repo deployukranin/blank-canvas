@@ -217,7 +217,10 @@ Deno.serve(async (req) => {
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
 
     if (linkResult.alreadyRegistered) {
-      return jsonResponse({ success: false, alreadyRegistered: true, error: linkResult.error }, 409)
+      // This is a user-facing validation state, not an operational function error.
+      // Return 200 so the app can render the inline/toast message without the
+      // preview/runtime treating the invocation as a crashing Edge Function error.
+      return jsonResponse({ success: false, alreadyRegistered: true, error: linkResult.error })
     }
     if (linkResult.error || !linkResult.actionLink) {
       console.error('generateLink error:', linkResult.error)
