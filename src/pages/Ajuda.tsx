@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, Mail } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -40,14 +40,14 @@ export default function AjudaPage() {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>{t('storefront.faqLogin')}</AccordionTrigger>
                   <AccordionContent>
-                    <span dangerouslySetInnerHTML={{ __html: t('storefront.faqLoginAnswer') }} />
+                    <Trans i18nKey="storefront.faqLoginAnswer" components={{ strong: <strong /> }} />
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
                   <AccordionTrigger>{t('storefront.faqNotifications')}</AccordionTrigger>
                   <AccordionContent>
-                    <span dangerouslySetInnerHTML={{ __html: t('storefront.faqNotificationsAnswer') }} />
+                    <Trans i18nKey="storefront.faqNotificationsAnswer" components={{ strong: <strong /> }} />
                   </AccordionContent>
                 </AccordionItem>
 
