@@ -12,23 +12,13 @@ import postgres from "https://deno.land/x/postgresjs@v3.4.4/mod.js";
 
 const DB_URL = Deno.env.get("SUPABASE_DB_URL");
 
-function makeSql() {
+async function makeSql() {
   if (!DB_URL) return null;
-  return postgres(DB_URL, {
-    max: 1,
-    prepare: false,
-    // Seed/cleanup happen as service_role (bypasses RLS + grants);
-    // per-test blocks switch to `authenticated` via SET LOCAL ROLE.
-    connection: { search_path: "public" },
-    onnotice: () => {},
-    // deno-lint-ignore no-explicit-any
-    transform: undefined as any,
-    debug: false,
-    // Elevate the initial session to service_role.
-    onconnect: async (conn: any) => {
-      try { await conn.unsafe("SET ROLE service_role"); } catch { /* ignore */ }
-    },
-  } as any);
+  const sql = postgres(DB_URL, { max: 1, prepare: false, onnotice: () => {} });
+  // Elevate default session to service_role so seed/cleanup bypasses RLS.
+  // (Each per-test block switches to `authenticated` via SET LOCAL ROLE.)
+  try { await sql.unsafe("SET ROLE service_role"); } catch { /* ignore */ }
+  return sql;
 }
 
 async function asUser<T>(
