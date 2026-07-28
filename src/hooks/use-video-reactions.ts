@@ -188,9 +188,7 @@ export function useVideoReactionStats(videoId: string) {
 
       try {
         const { data, error } = await supabase
-          .from('video_reactions')
-          .select('reaction_type')
-          .eq('video_id', videoId);
+          .rpc('get_video_reaction_counts', { p_video_id: videoId });
 
         if (!error && data && isMounted) {
           const counts: Record<ReactionType, number> = {
@@ -200,10 +198,10 @@ export function useVideoReactionStats(videoId: string) {
             favorito: 0,
           };
 
-          data.forEach((r) => {
+          (data as Array<{ reaction_type: string; count: number }>).forEach((r) => {
             const type = r.reaction_type as ReactionType;
             if (type in counts) {
-              counts[type]++;
+              counts[type] = Number(r.count);
             }
           });
 

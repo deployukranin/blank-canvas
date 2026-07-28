@@ -1817,6 +1817,13 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_video_reaction_counts: {
+        Args: { p_video_id: string }
+        Returns: {
+          count: number
+          reaction_type: Database["public"]["Enums"]["video_reaction_type"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
