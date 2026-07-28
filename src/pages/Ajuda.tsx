@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, Mail } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
