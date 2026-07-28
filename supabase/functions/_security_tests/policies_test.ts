@@ -15,10 +15,19 @@ const DB_URL = Deno.env.get("SUPABASE_DB_URL");
 async function makeSql() {
   if (!DB_URL) return null;
   const sql = postgres(DB_URL, { max: 1, prepare: false, onnotice: () => {} });
-  // Elevate default session to service_role so seed/cleanup bypasses RLS.
-  // (Each per-test block switches to `authenticated` via SET LOCAL ROLE.)
-  try { await sql.unsafe("SET ROLE service_role"); } catch { /* ignore */ }
-  return sql;
+  // Elevate default session so seed/cleanup bypasses RLS. If neither role
+  // is grantable to the connection user, skip the test suite gracefully.
+  for (const role of ["service_role", "postgres", "supabase_admin"]) {
+    try {
+      await sql.unsafe(`SET ROLE ${role}`);
+      const [{ current_user }] = await sql<{ current_user: string }[]>`SELECT current_user`;
+      if (current_user === role) return sql;
+    } catch { /* try next */ }
+  }
+  const [{ current_user }] = await sql<{ current_user: string }[]>`SELECT current_user`;
+  console.warn(`[security-tests] Skipping — cannot elevate role (current_user=${current_user}).`);
+  await sql.end({ timeout: 1 });
+  return null;
 }
 
 async function asUser<T>(
