@@ -14,7 +14,21 @@ const DB_URL = Deno.env.get("SUPABASE_DB_URL");
 
 function makeSql() {
   if (!DB_URL) return null;
-  return postgres(DB_URL, { max: 1, prepare: false });
+  return postgres(DB_URL, {
+    max: 1,
+    prepare: false,
+    // Seed/cleanup happen as service_role (bypasses RLS + grants);
+    // per-test blocks switch to `authenticated` via SET LOCAL ROLE.
+    connection: { search_path: "public" },
+    onnotice: () => {},
+    // deno-lint-ignore no-explicit-any
+    transform: undefined as any,
+    debug: false,
+    // Elevate the initial session to service_role.
+    onconnect: async (conn: any) => {
+      try { await conn.unsafe("SET ROLE service_role"); } catch { /* ignore */ }
+    },
+  } as any);
 }
 
 async function asUser<T>(
