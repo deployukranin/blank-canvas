@@ -87,7 +87,7 @@ const AdminYoutube = () => {
 
   useEffect(() => {
     const loadGlobalDefaults = async () => {
-      const globalCats = await loadConfig<YouTubeCategorizationDraft["categories"]>("global_default_categories");
+      const globalCats = await loadConfig<YouTubeCategorizationDraft["categories"]>("global_default_categories", storeId);
       if (globalCats && globalCats.length > 0) {
         setCategorizationDraft((prev) => {
           const merged = mergeWithDefaults(prev.categories.length > 0 ? prev.categories : globalCats);
