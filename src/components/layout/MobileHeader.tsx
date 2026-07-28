@@ -1,8 +1,9 @@
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, LogIn } from 'lucide-react';
+import { ArrowLeft, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/mytinglebox-logo.png';
 
 interface MobileHeaderProps {
   title?: string;
@@ -26,13 +27,11 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
             <ArrowLeft className="w-5 h-5" />
           </button>
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
+          <img src={logo} alt="MyTingleBox" className="h-7 w-auto" />
         )}
 
-        <h1 className="flex-1 text-center font-display font-semibold">
-          {title || 'MyTingleBox'}
+        <h1 className="flex-1 text-center font-display font-semibold truncate px-2">
+          {title || ''}
         </h1>
 
         {/* Login button for unauthenticated users */}

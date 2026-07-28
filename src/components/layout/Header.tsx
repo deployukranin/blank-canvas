@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Sparkles } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/mytinglebox-logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,12 +47,7 @@ export const Header = () => {
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <Link to={resolvePath('/')} className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-display text-xl font-bold gradient-text hidden sm:block">
-                MyTingleBox
-              </span>
+              <img src={logo} alt="MyTingleBox" className="h-8 w-auto" />
             </Link>
 
             {/* Desktop Navigation */}
