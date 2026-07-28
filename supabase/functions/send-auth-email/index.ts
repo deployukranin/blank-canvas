@@ -78,6 +78,69 @@ function buildEmail(type: AuthEmailType, link: string): { subject: string; html:
   }
 }
 
+// ---------- Supabase admin helpers ----------
+async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  return fetch(`${SUPABASE_URL}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      ...(init.headers || {}),
+    },
+  })
+}
+
+// Find an existing auth user by email. Returns { id, confirmed, createdAt } or null.
+async function findUserByEmail(email: string): Promise<{ id: string; confirmed: boolean; createdAt: string } | null> {
+  try {
+    const r = await adminFetch(`/auth/v1/admin/users?email=${encodeURIComponent(email)}`)
+    if (!r.ok) return null
+    const j = await r.json().catch(() => ({}))
+    const users = Array.isArray(j?.users) ? j.users : []
+    const u = users.find((x: any) => (x?.email || '').toLowerCase() === email.toLowerCase())
+    if (!u?.id) return null
+    return {
+      id: u.id as string,
+      confirmed: !!u.email_confirmed_at,
+      createdAt: u.created_at as string,
+    }
+  } catch {
+    return null
+  }
+}
+
+async function userHasStore(userId: string): Promise<boolean> {
+  try {
+    const r = await adminFetch(`/rest/v1/stores?select=id&created_by=eq.${userId}&limit=1`)
+    if (!r.ok) return false
+    const j = await r.json().catch(() => [])
+    return Array.isArray(j) && j.length > 0
+  } catch {
+    return false
+  }
+}
+
+async function deleteUser(userId: string): Promise<boolean> {
+  try {
+    const r = await adminFetch(`/auth/v1/admin/users/${userId}`, { method: 'DELETE' })
+    return r.ok
+  } catch {
+    return false
+  }
+}
+
+// If an unconfirmed user with this email exists and has no store, delete it so
+// the signup can proceed cleanly. Returns true if we cleared an orphan.
+async function clearOrphanIfAny(email: string): Promise<boolean> {
+  const existing = await findUserByEmail(email)
+  if (!existing) return false
+  if (existing.confirmed) return false
+  const hasStore = await userHasStore(existing.id)
+  if (hasStore) return false
+  return await deleteUser(existing.id)
+}
+
 // ---------- Supabase admin: generate auth action link ----------
 async function generateLink(params: {
   type: AuthEmailType
@@ -85,7 +148,7 @@ async function generateLink(params: {
   password?: string
   redirectTo?: string
   metadata?: Record<string, unknown>
-}): Promise<{ actionLink?: string; error?: string; alreadyRegistered?: boolean }> {
+}): Promise<{ actionLink?: string; userId?: string; error?: string; alreadyRegistered?: boolean }> {
   const body: Record<string, unknown> = {
     type: params.type,
     email: params.email,
@@ -98,13 +161,8 @@ async function generateLink(params: {
     body.options = { redirect_to: params.redirectTo }
   }
 
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, {
+  const res = await adminFetch(`/auth/v1/admin/generate_link`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
-    },
     body: JSON.stringify(body),
   })
 
@@ -119,9 +177,11 @@ async function generateLink(params: {
   }
 
   const actionLink = data?.action_link || data?.properties?.action_link
+  const userId = data?.user?.id || data?.id
   if (!actionLink) return { error: 'Link de ação não retornado' }
-  return { actionLink }
+  return { actionLink, userId }
 }
+
 
 // ---------- Resend send ----------
 async function sendViaResend(to: string, subject: string, html: string): Promise<{ error?: string }> {
