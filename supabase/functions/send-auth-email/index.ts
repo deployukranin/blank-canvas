@@ -22,6 +22,19 @@ function renderLogo(): string {
 
 type AuthEmailType = 'signup' | 'recovery'
 
+const FN = 'send-auth-email'
+function maskEmail(e: string) {
+  const [u, d] = e.split('@')
+  if (!u || !d) return '***'
+  return `${u.slice(0, 2)}***@${d}`
+}
+function slog(event: string, data: Record<string, unknown> = {}) {
+  console.log(JSON.stringify({ fn: FN, ts: new Date().toISOString(), event, ...data }))
+}
+function slogErr(event: string, data: Record<string, unknown> = {}) {
+  console.error(JSON.stringify({ fn: FN, ts: new Date().toISOString(), event, level: 'error', ...data }))
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
