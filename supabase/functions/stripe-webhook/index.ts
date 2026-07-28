@@ -161,34 +161,51 @@ Deno.serve(async (req) => {
       case "customer.subscription.updated":
       case "customer.subscription.created": {
         const sub = event.data.object;
-        const subscriptionId = sub.metadata?.subscription_id;
+        const correlationId = sub.metadata?.correlation_id;
         const storeId = sub.metadata?.store_id;
-        if (subscriptionId && storeId) {
+        if (correlationId && storeId) {
           const active = sub.status === "active" || sub.status === "trialing";
           const expiresAt = sub.current_period_end
             ? new Date(sub.current_period_end * 1000).toISOString()
             : null;
-          const patch: Record<string, unknown> = { status: active ? "active" : "cancelled" };
-          if (expiresAt) patch.expires_at = expiresAt;
-          await supabaseAdmin
-            .from("vip_subscriptions")
-            .update(patch)
-            .eq("id", subscriptionId)
-            .eq("store_id", storeId);
+          // Resolve vip_subscriptions.id via custom_orders.correlation_id → product_id
+          const { data: order } = await supabaseAdmin
+            .from("custom_orders")
+            .select("product_id")
+            .eq("correlation_id", correlationId)
+            .eq("store_id", storeId)
+            .maybeSingle();
+          if (order?.product_id) {
+            const patch: Record<string, unknown> = { status: active ? "active" : "cancelled" };
+            if (expiresAt) patch.expires_at = expiresAt;
+            await supabaseAdmin
+              .from("vip_subscriptions")
+              .update(patch)
+              .eq("id", order.product_id)
+              .eq("store_id", storeId);
+          }
         }
         break;
       }
 
       case "customer.subscription.deleted": {
         const sub = event.data.object;
-        const subscriptionId = sub.metadata?.subscription_id;
+        const correlationId = sub.metadata?.correlation_id;
         const storeId = sub.metadata?.store_id;
-        if (subscriptionId && storeId) {
-          await supabaseAdmin
-            .from("vip_subscriptions")
-            .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
-            .eq("id", subscriptionId)
-            .eq("store_id", storeId);
+        if (correlationId && storeId) {
+          const { data: order } = await supabaseAdmin
+            .from("custom_orders")
+            .select("product_id")
+            .eq("correlation_id", correlationId)
+            .eq("store_id", storeId)
+            .maybeSingle();
+          if (order?.product_id) {
+            await supabaseAdmin
+              .from("vip_subscriptions")
+              .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+              .eq("id", order.product_id)
+              .eq("store_id", storeId);
+          }
         }
         break;
       }
