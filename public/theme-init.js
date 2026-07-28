@@ -7,7 +7,18 @@
     // v2 cache — old v1 entries are ignored to avoid stale-color FOUC after schema/config changes
     var cached = localStorage.getItem('whitelabel_cache_v2_' + seg);
     if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_cache_v2___global');
+    // One-time cleanup of legacy v1 keys so they can't leak back in
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && (k.indexOf('whitelabel_cache_') === 0 && k.indexOf('whitelabel_cache_v2_') !== 0)) {
+          localStorage.removeItem(k);
+        }
+      }
+      localStorage.removeItem('whitelabel_config_cache');
+    } catch (_) {}
     if (!cached) return;
+
 
 
     var cfg = JSON.parse(cached);
