@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Sparkles } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
+import logo from '@/assets/mytinglebox-logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
