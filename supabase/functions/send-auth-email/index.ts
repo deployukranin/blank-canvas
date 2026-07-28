@@ -134,11 +134,14 @@ async function userHasStore(userId: string): Promise<boolean> {
   }
 }
 
-async function deleteUser(userId: string): Promise<boolean> {
+async function deleteUser(userId: string, context: string): Promise<boolean> {
   try {
     const r = await adminFetch(`/auth/v1/admin/users/${userId}`, { method: 'DELETE' })
+    if (r.ok) slog('user_deleted', { user_id: userId, context })
+    else slogErr('user_delete_failed', { user_id: userId, context, status: r.status })
     return r.ok
-  } catch {
+  } catch (err) {
+    slogErr('user_delete_error', { user_id: userId, context, error: (err as Error).message })
     return false
   }
 }
@@ -151,7 +154,8 @@ async function clearOrphanIfAny(email: string): Promise<boolean> {
   if (existing.confirmed) return false
   const hasStore = await userHasStore(existing.id)
   if (hasStore) return false
-  return await deleteUser(existing.id)
+  slog('orphan_detected', { user_id: existing.id, email: maskEmail(email) })
+  return await deleteUser(existing.id, 'preflight_orphan')
 }
 
 // ---------- Supabase admin: generate auth action link ----------
