@@ -1710,6 +1710,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_store_manager: { Args: { _store_id: string }; Returns: boolean }
+      is_store_member: { Args: { _store_id: string }; Returns: boolean }
       is_vip: { Args: { check_user_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
