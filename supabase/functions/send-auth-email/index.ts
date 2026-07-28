@@ -217,9 +217,7 @@ Deno.serve(async (req) => {
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
 
     if (linkResult.alreadyRegistered) {
-      // Do not confirm registration status (prevents enumeration + pre-registration blocking).
-      // For signup, return generic success so the caller doesn't reveal the account exists.
-      return jsonResponse({ success: true })
+      return jsonResponse({ success: false, alreadyRegistered: true, error: linkResult.error }, 409)
     }
     if (linkResult.error || !linkResult.actionLink) {
       console.error('generateLink error:', linkResult.error)
