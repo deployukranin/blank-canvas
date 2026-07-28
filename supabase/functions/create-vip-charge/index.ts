@@ -193,6 +193,12 @@ Deno.serve(async (req) => {
       amountCents = defaultPrices[body.planType] || 1990;
     }
 
+    // Sanity cap — reject nonsensical prices coming from misconfigured stores.
+    // Min R$10, max R$10.000 (or equivalent in USD cents).
+    if (!Number.isFinite(amountCents) || amountCents < 1000 || amountCents > 1_000_000) {
+      return jsonResponse({ success: false, error: 'Configured plan price is out of allowed range' }, 400);
+    }
+
     const correlationID = `vip_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     // Calculate subscription expiration
