@@ -39,7 +39,7 @@ async function asUser<T>(
 }
 
 Deno.test("store_users insert is blocked on suspended stores", async () => {
-  const sql = makeSql();
+  const sql = await makeSql();
   if (!sql) return; // env not available; skip
 
   const ownerId = crypto.randomUUID();
@@ -72,7 +72,7 @@ Deno.test("store_users insert is blocked on suspended stores", async () => {
 });
 
 Deno.test("custom_orders tamper trigger blocks client edits and audits", async () => {
-  const sql = makeSql();
+  const sql = await makeSql();
   if (!sql) return;
 
   const ownerId = crypto.randomUUID();
