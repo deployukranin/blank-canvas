@@ -34,3 +34,7 @@ verify_jwt = false
 
 [functions.send-auth-email]
 verify_jwt = false
+
+[functions.cleanup-orphan-signup]
+verify_jwt = false
+
