@@ -57,26 +57,29 @@ Deno.serve(async (req) => {
 
     const body = await req.text();
 
-    // Optional signature verification
+    // Signature verification REQUIRED — refuse if secret not configured.
     const webhookSecret = Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET");
     const sigHeader = req.headers.get("stripe-signature");
 
-    if (webhookSecret) {
-      if (!sigHeader) {
-        return new Response(JSON.stringify({ error: "Missing signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const valid = await verifyStripeSignature(body, sigHeader, webhookSecret);
-      if (!valid) {
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    } else {
-      console.warn("STRIPE_PLATFORM_WEBHOOK_SECRET not set — signature verification SKIPPED.");
+    if (!webhookSecret) {
+      console.error("STRIPE_PLATFORM_WEBHOOK_SECRET not configured — refusing webhook.");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!sigHeader) {
+      return new Response(JSON.stringify({ error: "Missing signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const valid = await verifyStripeSignature(body, sigHeader, webhookSecret);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const event = JSON.parse(body);
