@@ -175,10 +175,51 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: false, error: 'Senha deve ter pelo menos 6 caracteres' }, 400)
     }
 
+    // Rate limit: prevent signup spam, email flooding and pre-registration abuse.
+    // Two windows: per-IP (broad) and per-email (targeted). Both must pass.
+    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'anon'
+    const rlEndpoint = `send-auth-email:${type}`
+    async function rl(id: string, max: number, minutes: number): Promise<boolean> {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_rate_limit`, {
+          method: 'POST',
+          headers: {
+            apikey: SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            p_identifier: id,
+            p_endpoint: rlEndpoint,
+            p_max_requests: max,
+            p_window_minutes: minutes,
+          }),
+        })
+        if (!r.ok) return true
+        const j = await r.json()
+        return !!j?.allowed
+      } catch {
+        return true
+      }
+    }
+    // 20/hour per IP, 3/hour per email address
+    const [ipOk, emailOk] = await Promise.all([
+      rl(`ip:${ip}`, 20, 60),
+      rl(`email:${email}`, 3, 60),
+    ])
+    if (!ipOk || !emailOk) {
+      return jsonResponse(
+        { success: false, error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' },
+        429,
+      )
+    }
+
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
 
     if (linkResult.alreadyRegistered) {
-      return jsonResponse({ success: false, alreadyRegistered: true, error: linkResult.error }, 409)
+      // Do not confirm registration status (prevents enumeration + pre-registration blocking).
+      // For signup, return generic success so the caller doesn't reveal the account exists.
+      return jsonResponse({ success: true })
     }
     if (linkResult.error || !linkResult.actionLink) {
       console.error('generateLink error:', linkResult.error)
