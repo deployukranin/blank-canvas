@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { loadConfig, saveConfig } from "@/lib/config-storage";
 import {
   YouTubeCategoryManager,
