@@ -17,11 +17,24 @@
       }
       localStorage.removeItem('whitelabel_config_cache');
     } catch (_) {}
-    if (!cached) return;
 
-
-
-    var cfg = JSON.parse(cached);
+    var cfg = null;
+    if (cached) {
+      try { cfg = JSON.parse(cached); } catch (_) { cfg = null; }
+    }
+    if (!cfg) {
+      // Fallback: theme was injected server-side via Vercel Edge Middleware
+      var meta = document.querySelector('meta[name="theme-bootstrap"]');
+      if (meta) {
+        try {
+          cfg = JSON.parse(meta.getAttribute('content') || 'null');
+          if (cfg) {
+            try { localStorage.setItem('whitelabel_cache_v2_' + seg, JSON.stringify(cfg)); } catch (_) {}
+          }
+        } catch (_) { cfg = null; }
+      }
+    }
+    if (!cfg) return;
     var colors = cfg && cfg.colors;
     if (!colors) return;
 
