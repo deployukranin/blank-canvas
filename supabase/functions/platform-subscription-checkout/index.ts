@@ -141,6 +141,7 @@ Deno.serve(async (req) => {
     }
 
     // Create Stripe Checkout Session (subscription mode) on platform account
+    const correlationId = `plan_${store_id}_${plan_id}_${Date.now()}`;
     const params = new URLSearchParams({
       mode: "subscription",
       "line_items[0][price]": priceId,
@@ -148,12 +149,15 @@ Deno.serve(async (req) => {
       success_url,
       cancel_url,
       customer_email: userEmail || "",
+      client_reference_id: `${store_id}:${plan_id}`,
       "metadata[store_id]": store_id,
       "metadata[user_id]": userId,
       "metadata[plan_id]": plan_id,
+      "metadata[correlation_id]": correlationId,
       "subscription_data[metadata][store_id]": store_id,
       "subscription_data[metadata][user_id]": userId,
       "subscription_data[metadata][plan_id]": plan_id,
+      "subscription_data[metadata][correlation_id]": correlationId,
     });
 
     const sessionRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -161,6 +165,7 @@ Deno.serve(async (req) => {
       headers: {
         Authorization: `Bearer ${stripeSecretKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "Idempotency-Key": correlationId,
       },
       body: params,
     });
