@@ -1175,6 +1175,12 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // Debounce save to avoid too many writes
     saveTimeoutRef.current = setTimeout(async () => {
+      // Only persist tenant-scoped configs. Global (storeId=null) requires
+      // super_admin and would 403 for regular creators/admins.
+      if (!storeId) {
+        try { localStorage.setItem(getCacheKey(store?.slug || undefined), JSON.stringify(config)); } catch {}
+        return;
+      }
       try {
         await saveConfig('white_label_config', config, storeId);
         try { localStorage.setItem(getCacheKey(store?.slug || undefined), JSON.stringify(config)); } catch {}
@@ -1182,6 +1188,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         console.error('Error saving config to database:', err);
       }
     }, 2000);
+
 
     return () => {
       if (saveTimeoutRef.current) {
