@@ -40,7 +40,7 @@ export default function AjudaPage() {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>{t('storefront.faqLogin')}</AccordionTrigger>
                   <AccordionContent>
-                    <span dangerouslySetInnerHTML={{ __html: t('storefront.faqLoginAnswer') }} />
+                    <Trans i18nKey="storefront.faqLoginAnswer" components={{ strong: <strong /> }} />
                   </AccordionContent>
                 </AccordionItem>
 
