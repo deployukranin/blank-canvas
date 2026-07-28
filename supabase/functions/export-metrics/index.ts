@@ -136,12 +136,16 @@ Deno.serve(async (req) => {
       .select("role")
       .eq("user_id", user.id);
 
-    const allowedRoles = ["admin", "ceo", "super_admin"];
+    // Global platform metrics are restricted to CEO/super_admin only.
+    // Store creators/admins have their own scoped dashboards; letting `admin` role
+    // here would expose data from tenants they don't own (horizontal privilege
+    // escalation).
+    const allowedRoles = ["ceo", "super_admin"];
     const hasPermission = roles?.some((r: { role: string }) => allowedRoles.includes(r.role));
 
     if (!hasPermission) {
       return new Response(
-        JSON.stringify({ error: "Admin access required" }),
+        JSON.stringify({ error: "CEO or super_admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

@@ -59,18 +59,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const allowedRoles = ["admin", "ceo", "super_admin", "creator"];
-    const hasPermission = roles?.some((r) => allowedRoles.includes(r.role));
+    const userRoles = new Set((roles || []).map((r) => r.role));
+    const isPlatformAdmin = userRoles.has("ceo") || userRoles.has("super_admin");
+    const isStoreManagerRole = userRoles.has("admin") || userRoles.has("creator");
 
-    if (!hasPermission) {
-      console.error(`Access denied for user ${userId} - required roles: ${allowedRoles.join(", ")}`);
+    if (!isPlatformAdmin && !isStoreManagerRole) {
       return new Response(
-        JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias (admin, creator, ceo ou super_admin)" }),
+        JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    console.log(`Authorized config update by user ${userId} with roles: ${roles?.map(r => r.role).join(", ")}`);
 
     // 4. Parse request body
     const { config_key, config_value, store_id } = await req.json();
@@ -89,6 +87,32 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: false, error: "config_key inválido" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // 4b. Ownership check — platform configs (store_id null) require CEO/super_admin;
+    // store-scoped configs require that the caller actually owns/admins THAT store.
+    // Without this, any admin/creator role could overwrite configs of other tenants
+    // by passing an arbitrary store_id in the body (tenant escape).
+    const platformOnlyKeys = new Set(["platform_settings", "platform_plans"]);
+    if (!store_id || platformOnlyKeys.has(config_key)) {
+      if (!isPlatformAdmin) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Acesso negado: apenas CEO/super_admin podem alterar configurações globais" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else if (!isPlatformAdmin) {
+      // Verify the caller manages the target store
+      const [{ data: ownedStore }, { data: storeAdminRow }] = await Promise.all([
+        serviceClient.from("stores").select("id").eq("id", store_id).eq("created_by", userId).maybeSingle(),
+        serviceClient.from("store_admins").select("id").eq("store_id", store_id).eq("user_id", userId).maybeSingle(),
+      ]);
+      if (!ownedStore && !storeAdminRow) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Acesso negado: você não gerencia esta loja" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // 5. Use service role to save config (bypasses RLS for the actual save operation)
