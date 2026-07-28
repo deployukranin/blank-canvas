@@ -1,76 +1,130 @@
-## Objetivo
+# Auditoria de Segurança & Hardening para Produção
 
-Trackers (usuários com a role `tracker`, que não são o CEO/super_admin) passam a ter, dentro de `/admin-master`, as mesmas páginas do CEO — **tenants, clients, partners, referrals, ranking, support** — porém com **dados 100% isolados**: só aparece o que veio do cadastro atribuído àquele tracker. A criação de links de trackeamento ("Meus links de trackeamento") deixa de ficar com o tracker e passa a ser administrada **somente pela página do CEO**.
+Objetivo: elevar o projeto a nível de produção SaaS (OWASP ASVS L2+) sem alterar UX, UI ou funcionalidades. Trabalho feito em **fases sequenciais**, cada uma com diagnóstico → correção → verificação → documentação.
 
-## Regra de atribuição (isolamento)
+## Fase 0 — Descoberta (read-only)
 
-O que define o vínculo é o **cadastro**: quando alguém acessa via um link de tracking do tracker e se cadastra, isso gera um registro em `tracker_conversions`:
-- `type = 'store_signup'` → grava `store_id` (loja atribuída ao tracker)
-- `type = 'client_signup'` → grava `subject_id`/`email` (cliente atribuído ao tracker)
+Levantamento completo antes de qualquer alteração:
 
-A partir disso, o "universo" de um tracker é o **conjunto de `store_id`** atribuídos a ele. Todas as páginas filtram por esse conjunto:
+- **Backend:** ler todas as edge functions (`supabase/functions/*`), mapear autenticação, validação de input, CORS, tratamento de erro, uso de service role.
+- **DB:** rodar `supabase--linter`, revisar RLS/GRANTs em todas as tabelas, funções `SECURITY DEFINER`, triggers, views.
+- **Frontend:** procurar `console.log`, secrets, `dangerouslySetInnerHTML`, uso de `window.location`/redirects, storage de tokens.
+- **Infra:** `index.html`, `vercel.json`, `public/sw.js`, `manifest.json`, `vite.config.ts`, `.env`.
+- **Deps:** `code--dependency_scan` + `bun audit` para CVEs.
+- **Storage:** listar buckets, policies, MIME/size limits.
+- **Scans:** `security--get_scan_results` + `security--run_security_scan`.
 
-```text
-tracker (owner_user_id)
-   └── tracker_conversions (store_signup) ── store_id ──┐
-                                                        ├─► conjunto de lojas do tracker
-   └── tracker_conversions (client_signup) ── store_id ┘
-        ↓
-  tenants    = essas lojas
-  clients    = store_users dessas lojas
-  partners   = partners vinculados a essas lojas
-  referrals  = referral_commissions dessas lojas
-  ranking    = ranking só dessas lojas
-  support    = support_tickets dessas lojas
-```
+Entregável: inventário de findings classificados **CRÍTICA / ALTA / MÉDIA / BAIXA / INFO**.
 
-## Mudanças
+## Fase 1 — Autenticação & Sessão
 
-### 1. Backend — Edge Function de portal isolado do tracker
-Criar uma edge function `tracker-portal` (service role, Fetch API, valida sessão via `auth.getClaims`/endpoint `/auth/v1/user` como nas demais) com um parâmetro `section`:
-- Resolve o tracker pelo usuário logado (`trackers.owner_user_id = uid`).
-- Calcula o conjunto de `store_id` atribuídos (via `tracker_conversions`).
-- Retorna, conforme `section`:
-  - `tenants` → as lojas (de `stores`) desse conjunto.
-  - `clients` → `store_users` (com perfis/emails) dessas lojas.
-  - `partners` → partners (`stores.partner_id` + dados do parceiro) dessas lojas.
-  - `referrals` → `referral_commissions` dessas lojas.
-  - `ranking` → ranking (clientes + receita) só dessas lojas.
-  - `support` → `support_tickets` (+ contagem de mensagens) dessas lojas.
-- Se o conjunto de lojas for vazio, retorna listas vazias.
+- Revisar `AuthContext`, `send-auth-email`, `ClientAuth`, `SuperAdminLogin`, reset de senha.
+- Validar: expiração de token de recuperação, replay, enumeração de usuário (mensagens genéricas), rate-limit em login/signup/reset (usar `check_rate_limit` já existente), lockout progressivo.
+- Garantir `getClaims`/`getUser` server-side em todas edge functions (não confiar em `user_id` do body).
+- Verificar que logout limpa sessão e SW cache sensível.
 
-### 2. Frontend — páginas que se adaptam à role
-Para cada rota abaixo, exibir a versão do CEO quando `super_admin`, e a versão isolada (consumindo `tracker-portal`) quando `tracker`:
-- `/admin-master/tenants`
-- `/admin-master/clients`
-- `/admin-master/partners`
-- `/admin-master/referrals`
-- `/admin-master/ranking`
-- `/admin-master/support`
+## Fase 2 — Autorização, RBAC & Multi-tenant
 
-Implementação: trocar o guard dessas rotas de `SuperAdminRoute` para `AdminMasterRoute` (que aceita `super_admin` ou `tracker`) e, dentro de cada página, ramificar por role — o CEO mantém o componente atual; o tracker recebe uma versão somente-leitura alimentada pela edge function. As páginas reusam o `SuperAdminLayout` e o visual existente (GlassCard, tabelas).
+- Varredura de **todos** os endpoints (edge functions + RPC): cada um deve validar `has_role`/ownership antes de ler/escrever.
+- Auditar isolamento por `store_id`/`tracker_id`/`user_id` nas RLS de: `stores`, `custom_orders`, `vip_subscriptions`, `store_users`, `tracker_*`, `affiliate_*`, `support_*`, `video_*`, `feed_posts`, `app_configurations`.
+- Testar IDOR: cliente A não pode ler/alterar recursos de cliente B; tracker A não vê dados de tracker B; store admin não vê outra store.
+- Confirmar que rotas frontend protegidas (`AdminRoute`, `SuperAdminRoute`, `PartnerRoute`) têm equivalente backend — frontend nunca é fonte de verdade.
 
-### 3. Menu lateral do tracker (`SuperAdminLayout`)
-Hoje o tracker só vê "Tracking". Passar a mostrar para o tracker:
-- Dashboard (`/admin-master`), Tenants, Clients, Partners, Referrals, Ranking, Support.
-- **Não** mostrar para o tracker: Tracking (gestão de links), Plans, Settings — essas continuam exclusivas do CEO.
+## Fase 3 — Banco de dados & Supabase
 
-### 4. Links de trackeamento → somente CEO
-- No `TrackerDashboard` (dashboard do tracker em `/admin-master`): remover o criador de links e o botão de excluir; a seção "Meus links de trackeamento" fica **somente leitura** (lista + copiar URL), pois quem cria/edita/exclui é o CEO.
-- A criação/edição de links permanece (e é reforçada) na página do CEO `/admin-master/tracking` (`SuperAdminTracking`), por tracker.
-- RLS: ajustar a policy de `tracker_links` para que a role `tracker` tenha **apenas SELECT** dos próprios links (remover INSERT/UPDATE/DELETE do tracker); o `super_admin` mantém gestão total.
+- Rodar linter, corrigir findings acionáveis.
+- Todas as tabelas em `public` com RLS ligada + policies + GRANTs corretos (sem `anon` onde não é intencional).
+- Revisar `SECURITY DEFINER` funcs: `search_path` fixo, sem SQL dinâmico, validação de `auth.uid()`.
+- Constraints/checks para invariantes (preços ≥ mínimo, status em enum válido).
+- Verificar que nenhuma view exponha colunas sensíveis (`stripe_account_id`, `password_hash`, emails).
 
-## Detalhes técnicos
+## Fase 4 — Pagamentos (Stripe)
 
-- **Atribuição via cadastro já existe**: a captura de first-touch e a gravação em `tracker_conversions` já acontecem no fluxo atual (`tracker-convert`), então nenhuma mudança no momento do cadastro é necessária — apenas consumimos esses dados.
-- **Isolamento**: feito no servidor (edge function com service role filtrando pelo conjunto de `store_id` do tracker). As páginas do tracker nunca consultam tabelas globais diretamente.
-- **Migration**: apenas ajuste de RLS em `tracker_links` (tracker = SELECT-only). Sem novas tabelas.
-- **i18n**: textos novos adicionados em EN/PT-BR/ES.
-- **Sem novos segredos**; reutiliza `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+- `stripe-webhook`: assinatura HMAC obrigatória (falhar se secret ausente em prod), tolerância de timestamp, idempotência via `event.id`.
+- `stripe-create-checkout` e `create-pix-charge` / `create-vip-charge`: preço/plano **sempre** do servidor a partir de `product_id` autoritativo, nunca do body.
+- Validar `store_id` pertence a criador legítimo; validar `success_url`/`cancel_url` contra allowlist de origens.
+- `platform-subscription-webhook`: idempotência + signature.
 
-## Fora de escopo
-- Não muda o fluxo de login (já feito anteriormente).
-- Não cria marketplace nem múltiplos influenciadores.
-</content>
-<summary>Trackers ganham as páginas tenants/clients/partners/referrals/ranking/support em /admin-master com dados isolados pelo cadastro atribuído (via tracker_conversions → store_ids), servidos por uma edge function com service role; a criação de links de tracking passa a ser exclusiva do CEO.</summary>
-</invoke>
+## Fase 5 — Edge Functions Hardening
+
+Para cada função em `supabase/functions/*`:
+- CORS restrito a allowlist de origens (preview + prod + custom domains) — remover `*`.
+- Validação Zod de body/query/headers, limites de tamanho.
+- Rate-limit via `check_rate_limit` nos endpoints críticos (login, signup, reset, checkout, upload, webhooks públicos, tracker-click).
+- Erros genéricos ao cliente + log estruturado sem PII/secret.
+- Nunca retornar `SUPABASE_SERVICE_ROLE_KEY` ou stack trace.
+- Confirmar uso de `verify_jwt = false` só onde intencional (webhooks/públicos).
+
+## Fase 6 — Headers HTTP & CSP
+
+Adicionar em `vercel.json` (via `headers`) e `index.html` (meta fallback):
+
+- `Content-Security-Policy` restritiva: `default-src 'self'`; permitir apenas Supabase (`*.supabase.co`), Stripe (`js.stripe.com`, `api.stripe.com`, `hooks.stripe.com`), YouTube (`www.youtube.com`, `i.ytimg.com`), Google Fonts (se usado), self para img/media. Remover `unsafe-inline`/`unsafe-eval` — se conflitar com Vite/inline styles, usar nonces ou `strict-dynamic`.
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- `X-Frame-Options: DENY` + `frame-ancestors 'none'` no CSP
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` mínima (bloquear camera/mic/geo salvo onde usado)
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Resource-Policy: same-site`
+- `Origin-Agent-Cluster: ?1`
+- `Cache-Control: no-store` em rotas autenticadas (via SW/response headers)
+
+## Fase 7 — Service Worker & Cache
+
+Revisar `public/sw.js`:
+- Nunca cachear respostas de `*.supabase.co`, edge functions, `/admin*`, `/vip`, `/auth*`, `/checkout*`.
+- Versionamento por hash de build, `skipWaiting` + limpeza de caches antigos.
+- Bypass total para requests com `Authorization` header.
+
+## Fase 8 — Input Validation & Uploads
+
+- Adicionar Zod em toda edge function que recebe body.
+- Buckets de upload (`banners`, `vip-media`, `payment-proofs`, `email-assets`, `media-previews`): validar MIME + magic bytes server-side via edge function proxy (não upload direto), renomear com UUID, limite de tamanho.
+- Bloquear `text/html`, `image/svg+xml`, `application/javascript` em buckets de imagem.
+- URLs assinadas curtas (5-15min) para buckets privados.
+
+## Fase 9 — Frontend Hygiene
+
+- Remover `console.log` de código de produção (manter `console.error`), desativar source maps em prod (`build.sourcemap: false` em `vite.config.ts`).
+- Garantir `.env` só contém `VITE_SUPABASE_*` publishable.
+- Sem secrets, URLs internas, TODO/FIXME sensíveis no bundle.
+- Redirects (`window.location.href`, router) com validação contra open-redirect (allowlist de paths internos).
+- Sanitizar qualquer render de HTML do banco (`DOMPurify`).
+
+## Fase 10 — Deps, DNS, Emails
+
+- `code--dependency_scan` → atualizar CVEs críticas/altas para versões estáveis compatíveis.
+- Documentar (não executar) checklist DNS: DNSSEC, CAA, SPF, DKIM, DMARC (`p=quarantine` → `reject`) — depende do usuário no registrar/SES.
+- `send-auth-email`: header injection check no `to` e `subject`.
+
+## Fase 11 — Verificação & Relatório
+
+Depois de cada fase:
+- Rodar `supabase--linter` e `security--run_security_scan`.
+- Smoke test via Playwright em fluxos-chave (login CEO, login tracker, signup criador, checkout PIX, webhook Stripe simulado).
+- Marcar findings como `mark_as_fixed` ou `ignore` com justificativa.
+- Atualizar `security-memory`.
+
+## Entregável final
+
+Relatório único no chat contendo:
+- Resumo executivo
+- Tabelas de arquivos analisados/modificados
+- Findings por severidade (antes → depois)
+- Correções aplicadas por fase
+- Pendências dependentes de terceiros (Vercel/DNS/Stripe/SES/Supabase/domínio)
+- Checklists OWASP Top 10, ASVS L2, produção
+- **Nota 0-100** com justificativa e ações restantes para "excelente"
+
+## Regras aplicadas em todo trabalho
+
+- Ler arquivo inteiro antes de editar; nenhuma suposição.
+- Zero mudança de UX/UI/comportamento.
+- Cada alteração acompanhada de justificativa (risco → mitigação).
+- Edits pequenos, focados; rollback fácil.
+- Nada de novas features.
+
+## Ordem de execução
+
+Fases 0 → 11 sequenciais. Dentro de cada fase, edits paralelos quando independentes. Aguardo aprovação para iniciar pela Fase 0.
