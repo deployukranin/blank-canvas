@@ -58,6 +58,8 @@ const AdminYoutube = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const { config, updateYouTube } = useWhiteLabel();
+  const { store } = useTenant();
+  const storeId = store?.id ?? null;
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
   const [channelInput, setChannelInput] = useState(channelId);
