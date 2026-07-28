@@ -399,6 +399,42 @@ export type Database = {
           },
         ]
       }
+      custom_orders_tamper_attempts: {
+        Row: {
+          attempted_fields: Json
+          created_at: string
+          id: string
+          new_values: Json
+          old_values: Json
+          order_id: string | null
+          store_id: string | null
+          user_id: string | null
+          user_role: string | null
+        }
+        Insert: {
+          attempted_fields?: Json
+          created_at?: string
+          id?: string
+          new_values?: Json
+          old_values?: Json
+          order_id?: string | null
+          store_id?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          attempted_fields?: Json
+          created_at?: string
+          id?: string
+          new_values?: Json
+          old_values?: Json
+          order_id?: string | null
+          store_id?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Relationships: []
+      }
       feed_posts: {
         Row: {
           author_user_id: string | null
