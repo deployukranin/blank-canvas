@@ -75,6 +75,7 @@ import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import TrackRedirect from "./pages/TrackRedirect";
 import TrackDashboard from "./pages/TrackDashboard";
 import SuperAdminTracking from "./pages/super-admin/SuperAdminTracking";
+import SuperAdminCspReports from "./pages/super-admin/SuperAdminCspReports";
 import AdminMasterHome from "./pages/super-admin/AdminMasterHome";
 import { AdminMasterRoute } from "@/components/auth/AdminMasterRoute";
 import {
@@ -186,6 +187,7 @@ const App = () => (
                 <Route path="/admin-master/partners" element={<AdminMasterRoute><PartnersSection /></AdminMasterRoute>} />
                 <Route path="/admin-master/referrals" element={<AdminMasterRoute><ReferralsSection /></AdminMasterRoute>} />
                 <Route path="/admin-master/tracking" element={<SuperAdminRoute><SuperAdminTracking /></SuperAdminRoute>} />
+                <Route path="/admin-master/csp" element={<SuperAdminRoute><SuperAdminCspReports /></SuperAdminRoute>} />
 
                 {/* 🤝 Painel do Parceiro */}
                 <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />

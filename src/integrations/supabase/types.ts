@@ -234,6 +234,60 @@ export type Database = {
         }
         Relationships: []
       }
+      csp_violations: {
+        Row: {
+          blocked_uri: string | null
+          column_number: number | null
+          created_at: string
+          disposition: string | null
+          document_uri: string | null
+          effective_directive: string | null
+          id: string
+          ip_hash: string | null
+          line_number: number | null
+          raw: Json | null
+          referrer: string | null
+          script_sample: string | null
+          source_file: string | null
+          user_agent: string | null
+          violated_directive: string | null
+        }
+        Insert: {
+          blocked_uri?: string | null
+          column_number?: number | null
+          created_at?: string
+          disposition?: string | null
+          document_uri?: string | null
+          effective_directive?: string | null
+          id?: string
+          ip_hash?: string | null
+          line_number?: number | null
+          raw?: Json | null
+          referrer?: string | null
+          script_sample?: string | null
+          source_file?: string | null
+          user_agent?: string | null
+          violated_directive?: string | null
+        }
+        Update: {
+          blocked_uri?: string | null
+          column_number?: number | null
+          created_at?: string
+          disposition?: string | null
+          document_uri?: string | null
+          effective_directive?: string | null
+          id?: string
+          ip_hash?: string | null
+          line_number?: number | null
+          raw?: Json | null
+          referrer?: string | null
+          script_sample?: string | null
+          source_file?: string | null
+          user_agent?: string | null
+          violated_directive?: string | null
+        }
+        Relationships: []
+      }
       custom_orders: {
         Row: {
           affiliate_id: string | null
