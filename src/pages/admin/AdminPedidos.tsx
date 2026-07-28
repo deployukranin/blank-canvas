@@ -115,7 +115,7 @@ const AdminPedidos: React.FC = () => {
       
       const { error } = await supabase
         .from('custom_orders')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', id);
 
       if (error) throw error;
