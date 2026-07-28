@@ -4,9 +4,11 @@
   try {
     var seg = (location.pathname.split('/').filter(Boolean)[0] || '__global').toLowerCase();
     var isTenantRoute = seg !== '__global' && !['admin', 'super-admin', 'entrar', 'auth', 'setup'].includes(seg);
-    var cached = localStorage.getItem('whitelabel_cache_' + seg);
-    if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_config_cache');
+    // v2 cache — old v1 entries are ignored to avoid stale-color FOUC after schema/config changes
+    var cached = localStorage.getItem('whitelabel_cache_v2_' + seg);
+    if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_cache_v2___global');
     if (!cached) return;
+
 
     var cfg = JSON.parse(cached);
     var colors = cfg && cfg.colors;
