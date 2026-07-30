@@ -69,7 +69,7 @@ const tr = {
     pricingKicker: "Planos",
     pricingTitle1: "Escolha o plano",
     pricingTitle2: "ideal para você",
-    pricingSub: "Comece grátis com 7 dias de teste. Sem cartão de crédito.",
+    pricingSub: "Comece grátis com 3 dias de teste. Sem cartão de crédito.",
     mostPopular: "Mais popular",
     ctaFinalTitle1: "Pronto para começar",
     ctaFinalTitle2: "sua jornada?",
@@ -115,7 +115,7 @@ const tr = {
       { q: "Preciso saber programar?", a: "Não. Você cria e configura toda a sua loja por uma interface simples, sem escrever uma linha de código." },
       { q: "Como recebo os pagamentos?", a: "Via Stripe e PIX integrados. O dinheiro cai direto na sua conta, sem intermediários." },
       { q: "Posso usar minha própria marca?", a: "Sim. Domínio personalizado, cores, logo e identidade 100% suas em todos os planos." },
-      { q: "Existe período de teste?", a: "Sim, você começa com 7 dias grátis e sem precisar de cartão de crédito." },
+      { q: "Existe período de teste?", a: "Sim, você começa com 3 dias grátis e sem precisar de cartão de crédito." },
       { q: "Posso cancelar quando quiser?", a: "Claro. Não há fidelidade — você cancela a qualquer momento direto no painel." },
     ],
     footerTagline: "A plataforma white-label para criadores ASMR viverem da sua arte.",
@@ -151,7 +151,7 @@ const tr = {
     pricingKicker: "Plans",
     pricingTitle1: "Choose the plan",
     pricingTitle2: "that's right for you",
-    pricingSub: "Start with a free 7-day trial. No credit card required.",
+    pricingSub: "Start with a free 3-day trial. No credit card required.",
     mostPopular: "Most popular",
     ctaFinalTitle1: "Ready to start",
     ctaFinalTitle2: "your journey?",
@@ -197,7 +197,7 @@ const tr = {
       { q: "Do I need to code?", a: "No. You build and configure your entire store through a simple interface, without writing a single line of code." },
       { q: "How do I get paid?", a: "Via integrated Stripe and PIX. Money goes straight to your account, no middlemen." },
       { q: "Can I use my own brand?", a: "Yes. Custom domain, colors, logo and 100% your identity on every plan." },
-      { q: "Is there a trial period?", a: "Yes, you start with a free 7-day trial, no credit card required." },
+      { q: "Is there a trial period?", a: "Yes, you start with a free 3-day trial, no credit card required." },
       { q: "Can I cancel anytime?", a: "Of course. No lock-in — cancel anytime right from your dashboard." },
     ],
     footerTagline: "The white-label platform for ASMR creators to live from their art.",
@@ -233,7 +233,7 @@ const tr = {
     pricingKicker: "Planes",
     pricingTitle1: "Elige el plan",
     pricingTitle2: "ideal para ti",
-    pricingSub: "Empieza con 7 días de prueba gratis. Sin tarjeta de crédito.",
+    pricingSub: "Empieza con 3 días de prueba gratis. Sin tarjeta de crédito.",
     mostPopular: "Más popular",
     ctaFinalTitle1: "¿Listo para comenzar",
     ctaFinalTitle2: "tu camino?",
@@ -279,7 +279,7 @@ const tr = {
       { q: "¿Necesito saber programar?", a: "No. Creas y configuras toda tu tienda con una interfaz simple, sin escribir una línea de código." },
       { q: "¿Cómo recibo los pagos?", a: "Vía Stripe y PIX integrados. El dinero llega directo a tu cuenta, sin intermediarios." },
       { q: "¿Puedo usar mi propia marca?", a: "Sí. Dominio personalizado, colores, logo e identidad 100% tuya en todos los planes." },
-      { q: "¿Hay período de prueba?", a: "Sí, empiezas con 7 días gratis y sin necesidad de tarjeta de crédito." },
+      { q: "¿Hay período de prueba?", a: "Sí, empiezas con 3 días gratis y sin necesidad de tarjeta de crédito." },
       { q: "¿Puedo cancelar cuando quiera?", a: "Claro. Sin permanencia — cancela en cualquier momento desde el panel." },
     ],
     footerTagline: "La plataforma white-label para que los creadores ASMR vivan de su arte.",
@@ -382,7 +382,7 @@ const Landing = () => {
 
   const ctaLabel = (highlight?: boolean) =>
     highlight
-      ? { pt: "Testar 7 dias grátis", en: "Try 7 days free", es: "Prueba 7 días gratis" }[lang]
+      ? { pt: "Testar 3 dias grátis", en: "Try 3 days free", es: "Prueba 3 días gratis" }[lang]
       : { pt: "Começar grátis", en: "Get started", es: "Empezar gratis" }[lang];
 
   useEffect(() => {
