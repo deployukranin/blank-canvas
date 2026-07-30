@@ -243,7 +243,10 @@
       "expired": "Your trial has expired!",
       "daysLeft": "{{days}} days of trial remaining",
       "upgradeHint": "Upgrade to keep your platform active.",
-      "upgrade": "View Plans"
+      "upgrade": "View Plans",
+      "hoursLeft": "{{hours}}h of trial remaining",
+      "minutesLeft": "{{minutes}} min of trial remaining",
+      "expiredHint": "Paid actions are blocked until you choose a plan."
     },
     "plans": {
       "title": "Plans",
