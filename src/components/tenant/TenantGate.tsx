@@ -21,10 +21,8 @@ const TenantStoreNotFound = ({ slug }: TenantStoreNotFoundProps) => (
   </div>
 );
 
-function isTrialExpired(store: { plan_type: string; plan_expires_at: string | null }): boolean {
-  if (store.plan_type !== 'trial' || !store.plan_expires_at) return false;
-  return new Date(store.plan_expires_at) < new Date();
-}
+import { isTrialExpired } from '@/lib/trial';
+
 
 /**
  * Wraps tenant-scoped pages. Shows loading/error states while resolving store.
