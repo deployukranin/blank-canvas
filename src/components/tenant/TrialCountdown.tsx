@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { expiresAtMs } from '@/lib/trial';
 
 interface TrialCountdownProps {
   /** ISO date when the trial ends */
@@ -15,21 +16,34 @@ interface TrialCountdownProps {
 /**
  * Live trial countdown. Recomputes every minute so the remaining time
  * stays accurate without a page reload.
+ *
+ * The deadline is parsed as an absolute UTC instant (see `@/lib/trial`), so the
+ * value is identical after a refresh and does not shift if the device timezone
+ * changes.
  */
 export function TrialCountdown({ expiresAt, basePath }: TrialCountdownProps) {
   const { t } = useTranslation();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(id);
+    const tick = () => setNow(Date.now());
+    tick();
+    const id = setInterval(tick, 60_000);
+    // Re-sync when the tab wakes up or the clock/timezone changes.
+    document.addEventListener('visibilitychange', tick);
+    window.addEventListener('focus', tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+      window.removeEventListener('focus', tick);
+    };
   }, []);
 
   const { expired, isUrgent, label } = useMemo(() => {
-    const end = new Date(expiresAt).getTime();
-    const msLeft = end - now;
+    const end = expiresAtMs(expiresAt);
+    const msLeft = end === null ? -1 : end - now;
 
-    if (!Number.isFinite(end) || msLeft <= 0) {
+    if (end === null || msLeft <= 0) {
       return { expired: true, isUrgent: true, label: t('admin.trial.expired') };
     }
 
@@ -59,6 +73,7 @@ export function TrialCountdown({ expiresAt, basePath }: TrialCountdownProps) {
       label: t('admin.trial.minutesLeft', { minutes: Math.max(1, Math.ceil(msLeft / 60_000)) }),
     };
   }, [expiresAt, now, t]);
+
 
   return (
     <motion.div
