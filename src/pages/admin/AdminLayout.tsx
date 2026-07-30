@@ -14,6 +14,8 @@ import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { expiresAtMs, isTrialExpired as checkTrialExpired } from '@/lib/trial';
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -31,11 +33,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const { store } = useTenant();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  // Trial expiry calculations
-  const isTrialExpired = store?.plan_type === 'trial' && store?.plan_expires_at && new Date(store.plan_expires_at) < new Date();
-  const daysUntilDeletion = isTrialExpired && store?.plan_expires_at
-    ? Math.max(0, 7 - Math.floor((Date.now() - new Date(store.plan_expires_at).getTime()) / (1000 * 60 * 60 * 24)))
+  // Trial expiry calculations (UTC-safe, stable across timezones/refreshes)
+  const isTrialExpired = checkTrialExpired(store);
+  const expiresMs = expiresAtMs(store?.plan_expires_at);
+  const daysUntilDeletion = isTrialExpired && expiresMs !== null
+    ? Math.max(0, 7 - Math.floor((Date.now() - expiresMs) / (1000 * 60 * 60 * 24)))
     : null;
+
+
 
   const base = slug ? `/${slug}/admin` : '/admin';
 
