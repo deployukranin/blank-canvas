@@ -55,6 +55,12 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ─── Trial expiry guard (server-side rule) ───
+    const planBlocked = await storeBlockedResponse(store_id, corsHeaders);
+    if (planBlocked) return planBlocked;
+
+
+
     // Validate return_url — must be https and belong to a known app host.
     try {
       const u = new URL(return_url);
