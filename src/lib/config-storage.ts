@@ -19,6 +19,7 @@ export type ConfigKey =
 const CONFIG_ADMIN_ROLES = ['admin', 'creator', 'ceo', 'super_admin'] as const;
 const PLATFORM_ADMIN_ROLES = ['ceo', 'super_admin'] as const;
 const PLATFORM_ONLY_KEYS = new Set<ConfigKey>(['platform_settings', 'platform_plans']);
+const GLOBAL_CONFIG_KEYS = PLATFORM_ONLY_KEYS;
 const permissionCache = new Map<string, { canSave: boolean; isPlatformAdmin: boolean }>();
 
 const getConfigPermissions = async (userId: string): Promise<{ canSave: boolean; isPlatformAdmin: boolean }> => {
@@ -88,6 +89,11 @@ export const saveConfig = async <T>(
   storeId?: string | null
 ): Promise<boolean> => {
   try {
+    if (!storeId && !GLOBAL_CONFIG_KEYS.has(key)) {
+      console.debug(`Skipping save for ${key}: store-scoped config requires storeId`);
+      return false;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
@@ -102,7 +108,7 @@ export const saveConfig = async <T>(
     }
 
     if (!storeId && !permissions.isPlatformAdmin) {
-      console.debug(`Skipping save for ${key}: tenant-scoped config requires storeId`);
+      console.debug(`Skipping save for ${key}: global config requires platform admin permissions`);
       return false;
     }
 
@@ -167,9 +173,14 @@ export const saveConfig = async <T>(
 export const migrateLocalStorageToDb = async <T>(
   localStorageKey: string,
   dbKey: ConfigKey,
-  defaultValue: T
+  defaultValue: T,
+  storeId?: string | null
 ): Promise<void> => {
-  const existing = await loadConfig<T>(dbKey);
+  if (!storeId && !GLOBAL_CONFIG_KEYS.has(dbKey)) {
+    return;
+  }
+
+  const existing = await loadConfig<T>(dbKey, storeId);
   if (existing) {
     localStorage.removeItem(localStorageKey);
     return;
@@ -180,7 +191,7 @@ export const migrateLocalStorageToDb = async <T>(
     try {
       const parsed = JSON.parse(localData);
       const merged = { ...defaultValue, ...parsed };
-      const saved = await saveConfig(dbKey, merged);
+      const saved = await saveConfig(dbKey, merged, storeId);
       if (saved) {
         localStorage.removeItem(localStorageKey);
         console.log(`Migrated ${localStorageKey} to database`);
