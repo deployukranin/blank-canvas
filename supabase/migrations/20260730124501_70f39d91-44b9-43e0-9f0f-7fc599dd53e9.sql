@@ -1,0 +1,1 @@
+ALTER TABLE public.stores ALTER COLUMN plan_expires_at SET DEFAULT (now() + interval '3 days');
