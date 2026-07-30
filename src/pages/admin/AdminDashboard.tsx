@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { loadConfig } from '@/lib/config-storage';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 
 
@@ -31,6 +32,7 @@ const AdminDashboard: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { config } = useWhiteLabel();
   const { session } = useAuth();
+  const { store: tenantStore, isLoading: tenantLoading } = useTenant();
   const base = slug ? `/${slug}/admin` : '/admin';
   const [stats, setStats] = useState({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
@@ -61,8 +63,28 @@ const AdminDashboard: React.FC = () => {
 
   // Resolve store
   useEffect(() => {
+    if (tenantStore?.id) {
+      let cancelled = false;
+      setStoreSlug(tenantStore.slug);
+      setStoreId(tenantStore.id);
+      setStorePlan({ type: tenantStore.plan_type, expiresAt: tenantStore.plan_expires_at });
+      setStoreInfo({ name: tenantStore.name, description: tenantStore.description, avatar_url: tenantStore.avatar_url });
+
+      const loadTenantPaymentConfig = async () => {
+        const payConf = await loadConfig<any>('payment_config', tenantStore.id);
+        if (!cancelled) {
+          setPaymentConfigured(!!(payConf?.stripe?.secretKey || payConf?.pixManual?.key));
+        }
+      };
+
+      loadTenantPaymentConfig();
+      return () => { cancelled = true; };
+    }
+
+    if (tenantLoading) return;
+
     const userId = session?.user?.id;
-    if (!userId) { setStoreSlug(null); return; }
+    if (!userId) { setStoreSlug(null); setStoreId(null); return; }
     let cancelled = false;
 
     const resolve = async () => {
@@ -92,7 +114,7 @@ const AdminDashboard: React.FC = () => {
     };
     resolve();
     return () => { cancelled = true; };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, tenantLoading, tenantStore?.id, tenantStore?.slug, tenantStore?.plan_type, tenantStore?.plan_expires_at, tenantStore?.name, tenantStore?.description, tenantStore?.avatar_url]);
 
   const [ytHistory, setYtHistory] = useState<Array<{ recorded_at: string; subscriber_count: number; views_last_30d: number; total_view_count: number }>>([]);
 
@@ -192,21 +214,31 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
+      setIsLoading(true);
+      if (!storeId) {
+        setStats({ totalUsers: 0, totalVIP: 0, totalOrders: 0, revenue: 0, pendingOrders: 0, newUsersToday: 0 });
+        setPendingOrders([]);
+        setWeekData(buildEmptyWeek().map(b => ({
+          name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
+          orders: 0,
+          revenue: 0,
+        })));
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        let usersQuery = supabase.from('store_users').select('*', { count: 'exact', head: true });
-        let vipQuery = supabase.from('vip_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active');
-        let ordersQuery = supabase.from('custom_orders').select('*', { count: 'exact' });
-        let pendingQuery = supabase.from('custom_orders').select('id, customer_name, category_name, amount_cents').eq('status', 'pending').order('created_at', { ascending: false }).limit(5);
+        const weekBuckets = buildEmptyWeek();
+        const weekStart = weekBuckets[0]?.date.toISOString();
 
-        if (storeId) {
-          usersQuery = usersQuery.eq('store_id', storeId);
-          vipQuery = vipQuery.eq('store_id', storeId);
-          ordersQuery = ordersQuery.eq('store_id', storeId);
-          pendingQuery = pendingQuery.eq('store_id', storeId);
-        }
+        const usersQuery = supabase.from('store_users').select('*', { count: 'exact', head: true }).eq('store_id', storeId);
+        const vipQuery = supabase.from('vip_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active').eq('store_id', storeId);
+        const ordersQuery = supabase.from('custom_orders').select('id, status, amount_cents, created_at', { count: 'exact' }).eq('store_id', storeId);
+        const weeklyOrdersQuery = supabase.from('custom_orders').select('id, status, amount_cents, created_at').eq('store_id', storeId).gte('created_at', weekStart);
+        const pendingQuery = supabase.from('custom_orders').select('id, customer_name, category_name, amount_cents').eq('status', 'pending').eq('store_id', storeId).order('created_at', { ascending: false }).limit(5);
 
-        const [{ count: usersCount }, { count: vipCount }, { data: ordersData, count: ordersCount }, { data: pendingData, count: pendingCount }] = await Promise.all([
-          usersQuery, vipQuery, ordersQuery, pendingQuery,
+        const [{ count: usersCount }, { count: vipCount }, { data: ordersData, count: ordersCount }, { data: weeklyOrdersData }, { data: pendingData, count: pendingCount }] = await Promise.all([
+          usersQuery, vipQuery, ordersQuery, weeklyOrdersQuery, pendingQuery,
         ]);
         const paidOrders = ordersData?.filter(o => o.status === 'paid' || o.status === 'completed') || [];
         const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
@@ -214,8 +246,8 @@ const AdminDashboard: React.FC = () => {
         setPendingOrders(pendingData || []);
 
         // Weekly activity — real data from the last 7 days of orders
-        const buckets = buildEmptyWeek();
-        (ordersData || []).forEach((o: any) => {
+        const buckets = weekBuckets;
+        (weeklyOrdersData || []).forEach((o: any) => {
           if (!o.created_at) return;
           const key = new Date(o.created_at).toISOString().slice(0, 10);
           const bucket = buckets.find(b => b.key === key);
