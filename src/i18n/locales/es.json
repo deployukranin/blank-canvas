@@ -243,7 +243,10 @@
       "expired": "¡Tu prueba ha expirado!",
       "daysLeft": "{{days}} días de prueba restantes",
       "upgradeHint": "Actualiza para mantener tu plataforma activa.",
-      "upgrade": "Ver Planes"
+      "upgrade": "Ver Planes",
+      "hoursLeft": "{{hours}}h de prueba restantes",
+      "minutesLeft": "{{minutes}} min de prueba restantes",
+      "expiredHint": "Las acciones de pago están bloqueadas hasta que elijas un plan."
     },
     "plans": {
       "title": "Planes",

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { storeBlockedResponse } from "../_shared/store-plan.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,6 +54,12 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // ─── Trial expiry guard (server-side rule) ───
+    const planBlocked = await storeBlockedResponse(store_id, corsHeaders);
+    if (planBlocked) return planBlocked;
+
+
 
     // Validate return_url — must be https and belong to a known app host.
     try {

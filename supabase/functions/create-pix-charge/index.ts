@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { storeBlockedResponse } from "../_shared/store-plan.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -145,6 +146,11 @@ Deno.serve(async (req) => {
     const customerName = String(rawBody.customerName || '').trim();
     const durationMinutes = Number(rawBody.durationMinutes) || 0;
     const storeId = rawBody.storeId || null;
+
+    // ─── Trial expiry guard (server-side rule) ───
+    const planBlocked = await storeBlockedResponse(storeId, corsHeaders);
+    if (planBlocked) return planBlocked;
+
     const affiliateCode = typeof rawBody.affiliateCode === 'string'
       ? rawBody.affiliateCode.trim().toUpperCase().substring(0, 6)
       : '';

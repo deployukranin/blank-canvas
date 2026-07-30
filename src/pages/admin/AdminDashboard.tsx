@@ -15,7 +15,8 @@ import { Button } from '@/components/ui/button';
 
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
-import { differenceInDays, parseISO } from 'date-fns';
+import { TrialCountdown } from '@/components/tenant/TrialCountdown';
+
 
 interface YTMetrics {
   subscriber_count: number;
@@ -309,27 +310,10 @@ const AdminDashboard: React.FC = () => {
     <AdminLayout title={t('admin.dashboard')}>
       <div className="space-y-6">
         {/* Trial banner */}
-        {storePlan?.type === 'trial' && storePlan.expiresAt && (() => {
-          const daysLeft = differenceInDays(parseISO(storePlan.expiresAt), new Date());
-          const isUrgent = daysLeft <= 2;
-          return (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-              className={`flex items-center justify-between gap-4 p-4 rounded-xl border ${isUrgent ? 'bg-destructive/10 border-destructive/30' : 'bg-yellow-500/10 border-yellow-500/30'}`}>
-              <div className="flex items-center gap-3">
-                {isUrgent ? <AlertTriangle className="w-5 h-5 text-destructive shrink-0" /> : <Zap className="w-5 h-5 text-yellow-500 shrink-0" />}
-                <div>
-                  <p className={`font-semibold text-sm ${isUrgent ? 'text-destructive' : 'text-yellow-500'}`}>
-                    {daysLeft <= 0 ? t('admin.trial.expired') : t('admin.trial.daysLeft', { days: Math.max(0, daysLeft) })}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t('admin.trial.upgradeHint')}</p>
-                </div>
-              </div>
-              <Link to={`${base}/plans`}>
-                <Button size="sm" className="bg-primary hover:bg-primary/90 shrink-0">{t('admin.trial.upgrade')}</Button>
-              </Link>
-            </motion.div>
-          );
-        })()}
+        {storePlan?.type === 'trial' && storePlan.expiresAt && (
+          <TrialCountdown expiresAt={storePlan.expiresAt} basePath={base} />
+        )}
+
 
         {/* Platform quick actions */}
         <div className="flex flex-wrap items-center gap-3">

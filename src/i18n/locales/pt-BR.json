@@ -243,7 +243,10 @@
       "expired": "Seu trial expirou!",
       "daysLeft": "{{days}} dias restantes de trial",
       "upgradeHint": "Faça upgrade para manter sua plataforma ativa.",
-      "upgrade": "Ver Planos"
+      "upgrade": "Ver Planos",
+      "hoursLeft": "{{hours}}h restantes de trial",
+      "minutesLeft": "{{minutes}} min restantes de trial",
+      "expiredHint": "Ações pagas estão bloqueadas até você contratar um plano."
     },
     "plans": {
       "title": "Planos",
