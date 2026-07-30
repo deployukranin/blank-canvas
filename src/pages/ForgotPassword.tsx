@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Sparkles, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import myTingleBoxLogo from "@/assets/mytinglebox-logo.png";
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
