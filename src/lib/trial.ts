@@ -63,7 +63,7 @@ export async function fetchTrialStatus(storeId: string): Promise<TrialStatus | n
   const { data, error } = await supabase.rpc('get_store_trial_status', { p_store_id: storeId });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (error || !data || typeof data !== 'object') return null;
-  return data as TrialStatus;
+  return data as unknown as TrialStatus;
 }
 
 /**
