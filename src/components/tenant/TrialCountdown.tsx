@@ -4,26 +4,31 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { expiresAtMs } from '@/lib/trial';
+import { expiresAtMs, fetchTrialStatus, clockOffsetMs } from '@/lib/trial';
 
 interface TrialCountdownProps {
   /** ISO date when the trial ends */
   expiresAt: string;
   /** Base path of the tenant admin (e.g. /myslug/admin) */
   basePath: string;
+  /** Store id — enables the server-side (UTC) trial check */
+  storeId?: string | null;
 }
 
 /**
  * Live trial countdown. Recomputes every minute so the remaining time
  * stays accurate without a page reload.
  *
- * The deadline is parsed as an absolute UTC instant (see `@/lib/trial`), so the
- * value is identical after a refresh and does not shift if the device timezone
- * changes.
+ * The deadline is parsed as an absolute UTC instant (see `@/lib/trial`) and the
+ * backend is asked for the authoritative remaining time, so a wrong/drifted
+ * device clock cannot change what the user sees.
  */
-export function TrialCountdown({ expiresAt, basePath }: TrialCountdownProps) {
+export function TrialCountdown({ expiresAt, basePath, storeId }: TrialCountdownProps) {
   const { t } = useTranslation();
   const [now, setNow] = useState(() => Date.now());
+  // Server clock - device clock, in ms.
+  const [offset, setOffset] = useState(0);
+  const [serverExpiresAt, setServerExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
     const tick = () => setNow(Date.now());
@@ -39,9 +44,40 @@ export function TrialCountdown({ expiresAt, basePath }: TrialCountdownProps) {
     };
   }, []);
 
+  // Server-authoritative sync: removes any client clock drift.
+  useEffect(() => {
+    if (!storeId) return;
+    let cancelled = false;
+
+    const sync = async () => {
+      const status = await fetchTrialStatus(storeId);
+      if (cancelled || !status?.success) return;
+      setOffset(clockOffsetMs(status.server_now));
+      setServerExpiresAt(status.plan_expires_at ?? null);
+      setNow(Date.now());
+    };
+
+    sync();
+    // Re-sync periodically and when the tab regains focus.
+    const id = setInterval(sync, 5 * 60_000);
+    const onFocus = () => { if (document.visibilityState === 'visible') sync(); };
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [storeId]);
+
+
   const { expired, isUrgent, label } = useMemo(() => {
-    const end = expiresAtMs(expiresAt);
-    const msLeft = end === null ? -1 : end - now;
+    // Prefer the deadline reported by the backend, and compare against the
+    // server clock (device clock + measured skew).
+    const end = expiresAtMs(serverExpiresAt ?? expiresAt);
+    const serverNow = now + offset;
+    const msLeft = end === null ? -1 : end - serverNow;
 
     if (end === null || msLeft <= 0) {
       return { expired: true, isUrgent: true, label: t('admin.trial.expired') };
@@ -72,7 +108,7 @@ export function TrialCountdown({ expiresAt, basePath }: TrialCountdownProps) {
       isUrgent: true,
       label: t('admin.trial.minutesLeft', { minutes: Math.max(1, Math.ceil(msLeft / 60_000)) }),
     };
-  }, [expiresAt, now, t]);
+  }, [expiresAt, serverExpiresAt, offset, now, t]);
 
 
   return (

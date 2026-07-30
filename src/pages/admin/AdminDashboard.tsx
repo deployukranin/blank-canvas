@@ -311,7 +311,7 @@ const AdminDashboard: React.FC = () => {
       <div className="space-y-6">
         {/* Trial banner */}
         {storePlan?.type === 'trial' && storePlan.expiresAt && (
-          <TrialCountdown expiresAt={storePlan.expiresAt} basePath={base} />
+          <TrialCountdown expiresAt={storePlan.expiresAt} basePath={base} storeId={storeId} />
         )}
 
 
