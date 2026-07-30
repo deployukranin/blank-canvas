@@ -43,11 +43,12 @@ const ForgotPassword = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-bold text-lg font-['Space_Grotesk']">Creator Platform</span>
+        <div className="flex items-center justify-center mb-8">
+          <img
+            src={myTingleBoxLogo}
+            alt="My Tingle Box"
+            className="h-10 w-auto object-contain"
+          />
         </div>
 
         <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
