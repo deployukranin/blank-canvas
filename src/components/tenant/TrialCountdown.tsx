@@ -73,8 +73,11 @@ export function TrialCountdown({ expiresAt, basePath, storeId }: TrialCountdownP
 
 
   const { expired, isUrgent, label } = useMemo(() => {
-    const end = expiresAtMs(expiresAt);
-    const msLeft = end === null ? -1 : end - now;
+    // Prefer the deadline reported by the backend, and compare against the
+    // server clock (device clock + measured skew).
+    const end = expiresAtMs(serverExpiresAt ?? expiresAt);
+    const serverNow = now + offset;
+    const msLeft = end === null ? -1 : end - serverNow;
 
     if (end === null || msLeft <= 0) {
       return { expired: true, isUrgent: true, label: t('admin.trial.expired') };
@@ -105,7 +108,7 @@ export function TrialCountdown({ expiresAt, basePath, storeId }: TrialCountdownP
       isUrgent: true,
       label: t('admin.trial.minutesLeft', { minutes: Math.max(1, Math.ceil(msLeft / 60_000)) }),
     };
-  }, [expiresAt, now, t]);
+  }, [expiresAt, serverExpiresAt, offset, now, t]);
 
 
   return (
