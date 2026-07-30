@@ -6,6 +6,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+const ignoredConfigWrite = (error: string, extra: Record<string, unknown> = {}) =>
+  jsonResponse({ success: false, ignored: true, error, ...extra }, 200);
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -21,10 +30,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       console.error("Missing or invalid Authorization header");
-      return new Response(
-        JSON.stringify({ success: false, error: "Autenticação obrigatória" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Autenticação obrigatória" }, 401);
     }
 
     // 2. Validate JWT using getClaims (local validation, no server roundtrip)
@@ -36,10 +42,7 @@ Deno.serve(async (req) => {
     const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
       console.error("Invalid token:", claimsError?.message);
-      return new Response(
-        JSON.stringify({ success: false, error: "Token inválido ou expirado" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Token inválido ou expirado" }, 401);
     }
 
     const userId = claimsData.claims.sub as string;
@@ -53,10 +56,7 @@ Deno.serve(async (req) => {
 
     if (rolesError) {
       console.error("Error fetching user roles:", rolesError.message);
-      return new Response(
-        JSON.stringify({ success: false, error: "Erro ao verificar permissões" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Erro ao verificar permissões" }, 500);
     }
 
     const userRoles = new Set((roles || []).map((r) => r.role));
@@ -64,29 +64,20 @@ Deno.serve(async (req) => {
     const isStoreManagerRole = userRoles.has("admin") || userRoles.has("creator");
 
     if (!isPlatformAdmin && !isStoreManagerRole) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Acesso negado: permissões administrativas necessárias" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return ignoredConfigWrite("Acesso negado: permissões administrativas necessárias", { reason: "missing_admin_role" });
     }
 
     // 4. Parse request body
     const { config_key, config_value, store_id } = await req.json();
 
     if (!config_key || config_value === undefined) {
-      return new Response(
-        JSON.stringify({ success: false, error: "config_key e config_value são obrigatórios" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "config_key e config_value são obrigatórios" }, 400);
     }
 
     // Validate config_key
     const validKeys = ["video_config", "vip_config", "white_label_config", "global_default_categories", "payment_config", "youtube_channel", "social_links", "platform_settings", "platform_plans", "content_settings"];
     if (!validKeys.includes(config_key)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "config_key inválido" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "config_key inválido" }, 400);
     }
 
     // 4b. Ownership check — platform configs (store_id null) require CEO/super_admin;
@@ -111,18 +102,13 @@ Deno.serve(async (req) => {
     // crash while HMR/CDN catches up. Platform-only keys still require CEO/SA.
     if (!store_id && storeScopedKeys.has(config_key) && !isPlatformAdmin) {
       console.warn(`Ignored ${config_key} save without store_id by user ${userId}`);
-      return new Response(
-        JSON.stringify({ success: false, ignored: true, error: "store_id obrigatório para configurações da loja" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return ignoredConfigWrite("store_id obrigatório para configurações da loja", { reason: "missing_store_id" });
     }
 
     if (!store_id || platformOnlyKeys.has(config_key)) {
       if (!isPlatformAdmin) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Acesso negado: apenas CEO/super_admin podem alterar configurações globais" }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        console.warn(`Ignored global ${config_key} save by non-platform admin ${userId}`);
+        return ignoredConfigWrite("Acesso negado: apenas CEO/super_admin podem alterar configurações globais", { reason: "platform_admin_required" });
       }
     } else if (!isPlatformAdmin) {
       // Verify the caller manages the target store
@@ -131,10 +117,7 @@ Deno.serve(async (req) => {
         serviceClient.from("store_admins").select("id").eq("store_id", store_id).eq("user_id", userId).maybeSingle(),
       ]);
       if (!ownedStore && !storeAdminRow) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Acesso negado: você não gerencia esta loja" }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return ignoredConfigWrite("Acesso negado: você não gerencia esta loja", { reason: "store_not_managed" });
       }
     }
 
@@ -188,23 +171,14 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error("Error saving config:", error);
-      return new Response(
-        JSON.stringify({ success: false, error: "Erro ao salvar configuração" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ success: false, error: "Erro ao salvar configuração" }, 500);
     }
 
     console.log(`Config ${config_key} saved successfully by user ${userId}`);
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ success: true });
   } catch (err) {
     console.error("Error in save-app-config:", err);
-    return new Response(
-      JSON.stringify({ success: false, error: "Erro interno do servidor" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ success: false, error: "Erro interno do servidor" }, 500);
   }
 });
