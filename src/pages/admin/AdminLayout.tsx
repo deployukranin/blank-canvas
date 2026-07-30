@@ -34,12 +34,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   // Trial expiry calculations (UTC-safe, stable across timezones/refreshes)
-  const trialExpired = isTrialExpired(store);
+  const isTrialExpired = checkTrialExpired(store);
   const expiresMs = expiresAtMs(store?.plan_expires_at);
-  const daysUntilDeletion = trialExpired && expiresMs !== null
+  const daysUntilDeletion = isTrialExpired && expiresMs !== null
     ? Math.max(0, 7 - Math.floor((Date.now() - expiresMs) / (1000 * 60 * 60 * 24)))
     : null;
-  const isTrialExpiredFlag = trialExpired;
+
 
 
   const base = slug ? `/${slug}/admin` : '/admin';
