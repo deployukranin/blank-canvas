@@ -193,7 +193,7 @@ const SuperAdminTenants: React.FC = () => {
                               plan_type: value,
                               plan_expires_at: value === 'paid'
                                 ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                                : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                                : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
                             })
                           }
                         >

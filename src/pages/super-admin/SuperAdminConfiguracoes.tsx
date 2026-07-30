@@ -25,7 +25,7 @@ interface PlatformSettings {
 const defaults: PlatformSettings = {
   platformName: 'WhisperScape',
   platformDomain: '',
-  trialDays: 7,
+  trialDays: 3,
   autoSuspendExpired: false,
   newSignupsEnabled: true,
   maintenanceMode: false,
