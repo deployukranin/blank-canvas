@@ -173,6 +173,23 @@ const AdminDashboard: React.FC = () => {
     return 'hsl(263, 70%, 70%)';
   }, [config.colors.primary]);
 
+  const [weekData, setWeekData] = useState<Array<{ name: string; orders: number; revenue: number }>>([]);
+
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+
+  // Build the last 7 days (oldest → today) with zeroed buckets
+  const buildEmptyWeek = () => {
+    const days: Array<{ key: string; date: Date; orders: number; revenue: number }> = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      days.push({ key: d.toISOString().slice(0, 10), date: d, orders: 0, revenue: 0 });
+    }
+    return days;
+  };
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -195,6 +212,24 @@ const AdminDashboard: React.FC = () => {
         const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
         setStats({ totalUsers: usersCount || 0, totalVIP: vipCount || 0, totalOrders: ordersCount || 0, revenue: totalRevenue, pendingOrders: pendingCount || 0, newUsersToday: 0 });
         setPendingOrders(pendingData || []);
+
+        // Weekly activity — real data from the last 7 days of orders
+        const buckets = buildEmptyWeek();
+        (ordersData || []).forEach((o: any) => {
+          if (!o.created_at) return;
+          const key = new Date(o.created_at).toISOString().slice(0, 10);
+          const bucket = buckets.find(b => b.key === key);
+          if (!bucket) return;
+          bucket.orders += 1;
+          if (o.status === 'paid' || o.status === 'completed') {
+            bucket.revenue += (o.amount_cents || 0) / 100;
+          }
+        });
+        setWeekData(buckets.map(b => ({
+          name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
+          orders: b.orders,
+          revenue: b.revenue,
+        })));
       } catch (error) {
         console.error('Error fetching admin stats:', error);
       } finally {
@@ -202,14 +237,14 @@ const AdminDashboard: React.FC = () => {
       }
     };
     fetchStats();
-  }, [storeId]);
+  }, [storeId, i18n.language]);
 
-  const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
-  const chartData = dayKeys.map((key, i) => ({
-    name: t(`admin.days.${key}`),
-    orders: [2, 5, 3, 7, 4, 8, 6][i],
-    revenue: [45, 120, 80, 200, 150, 280, 190][i],
+  const chartData = weekData.length ? weekData : buildEmptyWeek().map(b => ({
+    name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
+    orders: 0,
+    revenue: 0,
   }));
+
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
     <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4">
