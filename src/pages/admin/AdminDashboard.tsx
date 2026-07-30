@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { TrialCountdown } from '@/components/tenant/TrialCountdown';
-import { differenceInDays, parseISO } from 'date-fns';
+
 
 interface YTMetrics {
   subscriber_count: number;
