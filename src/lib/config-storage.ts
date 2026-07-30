@@ -17,9 +17,11 @@ export type ConfigKey =
   | 'content_settings';
 
 const CONFIG_ADMIN_ROLES = ['admin', 'creator', 'ceo', 'super_admin'] as const;
-const permissionCache = new Map<string, boolean>();
+const PLATFORM_ADMIN_ROLES = ['ceo', 'super_admin'] as const;
+const PLATFORM_ONLY_KEYS = new Set<ConfigKey>(['platform_settings', 'platform_plans']);
+const permissionCache = new Map<string, { canSave: boolean; isPlatformAdmin: boolean }>();
 
-const canSaveConfig = async (userId: string): Promise<boolean> => {
+const getConfigPermissions = async (userId: string): Promise<{ canSave: boolean; isPlatformAdmin: boolean }> => {
   const cached = permissionCache.get(userId);
   if (cached !== undefined) return cached;
 
@@ -30,13 +32,18 @@ const canSaveConfig = async (userId: string): Promise<boolean> => {
 
   if (error) {
     console.debug('Skipping config save: could not verify admin permissions', error.message);
-    permissionCache.set(userId, false);
-    return false;
+    const denied = { canSave: false, isPlatformAdmin: false };
+    permissionCache.set(userId, denied);
+    return denied;
   }
 
-  const allowed = data?.some((r) => CONFIG_ADMIN_ROLES.includes(r.role as any)) ?? false;
-  permissionCache.set(userId, allowed);
-  return allowed;
+  const roles = data?.map((r) => r.role) || [];
+  const permissions = {
+    canSave: roles.some((role) => CONFIG_ADMIN_ROLES.includes(role as any)),
+    isPlatformAdmin: roles.some((role) => PLATFORM_ADMIN_ROLES.includes(role as any)),
+  };
+  permissionCache.set(userId, permissions);
+  return permissions;
 };
 
 /**
@@ -88,8 +95,19 @@ export const saveConfig = async <T>(
       return false;
     }
 
-    if (!(await canSaveConfig(session.user.id))) {
+    const permissions = await getConfigPermissions(session.user.id);
+    if (!permissions.canSave) {
       console.debug(`Skipping save for ${key}: administrative permissions required`);
+      return false;
+    }
+
+    if (!storeId && !permissions.isPlatformAdmin) {
+      console.debug(`Skipping save for ${key}: tenant-scoped config requires storeId`);
+      return false;
+    }
+
+    if (PLATFORM_ONLY_KEYS.has(key) && !permissions.isPlatformAdmin) {
+      console.debug(`Skipping save for ${key}: platform admin permissions required`);
       return false;
     }
 
