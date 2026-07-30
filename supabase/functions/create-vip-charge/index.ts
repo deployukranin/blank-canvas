@@ -136,6 +136,11 @@ Deno.serve(async (req) => {
     }
 
     const storeId = body.storeId || null;
+
+    // ─── Trial expiry guard (server-side rule) ───
+    const planBlocked = await storeBlockedResponse(storeId, corsHeaders);
+    if (planBlocked) return planBlocked;
+
     const affiliateCode = typeof body.affiliateCode === 'string'
       ? body.affiliateCode.trim().toUpperCase().substring(0, 6)
       : '';
