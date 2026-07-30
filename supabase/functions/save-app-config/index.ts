@@ -94,6 +94,29 @@ Deno.serve(async (req) => {
     // Without this, any admin/creator role could overwrite configs of other tenants
     // by passing an arbitrary store_id in the body (tenant escape).
     const platformOnlyKeys = new Set(["platform_settings", "platform_plans"]);
+    const storeScopedKeys = new Set([
+      "video_config",
+      "vip_config",
+      "white_label_config",
+      "global_default_categories",
+      "payment_config",
+      "youtube_channel",
+      "social_links",
+      "content_settings",
+    ]);
+
+    // Older frontend bundles could send tenant configs without store_id, which
+    // used to be treated as an attempted global write and returned 403. Do not
+    // save anything in that case, but return a controlled 200 so the UI does not
+    // crash while HMR/CDN catches up. Platform-only keys still require CEO/SA.
+    if (!store_id && storeScopedKeys.has(config_key) && !isPlatformAdmin) {
+      console.warn(`Ignored ${config_key} save without store_id by user ${userId}`);
+      return new Response(
+        JSON.stringify({ success: false, ignored: true, error: "store_id obrigatório para configurações da loja" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!store_id || platformOnlyKeys.has(config_key)) {
       if (!isPlatformAdmin) {
         return new Response(
