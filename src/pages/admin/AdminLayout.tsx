@@ -14,6 +14,8 @@ import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { expiresAtMs, isTrialExpired as checkTrialExpired } from '@/lib/trial';
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
