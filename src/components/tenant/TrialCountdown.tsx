@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { expiresAtMs, fetchTrialStatus, clockOffsetMs } from '@/lib/trial';
 
 interface TrialCountdownProps {
@@ -51,7 +50,7 @@ export function TrialCountdown({ expiresAt, basePath, storeId }: TrialCountdownP
     let cancelled = false;
 
     const sync = async () => {
-      const status = await fetchTrialStatus(supabase, storeId);
+      const status = await fetchTrialStatus(storeId);
       if (cancelled || !status?.success) return;
       setOffset(clockOffsetMs(status.server_now));
       setServerExpiresAt(status.plan_expires_at ?? null);

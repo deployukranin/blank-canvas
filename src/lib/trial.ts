@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 /**
  * Trial time helpers.
  *
@@ -57,11 +59,9 @@ export interface TrialStatus {
   error?: string;
 }
 
-export async function fetchTrialStatus(
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> },
-  storeId: string,
-): Promise<TrialStatus | null> {
+export async function fetchTrialStatus(storeId: string): Promise<TrialStatus | null> {
   const { data, error } = await supabase.rpc('get_store_trial_status', { p_store_id: storeId });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (error || !data || typeof data !== 'object') return null;
   return data as TrialStatus;
 }
