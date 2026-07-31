@@ -4,14 +4,14 @@
   try {
     var seg = (location.pathname.split('/').filter(Boolean)[0] || '__global').toLowerCase();
     var isTenantRoute = seg !== '__global' && !['admin', 'super-admin', 'entrar', 'auth', 'setup'].includes(seg);
-    // v2 cache — old v1 entries are ignored to avoid stale-color FOUC after schema/config changes
-    var cached = localStorage.getItem('whitelabel_cache_v3_' + seg);
-    if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_cache_v3___global');
-    // One-time cleanup of legacy v1 keys so they can't leak back in
+    // v4 cache — old v1/v3 entries are ignored to avoid stale-color FOUC after schema/config changes
+    var cached = localStorage.getItem('whitelabel_cache_v4_' + seg);
+    if (!cached && !isTenantRoute) cached = localStorage.getItem('whitelabel_cache_v4___global');
+    // One-time cleanup of legacy keys so they can't leak back in
     try {
       for (var i = localStorage.length - 1; i >= 0; i--) {
         var k = localStorage.key(i);
-        if (k && (k.indexOf('whitelabel_cache_') === 0 && k.indexOf('whitelabel_cache_v3_') !== 0)) {
+        if (k && (k.indexOf('whitelabel_cache_') === 0 && k.indexOf('whitelabel_cache_v4_') !== 0)) {
           localStorage.removeItem(k);
         }
       }
@@ -29,7 +29,7 @@
         try {
           cfg = JSON.parse(meta.getAttribute('content') || 'null');
           if (cfg) {
-            try { localStorage.setItem('whitelabel_cache_v3_' + seg, JSON.stringify(cfg)); } catch (_) {}
+            try { localStorage.setItem('whitelabel_cache_v4_' + seg, JSON.stringify(cfg)); } catch (_) {}
           }
         } catch (_) { cfg = null; }
       }
