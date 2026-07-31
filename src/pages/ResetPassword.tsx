@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2, Lock, Eye, EyeOff, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,11 +65,12 @@ const ResetPassword = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-bold text-lg font-['Space_Grotesk']">Creator Platform</span>
+        <div className="flex items-center justify-center mb-8">
+          <img
+            src={myTingleBoxLogo}
+            alt="My Tingle Box"
+            className="h-10 w-auto object-contain"
+          />
         </div>
 
         <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-8">
