@@ -17,9 +17,9 @@ import { Container, Grid } from "@/components/layout/primitives";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
 const Starfield = () => (
-  <div className="pointer-events-none absolute inset-0 z-0">
+  <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
     <div
-      className="absolute inset-0 opacity-[0.35]"
+      className="absolute inset-0 opacity-[0.18]"
       style={{
         backgroundImage:
           "radial-gradient(1px 1px at 20% 30%, hsl(270 80% 80%) 50%, transparent), radial-gradient(1px 1px at 70% 60%, hsl(280 80% 85%) 50%, transparent), radial-gradient(1.5px 1.5px at 40% 80%, hsl(260 80% 75%) 50%, transparent), radial-gradient(1px 1px at 90% 20%, hsl(290 80% 85%) 50%, transparent), radial-gradient(1px 1px at 10% 70%, hsl(270 70% 80%) 50%, transparent)",
@@ -27,13 +27,18 @@ const Starfield = () => (
         backgroundRepeat: "repeat",
       }}
     />
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0418]/40 to-[#0a0418]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0f]/50 to-[#0a0a0f]" />
     <div
-      className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-      style={{ background: "radial-gradient(circle, hsl(270 90% 60% / 0.4) 0%, transparent 70%)" }}
+      className="absolute -top-52 left-1/2 -translate-x-1/2 w-[720px] h-[720px] rounded-full opacity-25 blur-3xl"
+      style={{ background: "radial-gradient(circle, hsl(263 90% 62% / 0.35) 0%, transparent 70%)" }}
     />
   </div>
 );
+
+/** Shared field styling for the auth card (applied via arbitrary variants on the card). */
+const CARD_FIELD_STYLES =
+  "[&_input]:h-11 [&_input]:rounded-xl [&_input]:bg-white/[0.03] [&_input]:border-white/[0.08] [&_input]:transition-colors [&_input:hover]:border-white/[0.16] [&_label]:font-medium";
+
 
 
 const Auth = () => {
@@ -474,28 +479,30 @@ const Auth = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0418]">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8b5cf6]" />
       </div>
     );
   }
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 md:py-16 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen font-body flex items-center justify-center bg-[#0a0a0f] px-5 py-14 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
         <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
         </div>
         <Container width="form" className="relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
             <div className="flex items-center mb-8 justify-center">
-              <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
+              <img src={platformLogo} alt="My Tingle Box" className="w-[180px] max-w-[60%] h-auto" />
             </div>
-            <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
+            <div className="border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-[0_24px_60px_-24px_rgba(139,92,246,0.45)]">
+
               <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
                 <Mail className="w-7 h-7 text-purple-400" />
               </div>
@@ -520,7 +527,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0418] relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
+    <div className="min-h-screen font-body flex bg-[#0a0a0f] relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
       <Starfield />
       {/* Language selector — top right */}
       <div className="absolute top-4 right-4 z-20">
@@ -528,52 +535,55 @@ const Auth = () => {
       </div>
 
       {/* Left side — Branding / Features */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-[#0a0418] to-[#0a0418]" />
-        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
+      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1030] via-[#0a0a0f] to-[#0a0a0f]" />
+        <div className="absolute -top-24 -left-16 w-[420px] h-[420px] bg-[#8b5cf6]/15 rounded-full blur-[130px]" />
+        <div className="absolute bottom-0 right-8 w-72 h-72 bg-[#c4b5fd]/[0.07] rounded-full blur-[110px]" />
+        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
 
-        <div className="relative z-10 flex flex-col justify-center px-6 py-12 md:py-16 w-full">
+        <div className="relative z-10 flex flex-col justify-center px-10 xl:px-16 py-16 w-full">
           <Container width="prose">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="max-w-[30rem] motion-reduce:transform-none"
             >
-              <div className="flex items-center mb-8">
-                <img src={platformLogo} alt="TingleBox" className="h-24 w-auto" />
-              </div>
+              <img src={platformLogo} alt="My Tingle Box" className="w-[200px] h-auto mb-10" />
 
-              <h1 className="font-display text-4xl font-bold text-white mb-4 leading-tight">
+              <h1
+                className="font-display font-bold text-white mb-5 leading-[1.08] tracking-tight"
+                style={{ fontSize: "clamp(2rem, 2.6vw + 0.9rem, 3rem)" }}
+              >
                 {t("auth.heroTitle1")}
                 <br />
-                <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
+                <span className="bg-gradient-to-r from-[#c4b5fd] via-[#a78bfa] to-[#8b5cf6] bg-clip-text text-transparent">{t("auth.heroTitle2")}</span>
               </h1>
 
-              <p className="text-white/60 text-lg mb-6 max-w-md">
+              <p className="text-white/55 text-base leading-relaxed mb-7 max-w-md">
                 {t("auth.heroDesc")}
               </p>
 
-              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-full px-5 py-2.5 mb-12">
-                <Sparkles className="w-4 h-4 text-green-400" />
-                <span className="text-green-400 font-semibold text-sm">{t("auth.trialBadge")}</span>
+              <div className="inline-flex items-center gap-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/25 rounded-full px-4 py-2 mb-10">
+                <Sparkles className="w-3.5 h-3.5 text-[#c4b5fd]" />
+                <span className="text-[#c4b5fd] font-medium text-[13px]">{t("auth.trialBadge")}</span>
               </div>
 
-              <Grid cols="1" gap={5}>
+              <Grid cols="1" gap={4}>
                 {features.map((feature, i) => (
                   <motion.div
                     key={feature.title}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
-                    className="flex items-start gap-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + i * 0.06, duration: 0.35 }}
+                    className="flex items-start gap-3.5 motion-reduce:transform-none"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-purple-600/20 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
-                      <feature.icon className="w-5 h-5 text-purple-400" />
+                    <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-[18px] h-[18px] text-[#c4b5fd]" />
                     </div>
-                    <div>
-                      <h3 className="text-white font-medium text-sm">{feature.title}</h3>
-                      <p className="text-white/50 text-sm">{feature.desc}</p>
+                    <div className="min-w-0">
+                      <h3 className="text-white font-medium text-sm leading-snug">{feature.title}</h3>
+                      <p className="text-white/45 text-[13px] leading-snug mt-0.5">{feature.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -584,39 +594,41 @@ const Auth = () => {
       </div>
 
       {/* Right side — Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-16 relative z-10">
-        <Container width="form">
+      <div className="flex-1 flex items-center justify-center px-5 sm:px-8 py-14 relative z-10">
+        <Container width="form" className="max-w-[26rem]">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="motion-reduce:transform-none"
           >
           {/* Mobile branding */}
           <div className="lg:hidden flex items-center mb-8 justify-center">
-            <img src={platformLogo} alt="TingleBox" className="h-16 w-auto" />
+            <img src={platformLogo} alt="My Tingle Box" className="w-[160px] max-w-[55%] h-auto" />
           </div>
 
-          <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 shadow-2xl shadow-purple-500/10">
+          <div className={`border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_24px_60px_-24px_rgba(139,92,246,0.45)] ${CARD_FIELD_STYLES}`}>
             <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-white">
+              <h2 className="font-display text-[22px] font-bold text-white tracking-tight">
                 {defaultTab === "signup" ? t("auth.creatorSignup") : t("auth.creatorLogin")}
               </h2>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-white/45 text-sm mt-1">
                 {defaultTab === "signup" ? t("auth.creatorSignupDesc") : t("auth.creatorLoginDesc")}
               </p>
             </div>
 
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/[0.04] border border-white/[0.06]">
+              <TabsList className="grid w-full grid-cols-2 mb-6 h-11 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-400"
+                  className="rounded-lg text-white/50 transition-all data-[state=active]:bg-[#8b5cf6] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_-8px_rgba(139,92,246,0.9)]"
                 >
                   {t("auth.loginTab")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-400"
+                  className="rounded-lg text-white/50 transition-all data-[state=active]:bg-[#8b5cf6] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_-8px_rgba(139,92,246,0.9)]"
+
                 >
                   {t("auth.signupTab")}
                 </TabsTrigger>
@@ -668,7 +680,7 @@ const Auth = () => {
                   <div className="flex justify-end">
                     <a
                       href="/forgot-password"
-                      className="text-sm text-purple-400 hover:text-purple-300"
+                      className="text-sm text-[#c4b5fd] hover:text-white transition-colors"
                     >
                       {t("auth.forgotPassword")}
                     </a>
@@ -676,7 +688,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
+                    className="w-full h-12 rounded-xl font-semibold text-white bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] shadow-[0_14px_30px_-14px_rgba(139,92,246,0.9)] transition-all focus-visible:ring-2 focus-visible:ring-[#c4b5fd]/60"
                     disabled={isSubmitting}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -898,7 +910,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
+                    className="w-full h-12 rounded-xl font-semibold text-white bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] shadow-[0_14px_30px_-14px_rgba(139,92,246,0.9)] transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[#c4b5fd]/60"
                     disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
                     {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -908,11 +920,11 @@ const Auth = () => {
               </TabsContent>
             </Tabs>
 
-            <p className="text-center text-xs text-gray-600 mt-6">
+            <p className="text-center text-xs leading-relaxed text-white/35 mt-6 pt-5 border-t border-white/[0.06]">
               {t("auth.terms")}{" "}
-              <a href="/terms" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
+              <a href="/terms" className="text-[#c4b5fd] hover:text-white transition-colors">{t("auth.termsOfUse")}</a>{" "}
               {t("auth.and")}{" "}
-              <a href="/privacy" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
+              <a href="/privacy" className="text-[#c4b5fd] hover:text-white transition-colors">{t("auth.privacyPolicy")}</a>
             </p>
           </div>
         </motion.div>
