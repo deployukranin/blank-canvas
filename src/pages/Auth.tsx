@@ -910,7 +910,7 @@ const Auth = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-full shadow-lg shadow-purple-500/30"
+                    className="w-full h-12 rounded-xl font-semibold text-white bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] shadow-[0_14px_30px_-14px_rgba(139,92,246,0.9)] transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[#c4b5fd]/60"
                     disabled={isSubmitting || slugChecking || slugAvailable !== true || storeSlug.length < 3}
                   >
                     {(isSubmitting || slugChecking) && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
