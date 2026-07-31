@@ -889,7 +889,7 @@ const getSlugFromPath = () => {
   } catch { return '__global'; }
 };
 
-const getCacheKey = (slug?: string) => `whitelabel_cache_v3_${normalizeSlug(slug) || getSlugFromPath()}`;
+const getCacheKey = (slug?: string) => `whitelabel_cache_v4_${normalizeSlug(slug) || getSlugFromPath()}`;
 
 // Try to get cached config synchronously to prevent theme flash on reload
 const getCachedConfig = (): WhiteLabelConfig => {
