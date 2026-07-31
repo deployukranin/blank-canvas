@@ -82,6 +82,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         display: ['Space Grotesk', 'sans-serif'],
+        body: ['DM Sans', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
