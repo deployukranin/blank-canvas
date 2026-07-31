@@ -920,11 +920,11 @@ const Auth = () => {
               </TabsContent>
             </Tabs>
 
-            <p className="text-center text-xs text-gray-600 mt-6">
+            <p className="text-center text-xs leading-relaxed text-white/35 mt-6 pt-5 border-t border-white/[0.06]">
               {t("auth.terms")}{" "}
-              <a href="/terms" className="text-purple-400 hover:underline">{t("auth.termsOfUse")}</a>{" "}
+              <a href="/terms" className="text-[#c4b5fd] hover:text-white transition-colors">{t("auth.termsOfUse")}</a>{" "}
               {t("auth.and")}{" "}
-              <a href="/privacy" className="text-purple-400 hover:underline">{t("auth.privacyPolicy")}</a>
+              <a href="/privacy" className="text-[#c4b5fd] hover:text-white transition-colors">{t("auth.privacyPolicy")}</a>
             </p>
           </div>
         </motion.div>
