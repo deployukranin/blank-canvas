@@ -17,9 +17,9 @@ import { Container, Grid } from "@/components/layout/primitives";
 import platformLogo from "@/assets/mytinglebox-logo.png";
 
 const Starfield = () => (
-  <div className="pointer-events-none absolute inset-0 z-0">
+  <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
     <div
-      className="absolute inset-0 opacity-[0.35]"
+      className="absolute inset-0 opacity-[0.18]"
       style={{
         backgroundImage:
           "radial-gradient(1px 1px at 20% 30%, hsl(270 80% 80%) 50%, transparent), radial-gradient(1px 1px at 70% 60%, hsl(280 80% 85%) 50%, transparent), radial-gradient(1.5px 1.5px at 40% 80%, hsl(260 80% 75%) 50%, transparent), radial-gradient(1px 1px at 90% 20%, hsl(290 80% 85%) 50%, transparent), radial-gradient(1px 1px at 10% 70%, hsl(270 70% 80%) 50%, transparent)",
@@ -27,13 +27,18 @@ const Starfield = () => (
         backgroundRepeat: "repeat",
       }}
     />
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0418]/40 to-[#0a0418]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0f]/50 to-[#0a0a0f]" />
     <div
-      className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-      style={{ background: "radial-gradient(circle, hsl(270 90% 60% / 0.4) 0%, transparent 70%)" }}
+      className="absolute -top-52 left-1/2 -translate-x-1/2 w-[720px] h-[720px] rounded-full opacity-25 blur-3xl"
+      style={{ background: "radial-gradient(circle, hsl(263 90% 62% / 0.35) 0%, transparent 70%)" }}
     />
   </div>
 );
+
+/** Shared field styling for the auth card (applied via arbitrary variants on the card). */
+const CARD_FIELD_STYLES =
+  "[&_input]:h-11 [&_input]:rounded-xl [&_input]:bg-white/[0.03] [&_input]:border-white/[0.08] [&_input]:transition-colors [&_input:hover]:border-white/[0.16] [&_label]:font-medium";
+
 
 
 const Auth = () => {
