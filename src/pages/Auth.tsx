@@ -680,7 +680,7 @@ const Auth = () => {
                   <div className="flex justify-end">
                     <a
                       href="/forgot-password"
-                      className="text-sm text-purple-400 hover:text-purple-300"
+                      className="text-sm text-[#c4b5fd] hover:text-white transition-colors"
                     >
                       {t("auth.forgotPassword")}
                     </a>
