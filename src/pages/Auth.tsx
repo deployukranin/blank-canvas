@@ -487,20 +487,22 @@ const Auth = () => {
 
   if (signupConfirmationSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0418] px-6 py-12 md:py-16 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
+      <div className="min-h-screen font-body flex items-center justify-center bg-[#0a0a0f] px-5 py-14 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
         <Starfield />
         <div className="absolute top-4 right-4 z-20">
           <LanguageSelector variant="minimal" />
         </div>
         <Container width="form" className="relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
             <div className="flex items-center mb-8 justify-center">
-              <img src={platformLogo} alt="TingleBox" className="h-20 w-auto" />
+              <img src={platformLogo} alt="My Tingle Box" className="w-[180px] max-w-[60%] h-auto" />
             </div>
-            <div className="border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl rounded-2xl p-8 text-center space-y-4 shadow-2xl shadow-purple-500/10">
+            <div className="border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-[0_24px_60px_-24px_rgba(139,92,246,0.45)]">
+
               <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
                 <Mail className="w-7 h-7 text-purple-400" />
               </div>
