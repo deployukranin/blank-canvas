@@ -62,7 +62,7 @@ const tr = {
     ctaSeeFeatures: "Ver recursos",
     heroAlt: "Pré-visualização da plataforma MyTingleBox para criadores ASMR",
     trialBadge: "3 dias grátis — sem precisar de cartão de crédito",
-    heroPoints: ["0% de taxa no Premium", "Sua marca, seu domínio", "Stripe e PIX nativos"],
+    heroPoints: ["Dinheiro direto na sua conta", "Sua marca, seu domínio", "Stripe e PIX nativos"],
     featuresKicker: "Recursos",
     featuresTitle1: "Tudo que você precisa para",
     featuresTitle2: "viver da sua arte",
@@ -105,7 +105,7 @@ const tr = {
     ],
     statsTitle: "Criadores já confiam no MyTingleBox",
     stats: [
-      { value: "0%", label: "de taxa no plano Premium" },
+      { value: "100%", label: "do pagamento é seu" },
       { value: "3 min", label: "para publicar sua loja" },
       { value: "+30", label: "países atendidos" },
       { value: "24/7", label: "suporte e disponibilidade" },
@@ -146,7 +146,7 @@ const tr = {
     ctaSeeFeatures: "See features",
     heroAlt: "Preview of the MyTingleBox platform for ASMR creators",
     trialBadge: "3 days free — no credit card required",
-    heroPoints: ["0% fee on Premium", "Your brand, your domain", "Native Stripe & PIX"],
+    heroPoints: ["Money straight to your account", "Your brand, your domain", "Native Stripe & PIX"],
     featuresKicker: "Features",
     featuresTitle1: "Everything you need to",
     featuresTitle2: "live from your art",
@@ -189,7 +189,7 @@ const tr = {
     ],
     statsTitle: "Creators already trust MyTingleBox",
     stats: [
-      { value: "0%", label: "fee on the Premium plan" },
+      { value: "100%", label: "of revenue you keep" },
       { value: "3 min", label: "to publish your store" },
       { value: "30+", label: "countries served" },
       { value: "24/7", label: "support and uptime" },
@@ -273,7 +273,7 @@ const tr = {
     ],
     statsTitle: "Los creadores ya confían en MyTingleBox",
     stats: [
-      { value: "0%", label: "de tarifa en el plan Premium" },
+      { value: "100%", label: "del pago es tuyo" },
       { value: "3 min", label: "para publicar tu tienda" },
       { value: "+30", label: "países atendidos" },
       { value: "24/7", label: "soporte y disponibilidad" },
@@ -333,9 +333,9 @@ const fallbackPlans: PlatformPlanConfig[] = [
     name_pt: "Premium", name_en: "Premium", name_es: "Premium",
     period: "monthly",
     priceBRL: 199.9, priceUSD: 49.9,
-    features_pt: ["Tudo do Profissional", "Suporte prioritário", "0% de taxa da plataforma", "Branding white-label total", "Onboarding dedicado"],
-    features_en: ["All Professional features", "Priority support", "0% platform fee", "Full white-label", "Dedicated onboarding"],
-    features_es: ["Todo del Profesional", "Soporte prioritario", "0% de tarifa", "White-label total", "Onboarding dedicado"],
+    features_pt: ["Tudo do Profissional", "Suporte prioritário", "Relatórios premium", "Branding white-label total", "Onboarding dedicado"],
+    features_en: ["All Professional features", "Priority support", "Premium reports", "Full white-label", "Dedicated onboarding"],
+    features_es: ["Todo del Profesional", "Soporte prioritario", "Reportes premium", "White-label total", "Onboarding dedicado"],
   },
 ];
 
