@@ -681,41 +681,45 @@ const Landing = () => {
 
 
       {/* How it works */}
-      <Section id="how">
+      <Section id="how" className="relative z-10">
         <Container width="xl">
-          <div className="text-center mb-16">
-            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+          <div className="text-center mb-14">
+            <span className="text-[#c4b5fd] text-xs font-medium uppercase tracking-[0.18em]">
               {t.howKicker}
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+            <h2
+              className="font-display font-bold text-white mt-3 mb-4 leading-[1.1] tracking-tight"
+              style={{ fontSize: "clamp(1.75rem, 3vw + 0.8rem, 3rem)" }}
+            >
               {t.howTitle1}
               <br />
-              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#c4b5fd] to-[#8b5cf6] bg-clip-text text-transparent">
                 {t.howTitle2}
               </span>
             </h2>
-            <p className="text-white/60 max-w-2xl mx-auto">{t.howSub}</p>
+            <p className="text-white/50 leading-relaxed max-w-2xl mx-auto">{t.howSub}</p>
           </div>
 
           <Grid cols="3-md" gap={6}>
             {t.steps.map((step, i) => (
               <motion.div
                 key={step.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-7"
+                className="relative rounded-2xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-7 motion-reduce:transform-none"
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600 text-white font-display text-xl font-bold shadow-lg shadow-purple-500/30 mb-5">
+                <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[#8b5cf6] text-white font-display text-lg font-bold shadow-[0_12px_30px_-14px_rgba(139,92,246,0.95)] mb-5">
                   {i + 1}
                 </div>
-                <h3 className="font-display text-lg font-semibold text-white mb-2">
+                <h3 className="font-display text-base font-semibold text-white mb-2">
                   {step.title}
                 </h3>
-                <p className="text-sm text-white/60 leading-relaxed">{step.desc}</p>
+                <p className="text-[13px] text-white/50 leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
+
           </Grid>
         </Container>
       </Section>
