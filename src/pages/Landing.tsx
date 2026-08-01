@@ -540,80 +540,100 @@ const Landing = () => {
 
       {/* Hero */}
       <span id="top" />
-      <Section py="pt-32 md:pt-36 pb-24" className="text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="max-w-5xl mx-auto motion-reduce:transform-none"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#8b5cf6]/25 bg-[#8b5cf6]/10 backdrop-blur-sm mb-8">
-            <Crown className="w-3.5 h-3.5 text-[#c4b5fd]" />
-            <span className="text-[13px] font-medium text-[#c4b5fd]">{t.badge}</span>
-          </div>
+      <Section py="pt-28 md:pt-36 pb-20 md:pb-28" className="relative z-10">
+        <Container width="xl">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-12 lg:gap-14 items-center">
+            {/* Copy */}
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-center lg:text-left motion-reduce:transform-none"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#8b5cf6]/25 bg-[#8b5cf6]/10 backdrop-blur-sm mb-7">
+                <Crown className="w-3.5 h-3.5 text-[#c4b5fd]" />
+                <span className="text-[13px] font-medium text-[#c4b5fd]">{t.badge}</span>
+              </div>
 
-          <h1
-            className="font-display font-bold tracking-tight mb-6 text-white leading-[1.06] break-words"
-            style={{ fontSize: "clamp(2rem, 5.2vw + 0.6rem, 5rem)" }}
-          >
-            {t.heroTitle1}
-            <br />
-            <span className="bg-gradient-to-r from-[#c4b5fd] via-[#a78bfa] to-[#8b5cf6] bg-clip-text text-transparent">
-              {t.heroTitle2}
-            </span>
-          </h1>
-
-          <p className="text-base md:text-lg text-white/55 leading-relaxed max-w-2xl mx-auto mb-10">
-            {t.heroSub}
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
-            <Link to="/auth">
-              <Button
-                size="lg"
-                className="bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full px-7 h-12 gap-2 shadow-[0_18px_45px_-18px_rgba(139,92,246,0.95)]"
+              <h1
+                className="font-display font-bold tracking-tight mb-5 text-white leading-[1.05] break-words"
+                style={{ fontSize: "clamp(2.1rem, 4.2vw + 0.5rem, 4rem)" }}
               >
-                <Sparkles className="w-4 h-4" />
-                {t.ctaStart}
-              </Button>
-            </Link>
-            <a href="#features">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/[0.10] bg-white/[0.03] text-white hover:bg-white/[0.07] hover:text-white rounded-full px-7 h-12 gap-2 backdrop-blur-xl"
-              >
-                <Play className="w-4 h-4" />
-                {t.ctaSeeFeatures}
-              </Button>
-            </a>
-          </div>
-        </motion.div>
+                {t.heroTitle1}
+                <br />
+                <span className="bg-gradient-to-r from-[#c4b5fd] via-[#a78bfa] to-[#8b5cf6] bg-clip-text text-transparent">
+                  {t.heroTitle2}
+                </span>
+              </h1>
 
-        {/* Hero mockup */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative mt-20 max-w-5xl mx-auto motion-reduce:transform-none"
-        >
-          <div className="relative rounded-3xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-2 shadow-[0_40px_100px_-40px_rgba(139,92,246,0.55)]">
-            <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0f0820]">
-              <img
-                src={heroMockup}
-                alt={t.heroAlt}
-                className="w-full h-auto block"
-                width={1376}
-                height={768}
-              />
-            </div>
+              <p className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl mx-auto lg:mx-0 mb-7">
+                {t.heroSub}
+              </p>
+
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 mb-8">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[13px] font-medium text-emerald-400">{t.trialBadge}</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center lg:items-start lg:justify-start justify-center gap-3.5">
+                <Link to="/auth" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full px-7 h-12 gap-2 shadow-[0_18px_45px_-18px_rgba(139,92,246,0.95)]"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    {t.ctaStart}
+                  </Button>
+                </Link>
+                <a href="#features" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto border-white/[0.10] bg-white/[0.03] text-white hover:bg-white/[0.07] hover:text-white rounded-full px-7 h-12 gap-2 backdrop-blur-xl"
+                  >
+                    <Play className="w-4 h-4" />
+                    {t.ctaSeeFeatures}
+                  </Button>
+                </a>
+              </div>
+
+              <ul className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2">
+                {t.heroPoints.map((point) => (
+                  <li key={point} className="flex items-center gap-2 text-[13px] text-white/45">
+                    <Check className="w-3.5 h-3.5 text-[#c4b5fd]" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Hero mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="relative motion-reduce:transform-none"
+            >
+              <div className="absolute -inset-8 rounded-[2.5rem] bg-[#8b5cf6]/15 blur-[80px] pointer-events-none" aria-hidden="true" />
+              <div className="relative rounded-3xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-2 shadow-[0_40px_100px_-40px_rgba(139,92,246,0.55)]">
+                <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0f0820]">
+                  <img
+                    src={heroMockup}
+                    alt={t.heroAlt}
+                    className="w-full h-auto block"
+                    width={1376}
+                    height={768}
+                  />
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </Container>
       </Section>
 
 
       {/* Stats band */}
-      <Section py="pt-8 pb-20" className="relative z-10">
+      <Section py="pt-4 pb-20" className="relative z-10">
         <Container width="lg">
           <p className="text-center text-white/40 text-xs uppercase tracking-[0.18em] mb-8">
             {t.statsTitle}
