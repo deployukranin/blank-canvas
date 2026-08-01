@@ -420,13 +420,15 @@ const Landing = () => {
   ];
 
   const LangSwitcher = ({ className = "" }: { className?: string }) => (
-    <div className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm p-1 text-xs ${className}`}>
+    <div className={`inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-1 text-xs ${className}`}>
       {(["pt", "en", "es"] as Lang[]).map((l) => (
         <button
           key={l}
           onClick={() => changeLang(l)}
           className={`px-3 py-1 rounded-full transition-colors ${
-            lang === l ? "bg-purple-600 text-white" : "text-white/60 hover:text-white"
+            lang === l
+              ? "bg-[#8b5cf6] text-white shadow-[0_6px_18px_-8px_rgba(139,92,246,0.9)]"
+              : "text-white/50 hover:text-white"
           }`}
           aria-label={`Switch language to ${l.toUpperCase()}`}
         >
@@ -435,6 +437,7 @@ const Landing = () => {
       ))}
     </div>
   );
+
 
   return (
     <div className="min-h-screen bg-[#0a0418] text-foreground overflow-x-hidden relative">
