@@ -8,19 +8,38 @@
   var isPreview =
     host === 'localhost' ||
     host === '127.0.0.1' ||
+    host === 'beta.lovable.dev' ||
+    host.endsWith('.beta.lovable.dev') ||
+    host === 'lovableproject.com' ||
     host.endsWith('.lovableproject.com') ||
+    host === 'lovableproject-dev.com' ||
+    host.endsWith('.lovableproject-dev.com') ||
+    host.indexOf('preview--') === 0 ||
     host.indexOf('-preview--') !== -1 ||
-    host.indexOf('id-preview') === 0;
+    host.indexOf('id-preview--') === 0 ||
+    window.self !== window.top ||
+    new URLSearchParams(window.location.search).get('sw') === 'off';
 
   if (isPreview) {
-    navigator.serviceWorker.getRegistrations().then(function (regs) {
-      regs.forEach(function (r) { r.unregister(); });
+    Promise.all([
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        return Promise.all(regs.map(function (r) { return r.unregister(); }));
+      }).catch(function () { return []; }),
+      window.caches && caches.keys
+        ? caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          }).catch(function () { return []; })
+        : Promise.resolve([]),
+    ]).then(function () {
+      // An unregistered worker can still control the current document until
+      // navigation. Reload once so preview immediately returns to Vite/HMR.
+      if (navigator.serviceWorker.controller && !sessionStorage.getItem('preview-sw-cleaned')) {
+        sessionStorage.setItem('preview-sw-cleaned', '1');
+        window.location.reload();
+      } else {
+        sessionStorage.removeItem('preview-sw-cleaned');
+      }
     }).catch(function () {});
-    if (window.caches && caches.keys) {
-      caches.keys().then(function (keys) {
-        keys.forEach(function (k) { caches.delete(k); });
-      }).catch(function () {});
-    }
     return;
   }
 
