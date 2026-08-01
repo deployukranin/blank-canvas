@@ -273,7 +273,7 @@ const tr = {
     ],
     statsTitle: "Los creadores ya confían en MyTingleBox",
     stats: [
-      { value: "0%", label: "de tarifa en el plan Premium" },
+      { value: "100%", label: "del pago es tuyo" },
       { value: "3 min", label: "para publicar tu tienda" },
       { value: "+30", label: "países atendidos" },
       { value: "24/7", label: "soporte y disponibilidad" },
