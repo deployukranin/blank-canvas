@@ -105,7 +105,7 @@ const tr = {
     ],
     statsTitle: "Criadores já confiam no MyTingleBox",
     stats: [
-      { value: "0%", label: "de taxa da plataforma" },
+      { value: "100%", label: "do pagamento é seu" },
       { value: "3 min", label: "para publicar sua loja" },
       { value: "+30", label: "países atendidos" },
       { value: "24/7", label: "suporte e disponibilidade" },
