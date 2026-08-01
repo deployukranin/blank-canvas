@@ -440,11 +440,14 @@ const Landing = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#0a0418] text-foreground overflow-x-hidden relative">
+    <div
+      className="min-h-screen font-body bg-[#0a0a0f] text-foreground overflow-x-hidden relative"
+      style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}
+    >
       {/* Starfield background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         <div
-          className="absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0 opacity-[0.18]"
           style={{
             backgroundImage:
               "radial-gradient(1px 1px at 20% 30%, hsl(270 80% 80%) 50%, transparent), radial-gradient(1px 1px at 70% 60%, hsl(280 80% 85%) 50%, transparent), radial-gradient(1.5px 1.5px at 40% 80%, hsl(260 80% 75%) 50%, transparent), radial-gradient(1px 1px at 90% 20%, hsl(290 80% 85%) 50%, transparent), radial-gradient(1px 1px at 10% 70%, hsl(270 70% 80%) 50%, transparent)",
@@ -452,21 +455,20 @@ const Landing = () => {
             backgroundRepeat: "repeat",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0418]/40 to-[#0a0418]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0f]/50 to-[#0a0a0f]" />
         <div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-30 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, hsl(270 90% 60% / 0.4) 0%, transparent 70%)",
-          }}
+          className="absolute -top-52 left-1/2 -translate-x-1/2 w-[720px] h-[720px] rounded-full opacity-25 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(263 90% 62% / 0.35) 0%, transparent 70%)" }}
         />
+        <div className="absolute -left-24 top-1/3 w-[420px] h-[420px] rounded-full bg-[#8b5cf6]/10 blur-[130px]" />
+        <div className="absolute right-0 bottom-1/4 w-72 h-72 rounded-full bg-[#c4b5fd]/[0.06] blur-[110px]" />
       </div>
 
       {/* Header */}
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-[#0a0418]/80 backdrop-blur-xl border-b border-white/10"
+            ? "bg-[#0a0a0f]/75 backdrop-blur-xl border-b border-white/[0.08]"
             : "bg-transparent border-b border-transparent"
         }`}
       >
@@ -480,7 +482,7 @@ const Landing = () => {
               <a
                 key={item.href}
                 href={item.href}
-                className="px-3 py-2 text-sm text-white/70 hover:text-white transition-colors rounded-full"
+                className="px-3.5 py-2 text-sm text-white/55 hover:text-white hover:bg-white/[0.04] transition-colors rounded-full"
               >
                 {item.label}
               </a>
@@ -490,7 +492,7 @@ const Landing = () => {
           <div className="flex items-center gap-3">
             <LangSwitcher className="hidden sm:inline-flex" />
             <Link to="/auth" className="hidden sm:block">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-5 h-9 gap-1.5 shadow-lg shadow-purple-500/30">
+              <Button className="bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full px-5 h-9 gap-1.5 shadow-[0_10px_30px_-12px_rgba(139,92,246,0.9)]">
                 <Sparkles className="w-3.5 h-3.5" />
                 {t.ctaStart}
               </Button>
@@ -498,24 +500,24 @@ const Landing = () => {
 
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="outline" size="icon" className="border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-full h-9 w-9">
+                <Button variant="outline" size="icon" className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.07] rounded-full h-9 w-9">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-[#0a0418] border-white/10 text-white w-72">
+              <SheetContent side="right" className="bg-[#0a0a0f] border-white/[0.08] text-white w-72">
                 <div className="flex flex-col gap-1 mt-10">
                   {navItems.map((item) => (
                     <a
                       key={item.href}
                       href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="px-3 py-3 text-base text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                      className="px-3 py-3 text-base text-white/75 hover:text-white hover:bg-white/[0.04] rounded-xl transition-colors"
                     >
                       {item.label}
                     </a>
                   ))}
                   <Link to="/auth" onClick={() => setMenuOpen(false)} className="mt-4">
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full gap-1.5">
+                    <Button className="w-full bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full gap-1.5">
                       <Sparkles className="w-4 h-4" />
                       {t.ctaStart}
                     </Button>
@@ -532,35 +534,38 @@ const Landing = () => {
 
       {/* Hero */}
       <span id="top" />
-      <Section py="pt-32 md:pt-36 pb-24" className="text-center">
+      <Section py="pt-32 md:pt-36 pb-24" className="text-center relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-5xl mx-auto"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="max-w-5xl mx-auto motion-reduce:transform-none"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-sm mb-8">
-            <Crown className="w-4 h-4 text-purple-300" />
-            <span className="text-sm text-purple-100">{t.badge}</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#8b5cf6]/25 bg-[#8b5cf6]/10 backdrop-blur-sm mb-8">
+            <Crown className="w-3.5 h-3.5 text-[#c4b5fd]" />
+            <span className="text-[13px] font-medium text-[#c4b5fd]">{t.badge}</span>
           </div>
 
-          <h1 className="font-display text-[2rem] sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white leading-[1.1] md:leading-[1.05] break-words">
+          <h1
+            className="font-display font-bold tracking-tight mb-6 text-white leading-[1.06] break-words"
+            style={{ fontSize: "clamp(2rem, 5.2vw + 0.6rem, 5rem)" }}
+          >
             {t.heroTitle1}
             <br />
-            <span className="bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#c4b5fd] via-[#a78bfa] to-[#8b5cf6] bg-clip-text text-transparent">
               {t.heroTitle2}
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10">
+          <p className="text-base md:text-lg text-white/55 leading-relaxed max-w-2xl mx-auto mb-10">
             {t.heroSub}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
             <Link to="/auth">
               <Button
                 size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-7 h-12 gap-2 shadow-xl shadow-purple-500/40"
+                className="bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full px-7 h-12 gap-2 shadow-[0_18px_45px_-18px_rgba(139,92,246,0.95)]"
               >
                 <Sparkles className="w-4 h-4" />
                 {t.ctaStart}
@@ -570,7 +575,7 @@ const Landing = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white rounded-full px-7 h-12 gap-2 backdrop-blur-sm"
+                className="border-white/[0.10] bg-white/[0.03] text-white hover:bg-white/[0.07] hover:text-white rounded-full px-7 h-12 gap-2 backdrop-blur-xl"
               >
                 <Play className="w-4 h-4" />
                 {t.ctaSeeFeatures}
@@ -581,13 +586,13 @@ const Landing = () => {
 
         {/* Hero mockup */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative mt-20 max-w-5xl mx-auto"
+          className="relative mt-20 max-w-5xl mx-auto motion-reduce:transform-none"
         >
-          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-2 shadow-2xl shadow-purple-500/20">
-            <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0f0820]">
+          <div className="relative rounded-3xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-2 shadow-[0_40px_100px_-40px_rgba(139,92,246,0.55)]">
+            <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0f0820]">
               <img
                 src={heroMockup}
                 alt={t.heroAlt}
@@ -597,15 +602,9 @@ const Landing = () => {
               />
             </div>
           </div>
-          <div
-            className="absolute -inset-x-20 -bottom-20 h-40 blur-3xl opacity-50 -z-10"
-            style={{
-              background:
-                "linear-gradient(to right, hsl(270 90% 50%), hsl(290 90% 60%))",
-            }}
-          />
         </motion.div>
       </Section>
+
 
       {/* Stats band */}
       <Section py="pt-8 pb-20">
