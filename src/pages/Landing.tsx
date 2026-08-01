@@ -333,9 +333,9 @@ const fallbackPlans: PlatformPlanConfig[] = [
     name_pt: "Premium", name_en: "Premium", name_es: "Premium",
     period: "monthly",
     priceBRL: 199.9, priceUSD: 49.9,
-    features_pt: ["Tudo do Profissional", "Suporte prioritário", "0% de taxa da plataforma", "Branding white-label total", "Onboarding dedicado"],
-    features_en: ["All Professional features", "Priority support", "0% platform fee", "Full white-label", "Dedicated onboarding"],
-    features_es: ["Todo del Profesional", "Soporte prioritario", "0% de tarifa", "White-label total", "Onboarding dedicado"],
+    features_pt: ["Tudo do Profissional", "Suporte prioritário", "Relatórios premium", "Branding white-label total", "Onboarding dedicado"],
+    features_en: ["All Professional features", "Priority support", "Premium reports", "Full white-label", "Dedicated onboarding"],
+    features_es: ["Todo del Profesional", "Soporte prioritario", "Reportes premium", "White-label total", "Onboarding dedicado"],
   },
 ];
 
