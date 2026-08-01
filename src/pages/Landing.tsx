@@ -189,7 +189,7 @@ const tr = {
     ],
     statsTitle: "Creators already trust MyTingleBox",
     stats: [
-      { value: "0%", label: "fee on the Premium plan" },
+      { value: "100%", label: "of revenue you keep" },
       { value: "3 min", label: "to publish your store" },
       { value: "30+", label: "countries served" },
       { value: "24/7", label: "support and uptime" },
