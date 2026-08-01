@@ -634,20 +634,23 @@ const Landing = () => {
 
 
       {/* Features */}
-      <Section id="features">
+      <Section id="features" className="relative z-10">
         <Container width="xl">
-          <div className="text-center mb-16">
-            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+          <div className="text-center mb-14">
+            <span className="text-[#c4b5fd] text-xs font-medium uppercase tracking-[0.18em]">
               {t.featuresKicker}
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3 mb-4">
+            <h2
+              className="font-display font-bold text-white mt-3 mb-4 leading-[1.1] tracking-tight"
+              style={{ fontSize: "clamp(1.75rem, 3vw + 0.8rem, 3rem)" }}
+            >
               {t.featuresTitle1}
               <br />
-              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#c4b5fd] to-[#8b5cf6] bg-clip-text text-transparent">
                 {t.featuresTitle2}
               </span>
             </h2>
-            <p className="text-white/60 max-w-2xl mx-auto">{t.featuresSub}</p>
+            <p className="text-white/50 leading-relaxed max-w-2xl mx-auto">{t.featuresSub}</p>
           </div>
 
           <Grid cols="3" gap={5}>
@@ -656,25 +659,26 @@ const Landing = () => {
               return (
                 <motion.div
                   key={f.title}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 hover:border-purple-500/40 transition-colors"
+                  className="group rounded-2xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-6 transition-all duration-300 hover:border-[#8b5cf6]/35 hover:-translate-y-1 hover:shadow-[0_24px_60px_-32px_rgba(139,92,246,0.7)] motion-reduce:transform-none motion-reduce:hover:translate-y-0"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center mb-5 group-hover:bg-purple-500/25 transition-colors">
-                    <Icon className="w-5 h-5 text-purple-300" />
+                  <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-5 transition-colors group-hover:border-[#8b5cf6]/35 group-hover:bg-[#8b5cf6]/10">
+                    <Icon className="w-[18px] h-[18px] text-[#c4b5fd]" />
                   </div>
-                  <h3 className="font-display text-lg font-semibold text-white mb-2">
+                  <h3 className="font-display text-base font-semibold text-white mb-2">
                     {f.title}
                   </h3>
-                  <p className="text-sm text-white/60 leading-relaxed">{f.desc}</p>
+                  <p className="text-[13px] text-white/50 leading-relaxed">{f.desc}</p>
                 </motion.div>
               );
             })}
           </Grid>
         </Container>
       </Section>
+
 
       {/* How it works */}
       <Section id="how">
