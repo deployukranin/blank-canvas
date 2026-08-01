@@ -803,15 +803,18 @@ const Landing = () => {
       </Section>
 
       {/* FAQ */}
-      <Section id="faq">
+      <Section id="faq" className="relative z-10">
         <Container width="sm">
           <div className="text-center mb-12">
-            <span className="text-purple-300 text-sm font-medium uppercase tracking-wider">
+            <span className="text-[#c4b5fd] text-xs font-medium uppercase tracking-[0.18em]">
               {t.faqKicker}
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-3">
+            <h2
+              className="font-display font-bold text-white mt-3 leading-[1.1] tracking-tight"
+              style={{ fontSize: "clamp(1.75rem, 3vw + 0.8rem, 3rem)" }}
+            >
               {t.faqTitle1}{" "}
-              <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#c4b5fd] to-[#8b5cf6] bg-clip-text text-transparent">
                 {t.faqTitle2}
               </span>
             </h2>
@@ -822,12 +825,12 @@ const Landing = () => {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] px-5"
+                className="rounded-2xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl px-5 transition-colors hover:border-white/[0.16]"
               >
-                <AccordionTrigger className="text-left text-white hover:no-underline">
+                <AccordionTrigger className="text-left text-white text-[15px] hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-white/60 leading-relaxed">
+                <AccordionContent className="text-white/50 text-[13px] leading-relaxed">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -837,29 +840,32 @@ const Landing = () => {
       </Section>
 
       {/* Final CTA */}
-      <Section id="cta" py="py-24">
+      <Section id="cta" py="py-24" className="relative z-10">
         <Container width="md">
-          <div className="relative rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-600/20 via-purple-700/10 to-transparent p-12 md:p-16 text-center overflow-hidden">
+          <div className="relative rounded-3xl border border-white/[0.08] bg-[#1a1030]/50 backdrop-blur-xl p-12 md:p-16 text-center overflow-hidden shadow-[0_40px_100px_-40px_rgba(139,92,246,0.6)]">
             <div
-              className="absolute inset-0 opacity-30"
+              className="absolute inset-0 opacity-40"
               style={{
                 background:
-                  "radial-gradient(circle at center, hsl(270 90% 50% / 0.4) 0%, transparent 70%)",
+                  "radial-gradient(circle at 50% 0%, hsl(263 90% 62% / 0.28) 0%, transparent 70%)",
               }}
             />
             <div className="relative">
-              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+              <h2
+                className="font-display font-bold text-white mb-4 leading-[1.1] tracking-tight"
+                style={{ fontSize: "clamp(1.75rem, 3vw + 0.8rem, 3rem)" }}
+              >
                 {t.ctaFinalTitle1}
                 <br />
-                <span className="bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#c4b5fd] to-[#8b5cf6] bg-clip-text text-transparent">
                   {t.ctaFinalTitle2}
                 </span>
               </h2>
-              <p className="text-white/70 max-w-xl mx-auto mb-8">{t.ctaFinalSub}</p>
+              <p className="text-white/55 leading-relaxed max-w-xl mx-auto mb-8">{t.ctaFinalSub}</p>
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 h-12 gap-2 shadow-xl shadow-purple-500/40"
+                  className="bg-[#8b5cf6] hover:bg-[#7c4ef0] text-white rounded-full px-8 h-12 gap-2 shadow-[0_18px_45px_-18px_rgba(139,92,246,0.95)]"
                 >
                   {t.ctaFinalBtn}
                   <ArrowRight className="w-4 h-4" />
@@ -869,6 +875,7 @@ const Landing = () => {
           </div>
         </Container>
       </Section>
+
 
       {/* Footer */}
       <Section as="footer" py="pt-16 pb-10" className="border-t border-white/10">
