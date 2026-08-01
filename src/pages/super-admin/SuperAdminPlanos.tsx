@@ -62,10 +62,10 @@ const CAPABILITY_LABELS: { key: keyof PlanCapabilities; pt: string; en: string; 
   { key: 'whiteLabelFull', pt: 'White-label total', en: 'Full white-label', es: 'White-label total' },
   { key: 'prioritySupport', pt: 'Suporte prioritário', en: 'Priority support', es: 'Soporte prioritario' },
   { key: 'dedicatedOnboarding', pt: 'Onboarding dedicado', en: 'Dedicated onboarding', es: 'Onboarding dedicado' },
-  { key: 'zeroPlatformFee', pt: '0% taxa da plataforma', en: '0% platform fee', es: '0% tarifa de plataforma' },
   { key: 'apiAccess', pt: 'Acesso à API', en: 'API access', es: 'Acceso a API' },
   { key: 'dailyBackup', pt: 'Backup diário', en: 'Daily backup', es: 'Backup diario' },
 ];
+
 
 const LIMIT_LABELS: { key: keyof PlanLimits; pt: string; en: string; es: string }[] = [
   { key: 'maxUsers', pt: 'Máx. de usuários', en: 'Max users', es: 'Máx. usuarios' },
