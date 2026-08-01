@@ -146,7 +146,7 @@ const tr = {
     ctaSeeFeatures: "See features",
     heroAlt: "Preview of the MyTingleBox platform for ASMR creators",
     trialBadge: "3 days free — no credit card required",
-    heroPoints: ["0% fee on Premium", "Your brand, your domain", "Native Stripe & PIX"],
+    heroPoints: ["Money straight to your account", "Your brand, your domain", "Native Stripe & PIX"],
     featuresKicker: "Features",
     featuresTitle1: "Everything you need to",
     featuresTitle2: "live from your art",
