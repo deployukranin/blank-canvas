@@ -564,9 +564,9 @@ const Auth = () => {
                 {t("auth.heroDesc")}
               </p>
 
-              <div className="inline-flex items-center gap-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/25 rounded-full px-4 py-2 mb-10">
-                <Sparkles className="w-3.5 h-3.5 text-[#c4b5fd]" />
-                <span className="text-[#c4b5fd] font-medium text-[13px]">{t("auth.trialBadge")}</span>
+              <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-4 py-2 mb-10">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400 font-semibold text-[13px]">{t("auth.trialBadge")}</span>
               </div>
 
               <Grid cols="1" gap={4}>
