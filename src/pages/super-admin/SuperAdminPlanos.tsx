@@ -21,10 +21,10 @@ export interface PlanCapabilities {
   whiteLabelFull?: boolean;
   prioritySupport?: boolean;
   dedicatedOnboarding?: boolean;
-  zeroPlatformFee?: boolean;
   apiAccess?: boolean;
   dailyBackup?: boolean;
 }
+
 
 export interface PlanLimits {
   maxUsers?: number; // 0 or undefined = unlimited
