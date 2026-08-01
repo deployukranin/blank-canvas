@@ -607,30 +607,31 @@ const Landing = () => {
 
 
       {/* Stats band */}
-      <Section py="pt-8 pb-20">
+      <Section py="pt-8 pb-20" className="relative z-10">
         <Container width="lg">
-          <p className="text-center text-white/50 text-sm uppercase tracking-wider mb-8">
+          <p className="text-center text-white/40 text-xs uppercase tracking-[0.18em] mb-8">
             {t.statsTitle}
           </p>
           <Grid cols="4" gap={4}>
             {t.stats.map((s, i) => (
               <motion.div
                 key={s.label}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center"
+                className="rounded-2xl border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl p-6 text-center motion-reduce:transform-none"
               >
-                <div className="font-display text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent">
+                <div className="font-display text-3xl md:text-4xl font-bold tabular-nums bg-gradient-to-r from-[#c4b5fd] to-[#8b5cf6] bg-clip-text text-transparent">
                   {s.value}
                 </div>
-                <div className="text-xs md:text-sm text-white/50 mt-2">{s.label}</div>
+                <div className="text-xs md:text-[13px] text-white/45 mt-2 leading-snug">{s.label}</div>
               </motion.div>
             ))}
           </Grid>
         </Container>
       </Section>
+
 
       {/* Features */}
       <Section id="features">
