@@ -61,6 +61,8 @@ const tr = {
     ctaStart: "Começar grátis",
     ctaSeeFeatures: "Ver recursos",
     heroAlt: "Pré-visualização da plataforma MyTingleBox para criadores ASMR",
+    trialBadge: "3 dias grátis — sem precisar de cartão de crédito",
+    heroPoints: ["0% de taxa no Premium", "Sua marca, seu domínio", "Stripe e PIX nativos"],
     featuresKicker: "Recursos",
     featuresTitle1: "Tudo que você precisa para",
     featuresTitle2: "viver da sua arte",
