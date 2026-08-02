@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { useTenant } from '@/contexts/TenantContext';
@@ -982,7 +983,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             
             if (storeId) await saveConfig('white_label_config', merged, storeId);
             localStorage.removeItem(STORAGE_KEY);
-            console.log('Migrated whitelabel config to database');
+            devLog('Migrated whitelabel config to database');
           }
         }
       } catch (err) {

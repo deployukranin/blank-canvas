@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 /**
  * Configuration Storage - Persists app configurations to Supabase
  * Supports per-store configs via store_id
@@ -159,7 +160,7 @@ export const saveConfig = async <T>(
       return false;
     }
 
-    console.log(`Config ${key} saved successfully`);
+    devLog(`Config ${key} saved successfully`);
     return true;
   } catch (err) {
     console.error(`Exception saving config ${key}:`, err);
@@ -194,7 +195,7 @@ export const migrateLocalStorageToDb = async <T>(
       const saved = await saveConfig(dbKey, merged, storeId);
       if (saved) {
         localStorage.removeItem(localStorageKey);
-        console.log(`Migrated ${localStorageKey} to database`);
+        devLog(`Migrated ${localStorageKey} to database`);
       }
     } catch (err) {
       console.error(`Error migrating ${localStorageKey}:`, err);

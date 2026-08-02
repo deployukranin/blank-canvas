@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -131,7 +132,7 @@ export const useVIPSubscription = () => {
     }
 
     try {
-      console.log('Creating VIP charge:', { planType, userId });
+      devLog('Creating VIP charge:', { planType, userId });
       
       const { data, error } = await supabase.functions.invoke('create-vip-charge', {
         body: { planType, customerName },
@@ -157,7 +158,7 @@ export const useVIPSubscription = () => {
         return { success: false, error: data?.error };
       }
 
-      console.log('VIP charge created:', data);
+      devLog('VIP charge created:', data);
       return {
         success: true,
         subscriptionId: data.subscription_id,

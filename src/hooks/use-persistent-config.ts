@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 /**
  * Hook for persistent configuration that syncs with database
  */
@@ -64,7 +65,7 @@ export function usePersistentConfig<T>({
                 const saved = await saveConfig(configKey, merged, storeId);
                 if (saved) {
                   localStorage.removeItem(localStorageKey);
-                  console.log(`Migrated ${localStorageKey} to database`);
+                  devLog(`Migrated ${localStorageKey} to database`);
                 }
               } catch (err) {
                 console.error('Error parsing localStorage:', err);
@@ -74,14 +75,14 @@ export function usePersistentConfig<T>({
               setConfigState(defaultValue);
               if (seedDefaultsIfMissing) {
                 const seeded = await saveConfig(configKey, defaultValue, storeId);
-                if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+                if (seeded) devLog(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
               }
             }
           } else {
             setConfigState(defaultValue);
             if (seedDefaultsIfMissing) {
               const seeded = await saveConfig(configKey, defaultValue, storeId);
-              if (seeded) console.log(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
+              if (seeded) devLog(`Seeded default ${configKey} for store ${storeId ?? 'global'}`);
             }
           }
         }

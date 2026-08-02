@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -45,7 +46,7 @@ export function usePixPayment() {
     setIsLoading(true);
     
     try {
-      console.log('Creating PIX charge:', params);
+      devLog('Creating PIX charge:', params);
       
       const { data, error } = await supabase.functions.invoke('create-pix-charge', {
         body: params,
@@ -82,7 +83,7 @@ export function usePixPayment() {
       };
 
       setChargeData(result);
-      console.log('Charge created successfully:', result);
+      devLog('Charge created successfully:', result);
       return result;
 
     } catch (error) {

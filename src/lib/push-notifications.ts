@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 /**
  * Push Notifications System
  * Handles real-time push notifications using Service Workers
@@ -62,7 +63,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
       scope: '/',
     });
     
-    console.log('[Push] Service Worker registered:', registration);
+    devLog('[Push] Service Worker registered:', registration);
     return registration;
   } catch (error) {
     console.error('[Push] Service Worker registration failed:', error);
@@ -125,7 +126,7 @@ export const sendLocalNotification = async (
       
       await registration.showNotification(data.title, notificationOptions);
       
-      console.log('[Push] Notification sent via Service Worker');
+      devLog('[Push] Notification sent via Service Worker');
       return true;
     } else {
       // Fallback to regular notification
@@ -140,7 +141,7 @@ export const sendLocalNotification = async (
         },
       });
       
-      console.log('[Push] Notification sent via Notification API');
+      devLog('[Push] Notification sent via Notification API');
       return true;
     }
   } catch (error) {
