@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 /**
  * Integration Configuration & Central Functions
  * 
@@ -49,7 +50,7 @@ export const getConfig = () => ({
  * In the future, this will integrate with payment providers
  */
 export const onPurchase = async (payload: PurchasePayload): Promise<{ success: boolean; orderId?: string; error?: string }> => {
-  console.log('[Integration] Purchase requested:', payload);
+  devLog('[Integration] Purchase requested:', payload);
   
   // Simulate async processing
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -66,7 +67,7 @@ export const onPurchase = async (payload: PurchasePayload): Promise<{ success: b
  * In the future, this will integrate with Discord for role management
  */
 export const onVIPStatusChange = async (payload: VIPStatusPayload): Promise<{ success: boolean; status?: string }> => {
-  console.log('[Integration] VIP status change:', payload);
+  devLog('[Integration] VIP status change:', payload);
   
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -81,7 +82,7 @@ export const onVIPStatusChange = async (payload: VIPStatusPayload): Promise<{ su
  * In the future, this will create orders in the production system
  */
 export const onCustomOrder = async (payload: CustomOrderPayload): Promise<{ success: boolean; orderId?: string; estimatedDelivery?: string }> => {
-  console.log('[Integration] Custom order created:', payload);
+  devLog('[Integration] Custom order created:', payload);
   
   await new Promise(resolve => setTimeout(resolve, 1000));
   
@@ -101,7 +102,7 @@ export const onCustomOrder = async (payload: CustomOrderPayload): Promise<{ succ
  * In the future, this will send events to analytics platforms
  */
 export const trackEvent = (eventName: string, properties?: Record<string, unknown>) => {
-  console.log('[Analytics] Event:', eventName, properties);
+  devLog('[Analytics] Event:', eventName, properties);
   
   // Future: Send to analytics provider
 };
@@ -111,7 +112,7 @@ export const trackEvent = (eventName: string, properties?: Record<string, unknow
  * In the future, this will verify against the payment system
  */
 export const checkVIPAccess = async (userId: string): Promise<boolean> => {
-  console.log('[Integration] Checking VIP access for:', userId);
+  devLog('[Integration] Checking VIP access for:', userId);
   
   // Mock: Return false for now
   return false;

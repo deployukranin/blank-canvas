@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -166,7 +167,7 @@ export const useVideoIdeas = () => {
   }, [isAuthenticated, user?.id, user?.username, store?.id, contentSettings.requireApprovalForIdeas]);
 
   const reportIdea = useCallback(async (ideaId: string, reason: string) => {
-    console.log('[Report] Idea reported:', { ideaId, reason });
+    devLog('[Report] Idea reported:', { ideaId, reason });
     // For now, just log - in a real app, this would create a report record
     return { success: true };
   }, []);

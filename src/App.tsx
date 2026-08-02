@@ -16,7 +16,6 @@ import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
 import CustomDomainGate from "@/components/tenant/CustomDomainGate";
 
 import Index from "./pages/Index";
-import Setup from "./pages/Setup";
 import Ideias from "./pages/Ideias";
 import VIP from "./pages/VIP";
 import Customs from "./pages/Customs";

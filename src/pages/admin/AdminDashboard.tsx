@@ -1,3 +1,4 @@
+import { devLog } from '@/lib/logger';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -147,7 +148,7 @@ const AdminDashboard: React.FC = () => {
           });
         } else {
           // No metrics in DB yet — trigger one-time fetch via edge function
-          console.log('[AdminDashboard] No YT metrics cached, triggering initial fetch...');
+          devLog('[AdminDashboard] No YT metrics cached, triggering initial fetch...');
           const { data: fetchResult } = await supabase.functions.invoke('youtube-channel-metrics', {
             body: { channelId, storeId },
           });
