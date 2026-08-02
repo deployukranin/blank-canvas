@@ -238,10 +238,15 @@ const SuperAdminPlanos: React.FC = () => {
   return (
     <SuperAdminLayout title={t('superAdmin.planConfig.title', 'Configurar Planos')}>
       <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-white/50">
-            {t('superAdmin.planConfig.description', 'Configure os planos de assinatura que os criadores podem contratar.')}
-          </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-sm text-white/50">
+              {t('superAdmin.planConfig.description', 'Configure os planos de assinatura que os criadores podem contratar.')}
+            </p>
+            <p className="text-xs text-emerald-400">
+              {t('superAdmin.planConfig.noFeeNote', 'Nenhum plano cobra taxa sobre as vendas — o criador recebe 100% do valor.')}
+            </p>
+          </div>
           <Button onClick={handleSave} disabled={isSaving} className="gap-2 bg-purple-600 hover:bg-purple-700">
             <Save className="w-4 h-4" />
             {isSaving ? t('common.loading') : t('common.save')}
