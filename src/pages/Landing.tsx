@@ -912,17 +912,8 @@ const Landing = () => {
               <p className="text-[13px] text-white/45 max-w-xs leading-relaxed">
                 {t.footerTagline}
               </p>
-              <div className="flex items-center gap-3 mt-5">
-                <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.03] flex items-center justify-center text-white/50 hover:text-white hover:border-[#8b5cf6]/35 transition-colors">
-                  <Instagram className="w-4 h-4" />
-                </a>
-                <a href="#" aria-label="YouTube" className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.03] flex items-center justify-center text-white/50 hover:text-white hover:border-[#8b5cf6]/35 transition-colors">
-                  <Youtube className="w-4 h-4" />
-                </a>
-                <a href="#" aria-label="X" className="w-9 h-9 rounded-full border border-white/[0.08] bg-white/[0.03] flex items-center justify-center text-white/50 hover:text-white hover:border-[#8b5cf6]/35 transition-colors">
-                  <Twitter className="w-4 h-4" />
-                </a>
-              </div>
+
+
 
             </div>
 
