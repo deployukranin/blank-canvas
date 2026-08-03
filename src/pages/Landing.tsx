@@ -14,9 +14,7 @@ import {
   Check,
   ArrowRight,
   Menu,
-  Instagram,
-  Youtube,
-  Twitter,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
