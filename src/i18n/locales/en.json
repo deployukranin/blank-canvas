@@ -23,7 +23,8 @@
     "language": "Language",
     "english": "English",
     "portuguese": "Português",
-    "noData": "No data"
+    "noData": "No data",
+    "backHome": "Home"
   },
   "nav": {
     "home": "Home",

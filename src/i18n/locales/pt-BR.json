@@ -23,7 +23,8 @@
     "language": "Idioma",
     "english": "English",
     "portuguese": "Português",
-    "noData": "Sem dados"
+    "noData": "Sem dados",
+    "backHome": "Início"
   },
   "nav": {
     "home": "Início",
