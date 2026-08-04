@@ -102,50 +102,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const redirectUrl = redirectTo || `${window.location.origin}/auth`;
 
-      // Create the (unconfirmed) user and send the confirmation email via Resend.
-      const { data, error } = await supabase.functions.invoke("send-auth-email", {
-        body: {
-          type: "signup",
-          email,
-          password,
-          redirect_to: redirectUrl,
-          metadata,
+      // Email verification is temporarily disabled: create the account directly
+      // and let Supabase return an active session immediately.
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: metadata,
         },
       });
 
-      // Edge function returns a non-2xx for "already registered" (409) etc.
       if (error) {
-        const ctx = (error as any)?.context;
-        let parsed: any = null;
-        try {
-          if (ctx && typeof ctx.clone === "function") {
-            parsed = await ctx.clone().json();
-          } else if (ctx && typeof ctx.text === "function") {
-            const txt = await ctx.text();
-            try { parsed = JSON.parse(txt); } catch { /* ignore */ }
-          } else if (ctx && typeof ctx === "object") {
-            parsed = ctx;
-          }
-        } catch { /* ignore */ }
-        if (parsed?.alreadyRegistered || /already.*registered|já.*cadastrad/i.test(String((error as any)?.message || ""))) {
+        if (/already.*registered|user already/i.test(error.message)) {
           return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
         }
-        return { success: false, error: getFriendlyAuthEmailError(parsed?.error) };
+        return { success: false, error: getFriendlyAuthEmailError(error.message) };
       }
 
-      if (!data?.success) {
-        if (data?.alreadyRegistered) {
-          return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
-        }
-        return { success: false, error: getFriendlyAuthEmailError(data?.error) };
+      if (data.user && (data.user.identities?.length ?? 1) === 0) {
+        return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
       }
 
-      // The user must always confirm via the emailed link before getting a session.
-      return { success: true, needsConfirmation: true };
+      // No confirmation step while verification is disabled.
+      return { success: true, needsConfirmation: !data.session };
     } catch (err) {
       return { success: false, error: "Erro ao criar conta" };
     }
   }, []);
+
 
   const resetPassword = useCallback(async (email: string) => {
     try {
