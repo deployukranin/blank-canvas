@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Save, Bell, Shield, Loader2 } from 'lucide-react';
+import { Save, Shield, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -13,13 +13,11 @@ import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { useTenant } from '@/contexts/TenantContext';
 
 export interface ContentSettings {
-  emailNotifications: boolean;
   publicIdeas: boolean;
   requireApprovalForIdeas: boolean;
 }
 
 export const defaultContentSettings: ContentSettings = {
-  emailNotifications: true,
   publicIdeas: true,
   requireApprovalForIdeas: false,
 };
