@@ -53,6 +53,34 @@ const AdminCustoms = () => {
   });
 
   const [showPreview, setShowPreview] = useState(false);
+  const [isUploadingPreview, setIsUploadingPreview] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePreviewUpload = async (file: File, target: 'video' | 'image') => {
+    if (!store?.id) return;
+    setIsUploadingPreview(true);
+    try {
+      const { ref } = await uploadPreviewMedia(file, store.id);
+      setConfig({
+        ...config,
+        ...(target === 'video' ? { previewVideoUrl: ref } : { previewImageUrl: ref }),
+      });
+      toast({ title: t('common.save', 'Salvo'), description: file.name });
+    } catch (err) {
+      const code = String((err as Error)?.message || '');
+      const description =
+        code === 'quota'
+          ? t('vipAdmin.uploadQuotaError', 'Limite de armazenamento do plano atingido. Faça upgrade ou remova arquivos.')
+          : code === 'size'
+          ? t('vipAdmin.fileTooLargeDesc', 'Arquivo maior que 100MB')
+          : code;
+      toast({ title: t('vipAdmin.uploadError', 'Erro no upload'), description, variant: 'destructive' });
+    } finally {
+      setIsUploadingPreview(false);
+    }
+  };
+
   const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
   const supportedLanguages = ['pt-BR', 'en', 'es'] as const;
 
