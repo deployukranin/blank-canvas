@@ -65,8 +65,17 @@ const Index = () => {
         <HeroBanner
           images={[bannerStudio]}
           banners={config.banners}
-          greeting={config.heroGreeting || (user ? `${t('home.greeting').replace('ceo', displayName || '')}` : t('home.subtitle'))}
-          subtitle={config.heroSubtitle || t('home.subtitle')}
+          greeting={
+            isLegacyGreeting(config.heroGreeting)
+              ? (user ? `${t('home.greeting').replace('ceo', displayName || '')}` : t('admin.banners.defaultGreeting', 'Welcome! 🤍'))
+              : config.heroGreeting
+          }
+          subtitle={
+            isLegacySubtitle(config.heroSubtitle)
+              ? t('admin.banners.defaultSubtitle', 'Relax with quality ASMR')
+              : config.heroSubtitle
+          }
+
         />
       </motion.div>
 
