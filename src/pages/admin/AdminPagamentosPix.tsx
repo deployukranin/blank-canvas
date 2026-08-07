@@ -244,25 +244,6 @@ const AdminPagamentosPix = () => {
           </div>
         </GlassCard>
 
-        {/* Currency (automatic, based on the visitor's language) */}
-        <GlassCard className="p-5">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h3 className="text-sm font-medium">{t('adminPayments.currency', 'Default currency')}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t(
-                  'adminPayments.currencyAutoHint',
-                  'Automatic: Portuguese (PT) is charged in BRL, English (EN) and Spanish (ES) are charged in USD. PIX manual always uses BRL.',
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <Badge variant="outline">PT → BRL</Badge>
-              <Badge variant="outline">EN → USD</Badge>
-              <Badge variant="outline">ES → USD</Badge>
-            </div>
-          </div>
-        </GlassCard>
 
 
         {/* Payment Gateways */}
