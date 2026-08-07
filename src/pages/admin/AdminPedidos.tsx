@@ -20,6 +20,12 @@ import { VideoPlayer } from '@/components/video/VideoPlayer';
 import { OrderChat } from '@/components/orders/OrderChat';
 import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
+import {
+  MAX_DRIVE_UPLOAD_BYTES,
+  getDeliverySignedUrl,
+  uploadCustomDelivery,
+} from '@/lib/external-storage';
+
 
 interface Order {
   id: string;
