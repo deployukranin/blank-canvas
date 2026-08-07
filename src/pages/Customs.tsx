@@ -15,6 +15,7 @@ import {
   Pause
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { displayCurrencyForLang, formatPriceForLang } from '@/lib/currency';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -94,20 +95,10 @@ const CustomsPage = () => {
   const config: VideoConfig | null = isConfigLoading ? null : loadedConfig;
 
   // Currency follows the selected language: pt → BRL, en/es → USD
-  const currencyByLanguage = (lng: string): 'BRL' | 'USD' => {
-    const l = (lng || '').toLowerCase();
-    if (l.startsWith('pt')) return 'BRL';
-    return 'USD';
-  };
-  const storeCurrency = currencyByLanguage(i18n.language);
+  const storeCurrency = displayCurrencyForLang(i18n.language);
 
-  const formatCurrency = (value: number) => {
-    const localeByCurrency: Record<string, string> = { BRL: 'pt-BR', USD: 'en-US', EUR: 'de-DE' };
-    return new Intl.NumberFormat(localeByCurrency[storeCurrency] || 'en-US', {
-      style: 'currency',
-      currency: storeCurrency,
-    }).format(value);
-  };
+  // Prices are configured in BRL; convert for display when showing USD.
+  const formatCurrency = (value: number) => formatPriceForLang(value, 'BRL', i18n.language);
 
 
   // Video state
