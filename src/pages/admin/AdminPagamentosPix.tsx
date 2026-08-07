@@ -244,31 +244,26 @@ const AdminPagamentosPix = () => {
           </div>
         </GlassCard>
 
-        {/* Currency selector */}
+        {/* Currency (automatic, based on the visitor's language) */}
         <GlassCard className="p-5">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h3 className="text-sm font-medium">{t('adminPayments.currency', 'Default currency')}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {t('adminPayments.currencyHint', 'Currency used for prices and Stripe charges. PIX manual always uses BRL.')}
+                {t(
+                  'adminPayments.currencyAutoHint',
+                  'Automatic: Portuguese (PT) is charged in BRL, English (EN) and Spanish (ES) are charged in USD. PIX manual always uses BRL.',
+                )}
               </p>
             </div>
-            <Select
-              value={config.currency || 'BRL'}
-              onValueChange={(value) => setConfig(prev => ({ ...prev, currency: value as PaymentCurrency }))}
-              disabled={config.activeGateway === 'pix_manual'}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="BRL">BRL — Real (R$)</SelectItem>
-                <SelectItem value="USD">USD — Dollar ($)</SelectItem>
-                <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2 text-xs">
+              <Badge variant="outline">PT → BRL</Badge>
+              <Badge variant="outline">EN → USD</Badge>
+              <Badge variant="outline">ES → USD</Badge>
+            </div>
           </div>
         </GlassCard>
+
 
         {/* Payment Gateways */}
         <Tabs defaultValue={isBrazil && config.activeGateway === 'pix_manual' ? 'pix_manual' : 'stripe'} className="w-full">
