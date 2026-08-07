@@ -56,7 +56,7 @@ interface StripeConnectStatus {
 }
 
 const AdminPagamentosPix = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { store } = useTenant();
   const storeId = store?.id ?? null;
