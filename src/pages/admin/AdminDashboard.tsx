@@ -329,38 +329,56 @@ const AdminDashboard: React.FC = () => {
 
         {/* Setup Checklist */}
         {(() => {
-           const checks = [
-            { key: 'storeName', done: !!storeInfo?.name && storeInfo.name !== 'WhisperScape', label: t('admin.checklist.storeName'), path: `${base}/customize` },
-            { key: 'colors', done: config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
+          const defaultNames = ['WhisperScape', 'TingleBox', 'My Tingle Box'];
+          const checks = [
+            { key: 'storeName', done: !!storeInfo?.name && !defaultNames.includes(storeInfo.name), label: t('admin.checklist.storeName'), path: `${base}/customize` },
+            { key: 'colors', done: !!config.setup?.colorsConfirmed || config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
+            { key: 'icon', done: !!storeInfo?.avatar_url || !!config.icons?.logoIcon?.value, label: t('admin.checklist.icon', 'Defina o ícone da plataforma'), path: `${base}/customize` },
             { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/customize` },
             { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/payments` },
-           ];
+            { key: 'youtube', done: !!config.youtube?.channelId?.trim(), label: t('admin.checklist.youtube', 'Conecte seu canal do YouTube'), path: `${base}/youtube` },
+          ];
           const doneCount = checks.filter(c => c.done).length;
           const allDone = doneCount === checks.length;
-          if (allDone) return null;
           const pct = Math.round((doneCount / checks.length) * 100);
+          const nextStep = checks.find(c => !c.done);
+          if (allDone && checklistDismissed) return null;
           return (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <GlassCard className="p-4">
-                <button onClick={() => setChecklistOpen(o => !o)} className="w-full flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
-                      <CircleCheck className="w-4 h-4 text-primary" />
+                <div className="flex items-center justify-between gap-3">
+                  <button onClick={() => setChecklistOpen(o => !o)} className="flex items-center gap-3 min-w-0 flex-1 text-left">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${allDone ? 'bg-emerald-500/15' : 'bg-primary/20'}`}>
+                      <CircleCheck className={`w-4 h-4 ${allDone ? 'text-emerald-400' : 'text-primary'}`} />
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-foreground">{t('admin.checklist.title')}</p>
-                      <p className="text-xs text-muted-foreground">{doneCount}/{checks.length} {t('admin.checklist.completed')}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {allDone ? t('admin.checklist.allDoneTitle', 'Plataforma configurada!') : t('admin.checklist.title')}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {allDone
+                          ? t('admin.checklist.allDoneDesc', 'Todos os passos essenciais estão concluídos.')
+                          : `${doneCount}/${checks.length} ${t('admin.checklist.completed')}${nextStep ? ` • ${t('admin.checklist.next', 'Próximo')}: ${nextStep.label}` : ''}`}
+                      </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
-                      <motion.div className="h-full rounded-full bg-primary" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
+                  </button>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="hidden sm:block w-24 h-2 rounded-full bg-muted overflow-hidden">
+                      <motion.div className={`h-full rounded-full ${allDone ? 'bg-emerald-500' : 'bg-primary'}`} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
                     </div>
                     <span className="text-xs font-medium text-muted-foreground">{pct}%</span>
-                    {checklistOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                    {allDone ? (
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={() => { setChecklistDismissed(true); try { localStorage.setItem(checklistDismissKey, '1'); } catch {} }}>
+                        {t('admin.checklist.dismiss', 'Ocultar')}
+                      </Button>
+                    ) : (
+                      <button onClick={() => setChecklistOpen(o => !o)} aria-label="toggle">
+                        {checklistOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                      </button>
+                    )}
                   </div>
-                </button>
-                {checklistOpen && (
+                </div>
+                {checklistOpen && !allDone && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="mt-4 space-y-1.5">
                     {checks.map(c => (
                       <Link key={c.key} to={c.path} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c.done ? 'opacity-60' : 'hover:bg-primary/5'}`}>
@@ -374,6 +392,7 @@ const AdminDashboard: React.FC = () => {
             </motion.div>
           );
         })()}
+
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
