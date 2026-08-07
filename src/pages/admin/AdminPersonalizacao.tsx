@@ -442,6 +442,30 @@ const AdminPersonalizacao: React.FC = () => {
                 </div>
               </GlassCard>
 
+              {quota && !quota.unlimited && (
+                <GlassCard className="p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-foreground">{t('admin.storage.title', 'Armazenamento')}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {formatBytes(quota.used_bytes)} / {formatBytes(quota.limit_bytes)}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${quota.used_bytes / quota.limit_bytes > 0.9 ? 'bg-destructive' : 'bg-primary'}`}
+                      style={{ width: `${Math.min(100, Math.round((quota.used_bytes / quota.limit_bytes) * 100))}%` }}
+                    />
+                  </div>
+                  {quota.is_trial && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('admin.storage.trialHint', 'Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.')}
+                    </p>
+                  )}
+                </GlassCard>
+              )}
+
+
+
               <GlassCard className="p-5 space-y-4">
                 <h3 className="font-semibold text-foreground text-sm">{t('admin.banners.heroText', 'Banner Text')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
