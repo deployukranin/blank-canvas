@@ -202,6 +202,10 @@ const AdminPagamentosPix = () => {
     return null;
   };
 
+  // PIX manual is Brazil-only (BRL / Brazilian PIX keys)
+  const isBrazil = (i18n.language || '').toLowerCase().startsWith('pt');
+
+
 
   if (isLoading) {
     return (
