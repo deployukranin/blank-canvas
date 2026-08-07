@@ -209,8 +209,10 @@ Deno.serve(async (req) => {
 
 
     // Sanity cap — reject nonsensical prices coming from misconfigured stores.
-    // Min R$10, max R$10.000 (or equivalent in USD cents).
-    if (!Number.isFinite(amountCents) || amountCents < 1000 || amountCents > 1_000_000) {
+    // Min R$10 / US$1.85, max R$10.000 (or the USD equivalent).
+    const minCents = planCurrency === 'usd' ? Math.round(1000 / BRL_PER_USD) : 1000;
+    const maxCents = planCurrency === 'usd' ? Math.round(1_000_000 / BRL_PER_USD) : 1_000_000;
+    if (!Number.isFinite(amountCents) || amountCents < minCents || amountCents > maxCents) {
       return jsonResponse({ success: false, error: 'Configured plan price is out of allowed range' }, 400);
     }
 
