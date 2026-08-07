@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { useTenant } from '@/contexts/TenantContext';
+import { uploadPreviewMedia } from '@/lib/external-storage';
 import {
   defaultVideoConfig,
   saveVideoConfig,
