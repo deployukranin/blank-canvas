@@ -11,6 +11,7 @@ import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { loadConfig, saveConfig } from "@/lib/config-storage";
+import { supabase } from "@/integrations/supabase/client";
 import {
   YouTubeCategoryManager,
   type YouTubeCategorizationDraft,
