@@ -1,0 +1,2 @@
+CREATE POLICY "Store managers view store orders" ON public.custom_orders FOR SELECT TO authenticated USING (public.is_store_manager(store_id));
+CREATE POLICY "Store managers view store subscriptions" ON public.vip_subscriptions FOR SELECT TO authenticated USING (public.is_store_manager(store_id));
