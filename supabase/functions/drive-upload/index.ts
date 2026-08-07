@@ -91,6 +91,22 @@ Deno.serve(async (req) => {
       return json({ success: false, error: 'Forbidden' }, 403);
     }
 
+    // ── Storage quota (trial = 100MB total) ──
+    const { data: quota } = await admin.rpc('get_store_storage_quota', { p_store_id: storeId });
+    const q = quota as { used_bytes?: number; limit_bytes?: number; unlimited?: boolean } | null;
+    if (q && !q.unlimited && typeof q.limit_bytes === 'number' && q.limit_bytes > 0) {
+      const used = Number(q.used_bytes || 0);
+      if (used + file.size > q.limit_bytes) {
+        return json({
+          success: false,
+          error: 'storage_quota_exceeded',
+          used_bytes: used,
+          limit_bytes: q.limit_bytes,
+        }, 413);
+      }
+    }
+
+
     if (orderId) {
       const { data: order } = await admin
         .from('custom_orders')

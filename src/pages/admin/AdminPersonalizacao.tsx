@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
+
 import { motion } from 'framer-motion';
 import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
@@ -71,14 +73,30 @@ const AdminPersonalizacao: React.FC = () => {
   };
 
   // ── Banner state ──
-  const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
-  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
+  const LEGACY_GREETINGS = ['Bem-vindo! 🤍', 'Welcome! 🤍', '¡Bienvenido! 🤍'];
+  const LEGACY_SUBTITLES = ['Relaxe com ASMR de qualidade', 'Relax with quality ASMR', 'Relájate con ASMR de calidad'];
+  const defaultGreeting = t('admin.banners.defaultGreeting', 'Welcome! 🤍');
+  const defaultSubtitle = t('admin.banners.defaultSubtitle', 'Relax with quality ASMR');
+  const [heroGreeting, setHeroGreeting] = useState(
+    !config.heroGreeting || LEGACY_GREETINGS.includes(config.heroGreeting) ? defaultGreeting : config.heroGreeting
+  );
+  const [heroSubtitle, setHeroSubtitle] = useState(
+    !config.heroSubtitle || LEGACY_SUBTITLES.includes(config.heroSubtitle) ? defaultSubtitle : config.heroSubtitle
+  );
   const [banners, setBanners] = useState<BannerConfig[]>(
     config.banners?.length ? config.banners : [{ id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]
   );
   const [previewBanner, setPreviewBanner] = useState<{ url: string; type: string } | null>(null);
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [quota, setQuota] = useState<StorageQuota | null>(null);
   const canAdd = banners.length < 3;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchStorageQuota(store?.id).then(q => { if (!cancelled && q) setQuota(q); });
+    return () => { cancelled = true; };
+  }, [store?.id]);
+
 
   // ── Platform Icon state ──
   const [iconMode, setIconMode] = useState<'upload' | 'lucide'>(store?.avatar_url ? 'upload' : 'lucide');
@@ -161,13 +179,27 @@ const AdminPersonalizacao: React.FC = () => {
     const uploadKey = `${bannerId}-${variant}`;
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
     try {
+      // Enforce storage quota (trial stores are capped at 100MB total)
+      const current = await fetchStorageQuota(store?.id);
+      if (current) setQuota(current);
+      if (!fitsInQuota(current, file.size)) {
+        toast({
+          title: t('admin.storage.quotaExceeded', 'Limite de armazenamento atingido'),
+          description: t('admin.storage.quotaExceededDesc', 'Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço.'),
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${bannerId}/${variant}-${Date.now()}.${ext}`;
+      const prefix = store?.id ? `${store.id}/` : '';
+      const path = `${prefix}${bannerId}/${variant}-${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
       updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl);
       toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
+      fetchStorageQuota(store?.id).then(q => q && setQuota(q));
     } catch (err: any) {
       toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
     } finally {
@@ -191,6 +223,7 @@ const AdminPersonalizacao: React.FC = () => {
     };
     input.click();
   };
+
 
   const handleSaveBanners = () => {
     const enabledBanners = banners.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl));
@@ -234,7 +267,7 @@ const AdminPersonalizacao: React.FC = () => {
             {isUploading ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : (<><Upload className="w-5 h-5 text-muted-foreground" /><span className="text-xs text-muted-foreground">{t('admin.banners.clickToUpload', 'Click to upload')}</span></>)}
           </div>
         )}
-        <Input placeholder={`URL ${isDesktop ? 'Desktop' : 'Mobile'}`} value={url} onChange={(e) => updateBanner(banner.id, field, e.target.value)} className="bg-background/50 border-border/30 text-xs h-8" />
+        
       </div>
     );
   };
@@ -408,6 +441,30 @@ const AdminPersonalizacao: React.FC = () => {
                   </div>
                 </div>
               </GlassCard>
+
+              {quota && !quota.unlimited && (
+                <GlassCard className="p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-foreground">{t('admin.storage.title', 'Armazenamento')}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {formatBytes(quota.used_bytes)} / {formatBytes(quota.limit_bytes)}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${quota.used_bytes / quota.limit_bytes > 0.9 ? 'bg-destructive' : 'bg-primary'}`}
+                      style={{ width: `${Math.min(100, Math.round((quota.used_bytes / quota.limit_bytes) * 100))}%` }}
+                    />
+                  </div>
+                  {quota.is_trial && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('admin.storage.trialHint', 'Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.')}
+                    </p>
+                  )}
+                </GlassCard>
+              )}
+
+
 
               <GlassCard className="p-5 space-y-4">
                 <h3 className="font-semibold text-foreground text-sm">{t('admin.banners.heroText', 'Banner Text')}</h3>
