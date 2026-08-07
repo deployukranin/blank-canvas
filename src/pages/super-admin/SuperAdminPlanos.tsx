@@ -31,6 +31,7 @@ export interface PlanLimits {
   maxVideos?: number;
   maxVipPosts?: number;
   maxAdmins?: number;
+  storageGB?: number; // 0 = unlimited
 }
 
 interface PlanConfig {
@@ -72,6 +73,7 @@ const LIMIT_LABELS: { key: keyof PlanLimits; pt: string; en: string; es: string 
   { key: 'maxVideos', pt: 'Máx. de vídeos', en: 'Max videos', es: 'Máx. videos' },
   { key: 'maxVipPosts', pt: 'Máx. de posts VIP', en: 'Max VIP posts', es: 'Máx. publicaciones VIP' },
   { key: 'maxAdmins', pt: 'Máx. de admins', en: 'Max admins', es: 'Máx. admins' },
+  { key: 'storageGB', pt: 'Armazenamento (GB)', en: 'Storage (GB)', es: 'Almacenamiento (GB)' },
 ];
 
 const defaultPlans: PlanConfig[] = [
@@ -83,9 +85,10 @@ const defaultPlans: PlanConfig[] = [
     period: 'monthly',
     priceBRL: 49.90,
     priceUSD: 9.90,
-    features_pt: ['Plataforma personalizada', 'Painel admin completo', 'Pagamentos PIX + Stripe', 'Até 500 usuários', 'Suporte por email'],
-    features_en: ['Custom platform', 'Full admin panel', 'PIX + Stripe payments', 'Up to 500 users', 'Email support'],
-    features_es: ['Plataforma personalizada', 'Panel admin completo', 'Pagos PIX + Stripe', 'Hasta 500 usuarios', 'Soporte por email'],
+    features_pt: ['Plataforma personalizada', 'Painel admin completo', 'Pagamentos PIX + Stripe', 'Até 500 usuários', '15 GB de armazenamento', 'Suporte por email'],
+    features_en: ['Custom platform', 'Full admin panel', 'PIX + Stripe payments', 'Up to 500 users', '15 GB storage', 'Email support'],
+    features_es: ['Plataforma personalizada', 'Panel admin completo', 'Pagos PIX + Stripe', 'Hasta 500 usuarios', '15 GB de almacenamiento', 'Soporte por email'],
+    limits: { storageGB: 15 },
   },
   {
     id: 'pro',
@@ -95,9 +98,10 @@ const defaultPlans: PlanConfig[] = [
     period: 'monthly',
     priceBRL: 129.90,
     priceUSD: 24.90,
-    features_pt: ['Tudo do Básico', 'Até 2.000 usuários', 'Domínio personalizado', 'Suporte prioritário', 'Relatórios avançados'],
-    features_en: ['All Basic features', 'Up to 2,000 users', 'Custom domain', 'Priority support', 'Advanced reports'],
-    features_es: ['Todo del Básico', 'Hasta 2.000 usuarios', 'Dominio personalizado', 'Soporte prioritario', 'Reportes avanzados'],
+    features_pt: ['Tudo do Básico', 'Até 2.000 usuários', '50 GB de armazenamento', 'Domínio personalizado', 'Suporte prioritário', 'Relatórios avançados'],
+    features_en: ['All Basic features', 'Up to 2,000 users', '50 GB storage', 'Custom domain', 'Priority support', 'Advanced reports'],
+    features_es: ['Todo del Básico', 'Hasta 2.000 usuarios', '50 GB de almacenamiento', 'Dominio personalizado', 'Soporte prioritario', 'Reportes avanzados'],
+    limits: { storageGB: 50 },
     highlight: true,
   },
   {
@@ -108,9 +112,10 @@ const defaultPlans: PlanConfig[] = [
     period: 'monthly',
     priceBRL: 249.90,
     priceUSD: 49.90,
-    features_pt: ['Tudo do Profissional', 'Usuários ilimitados', 'API personalizada', 'Suporte VIP 24h', 'Analytics premium', 'Backup diário'],
-    features_en: ['All Professional features', 'Unlimited users', 'Custom API', 'VIP 24h support', 'Premium analytics', 'Daily backup'],
-    features_es: ['Todo del Profesional', 'Usuarios ilimitados', 'API personalizada', 'Soporte VIP 24h', 'Analytics premium', 'Backup diario'],
+    features_pt: ['Tudo do Profissional', 'Usuários ilimitados', 'Armazenamento ilimitado', 'API personalizada', 'Suporte VIP 24h', 'Analytics premium', 'Backup diário'],
+    features_en: ['All Professional features', 'Unlimited users', 'Unlimited storage', 'Custom API', 'VIP 24h support', 'Premium analytics', 'Daily backup'],
+    features_es: ['Todo del Profesional', 'Usuarios ilimitados', 'Almacenamiento ilimitado', 'API personalizada', 'Soporte VIP 24h', 'Analytics premium', 'Backup diario'],
+    limits: { storageGB: 0 },
   },
 ];
 
