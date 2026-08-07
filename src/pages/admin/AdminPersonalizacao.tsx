@@ -57,7 +57,7 @@ const AdminPersonalizacao: React.FC = () => {
   const { toast } = useToast();
   const { config, setConfig, updateColors } = useWhiteLabel();
   const { store } = useTenant();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // ── Color state ──
   const activeTemplate = allTemplates.find(
