@@ -209,7 +209,13 @@
       "storeName": "Defina o nome da plataforma",
       "colors": "Personalize o tema de cores",
       "banners": "Adicione pelo menos um banner",
-      "payments": "Configure os meios de pagamento"
+      "payments": "Configure os meios de pagamento",
+      "icon": "Defina o ícone da plataforma",
+      "youtube": "Conecte seu canal do YouTube",
+      "allDoneTitle": "Plataforma configurada!",
+      "allDoneDesc": "Todos os passos essenciais estão concluídos.",
+      "next": "Próximo",
+      "dismiss": "Ocultar"
     },
     "videoCategories": "Categorias de Vídeo",
     "categoriesOrganized": "{{count}} categorias • {{videos}} vídeos organizados",

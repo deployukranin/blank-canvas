@@ -209,7 +209,13 @@
       "storeName": "Set your platform name",
       "colors": "Customize your color theme",
       "banners": "Add at least one banner",
-      "payments": "Configure payment methods"
+      "payments": "Configure payment methods",
+      "icon": "Set your platform icon",
+      "youtube": "Connect your YouTube channel",
+      "allDoneTitle": "Platform is set up!",
+      "allDoneDesc": "All essential steps are complete.",
+      "next": "Next",
+      "dismiss": "Hide"
     },
     "videoCategories": "Video Categories",
     "categoriesOrganized": "{{count}} categories • {{videos}} videos organized",
