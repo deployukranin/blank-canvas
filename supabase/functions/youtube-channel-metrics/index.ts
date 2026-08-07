@@ -139,17 +139,51 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch channel statistics
-    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${encodeURIComponent(channelId)}&key=${youtubeKey}`;
-    const channelRes = await fetch(channelUrl);
-    const channelData = await channelRes.json();
+    // Fetch channel statistics — channelId may be a UC... id, an @handle, or a plain handle
+    const base = "https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet";
+    const isChannelId = /^UC[\w-]{20,}$/.test(channelId);
+    const handle = channelId.replace(/^@/, "");
 
-    if (!channelData.items?.length) {
+    const tryFetch = async (url: string) => {
+      const res = await fetch(url);
+      const json = await res.json();
+      return json?.items?.length ? json : null;
+    };
+
+    let channelData: any = null;
+    if (isChannelId) {
+      channelData = await tryFetch(`${base}&id=${encodeURIComponent(channelId)}&key=${youtubeKey}`);
+    }
+    if (!channelData) {
+      channelData = await tryFetch(`${base}&forHandle=${encodeURIComponent(handle)}&key=${youtubeKey}`);
+    }
+    if (!channelData) {
+      channelData = await tryFetch(`${base}&forUsername=${encodeURIComponent(handle)}&key=${youtubeKey}`);
+    }
+    if (!channelData) {
+      // Last resort: resolve via search
+      const searchRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(handle)}&key=${youtubeKey}`
+      );
+      const searchJson = await searchRes.json();
+      const foundId = searchJson?.items?.[0]?.snippet?.channelId || searchJson?.items?.[0]?.id?.channelId;
+      if (foundId) {
+        channelData = await tryFetch(`${base}&id=${encodeURIComponent(foundId)}&key=${youtubeKey}`);
+      }
+    }
+
+    if (!channelData) {
+      if (cached) {
+        return new Response(JSON.stringify({ success: true, metrics: cached, fromCache: true, stale: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(
         JSON.stringify({ error: "Channel not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
 
     const channelStats = channelData.items[0].statistics;
     const subscriberCount = parseInt(channelStats.subscriberCount || "0");
