@@ -209,22 +209,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             ))}
           </nav>
 
-          {/* Footer user */}
-          <div className={cn("shrink-0 border-t border-border/40 p-3", collapsed && "lg:hidden")}>
-            <div className="flex items-center gap-2 min-w-0">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <span className="text-xs text-primary font-semibold">{initial}</span>
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-foreground/80 truncate">{user?.username}</p>
-                <p className="text-[10px] text-foreground/35 truncate">{user?.email}</p>
-              </div>
-            </div>
-          </div>
+
+
         </aside>
 
         {sidebarOpen && (
