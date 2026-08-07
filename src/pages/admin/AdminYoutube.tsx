@@ -54,30 +54,97 @@ function mergeWithDefaults(
   return [...saved, ...missing];
 }
 
+interface ChannelChangeStatus {
+  used: number;
+  limit: number;
+  remaining: number;
+  next_available_at?: string | null;
+}
+
 const AdminYoutube = () => {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { config, updateYouTube } = useWhiteLabel();
   const { store } = useTenant();
   const storeId = store?.id ?? null;
   const channelId = config.youtube?.channelId?.trim() || "";
   const [isSaving, setIsSaving] = useState(false);
   const [channelInput, setChannelInput] = useState(channelId);
+  const [changeStatus, setChangeStatus] = useState<ChannelChangeStatus | null>(null);
+  const [isSavingChannel, setIsSavingChannel] = useState(false);
 
   useEffect(() => {
     setChannelInput(channelId);
   }, [channelId]);
 
-  const handleSaveChannel = () => {
-    const value = channelInput.trim();
-    updateYouTube({ ...(config.youtube || {}), channelId: value } as any);
-    toast({
-      title: t("common.save"),
-      description: value
-        ? t("youtubeAdmin.channelSaved", "Channel saved")
-        : t("youtubeAdmin.channelCleared", "Channel cleared"),
-    });
+  useEffect(() => {
+    if (!storeId) return;
+    const loadStatus = async () => {
+      const { data } = await supabase.rpc("get_youtube_channel_change_status", { p_store_id: storeId });
+      const s = data as unknown as (ChannelChangeStatus & { success?: boolean }) | null;
+      if (s?.success) setChangeStatus(s);
+    };
+    loadStatus();
+  }, [storeId]);
+
+  const limitReached = !!changeStatus && changeStatus.remaining <= 0;
+
+  const formatDate = (iso?: string | null) => {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleDateString(i18n.language, { day: "2-digit", month: "short", year: "numeric" });
+    } catch {
+      return iso;
+    }
   };
+
+  const handleSaveChannel = async () => {
+    const value = channelInput.trim();
+    if (value === channelId) {
+      toast({ title: t("common.save"), description: t("youtubeAdmin.noChange", "No changes to save") });
+      return;
+    }
+    if (!storeId) return;
+
+    setIsSavingChannel(true);
+    try {
+      const { data, error } = await supabase.rpc("record_youtube_channel_change", {
+        p_store_id: storeId,
+        p_channel_id: value || "(cleared)",
+      });
+      const res = data as unknown as (ChannelChangeStatus & { success?: boolean; error?: string; next_available_at?: string }) | null;
+
+      if (error || !res?.success) {
+        if (res?.error === "limit_reached") {
+          setChangeStatus({ used: res.used, limit: res.limit, remaining: 0, next_available_at: res.next_available_at });
+          toast({
+            title: t("youtubeAdmin.limitReachedTitle", "Change limit reached"),
+            description: t("youtubeAdmin.limitReachedDesc", {
+              defaultValue: "You can change the channel up to {{limit}} times every 14 days. Next change available on {{date}}.",
+              limit: res.limit,
+              date: formatDate(res.next_available_at),
+            }),
+            variant: "destructive",
+          });
+        } else {
+          toast({ title: t("common.error", "Error"), description: res?.error || error?.message, variant: "destructive" });
+        }
+        return;
+      }
+
+      updateYouTube({ ...(config.youtube || {}), channelId: value } as any);
+      setChangeStatus({ used: res.used, limit: res.limit, remaining: res.remaining ?? 0 });
+      toast({
+        title: t("common.save"),
+        description: value
+          ? t("youtubeAdmin.channelSaved", "Channel saved")
+          : t("youtubeAdmin.channelCleared", "Channel cleared"),
+      });
+    } finally {
+      setIsSavingChannel(false);
+    }
+  };
+
 
   const [categorizationDraft, setCategorizationDraft] = useState<YouTubeCategorizationDraft>(() => ({
     categories: mergeWithDefaults(config.youtube?.categories),
