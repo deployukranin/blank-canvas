@@ -730,6 +730,12 @@ export interface WhiteLabelConfig {
     mode?: 'dark' | 'light';
   };
 
+  // Setup checklist progress (explicit user confirmations)
+  setup?: {
+    colorsConfirmed?: boolean;
+  };
+
+
   // Shopify Integration
   shopify: {
     enabled: boolean;
@@ -1221,8 +1227,10 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({
       ...prev,
       colors: { ...prev.colors, ...colors },
+      setup: { ...(prev.setup || {}), colorsConfirmed: true },
     }));
   }, []);
+
 
   const updateIcons = useCallback((icons: Partial<IconConfig>) => {
     setConfig(prev => ({
