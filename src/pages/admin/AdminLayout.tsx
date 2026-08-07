@@ -237,12 +237,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <div className="bg-destructive/10 border-b border-destructive/30 px-4 py-3 flex items-center gap-3 text-sm">
               <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
               <p className="text-destructive font-medium">
-                Seu trial expirou! {daysUntilDeletion !== null && daysUntilDeletion > 0
-                  ? `Contrate um plano em ${daysUntilDeletion} dia${daysUntilDeletion !== 1 ? 's' : ''} ou sua loja será apagada automaticamente.`
-                  : 'Sua loja será apagada em breve. Contrate um plano agora!'}
+                {t('admin.trial.expired')}{' '}
+                {daysUntilDeletion !== null && daysUntilDeletion > 0
+                  ? t('admin.trial.deleteWarning', { days: daysUntilDeletion })
+                  : t('admin.trial.deleteSoon')}
               </p>
               <Link to={`${base}/plans`} className="shrink-0 ml-auto text-xs font-semibold text-destructive underline hover:no-underline">
-                Ver planos
+                {t('admin.trial.upgrade')}
               </Link>
             </div>
           )}
