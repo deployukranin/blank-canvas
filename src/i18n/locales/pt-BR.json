@@ -165,9 +165,16 @@
       "savedDesc": "Sua configuração de banners foi atualizada.",
       "disabled": "Desativado",
       "addBanner": "Adicionar Banner",
-      "emptyHint": "Envie uma imagem ou cole uma URL para o banner desktop e/ou mobile.",
+      "emptyHint": "Envie uma imagem para o banner desktop e/ou mobile.",
       "defaultGreeting": "Bem-vindo! 🤍",
-      "defaultSubtitle": "Relaxe com ASMR de qualidade"
+      "defaultSubtitle": "Relaxe com ASMR de qualidade",
+      "subtitleLabel": "Subtítulo",
+      "subtitleHint": "Frase curta exibida abaixo do título.",
+      "enabled": "Ativo",
+      "bannerLabel": "Banner"
+    },
+    "preview": {
+      "description": "Veja como sua plataforma fica com as configurações atuais."
     },
     "dashboard": "Dashboard",
     "ideas": "Ideias",
