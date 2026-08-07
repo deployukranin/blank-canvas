@@ -112,9 +112,10 @@ const defaultPlans: PlanConfig[] = [
     period: 'monthly',
     priceBRL: 249.90,
     priceUSD: 49.90,
-    features_pt: ['Tudo do Profissional', 'Usuários ilimitados', 'API personalizada', 'Suporte VIP 24h', 'Analytics premium', 'Backup diário'],
-    features_en: ['All Professional features', 'Unlimited users', 'Custom API', 'VIP 24h support', 'Premium analytics', 'Daily backup'],
-    features_es: ['Todo del Profesional', 'Usuarios ilimitados', 'API personalizada', 'Soporte VIP 24h', 'Analytics premium', 'Backup diario'],
+    features_pt: ['Tudo do Profissional', 'Usuários ilimitados', 'Armazenamento ilimitado', 'API personalizada', 'Suporte VIP 24h', 'Analytics premium', 'Backup diário'],
+    features_en: ['All Professional features', 'Unlimited users', 'Unlimited storage', 'Custom API', 'VIP 24h support', 'Premium analytics', 'Daily backup'],
+    features_es: ['Todo del Profesional', 'Usuarios ilimitados', 'Almacenamiento ilimitado', 'API personalizada', 'Soporte VIP 24h', 'Analytics premium', 'Backup diario'],
+    limits: { storageGB: 0 },
   },
 ];
 
