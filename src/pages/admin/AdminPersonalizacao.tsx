@@ -493,11 +493,11 @@ const AdminPersonalizacao: React.FC = () => {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center"><span className="text-sm font-bold text-primary">{index + 1}</span></div>
-                        <h3 className="font-semibold text-sm text-foreground">Banner {index + 1}</h3>
+                        <h3 className="font-semibold text-sm text-foreground">{t('admin.banners.bannerLabel', 'Banner')} {index + 1}</h3>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor={`en-${banner.id}`} className="text-xs text-muted-foreground">{banner.enabled ? t('common.active') : 'Off'}</Label>
+                          <Label htmlFor={`en-${banner.id}`} className="text-xs text-muted-foreground">{banner.enabled ? t('admin.banners.enabled', 'Active') : t('admin.banners.disabled', 'Disabled')}</Label>
                           <Switch id={`en-${banner.id}`} checked={banner.enabled} onCheckedChange={(v) => updateBanner(banner.id, 'enabled', v)} />
                         </div>
                         {banners.length > 1 && (
