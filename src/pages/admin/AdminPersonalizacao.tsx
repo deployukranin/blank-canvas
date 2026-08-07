@@ -73,16 +73,21 @@ const AdminPersonalizacao: React.FC = () => {
   };
 
   // ── Banner state ──
-  const LEGACY_GREETINGS = ['Bem-vindo! 🤍', 'Welcome! 🤍', '¡Bienvenido! 🤍'];
-  const LEGACY_SUBTITLES = ['Relaxe com ASMR de qualidade', 'Relax with quality ASMR', 'Relájate con ASMR de calidad'];
   const defaultGreeting = t('admin.banners.defaultGreeting', 'Welcome! 🤍');
   const defaultSubtitle = t('admin.banners.defaultSubtitle', 'Relax with quality ASMR');
   const [heroGreeting, setHeroGreeting] = useState(
-    !config.heroGreeting || LEGACY_GREETINGS.includes(config.heroGreeting) ? defaultGreeting : config.heroGreeting
+    isLegacyGreeting(config.heroGreeting) ? defaultGreeting : config.heroGreeting
   );
   const [heroSubtitle, setHeroSubtitle] = useState(
-    !config.heroSubtitle || LEGACY_SUBTITLES.includes(config.heroSubtitle) ? defaultSubtitle : config.heroSubtitle
+    isLegacySubtitle(config.heroSubtitle) ? defaultSubtitle : config.heroSubtitle
   );
+
+  // Keep hero texts translated when the config loads late or the language changes
+  useEffect(() => {
+    setHeroGreeting(prev => (isLegacyGreeting(prev) ? defaultGreeting : prev));
+    setHeroSubtitle(prev => (isLegacySubtitle(prev) ? defaultSubtitle : prev));
+  }, [config.heroGreeting, config.heroSubtitle, i18n.language, defaultGreeting, defaultSubtitle]);
+
   const [banners, setBanners] = useState<BannerConfig[]>(
     config.banners?.length ? config.banners : [{ id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]
   );
