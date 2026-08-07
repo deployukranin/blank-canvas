@@ -478,11 +478,11 @@ const AdminPersonalizacao: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label className="text-xs">{t('admin.banners.greeting', 'Title / Greeting')}</Label>
-                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder="Welcome! 🤍" className="bg-background/50 border-border/30" />
+                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder={defaultGreeting} className="bg-background/50 border-border/30" />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">{t('admin.banners.subtitleLabel', 'Subtitle')}</Label>
-                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Relax with quality content" className="bg-background/50 border-border/30" />
+                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder={defaultSubtitle} className="bg-background/50 border-border/30" />
                   </div>
                 </div>
               </GlassCard>
@@ -493,11 +493,11 @@ const AdminPersonalizacao: React.FC = () => {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center"><span className="text-sm font-bold text-primary">{index + 1}</span></div>
-                        <h3 className="font-semibold text-sm text-foreground">Banner {index + 1}</h3>
+                        <h3 className="font-semibold text-sm text-foreground">{t('admin.banners.bannerLabel', 'Banner')} {index + 1}</h3>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor={`en-${banner.id}`} className="text-xs text-muted-foreground">{banner.enabled ? t('common.active') : 'Off'}</Label>
+                          <Label htmlFor={`en-${banner.id}`} className="text-xs text-muted-foreground">{banner.enabled ? t('admin.banners.enabled', 'Active') : t('admin.banners.disabled', 'Disabled')}</Label>
                           <Switch id={`en-${banner.id}`} checked={banner.enabled} onCheckedChange={(v) => updateBanner(banner.id, 'enabled', v)} />
                         </div>
                         {banners.length > 1 && (
@@ -527,7 +527,7 @@ const AdminPersonalizacao: React.FC = () => {
               <div className="space-y-4">
                 {/* Device toggle */}
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{t('admin.preview.description', 'See how your platform looks with current settings.')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.preview.description', 'See how your platform looks with the current settings.')}</p>
                   <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
                     <Button
                       variant={previewMode === 'desktop' ? 'default' : 'ghost'}
@@ -577,10 +577,10 @@ const AdminPersonalizacao: React.FC = () => {
                       {/* Text overlay */}
                       <div className="absolute bottom-6 left-5 right-5 z-10">
                         <h2 className="font-bold text-lg leading-tight mb-1" style={{ color: previewFg }}>
-                          {heroGreeting || 'Welcome! 🤍'}
+                          {heroGreeting || defaultGreeting}
                         </h2>
                         <p className="text-sm" style={{ color: previewMuted }}>
-                          {heroSubtitle || 'Relax with quality content'}
+                          {heroSubtitle || defaultSubtitle}
                         </p>
                       </div>
 
