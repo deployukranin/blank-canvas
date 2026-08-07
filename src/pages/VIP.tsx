@@ -297,6 +297,7 @@ const VIPPage = () => {
         body: {
           planType: selectedPlan.type,
           storeId: resolvedStoreId,
+          currency: displayCurrencyForLang(i18n.language),
           affiliateCode: getAffiliateCode(resolvedStoreId) || undefined,
           successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
           cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
