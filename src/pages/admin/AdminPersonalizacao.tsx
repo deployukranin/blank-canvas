@@ -15,6 +15,8 @@ import { useWhiteLabel, type BannerConfig } from '@/contexts/WhiteLabelContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
+
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
