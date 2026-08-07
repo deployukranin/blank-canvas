@@ -242,8 +242,9 @@ const AdminYoutube = () => {
             value={channelInput}
             onChange={(e) => setChannelInput(e.target.value)}
             placeholder="UCxxxxxxxx or @handle"
+            disabled={limitReached}
           />
-          <Button onClick={handleSaveChannel} className="gap-2">
+          <Button onClick={handleSaveChannel} className="gap-2" disabled={isSavingChannel || limitReached}>
             <Save className="w-4 h-4" />
             {t('common.save', 'Save')}
           </Button>
@@ -253,7 +254,23 @@ const AdminYoutube = () => {
             {t('youtubeAdmin.currentChannel', 'Current')}: <span className="font-mono">{channelId}</span>
           </p>
         )}
+        {changeStatus && (
+          <p className={`text-xs ${limitReached ? 'text-destructive' : 'text-muted-foreground'}`}>
+            {limitReached
+              ? t('youtubeAdmin.limitReachedDesc', {
+                  defaultValue: 'You can change the channel up to {{limit}} times every 14 days. Next change available on {{date}}.',
+                  limit: changeStatus.limit,
+                  date: formatDate(changeStatus.next_available_at),
+                })
+              : t('youtubeAdmin.changesRemaining', {
+                  defaultValue: '{{remaining}} of {{limit}} channel changes remaining in the last 14 days.',
+                  remaining: changeStatus.remaining,
+                  limit: changeStatus.limit,
+                })}
+          </p>
+        )}
       </div>
+
     </GlassCard>
   );
 
