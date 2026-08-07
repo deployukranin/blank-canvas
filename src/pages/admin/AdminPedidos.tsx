@@ -487,25 +487,29 @@ const AdminPedidos: React.FC = () => {
                 </p>
               )}
             </GlassCard>
-            {uploadedVideoUrl ? (
+            {deliveryPreviewUrl || uploadedVideoUrl ? (
               <div className="rounded-lg overflow-hidden">
-                <VideoPlayer videoUrl={uploadedVideoUrl} title={t('orders.videoPreview', 'Preview')} />
+                <VideoPlayer videoUrl={deliveryPreviewUrl || uploadedVideoUrl} title={t('orders.videoPreview', 'Preview')} />
               </div>
             ) : (
               <GlassCard 
                 className="p-8 text-center cursor-pointer hover:bg-white/5 transition-colors"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => !isUploading && fileInputRef.current?.click()}
               >
                 <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-sm font-medium mb-2">
-                  {selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo', 'Clique para enviar o vídeo') : t('orders.clickToUploadAudio', 'Clique para enviar o áudio')}
+                  {isUploading
+                    ? t('orders.uploading', 'Enviando...')
+                    : selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo', 'Clique para enviar o vídeo') : t('orders.clickToUploadAudio', 'Clique para enviar o áudio')}
                 </p>
+                <p className="text-xs text-muted-foreground">{t('orders.maxSize', 'Máx. 100MB')}</p>
               </GlassCard>
             )}
             <input ref={fileInputRef} type="file" accept={selectedOrderForUpload?.product_type === 'video' ? 'video/*' : 'audio/*'} className="hidden" onChange={handleFileUpload} />
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowUploadDialog(false)}>{t('common.cancel', 'Cancelar')}</Button>
-              <Button disabled={!uploadedVideoUrl || isUploading} onClick={handleConfirmDelivery} className="bg-green-500 hover:bg-green-600">
+              <Button disabled={!deliveryRef || isUploading} onClick={handleConfirmDelivery} className="bg-green-500 hover:bg-green-600">
+
                 {t('orders.confirmDelivery', 'Confirmar Entrega')}
               </Button>
             </div>
