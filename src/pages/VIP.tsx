@@ -256,14 +256,9 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, resolvedStoreId]);
 
-  const formatCurrency = (value: number, currency?: 'BRL' | 'USD') => {
-    const cur = currency || (i18n.language?.startsWith('pt') ? 'BRL' : 'USD');
-    const locale = cur === 'BRL' ? 'pt-BR' : 'en-US';
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: cur,
-    }).format(value);
-  };
+  const formatCurrency = (value: number, currency?: 'BRL' | 'USD') =>
+    formatPriceForLang(value, currency, i18n.language);
+
 
   const getPlanLabel = (type: string) => {
     switch (type) {
