@@ -54,7 +54,9 @@ interface DBOrder {
   triggers: string | null;
   script: string | null;
   correlation_id: string;
+  delivery_file_id?: string | null;
 }
+
 
 const statusConfig: Record<string, { icon: React.ReactNode; label: string; labelKey: string; color: string }> = {
   pending: { 
