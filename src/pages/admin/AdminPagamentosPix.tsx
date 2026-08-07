@@ -267,21 +267,18 @@ const AdminPagamentosPix = () => {
         </GlassCard>
 
         {/* Payment Gateways */}
-        <Tabs defaultValue={config.activeGateway === 'pix_manual' ? 'pix_manual' : 'stripe'} className="w-full">
+        <Tabs defaultValue={isBrazil && config.activeGateway === 'pix_manual' ? 'pix_manual' : 'stripe'} className="w-full">
           <TabsList className="w-full">
             <TabsTrigger value="stripe" className="flex-1 gap-2">
               <CreditCard className="w-4 h-4" />
               {t('adminPayments.stripeConnect')}
             </TabsTrigger>
-            <TabsTrigger value="pix_manual" className="flex-1 gap-2">
-              <QrCode className="w-4 h-4" />
-              {t('adminPayments.pixManual')}
-            </TabsTrigger>
-            <TabsTrigger value="pix_auto" disabled className="flex-1 gap-2 opacity-40 cursor-not-allowed">
-              <Zap className="w-4 h-4" />
-              {t('adminPayments.pixAuto')}
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">{t('adminPayments.comingSoon')}</Badge>
-            </TabsTrigger>
+            {isBrazil && (
+              <TabsTrigger value="pix_manual" className="flex-1 gap-2">
+                <QrCode className="w-4 h-4" />
+                {t('adminPayments.pixManual')}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* STRIPE CONNECT TAB */}
