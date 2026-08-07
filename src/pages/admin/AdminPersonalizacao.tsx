@@ -234,7 +234,7 @@ const AdminPersonalizacao: React.FC = () => {
             {isUploading ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : (<><Upload className="w-5 h-5 text-muted-foreground" /><span className="text-xs text-muted-foreground">{t('admin.banners.clickToUpload', 'Click to upload')}</span></>)}
           </div>
         )}
-        <Input placeholder={`URL ${isDesktop ? 'Desktop' : 'Mobile'}`} value={url} onChange={(e) => updateBanner(banner.id, field, e.target.value)} className="bg-background/50 border-border/30 text-xs h-8" />
+        
       </div>
     );
   };
