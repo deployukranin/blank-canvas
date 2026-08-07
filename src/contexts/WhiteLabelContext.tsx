@@ -730,6 +730,12 @@ export interface WhiteLabelConfig {
     mode?: 'dark' | 'light';
   };
 
+  // Setup checklist progress (explicit user confirmations)
+  setup?: {
+    colorsConfirmed?: boolean;
+  };
+
+
   // Shopify Integration
   shopify: {
     enabled: boolean;
