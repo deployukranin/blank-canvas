@@ -470,20 +470,8 @@ const AdminVipConteudo = () => {
                       <><Upload className="w-4 h-4 mr-2" /> {t('vipAdmin.uploadFile')}</>
                     )}
                   </Button>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">{t('vipAdmin.or')}</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  
-                  <Input
-                    value={formMediaUrl}
-                    onChange={e => setFormMediaUrl(e.target.value)}
-                    placeholder={t('vipAdmin.mediaUrlPlaceholder')}
-                    disabled={isUploading}
-                  />
                 </div>
+
               )}
               
               <p className="text-xs text-muted-foreground mt-1.5">
