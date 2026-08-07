@@ -9,6 +9,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface PlanLimits {
+  maxUsers?: number;
+  maxVideos?: number;
+  maxVipPosts?: number;
+  maxAdmins?: number;
+  storageGB?: number; // 0 = unlimited
+}
+
 interface PlanConfig {
   id: string;
   name_pt: string;
@@ -22,6 +30,7 @@ interface PlanConfig {
   features_pt: string[];
   features_en: string[];
   features_es: string[];
+  limits?: PlanLimits;
   highlight?: boolean;
   discount?: string;
 }
