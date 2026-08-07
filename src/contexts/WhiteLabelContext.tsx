@@ -1227,8 +1227,10 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({
       ...prev,
       colors: { ...prev.colors, ...colors },
+      setup: { ...(prev.setup || {}), colorsConfirmed: true },
     }));
   }, []);
+
 
   const updateIcons = useCallback((icons: Partial<IconConfig>) => {
     setConfig(prev => ({
