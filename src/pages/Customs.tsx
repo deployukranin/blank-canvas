@@ -392,12 +392,13 @@ const CustomsPage = () => {
               return (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <GlassCard className="overflow-hidden p-0">
-                  {config.previewType === 'video' && config.previewVideoUrl ? (
-                    <VideoPlayer videoUrl={config.previewVideoUrl} title={previewTitle} description={previewDesc} />
-                  ) : config.previewType === 'image' && config.previewImageUrl ? (
+                  {config.previewType === 'video' && previewVideoSrc ? (
+                    <VideoPlayer videoUrl={previewVideoSrc} title={previewTitle} description={previewDesc} />
+                  ) : config.previewType === 'image' && previewImageSrc ? (
                     <div className="aspect-video bg-black">
-                      <img src={config.previewImageUrl} alt={previewTitle} className="w-full h-full object-cover" />
+                      <img src={previewImageSrc} alt={previewTitle} className="w-full h-full object-cover" />
                     </div>
+
                   ) : (
                     <VideoPlaceholder title={previewTitle} description={previewDesc} />
                   )}
