@@ -560,23 +560,6 @@ const AdminPagamentosPix = () => {
             </GlassCard>
           </TabsContent>
 
-          {/* AUTO PIX TAB (coming soon) */}
-          <TabsContent value="pix_auto" className="mt-6">
-            <GlassCard className="p-6">
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Zap className="w-8 h-8 text-primary/50" />
-                </div>
-                <h3 className="text-lg font-semibold text-muted-foreground">{t('adminPayments.pixAuto')}</h3>
-                <p className="text-sm text-muted-foreground/60 mt-2 max-w-sm">
-                  {t('adminPayments.pixAutoDescription')}
-                </p>
-                <Badge variant="outline" className="mt-4">
-                  <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.comingSoonBadge')}
-                </Badge>
-              </div>
-            </GlassCard>
-          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>
