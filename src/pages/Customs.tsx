@@ -137,6 +137,24 @@ const CustomsPage = () => {
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
 
+  // Resolve uploaded (Google Drive) preview assets into playable URLs.
+  const [previewVideoSrc, setPreviewVideoSrc] = useState<string | null>(null);
+  const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const resolve = async (ref?: string | null, set?: (v: string | null) => void) => {
+      if (!ref) return set?.(null);
+      if (!isDriveRef(ref)) return set?.(ref);
+      const url = await getVipMediaSignedUrl(ref);
+      if (active) set?.(url);
+    };
+    resolve(config?.previewVideoUrl, setPreviewVideoSrc);
+    resolve(config?.previewImageUrl, setPreviewImageSrc);
+    return () => { active = false; };
+  }, [config?.previewVideoUrl, config?.previewImageUrl]);
+
+
   // Video handlers
   const handleSelectCategory = (category: VideoCategory) => {
     setSelectedCategory(category);
