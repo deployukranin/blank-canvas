@@ -161,13 +161,27 @@ const AdminPersonalizacao: React.FC = () => {
     const uploadKey = `${bannerId}-${variant}`;
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
     try {
+      // Enforce storage quota (trial stores are capped at 100MB total)
+      const current = await fetchStorageQuota(store?.id);
+      if (current) setQuota(current);
+      if (!fitsInQuota(current, file.size)) {
+        toast({
+          title: t('admin.storage.quotaExceeded', 'Limite de armazenamento atingido'),
+          description: t('admin.storage.quotaExceededDesc', 'Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço.'),
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${bannerId}/${variant}-${Date.now()}.${ext}`;
+      const prefix = store?.id ? `${store.id}/` : '';
+      const path = `${prefix}${bannerId}/${variant}-${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
       updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl);
       toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
+      fetchStorageQuota(store?.id).then(q => q && setQuota(q));
     } catch (err: any) {
       toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
     } finally {
@@ -191,6 +205,7 @@ const AdminPersonalizacao: React.FC = () => {
     };
     input.click();
   };
+
 
   const handleSaveBanners = () => {
     const enabledBanners = banners.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl));
