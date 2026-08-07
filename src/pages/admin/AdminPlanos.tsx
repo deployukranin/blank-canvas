@@ -42,10 +42,8 @@ const AdminPlanos: React.FC = () => {
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [plans, setPlans] = useState<PlanConfig[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'stripe' | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
+
 
   const isBRL = i18n.language?.startsWith('pt');
   const lang = i18n.language?.startsWith('pt') ? 'pt' : i18n.language?.startsWith('es') ? 'es' : 'en';
