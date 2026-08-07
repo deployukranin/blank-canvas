@@ -442,6 +442,7 @@ const AdminPagamentosPix = () => {
           </TabsContent>
 
           {/* MANUAL PIX TAB */}
+          {isBrazil && (
           <TabsContent value="pix_manual" className="mt-6">
             <GlassCard className="p-6 space-y-6">
               <div className="flex items-start justify-between">
