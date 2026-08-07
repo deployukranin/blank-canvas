@@ -14,14 +14,26 @@ interface UploadResult {
   name: string;
 }
 
+export type UploadKind = 'vip' | 'custom' | 'preview';
+
+/** Maps backend error codes to a readable message. */
+export function describeUploadError(raw?: string | null): string {
+  const code = (raw || '').trim();
+  if (!code) return 'Falha no upload';
+  if (code.includes('storage_quota_exceeded')) return 'quota';
+  if (code.includes('100MB') || code.includes('too large')) return 'size';
+  if (code.toLowerCase().includes('forbidden')) return 'forbidden';
+  return code;
+}
+
 async function uploadToDrive(
   file: File,
   storeId: string,
-  kind: 'vip' | 'custom',
+  kind: UploadKind,
   orderId?: string,
 ): Promise<UploadResult> {
   if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
-    throw new Error('Arquivo maior que 100MB');
+    throw new Error('size');
   }
 
   const form = new FormData();
@@ -33,10 +45,10 @@ async function uploadToDrive(
   const { data, error } = await supabase.functions.invoke('drive-upload', { body: form });
   if (error) {
     const detail = await extractFunctionError(error);
-    throw new Error(detail || 'Falha no upload');
+    throw new Error(describeUploadError(detail));
   }
   if (!data?.success || !data?.ref) {
-    throw new Error(data?.error || 'Falha no upload');
+    throw new Error(describeUploadError(data?.error));
   }
   return { ref: data.ref as string, name: (data.name as string) || file.name };
 }
@@ -47,6 +59,11 @@ export async function uploadVipMedia(file: File, storeId: string): Promise<strin
   return ref;
 }
 
+/** Uploads a public preview asset (customs/videos page banner or teaser video). */
+export async function uploadPreviewMedia(file: File, storeId: string): Promise<UploadResult> {
+  return await uploadToDrive(file, storeId, 'preview');
+}
+
 /** Uploads a delivery file for a custom order. */
 export async function uploadCustomDelivery(
   file: File,
@@ -55,6 +72,7 @@ export async function uploadCustomDelivery(
 ): Promise<UploadResult> {
   return await uploadToDrive(file, storeId, 'custom', orderId);
 }
+
 
 /**
  * Resolve a playable/downloadable URL.
