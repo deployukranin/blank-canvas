@@ -179,8 +179,11 @@ Deno.serve(async (req) => {
     }
 
     // ─── Load store's VIP prices ───
+    // Charge currency follows the buyer's language (pt → BRL, en/es → USD).
+    const BRL_PER_USD = 5.4;
+    const requestedCurrency = String((body as any).currency || 'BRL').toLowerCase() === 'usd' ? 'usd' : 'brl';
     let amountCents: number;
-    let planCurrency: 'brl' | 'usd' = 'brl';
+    let planCurrency: 'brl' | 'usd' = requestedCurrency;
     if (storeId) {
       const { data: vipCfg } = await supabase
         .from('app_configurations')
@@ -192,12 +195,18 @@ Deno.serve(async (req) => {
       const plans = (vipCfg?.config_value as any)?.plans || [];
       const matchingPlan = plans.find((p: any) => p.type === body.planType);
       amountCents = matchingPlan ? Math.round(matchingPlan.price * 100) : 1990;
-      const cur = (matchingPlan?.currency || 'BRL').toString().toLowerCase();
-      planCurrency = cur === 'usd' ? 'usd' : 'brl';
+      const storedCurrency = (matchingPlan?.currency || 'BRL').toString().toLowerCase() === 'usd' ? 'usd' : 'brl';
+      if (storedCurrency !== planCurrency) {
+        amountCents = planCurrency === 'usd'
+          ? Math.round(amountCents / BRL_PER_USD)
+          : Math.round(amountCents * BRL_PER_USD);
+      }
     } else {
       const defaultPrices: Record<string, number> = { monthly: 1990, quarterly: 4990, yearly: 19990 };
       amountCents = defaultPrices[body.planType] || 1990;
+      if (planCurrency === 'usd') amountCents = Math.round(amountCents / BRL_PER_USD);
     }
+
 
     // Sanity cap — reject nonsensical prices coming from misconfigured stores.
     // Min R$10, max R$10.000 (or equivalent in USD cents).
