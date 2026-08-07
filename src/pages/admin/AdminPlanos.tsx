@@ -138,21 +138,16 @@ const AdminPlanos: React.FC = () => {
     }
   };
 
-  const handlePayment = async () => {
-    if (!selectedPlan || !paymentMethod || !storeId) return;
+  const handlePayment = async (planId: string) => {
+    if (!planId || !storeId || checkoutPlanId) return;
 
-    if (paymentMethod === 'pix') {
-      toast.info(t('admin.plans.pixInstructions', 'PIX para planos da plataforma em breve. Use Stripe por enquanto.'));
-      return;
-    }
-
-    setIsCheckingOut(true);
+    setCheckoutPlanId(planId);
     try {
       const returnBase = window.location.origin + window.location.pathname;
       const { data, error } = await supabase.functions.invoke('platform-subscription-checkout', {
         body: {
           store_id: storeId,
-          plan_id: selectedPlan,
+          plan_id: planId,
           currency: isBRL ? 'brl' : 'usd',
           success_url: `${returnBase}?subscription=success`,
           cancel_url: `${returnBase}?subscription=cancelled`,
@@ -170,9 +165,10 @@ const AdminPlanos: React.FC = () => {
       console.error('Checkout error:', err);
       toast.error(err instanceof Error ? err.message : t('common.error', 'Erro'));
     } finally {
-      setIsCheckingOut(false);
+      setCheckoutPlanId(null);
     }
   };
+
 
   const isTrial = currentPlan === 'trial';
 
