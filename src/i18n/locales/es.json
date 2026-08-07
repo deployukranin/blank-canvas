@@ -24,7 +24,8 @@
     "english": "English",
     "portuguese": "Português",
     "noData": "Sin datos",
-    "backHome": "Inicio"
+    "backHome": "Inicio",
+    "backToSite": "Volver al sitio"
   },
   "nav": {
     "home": "Inicio",
@@ -392,6 +393,12 @@
         "paid": "Pagado",
         "cancelled": "Cancelado"
       }
+    },
+    "groups": {
+      "overview": "Visión general",
+      "content": "Contenido",
+      "growth": "Crecimiento",
+      "store": "Tienda"
     }
   },
   "superAdmin": {
