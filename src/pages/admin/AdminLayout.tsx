@@ -10,7 +10,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
@@ -34,7 +33,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { user, logout } = useAuth();
-  const { profile } = useProfile();
   const { store } = useTenant();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState<boolean>(() => {
