@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, LogIn, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
+
 import { useTenant } from '@/contexts/TenantContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -65,8 +67,17 @@ const Index = () => {
         <HeroBanner
           images={[bannerStudio]}
           banners={config.banners}
-          greeting={config.heroGreeting || (user ? `${t('home.greeting').replace('ceo', displayName || '')}` : t('home.subtitle'))}
-          subtitle={config.heroSubtitle || t('home.subtitle')}
+          greeting={
+            isLegacyGreeting(config.heroGreeting)
+              ? (user ? `${t('home.greeting').replace('ceo', displayName || '')}` : t('admin.banners.defaultGreeting', 'Welcome! 🤍'))
+              : config.heroGreeting
+          }
+          subtitle={
+            isLegacySubtitle(config.heroSubtitle)
+              ? t('admin.banners.defaultSubtitle', 'Relax with quality ASMR')
+              : config.heroSubtitle
+          }
+
         />
       </motion.div>
 
