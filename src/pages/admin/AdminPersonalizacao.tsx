@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
+
 import { motion } from 'framer-motion';
 import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
