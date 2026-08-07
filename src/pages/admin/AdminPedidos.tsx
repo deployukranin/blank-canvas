@@ -58,6 +58,9 @@ const AdminPedidos: React.FC = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedOrderForUpload, setSelectedOrderForUpload] = useState<Order | null>(null);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
+  const [deliveryRef, setDeliveryRef] = useState<string>('');
+  const [deliveryPreviewUrl, setDeliveryPreviewUrl] = useState<string>('');
+
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
