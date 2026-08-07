@@ -47,6 +47,11 @@ const AdminDashboard: React.FC = () => {
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
   const [ytLoading, setYtLoading] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(true);
+  const checklistDismissKey = 'admin_setup_checklist_dismissed';
+  const [checklistDismissed, setChecklistDismissed] = useState<boolean>(() => {
+    try { return localStorage.getItem('admin_setup_checklist_dismissed') === '1'; } catch { return false; }
+  });
+
   const [paymentConfigured, setPaymentConfigured] = useState(false);
 
   const getPublishedOrigin = () => {
