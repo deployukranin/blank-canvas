@@ -43,6 +43,8 @@ interface Order {
   script: string | null;
   user_id: string | null;
   payment_proof_url: string | null;
+  delivery_file_id?: string | null;
+
 }
 
 const AdminPedidos: React.FC = () => {
