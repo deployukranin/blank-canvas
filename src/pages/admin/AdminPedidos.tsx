@@ -133,27 +133,68 @@ const AdminPedidos: React.FC = () => {
   const handleDeliverVideo = (order: Order) => {
     setSelectedOrderForUpload(order);
     setUploadedVideoUrl('');
+    setDeliveryRef('');
+    setDeliveryPreviewUrl('');
     setShowUploadDialog(true);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      const url = URL.createObjectURL(file);
-      setUploadedVideoUrl(url);
+    if (!file || !selectedOrderForUpload || !storeId) return;
+
+    if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
+      toast.error(t('orders.fileTooLarge', 'Arquivo maior que 100MB'));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const { ref } = await uploadCustomDelivery(file, storeId, selectedOrderForUpload.id);
+      setDeliveryRef(ref);
+      setUploadedVideoUrl(URL.createObjectURL(file));
+      const signed = await getDeliverySignedUrl(ref);
+      if (signed) setDeliveryPreviewUrl(signed);
+      toast.success(t('orders.uploadDone', 'Arquivo enviado'));
+    } catch (error) {
+      console.error('Delivery upload error:', error);
+      toast.error((error as Error).message || t('orders.uploadError', 'Erro no upload'));
+    } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleConfirmDelivery = async () => {
-    if (selectedOrderForUpload && uploadedVideoUrl) {
-      await handleStatusChange(selectedOrderForUpload.id, 'completed');
+    if (!selectedOrderForUpload || !deliveryRef) return;
+    try {
+      const { error } = await supabase
+        .from('custom_orders')
+        .update({
+          delivery_file_id: deliveryRef,
+          status: 'completed',
+          delivered_at: new Date().toISOString(),
+        } as never)
+        .eq('id', selectedOrderForUpload.id);
+      if (error) throw error;
+
+      setOrders(orders.map(o =>
+        o.id === selectedOrderForUpload.id
+          ? { ...o, status: 'completed', delivery_file_id: deliveryRef }
+          : o
+      ));
+      toast.success(t('orders.deliveredSuccess', 'Pedido entregue'));
       setShowUploadDialog(false);
       setSelectedOrderForUpload(null);
       setUploadedVideoUrl('');
+      setDeliveryRef('');
+      setDeliveryPreviewUrl('');
+    } catch (error) {
+      console.error('Error delivering order:', error);
+      toast.error(t('orders.statusUpdateError', 'Erro ao atualizar status'));
     }
   };
+
 
   const handleViewProof = async (order: Order) => {
     if (order.payment_proof_url) {
