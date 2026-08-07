@@ -560,6 +560,7 @@ const AdminPagamentosPix = () => {
               </div>
             </GlassCard>
           </TabsContent>
+          )}
 
         </Tabs>
       </div>
