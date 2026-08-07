@@ -117,6 +117,13 @@ const AdminPlanos: React.FC = () => {
     return plan.features_en;
   };
 
+  const getStorageLabel = (plan: PlanConfig) => {
+    const gb = plan.limits?.storageGB;
+    if (gb === undefined || gb === null) return null;
+    if (gb <= 0) return t('admin.plans.storageUnlimited', 'Armazenamento ilimitado');
+    return t('admin.plans.storageGB', '{{gb}} GB de armazenamento', { gb });
+  };
+
   const formatPrice = (plan: PlanConfig) => {
     if (isBRL) return `R$ ${plan.priceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     return `$ ${plan.priceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
