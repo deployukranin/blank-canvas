@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Save, Plus, Trash2, Video, Headphones, Clock, Music, 
-  ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2 
+  ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2, Upload 
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
