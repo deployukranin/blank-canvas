@@ -15,6 +15,7 @@ import {
   Pause
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { displayCurrencyForLang, formatPriceForLang } from '@/lib/currency';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
