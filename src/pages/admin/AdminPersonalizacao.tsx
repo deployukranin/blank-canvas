@@ -73,14 +73,30 @@ const AdminPersonalizacao: React.FC = () => {
   };
 
   // ── Banner state ──
-  const [heroGreeting, setHeroGreeting] = useState(config.heroGreeting || 'Bem-vindo! 🤍');
-  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle || 'Relaxe com ASMR de qualidade');
+  const LEGACY_GREETINGS = ['Bem-vindo! 🤍', 'Welcome! 🤍', '¡Bienvenido! 🤍'];
+  const LEGACY_SUBTITLES = ['Relaxe com ASMR de qualidade', 'Relax with quality ASMR', 'Relájate con ASMR de calidad'];
+  const defaultGreeting = t('admin.banners.defaultGreeting', 'Welcome! 🤍');
+  const defaultSubtitle = t('admin.banners.defaultSubtitle', 'Relax with quality ASMR');
+  const [heroGreeting, setHeroGreeting] = useState(
+    !config.heroGreeting || LEGACY_GREETINGS.includes(config.heroGreeting) ? defaultGreeting : config.heroGreeting
+  );
+  const [heroSubtitle, setHeroSubtitle] = useState(
+    !config.heroSubtitle || LEGACY_SUBTITLES.includes(config.heroSubtitle) ? defaultSubtitle : config.heroSubtitle
+  );
   const [banners, setBanners] = useState<BannerConfig[]>(
     config.banners?.length ? config.banners : [{ id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]
   );
   const [previewBanner, setPreviewBanner] = useState<{ url: string; type: string } | null>(null);
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [quota, setQuota] = useState<StorageQuota | null>(null);
   const canAdd = banners.length < 3;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchStorageQuota(store?.id).then(q => { if (!cancelled && q) setQuota(q); });
+    return () => { cancelled = true; };
+  }, [store?.id]);
+
 
   // ── Platform Icon state ──
   const [iconMode, setIconMode] = useState<'upload' | 'lucide'>(store?.avatar_url ? 'upload' : 'lucide');
