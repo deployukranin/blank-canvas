@@ -27,6 +27,7 @@ import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { isDriveRef, getVipMediaSignedUrl } from '@/lib/external-storage';
 import { 
   defaultVideoConfig,
   calculatePrice,
