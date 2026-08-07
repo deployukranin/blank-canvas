@@ -187,7 +187,17 @@ const AdminVipConteudo = () => {
       toast({ title: t('vipAdmin.uploadDone') });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast({ title: t('vipAdmin.uploadError'), description: error.message, variant: 'destructive' });
+      const code = String(error?.message || '');
+      const description =
+        code === 'quota'
+          ? t('vipAdmin.uploadQuotaError', 'Limite de armazenamento do plano atingido. Faça upgrade ou remova arquivos.')
+          : code === 'size'
+          ? t('vipAdmin.fileTooLargeDesc')
+          : code === 'forbidden'
+          ? t('vipAdmin.uploadForbidden', 'Sem permissão para enviar arquivos nesta loja.')
+          : code;
+      toast({ title: t('vipAdmin.uploadError'), description, variant: 'destructive' });
+
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
