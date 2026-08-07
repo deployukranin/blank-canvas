@@ -31,6 +31,7 @@ export interface PlanLimits {
   maxVideos?: number;
   maxVipPosts?: number;
   maxAdmins?: number;
+  storageGB?: number; // 0 = unlimited
 }
 
 interface PlanConfig {
