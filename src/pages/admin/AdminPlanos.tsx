@@ -315,7 +315,7 @@ const AdminPlanos: React.FC = () => {
                 {t('admin.plans.paymentMethod', 'Método de Pagamento')}
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div
                   onClick={() => setPaymentMethod('stripe')}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -324,36 +324,12 @@ const AdminPlanos: React.FC = () => {
                       : 'border-border/30 hover:border-primary/30 bg-foreground/[0.02]'
                   }`}
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3">
                     <CreditCard className="w-6 h-6 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Stripe</p>
                       <p className="text-xs text-muted-foreground">
                         {t('admin.plans.stripeDesc', 'Cartão de crédito / débito (assinatura recorrente)')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setPaymentMethod('pix')}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all opacity-60 ${
-                    paymentMethod === 'pix'
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border/30 hover:border-primary/30 bg-foreground/[0.02]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <QrCode className="w-6 h-6 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        PIX
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                          {t('admin.plans.comingSoon', 'Em breve')}
-                        </span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {t('admin.plans.pixDesc', 'Pagamento manual via QR Code')}
                       </p>
                     </div>
                   </div>
@@ -370,10 +346,9 @@ const AdminPlanos: React.FC = () => {
                   ? t('common.loading', 'Carregando...')
                   : paymentMethod === 'stripe'
                   ? t('admin.plans.payWithStripe', 'Continuar para Stripe')
-                  : paymentMethod === 'pix'
-                  ? t('admin.plans.payWithPix', 'Pagar com PIX')
                   : t('admin.plans.selectMethod', 'Selecione um método')}
               </Button>
+
             </GlassCard>
           </motion.div>
         )}
