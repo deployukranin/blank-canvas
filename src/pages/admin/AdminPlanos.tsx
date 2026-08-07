@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Check, CreditCard, QrCode, Zap } from 'lucide-react';
+import { Crown, Check, CreditCard, QrCode, Zap, HardDrive } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/GlassCard';
