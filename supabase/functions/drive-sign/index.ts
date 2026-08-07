@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
         .select('user_id, status')
         .eq('id', row.order_id)
         .maybeSingle();
-      if (order?.user_id === userId && ['paid', 'delivered'].includes(String(order.status))) {
+      if (order?.user_id === userId && ['paid', 'processing', 'completed', 'delivered'].includes(String(order.status))) {
         allowed = true;
       }
     }
