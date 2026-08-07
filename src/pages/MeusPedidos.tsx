@@ -115,6 +115,8 @@ const MeusPedidosPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [loadingDelivery, setLoadingDelivery] = useState(false);
+
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
   const isBR = i18n.language?.startsWith('pt');
