@@ -1881,6 +1881,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_store_storage_quota: { Args: { p_store_id: string }; Returns: Json }
       get_store_trial_status: { Args: { p_store_id: string }; Returns: Json }
       get_video_reaction_counts: {
         Args: { p_video_id: string }
