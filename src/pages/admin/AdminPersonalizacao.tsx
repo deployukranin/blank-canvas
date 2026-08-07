@@ -527,7 +527,7 @@ const AdminPersonalizacao: React.FC = () => {
               <div className="space-y-4">
                 {/* Device toggle */}
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{t('admin.preview.description', 'See how your platform looks with current settings.')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.preview.description', 'See how your platform looks with the current settings.')}</p>
                   <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
                     <Button
                       variant={previewMode === 'desktop' ? 'default' : 'ghost'}
