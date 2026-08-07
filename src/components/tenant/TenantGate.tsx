@@ -1,25 +1,26 @@
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StoreOffline } from './StoreOffline';
 
 interface TenantStoreNotFoundProps {
   slug: string;
 }
 
-const TenantStoreNotFound = ({ slug }: TenantStoreNotFoundProps) => (
-  <div className="min-h-screen flex items-center justify-center bg-background px-4">
-    <div className="text-center max-w-md">
-      <h1 className="text-4xl font-bold text-foreground mb-3">404</h1>
-      <p className="text-muted-foreground mb-2">
-        A loja <span className="font-semibold text-foreground">"{slug}"</span> não foi encontrada.
-      </p>
-      <p className="text-sm text-muted-foreground">
-        Verifique se o endereço está correto ou entre em contato com o criador.
-      </p>
+const TenantStoreNotFound = ({ slug }: TenantStoreNotFoundProps) => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-4xl font-bold text-foreground mb-3">404</h1>
+        <p className="text-muted-foreground mb-2">{t('admin.trial.notFoundDesc', { slug })}</p>
+        <p className="text-sm text-muted-foreground">{t('admin.trial.notFoundHint')}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
 
 import { isTrialExpired } from '@/lib/trial';
 
