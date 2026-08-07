@@ -478,11 +478,11 @@ const AdminPersonalizacao: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label className="text-xs">{t('admin.banners.greeting', 'Title / Greeting')}</Label>
-                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder="Welcome! 🤍" className="bg-background/50 border-border/30" />
+                    <Input value={heroGreeting} onChange={(e) => setHeroGreeting(e.target.value)} placeholder={defaultGreeting} className="bg-background/50 border-border/30" />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">{t('admin.banners.subtitleLabel', 'Subtitle')}</Label>
-                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Relax with quality content" className="bg-background/50 border-border/30" />
+                    <Input value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder={defaultSubtitle} className="bg-background/50 border-border/30" />
                   </div>
                 </div>
               </GlassCard>
