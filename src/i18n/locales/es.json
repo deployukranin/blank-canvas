@@ -247,7 +247,13 @@
       "upgrade": "Ver Planes",
       "hoursLeft": "{{hours}}h de prueba restantes",
       "minutesLeft": "{{minutes}} min de prueba restantes",
-      "expiredHint": "Las acciones de pago están bloqueadas hasta que elijas un plan."
+      "expiredHint": "Las acciones de pago están bloqueadas hasta que elijas un plan.",
+      "deleteWarning": "Contrata un plan en {{days}} día(s) o tu tienda será eliminada automáticamente.",
+      "deleteSoon": "Tu tienda será eliminada pronto. ¡Contrata un plan ahora!",
+      "offlineTitle": "Plataforma Fuera de Línea",
+      "offlineDesc": "Esta plataforma está temporalmente fuera de línea. Contacta al creador para más información.",
+      "notFoundDesc": "La tienda \"{{slug}}\" no fue encontrada.",
+      "notFoundHint": "Verifica que la dirección sea correcta o contacta al creador."
     },
     "plans": {
       "title": "Planes",

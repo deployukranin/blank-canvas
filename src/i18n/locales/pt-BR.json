@@ -247,7 +247,13 @@
       "upgrade": "Ver Planos",
       "hoursLeft": "{{hours}}h restantes de trial",
       "minutesLeft": "{{minutes}} min restantes de trial",
-      "expiredHint": "Ações pagas estão bloqueadas até você contratar um plano."
+      "expiredHint": "Ações pagas estão bloqueadas até você contratar um plano.",
+      "deleteWarning": "Contrate um plano em {{days}} dia(s) ou sua loja será apagada automaticamente.",
+      "deleteSoon": "Sua loja será apagada em breve. Contrate um plano agora!",
+      "offlineTitle": "Plataforma Offline",
+      "offlineDesc": "Esta plataforma está temporariamente offline. Entre em contato com o criador para mais informações.",
+      "notFoundDesc": "A loja \"{{slug}}\" não foi encontrada.",
+      "notFoundHint": "Verifique se o endereço está correto ou entre em contato com o criador."
     },
     "plans": {
       "title": "Planos",

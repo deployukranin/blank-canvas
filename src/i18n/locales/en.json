@@ -247,7 +247,13 @@
       "upgrade": "View Plans",
       "hoursLeft": "{{hours}}h of trial remaining",
       "minutesLeft": "{{minutes}} min of trial remaining",
-      "expiredHint": "Paid actions are blocked until you choose a plan."
+      "expiredHint": "Paid actions are blocked until you choose a plan.",
+      "deleteWarning": "Purchase a plan within {{days}} day(s) or your store will be deleted automatically.",
+      "deleteSoon": "Your store will be deleted soon. Purchase a plan now!",
+      "offlineTitle": "Platform Offline",
+      "offlineDesc": "This platform is temporarily offline. Contact the creator for more information.",
+      "notFoundDesc": "The store \"{{slug}}\" was not found.",
+      "notFoundHint": "Check that the address is correct or contact the creator."
     },
     "plans": {
       "title": "Plans",
