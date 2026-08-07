@@ -20,6 +20,12 @@ import { VideoPlayer } from '@/components/video/VideoPlayer';
 import { OrderChat } from '@/components/orders/OrderChat';
 import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
+import {
+  MAX_DRIVE_UPLOAD_BYTES,
+  getDeliverySignedUrl,
+  uploadCustomDelivery,
+} from '@/lib/external-storage';
+
 
 interface Order {
   id: string;
@@ -37,6 +43,8 @@ interface Order {
   script: string | null;
   user_id: string | null;
   payment_proof_url: string | null;
+  delivery_file_id?: string | null;
+
 }
 
 const AdminPedidos: React.FC = () => {
@@ -52,6 +60,9 @@ const AdminPedidos: React.FC = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedOrderForUpload, setSelectedOrderForUpload] = useState<Order | null>(null);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
+  const [deliveryRef, setDeliveryRef] = useState<string>('');
+  const [deliveryPreviewUrl, setDeliveryPreviewUrl] = useState<string>('');
+
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [chatOrder, setChatOrder] = useState<Order | null>(null);
@@ -133,27 +144,68 @@ const AdminPedidos: React.FC = () => {
   const handleDeliverVideo = (order: Order) => {
     setSelectedOrderForUpload(order);
     setUploadedVideoUrl('');
+    setDeliveryRef('');
+    setDeliveryPreviewUrl('');
     setShowUploadDialog(true);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      const url = URL.createObjectURL(file);
-      setUploadedVideoUrl(url);
+    if (!file || !selectedOrderForUpload || !storeId) return;
+
+    if (file.size > MAX_DRIVE_UPLOAD_BYTES) {
+      toast.error(t('orders.fileTooLarge', 'Arquivo maior que 100MB'));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const { ref } = await uploadCustomDelivery(file, storeId, selectedOrderForUpload.id);
+      setDeliveryRef(ref);
+      setUploadedVideoUrl(URL.createObjectURL(file));
+      const signed = await getDeliverySignedUrl(ref);
+      if (signed) setDeliveryPreviewUrl(signed);
+      toast.success(t('orders.uploadDone', 'Arquivo enviado'));
+    } catch (error) {
+      console.error('Delivery upload error:', error);
+      toast.error((error as Error).message || t('orders.uploadError', 'Erro no upload'));
+    } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleConfirmDelivery = async () => {
-    if (selectedOrderForUpload && uploadedVideoUrl) {
-      await handleStatusChange(selectedOrderForUpload.id, 'completed');
+    if (!selectedOrderForUpload || !deliveryRef) return;
+    try {
+      const { error } = await supabase
+        .from('custom_orders')
+        .update({
+          delivery_file_id: deliveryRef,
+          status: 'completed',
+          delivered_at: new Date().toISOString(),
+        } as never)
+        .eq('id', selectedOrderForUpload.id);
+      if (error) throw error;
+
+      setOrders(orders.map(o =>
+        o.id === selectedOrderForUpload.id
+          ? { ...o, status: 'completed', delivery_file_id: deliveryRef }
+          : o
+      ));
+      toast.success(t('orders.deliveredSuccess', 'Pedido entregue'));
       setShowUploadDialog(false);
       setSelectedOrderForUpload(null);
       setUploadedVideoUrl('');
+      setDeliveryRef('');
+      setDeliveryPreviewUrl('');
+    } catch (error) {
+      console.error('Error delivering order:', error);
+      toast.error(t('orders.statusUpdateError', 'Erro ao atualizar status'));
     }
   };
+
 
   const handleViewProof = async (order: Order) => {
     if (order.payment_proof_url) {
@@ -435,25 +487,29 @@ const AdminPedidos: React.FC = () => {
                 </p>
               )}
             </GlassCard>
-            {uploadedVideoUrl ? (
+            {deliveryPreviewUrl || uploadedVideoUrl ? (
               <div className="rounded-lg overflow-hidden">
-                <VideoPlayer videoUrl={uploadedVideoUrl} title={t('orders.videoPreview', 'Preview')} />
+                <VideoPlayer videoUrl={deliveryPreviewUrl || uploadedVideoUrl} title={t('orders.videoPreview', 'Preview')} />
               </div>
             ) : (
               <GlassCard 
                 className="p-8 text-center cursor-pointer hover:bg-white/5 transition-colors"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => !isUploading && fileInputRef.current?.click()}
               >
                 <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-sm font-medium mb-2">
-                  {selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo', 'Clique para enviar o vídeo') : t('orders.clickToUploadAudio', 'Clique para enviar o áudio')}
+                  {isUploading
+                    ? t('orders.uploading', 'Enviando...')
+                    : selectedOrderForUpload?.product_type === 'video' ? t('orders.clickToUploadVideo', 'Clique para enviar o vídeo') : t('orders.clickToUploadAudio', 'Clique para enviar o áudio')}
                 </p>
+                <p className="text-xs text-muted-foreground">{t('orders.maxSize', 'Máx. 100MB')}</p>
               </GlassCard>
             )}
             <input ref={fileInputRef} type="file" accept={selectedOrderForUpload?.product_type === 'video' ? 'video/*' : 'audio/*'} className="hidden" onChange={handleFileUpload} />
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowUploadDialog(false)}>{t('common.cancel', 'Cancelar')}</Button>
-              <Button disabled={!uploadedVideoUrl || isUploading} onClick={handleConfirmDelivery} className="bg-green-500 hover:bg-green-600">
+              <Button disabled={!deliveryRef || isUploading} onClick={handleConfirmDelivery} className="bg-green-500 hover:bg-green-600">
+
                 {t('orders.confirmDelivery', 'Confirmar Entrega')}
               </Button>
             </div>

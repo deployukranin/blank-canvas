@@ -26,6 +26,8 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
+import { getDeliverySignedUrl } from '@/lib/external-storage';
+
 import {
   Dialog,
   DialogContent,
@@ -54,7 +56,9 @@ interface DBOrder {
   triggers: string | null;
   script: string | null;
   correlation_id: string;
+  delivery_file_id?: string | null;
 }
+
 
 const statusConfig: Record<string, { icon: React.ReactNode; label: string; labelKey: string; color: string }> = {
   pending: { 
@@ -113,6 +117,8 @@ const MeusPedidosPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [loadingDelivery, setLoadingDelivery] = useState(false);
+
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
   const isBR = i18n.language?.startsWith('pt');
@@ -189,6 +195,20 @@ const MeusPedidosPage = () => {
   const getStatus = (status: string) => {
     return statusConfig[status] || statusConfig.pending;
   };
+
+  const handleOpenDelivery = async (order: DBOrder) => {
+    if (!order.delivery_file_id) return;
+    setLoadingDelivery(true);
+    try {
+      const url = await getDeliverySignedUrl(order.delivery_file_id);
+      if (url) {
+        window.open(url, '_blank', 'noopener');
+      }
+    } finally {
+      setLoadingDelivery(false);
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -385,6 +405,35 @@ const MeusPedidosPage = () => {
                       </div>
                     </GlassCard>
                   )}
+
+                  {/* Delivered file */}
+                  {selectedOrder.delivery_file_id && (
+                    <GlassCard className="p-4 bg-emerald-500/10 border-emerald-500/20">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm text-emerald-400 mb-2">
+                            {t('orders.deliveryReady', 'Seu pedido está pronto!')}
+                          </h4>
+                          <Button
+                            size="sm"
+                            className="gap-2"
+                            disabled={loadingDelivery}
+                            onClick={() => handleOpenDelivery(selectedOrder)}
+                          >
+                            {loadingDelivery ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Download className="w-4 h-4" />
+                            )}
+                            {t('orders.openDelivery', 'Abrir arquivo')}
+                          </Button>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  )}
+
+
 
                   {/* Order Info */}
                   <GlassCard className="p-4 space-y-3">

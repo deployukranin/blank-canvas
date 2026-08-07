@@ -299,6 +299,7 @@ export type Database = {
           created_at: string
           customer_name: string
           delivered_at: string | null
+          delivery_file_id: string | null
           duration_label: string | null
           duration_minutes: number | null
           expires_at: string | null
@@ -330,6 +331,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           delivered_at?: string | null
+          delivery_file_id?: string | null
           duration_label?: string | null
           duration_minutes?: number | null
           expires_at?: string | null
@@ -361,6 +363,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           delivered_at?: string | null
+          delivery_file_id?: string | null
           duration_label?: string | null
           duration_minutes?: number | null
           expires_at?: string | null
@@ -434,6 +437,67 @@ export type Database = {
           user_role?: string | null
         }
         Relationships: []
+      }
+      drive_files: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_id: string
+          id: string
+          kind: string
+          mime_type: string | null
+          name: string | null
+          order_id: string | null
+          size_bytes: number | null
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_id: string
+          id?: string
+          kind: string
+          mime_type?: string | null
+          name?: string | null
+          order_id?: string | null
+          size_bytes?: number | null
+          store_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_id?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          name?: string | null
+          order_id?: string | null
+          size_bytes?: number | null
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_files_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "custom_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drive_files_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drive_files_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feed_posts: {
         Row: {
