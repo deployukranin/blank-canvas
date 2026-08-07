@@ -22,6 +22,30 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const admin = createClient(SUPABASE_URL, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+    const body = await req.json().catch(() => ({}));
+    const fileId = String(body?.ref || body?.fileId || '').replace(/^gdrive:/, '').trim();
+    if (!fileId) return json({ success: false, error: 'ref required' }, 400);
+
+    const { data: row } = await admin
+      .from('drive_files')
+      .select('file_id, store_id, kind, order_id, mime_type, name')
+      .eq('file_id', fileId)
+      .maybeSingle();
+    if (!row) return json({ success: false, error: 'Arquivo não encontrado' }, 404);
+
+    // Public preview assets (store landing/customs teaser) need no authentication.
+    if (row.kind === 'preview') {
+      const previewExp = Math.floor(Date.now() / 1000) + TTL_SECONDS;
+      const previewSig = await signMediaToken(fileId, previewExp);
+      return json({
+        success: true,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${previewExp}&sig=${previewSig}`,
+        expiresAt: previewExp,
+        name: row.name,
+        mimeType: row.mime_type,
+      });
+    }
+
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return json({ success: false, error: 'Authentication required' }, 401);
@@ -36,16 +60,6 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.claims.sub as string;
 
-    const body = await req.json().catch(() => ({}));
-    const fileId = String(body?.ref || body?.fileId || '').replace(/^gdrive:/, '').trim();
-    if (!fileId) return json({ success: false, error: 'ref required' }, 400);
-
-    const { data: row } = await admin
-      .from('drive_files')
-      .select('file_id, store_id, kind, order_id, mime_type, name')
-      .eq('file_id', fileId)
-      .maybeSingle();
-    if (!row) return json({ success: false, error: 'Arquivo não encontrado' }, 404);
 
     // ── Authorization ──
     let allowed = false;

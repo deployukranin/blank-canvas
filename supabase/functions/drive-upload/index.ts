@@ -119,7 +119,10 @@ Deno.serve(async (req) => {
     }
 
     const storeFolder = await ensureFolder(storeId, DRIVE_ROOT_FOLDER_ID);
-    const kindFolder = await ensureFolder(kind === 'vip' ? 'vip' : 'customs', storeFolder);
+    const kindFolder = await ensureFolder(
+      kind === 'vip' ? 'vip' : kind === 'preview' ? 'previews' : 'customs',
+      storeFolder,
+    );
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
     const bytes = new Uint8Array(await file.arrayBuffer());
