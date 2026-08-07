@@ -165,7 +165,9 @@
       "savedDesc": "Sua configuração de banners foi atualizada.",
       "disabled": "Desativado",
       "addBanner": "Adicionar Banner",
-      "emptyHint": "Envie uma imagem ou cole uma URL para o banner desktop e/ou mobile."
+      "emptyHint": "Envie uma imagem ou cole uma URL para o banner desktop e/ou mobile.",
+      "defaultGreeting": "Bem-vindo! 🤍",
+      "defaultSubtitle": "Relaxe com ASMR de qualidade"
     },
     "dashboard": "Dashboard",
     "ideas": "Ideias",
@@ -405,6 +407,12 @@
       "content": "Conteúdo",
       "growth": "Crescimento",
       "store": "Loja"
+    },
+    "storage": {
+      "title": "Armazenamento",
+      "trialHint": "Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.",
+      "quotaExceeded": "Limite de armazenamento atingido",
+      "quotaExceededDesc": "Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço."
     }
   },
   "superAdmin": {

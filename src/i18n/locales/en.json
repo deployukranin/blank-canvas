@@ -165,7 +165,9 @@
       "savedDesc": "Your banner configuration has been updated.",
       "disabled": "Disabled",
       "addBanner": "Add Banner",
-      "emptyHint": "Upload an image or paste a URL for desktop and/or mobile banner."
+      "emptyHint": "Upload an image or paste a URL for desktop and/or mobile banner.",
+      "defaultGreeting": "Welcome! 🤍",
+      "defaultSubtitle": "Relax with quality ASMR"
     },
     "dashboard": "Dashboard",
     "ideas": "Ideas",
@@ -405,6 +407,12 @@
       "content": "Content",
       "growth": "Growth",
       "store": "Store"
+    },
+    "storage": {
+      "title": "Storage",
+      "trialHint": "During the trial you have 100 MB in total. Choose a plan to unlock more space.",
+      "quotaExceeded": "Storage limit reached",
+      "quotaExceededDesc": "You reached your plan limit. Choose a plan to unlock more space."
     }
   },
   "superAdmin": {

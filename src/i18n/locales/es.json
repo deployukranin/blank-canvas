@@ -165,7 +165,9 @@
       "savedDesc": "Tu configuración de banners se ha actualizado.",
       "disabled": "Deshabilitado",
       "addBanner": "Agregar Banner",
-      "emptyHint": "Sube una imagen o pega una URL para el banner de escritorio y/o móvil."
+      "emptyHint": "Sube una imagen o pega una URL para el banner de escritorio y/o móvil.",
+      "defaultGreeting": "¡Bienvenido! 🤍",
+      "defaultSubtitle": "Relájate con ASMR de calidad"
     },
     "dashboard": "Dashboard",
     "ideas": "Ideas",
@@ -405,6 +407,12 @@
       "content": "Contenido",
       "growth": "Crecimiento",
       "store": "Tienda"
+    },
+    "storage": {
+      "title": "Almacenamiento",
+      "trialHint": "Durante la prueba tienes 100 MB en total. Elige un plan para liberar más espacio.",
+      "quotaExceeded": "Límite de almacenamiento alcanzado",
+      "quotaExceededDesc": "Has alcanzado el límite de tu plan. Elige un plan para liberar más espacio."
     }
   },
   "superAdmin": {
