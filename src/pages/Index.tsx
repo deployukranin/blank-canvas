@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, LogIn, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
+
 import { useTenant } from '@/contexts/TenantContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
