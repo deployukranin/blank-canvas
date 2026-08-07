@@ -43,6 +43,7 @@ const AdminPlanos: React.FC = () => {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [plans, setPlans] = useState<PlanConfig[]>([]);
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
 
   const isBRL = i18n.language?.startsWith('pt');
