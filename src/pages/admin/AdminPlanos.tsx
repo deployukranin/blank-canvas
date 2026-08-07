@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Check, CreditCard, QrCode, Zap } from 'lucide-react';
+import { Crown, Check, CreditCard, QrCode, Zap, HardDrive } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -8,6 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+interface PlanLimits {
+  maxUsers?: number;
+  maxVideos?: number;
+  maxVipPosts?: number;
+  maxAdmins?: number;
+  storageGB?: number; // 0 = unlimited
+}
 
 interface PlanConfig {
   id: string;
@@ -22,6 +30,7 @@ interface PlanConfig {
   features_pt: string[];
   features_en: string[];
   features_es: string[];
+  limits?: PlanLimits;
   highlight?: boolean;
   discount?: string;
 }
@@ -106,6 +115,13 @@ const AdminPlanos: React.FC = () => {
     if (lang === 'pt') return plan.features_pt;
     if (lang === 'es') return plan.features_es;
     return plan.features_en;
+  };
+
+  const getStorageLabel = (plan: PlanConfig) => {
+    const gb = plan.limits?.storageGB;
+    if (gb === undefined || gb === null) return null;
+    if (gb <= 0) return t('admin.plans.storageUnlimited', 'Armazenamento ilimitado');
+    return t('admin.plans.storageGB', '{{gb}} GB de armazenamento', { gb });
   };
 
   const formatPrice = (plan: PlanConfig) => {
@@ -255,6 +271,13 @@ const AdminPlanos: React.FC = () => {
                       <span className="text-sm text-muted-foreground">{getPeriodLabel(plan.period)}</span>
                     </div>
                   </div>
+
+                  {getStorageLabel(plan) && (
+                    <div className="mb-5 flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2">
+                      <HardDrive className="w-4 h-4 text-primary shrink-0" />
+                      <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
+                    </div>
+                  )}
 
                   <ul className="space-y-2.5 mb-6">
                     {getPlanFeatures(plan).map((feature, i) => (
