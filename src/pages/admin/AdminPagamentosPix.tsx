@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   CreditCard, 
   QrCode,
-  Zap,
+  
   Check,
   Clock,
   Save,
