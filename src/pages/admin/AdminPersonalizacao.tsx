@@ -577,10 +577,10 @@ const AdminPersonalizacao: React.FC = () => {
                       {/* Text overlay */}
                       <div className="absolute bottom-6 left-5 right-5 z-10">
                         <h2 className="font-bold text-lg leading-tight mb-1" style={{ color: previewFg }}>
-                          {heroGreeting || 'Welcome! 🤍'}
+                          {heroGreeting || defaultGreeting}
                         </h2>
                         <p className="text-sm" style={{ color: previewMuted }}>
-                          {heroSubtitle || 'Relax with quality content'}
+                          {heroSubtitle || defaultSubtitle}
                         </p>
                       </div>
 
