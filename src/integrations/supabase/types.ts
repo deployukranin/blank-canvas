@@ -1625,6 +1625,45 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_channel_changes: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          store_id: string
+          user_id: string | null
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          store_id: string
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          store_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_channel_changes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "youtube_channel_changes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       youtube_channel_metrics: {
         Row: {
           channel_id: string
@@ -1890,6 +1929,10 @@ export type Database = {
           reaction_type: Database["public"]["Enums"]["video_reaction_type"]
         }[]
       }
+      get_youtube_channel_change_status: {
+        Args: { p_store_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1912,6 +1955,10 @@ export type Database = {
       }
       mark_eligible_commissions: { Args: never; Returns: number }
       owns_tracker: { Args: { _tracker_id: string }; Returns: boolean }
+      record_youtube_channel_change: {
+        Args: { p_channel_id: string; p_store_id: string }
+        Returns: Json
+      }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }

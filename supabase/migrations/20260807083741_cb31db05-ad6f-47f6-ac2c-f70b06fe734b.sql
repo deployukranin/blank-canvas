@@ -1,0 +1,2 @@
+ALTER TABLE public.drive_files DROP CONSTRAINT drive_files_kind_check;
+ALTER TABLE public.drive_files ADD CONSTRAINT drive_files_kind_check CHECK (kind = ANY (ARRAY['vip'::text, 'custom'::text, 'preview'::text]));

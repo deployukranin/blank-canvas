@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
 
     if (!(file instanceof File)) return json({ success: false, error: 'file required' }, 400);
     if (!storeId) return json({ success: false, error: 'store_id required' }, 400);
-    if (!['vip', 'custom'].includes(kind)) return json({ success: false, error: 'invalid kind' }, 400);
+    if (!['vip', 'custom', 'preview'].includes(kind)) return json({ success: false, error: 'invalid kind' }, 400);
     if (file.size > MAX_UPLOAD_BYTES) {
       return json({ success: false, error: 'Arquivo maior que 100MB' }, 413);
     }
@@ -119,7 +119,10 @@ Deno.serve(async (req) => {
     }
 
     const storeFolder = await ensureFolder(storeId, DRIVE_ROOT_FOLDER_ID);
-    const kindFolder = await ensureFolder(kind === 'vip' ? 'vip' : 'customs', storeFolder);
+    const kindFolder = await ensureFolder(
+      kind === 'vip' ? 'vip' : kind === 'preview' ? 'previews' : 'customs',
+      storeFolder,
+    );
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
     const bytes = new Uint8Array(await file.arrayBuffer());

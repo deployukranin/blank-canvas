@@ -27,6 +27,7 @@ import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
 import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { isDriveRef, getVipMediaSignedUrl } from '@/lib/external-storage';
 import { 
   defaultVideoConfig,
   calculatePrice,
@@ -136,6 +137,24 @@ const CustomsPage = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
+
+  // Resolve uploaded (Google Drive) preview assets into playable URLs.
+  const [previewVideoSrc, setPreviewVideoSrc] = useState<string | null>(null);
+  const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const resolve = async (ref?: string | null, set?: (v: string | null) => void) => {
+      if (!ref) return set?.(null);
+      if (!isDriveRef(ref)) return set?.(ref);
+      const url = await getVipMediaSignedUrl(ref);
+      if (active) set?.(url);
+    };
+    resolve(config?.previewVideoUrl, setPreviewVideoSrc);
+    resolve(config?.previewImageUrl, setPreviewImageSrc);
+    return () => { active = false; };
+  }, [config?.previewVideoUrl, config?.previewImageUrl]);
+
 
   // Video handlers
   const handleSelectCategory = (category: VideoCategory) => {
@@ -392,12 +411,13 @@ const CustomsPage = () => {
               return (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <GlassCard className="overflow-hidden p-0">
-                  {config.previewType === 'video' && config.previewVideoUrl ? (
-                    <VideoPlayer videoUrl={config.previewVideoUrl} title={previewTitle} description={previewDesc} />
-                  ) : config.previewType === 'image' && config.previewImageUrl ? (
+                  {config.previewType === 'video' && previewVideoSrc ? (
+                    <VideoPlayer videoUrl={previewVideoSrc} title={previewTitle} description={previewDesc} />
+                  ) : config.previewType === 'image' && previewImageSrc ? (
                     <div className="aspect-video bg-black">
-                      <img src={config.previewImageUrl} alt={previewTitle} className="w-full h-full object-cover" />
+                      <img src={previewImageSrc} alt={previewTitle} className="w-full h-full object-cover" />
                     </div>
+
                   ) : (
                     <VideoPlaceholder title={previewTitle} description={previewDesc} />
                   )}

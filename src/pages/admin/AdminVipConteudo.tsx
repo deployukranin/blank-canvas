@@ -187,7 +187,17 @@ const AdminVipConteudo = () => {
       toast({ title: t('vipAdmin.uploadDone') });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast({ title: t('vipAdmin.uploadError'), description: error.message, variant: 'destructive' });
+      const code = String(error?.message || '');
+      const description =
+        code === 'quota'
+          ? t('vipAdmin.uploadQuotaError', 'Limite de armazenamento do plano atingido. Faça upgrade ou remova arquivos.')
+          : code === 'size'
+          ? t('vipAdmin.fileTooLargeDesc')
+          : code === 'forbidden'
+          ? t('vipAdmin.uploadForbidden', 'Sem permissão para enviar arquivos nesta loja.')
+          : code;
+      toast({ title: t('vipAdmin.uploadError'), description, variant: 'destructive' });
+
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -470,20 +480,8 @@ const AdminVipConteudo = () => {
                       <><Upload className="w-4 h-4 mr-2" /> {t('vipAdmin.uploadFile')}</>
                     )}
                   </Button>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">{t('vipAdmin.or')}</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  
-                  <Input
-                    value={formMediaUrl}
-                    onChange={e => setFormMediaUrl(e.target.value)}
-                    placeholder={t('vipAdmin.mediaUrlPlaceholder')}
-                    disabled={isUploading}
-                  />
                 </div>
+
               )}
               
               <p className="text-xs text-muted-foreground mt-1.5">
