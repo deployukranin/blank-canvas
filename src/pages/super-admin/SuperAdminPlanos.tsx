@@ -73,6 +73,7 @@ const LIMIT_LABELS: { key: keyof PlanLimits; pt: string; en: string; es: string 
   { key: 'maxVideos', pt: 'Máx. de vídeos', en: 'Max videos', es: 'Máx. videos' },
   { key: 'maxVipPosts', pt: 'Máx. de posts VIP', en: 'Max VIP posts', es: 'Máx. publicaciones VIP' },
   { key: 'maxAdmins', pt: 'Máx. de admins', en: 'Max admins', es: 'Máx. admins' },
+  { key: 'storageGB', pt: 'Armazenamento (GB)', en: 'Storage (GB)', es: 'Almacenamiento (GB)' },
 ];
 
 const defaultPlans: PlanConfig[] = [
