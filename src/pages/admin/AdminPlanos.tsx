@@ -243,10 +243,9 @@ const AdminPlanos: React.FC = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <GlassCard
-                  className={`p-6 relative cursor-pointer transition-all hover:scale-[1.02] ${
+                  className={`p-6 relative transition-all ${
                     plan.highlight ? 'border-primary/40 ring-1 ring-primary/20' : ''
-                  } ${selectedPlan === plan.id ? 'ring-2 ring-primary border-primary/60' : ''}`}
-                  onClick={() => { setSelectedPlan(plan.id); setPaymentMethod(null); }}
+                  }`}
                 >
                   {plan.discount && (
                     <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
@@ -284,16 +283,20 @@ const AdminPlanos: React.FC = () => {
                   </ul>
 
                   <Button
-                    className={`w-full ${
-                      selectedPlan === plan.id
-                        ? 'bg-primary hover:bg-primary/90'
-                        : 'bg-foreground/10 hover:bg-foreground/15 text-foreground'
-                    }`}
-                    onClick={(e) => { e.stopPropagation(); setSelectedPlan(plan.id); setPaymentMethod(null); }}
+                    className="w-full bg-primary hover:bg-primary/90"
+                    disabled={currentPlan === plan.id || checkoutPlanId !== null}
+                    onClick={() => handlePayment(plan.id)}
                   >
-                    {selectedPlan === plan.id
-                      ? t('admin.plans.selected', 'Selecionado')
-                      : t('admin.plans.select', 'Selecionar')}
+                    {currentPlan === plan.id ? (
+                      t('admin.plans.currentPlanBadge', 'Plano atual')
+                    ) : checkoutPlanId === plan.id ? (
+                      t('common.loading', 'Carregando...')
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <CreditCard className="w-4 h-4" />
+                        {t('admin.plans.payWithStripe', 'Assinar com Stripe')}
+                      </span>
+                    )}
                   </Button>
                 </GlassCard>
               </motion.div>
@@ -301,52 +304,6 @@ const AdminPlanos: React.FC = () => {
           </div>
         )}
 
-        {/* Payment method */}
-        {selectedPlan && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <GlassCard className="p-6 space-y-5">
-              <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary" />
-                {t('admin.plans.paymentMethod', 'Método de Pagamento')}
-              </h3>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div
-                  onClick={() => setPaymentMethod('stripe')}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === 'stripe'
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border/30 hover:border-primary/30 bg-foreground/[0.02]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-6 h-6 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">Stripe</p>
-                      <p className="text-xs text-muted-foreground">
-                        {t('admin.plans.stripeDesc', 'Cartão de crédito / débito (assinatura recorrente)')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                className="w-full bg-primary hover:bg-primary/90"
-                size="lg"
-                disabled={!paymentMethod || isCheckingOut}
-                onClick={handlePayment}
-              >
-                {isCheckingOut
-                  ? t('common.loading', 'Carregando...')
-                  : paymentMethod === 'stripe'
-                  ? t('admin.plans.payWithStripe', 'Continuar para Stripe')
-                  : t('admin.plans.selectMethod', 'Selecione um método')}
-              </Button>
-
-            </GlassCard>
-          </motion.div>
-        )}
       </div>
     </AdminLayout>
   );
