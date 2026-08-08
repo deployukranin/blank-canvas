@@ -419,7 +419,12 @@
       "title": "Armazenamento",
       "trialHint": "Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.",
       "quotaExceeded": "Limite de armazenamento atingido",
-      "quotaExceededDesc": "Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço."
+      "quotaExceededDesc": "Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço.",
+      "fileTooLarge": "Arquivo maior que 100MB.",
+      "forbidden": "Você não tem permissão para enviar arquivos nesta loja.",
+      "planTrial": "Teste",
+      "planPaid": "Plano ativo",
+      "unlimited": "Ilimitado"
     },
     "layout": {
       "tab": "Layout",

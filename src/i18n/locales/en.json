@@ -419,7 +419,12 @@
       "title": "Storage",
       "trialHint": "During the trial you have 100 MB in total. Choose a plan to unlock more space.",
       "quotaExceeded": "Storage limit reached",
-      "quotaExceededDesc": "You reached your plan limit. Choose a plan to unlock more space."
+      "quotaExceededDesc": "You reached your plan limit. Choose a plan to unlock more space.",
+      "fileTooLarge": "File larger than 100MB.",
+      "forbidden": "You don't have permission to upload files for this store.",
+      "planTrial": "Trial",
+      "planPaid": "Active plan",
+      "unlimited": "Unlimited"
     },
     "layout": {
       "tab": "Layout",
