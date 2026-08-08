@@ -128,6 +128,14 @@ const AdminDashboard: React.FC = () => {
     return () => { cancelled = true; };
   }, [session?.user?.id, tenantLoading, tenantStore?.id, tenantStore?.slug, tenantStore?.plan_type, tenantStore?.plan_expires_at, tenantStore?.name, tenantStore?.description, tenantStore?.avatar_url]);
 
+  // Once the checklist has been fully completed for this store, never show it again
+  const checklistDoneKey = storeId ? `admin_setup_checklist_done:${storeId}` : null;
+  useEffect(() => {
+    if (!checklistDoneKey) return;
+    try { setChecklistCompleted(localStorage.getItem(checklistDoneKey) === '1'); } catch { setChecklistCompleted(false); }
+  }, [checklistDoneKey]);
+
+
   const [ytHistory, setYtHistory] = useState<Array<{ recorded_at: string; subscriber_count: number; views_last_30d: number; total_view_count: number }>>([]);
 
   // Fetch YouTube metrics from DB, trigger edge function if no data exists
