@@ -91,6 +91,18 @@ Deno.serve(async (req) => {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
       const body = await req.json().catch(() => ({}));
+
+      // Create the tenant folder tree (config/vip/customs) even before any upload
+      if (body?.action === 'provision') {
+        const provStoreId = String(body.store_id || '').trim();
+        if (!provStoreId) return json({ success: false, error: 'store_id required' }, 400);
+        if (!(await isStoreManager(admin, userId, provStoreId))) {
+          return json({ success: false, error: 'Forbidden' }, 403);
+        }
+        const tree = await provisionStoreTree(admin, provStoreId);
+        return json({ success: true, folderId: tree.storeFolderId, folders: tree.folders });
+      }
+
       if (body?.action !== 'migrate_config') {
         return json({ success: false, error: 'invalid action' }, 400);
       }
