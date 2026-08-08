@@ -38,6 +38,12 @@ export const VideoCard = ({
           src={video.thumbnail_url}
           alt={video.video_title}
           loading="lazy"
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src.includes('maxresdefault')) {
+              img.src = img.src.replace('maxresdefault', 'hqdefault');
+            }
+          }}
           className="w-full h-full object-cover"
           initial={{ scale: 1 }}
           whileHover={{ scale: 1.04 }}
