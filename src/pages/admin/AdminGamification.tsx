@@ -19,6 +19,15 @@ import {
 
 const AdminGamification: React.FC = () => {
   const { t } = useTranslation();
+  /** Default level titles / badge names are seeded in Portuguese; show them translated. */
+  const localizedLevelTitle = (level: number, title: string) => {
+    const def = DEFAULT_GAMIFICATION_CONFIG.levels.find((l) => l.level === level);
+    return def && def.title === title ? t(`gamification.levelTitle.${level}`, title) : title;
+  };
+  const localizedBadgeName = (id: string, name: string) => {
+    const def = DEFAULT_GAMIFICATION_CONFIG.badges.find((b) => b.id === id);
+    return def && def.name === name ? t(`gamification.badgeName.${id}`, name) : name;
+  };
   const { store } = useTenant();
   const storeId = store?.id ?? null;
 
@@ -121,17 +130,32 @@ const AdminGamification: React.FC = () => {
             <Award className="w-4 h-4 text-primary" />
             {t('admin.gamification.levels', 'Levels & unlocked perks')}
           </p>
+          <p className="text-xs text-muted-foreground -mt-2">
+            {t('admin.gamification.levelsDesc', 'Set the name, icon and points required for each level, then choose what it unlocks.')}
+          </p>
+          <div className="hidden sm:flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+            <span className="w-10" />
+            <span className="w-16 text-center">{t('admin.gamification.colIcon', 'Icon')}</span>
+            <span className="flex-1 min-w-[120px]">{t('admin.gamification.colTitle', 'Level name')}</span>
+            <span className="w-28">{t('admin.gamification.colPoints', 'Required points')}</span>
+          </div>
           <div className="space-y-4">
             {config.levels.map((level, index) => (
               <div key={level.level} className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold text-muted-foreground w-10">Lv.{level.level}</span>
                   <Input className="w-16 h-9 text-center" value={level.icon} onChange={(e) => updateLevel(index, { icon: e.target.value })} />
-                  <Input className="flex-1 min-w-[120px] h-9" value={level.title} onChange={(e) => updateLevel(index, { title: e.target.value })} />
+                  <Input
+                    className="flex-1 min-w-[120px] h-9"
+                    aria-label={t('admin.gamification.colTitle', 'Level name')}
+                    value={localizedLevelTitle(level.level, level.title)}
+                    onChange={(e) => updateLevel(index, { title: e.target.value })}
+                  />
                   <Input
                     type="number"
                     min={0}
                     className="w-28 h-9"
+                    aria-label={t('admin.gamification.colPoints', 'Required points')}
                     value={level.minPoints}
                     onChange={(e) => updateLevel(index, { minPoints: Math.max(0, Number(e.target.value)) })}
                   />
@@ -165,12 +189,20 @@ const AdminGamification: React.FC = () => {
             <Award className="w-4 h-4 text-primary" />
             {t('admin.gamification.badges', 'Medals')}
           </p>
+          <p className="text-xs text-muted-foreground -mt-2">
+            {t('admin.gamification.badgesDesc', 'Turn medals on or off and set the goal members must reach.')}
+          </p>
           <div className="space-y-3">
             {config.badges.map((badge, index) => (
               <div key={badge.id} className="flex flex-wrap items-center gap-2">
                 <Switch checked={badge.enabled} onCheckedChange={(v) => updateBadge(index, { enabled: v })} />
                 <Input className="w-16 h-9 text-center" value={badge.icon} onChange={(e) => updateBadge(index, { icon: e.target.value })} />
-                <Input className="flex-1 min-w-[140px] h-9" value={badge.name} onChange={(e) => updateBadge(index, { name: e.target.value })} />
+                <Input
+                  className="flex-1 min-w-[140px] h-9"
+                  aria-label={t('admin.gamification.colName', 'Medal name')}
+                  value={localizedBadgeName(badge.id, badge.name)}
+                  onChange={(e) => updateBadge(index, { name: e.target.value })}
+                />
                 <span className="text-xs text-muted-foreground">
                   {t(`admin.gamification.condition.${badge.condition.type}`, badge.condition.type.replace('_', ' '))}
                 </span>
@@ -178,6 +210,7 @@ const AdminGamification: React.FC = () => {
                   type="number"
                   min={1}
                   className="w-24 h-9"
+                  aria-label={t('admin.gamification.colValue', 'Goal')}
                   value={badge.condition.value}
                   onChange={(e) => updateBadge(index, { condition: { ...badge.condition, value: Math.max(1, Number(e.target.value)) } })}
                 />

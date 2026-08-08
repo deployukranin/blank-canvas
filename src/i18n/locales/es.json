@@ -446,6 +446,31 @@
       "upgrade": "Mejorar plan",
       "preview": "Vista previa",
       "previewDesc": "Vista previa en vivo de tu tienda con datos reales."
+    },
+    "gamification": {
+      "title": "Gamificación",
+      "subtitle": "Configura niveles, medallas y los beneficios que se desbloquean en cada rango. Los puntos se otorgan automáticamente por la plataforma.",
+      "saved": "¡Configuración de gamificación guardada!",
+      "saveError": "No se pudo guardar la configuración.",
+      "enabled": "Activar gamificación",
+      "enabledDesc": "Muestra reputación, niveles y ranking a tus miembros.",
+      "levels": "Niveles y beneficios desbloqueados",
+      "levelsDesc": "Define el nombre, el icono y los puntos necesarios de cada nivel, y elige qué desbloquea.",
+      "badges": "Medallas",
+      "badgesDesc": "Activa o desactiva medallas y define la meta que deben alcanzar los miembros.",
+      "colIcon": "Icono",
+      "colTitle": "Nombre del nivel",
+      "colPoints": "Puntos necesarios",
+      "colName": "Nombre de la medalla",
+      "colValue": "Meta",
+      "condition": {
+        "points": "Puntos",
+        "level": "Nivel",
+        "ideas": "Ideas creadas",
+        "votes_received": "Votos recibidos",
+        "comments": "Comentarios",
+        "orders": "Pedidos"
+      }
     }
   },
   "superAdmin": {
@@ -1413,6 +1438,38 @@
     },
     "errors": {
       "generic": "Error"
+    }
+  },
+  "gamification": {
+    "rewards": {
+      "animatedBanner": "Banner animado (GIF)",
+      "animatedAvatar": "Avatar animado (GIF)",
+      "profileFrame": "Marco de perfil / destaque en el ranking",
+      "chatBadge": "Insignia en el chat de la comunidad",
+      "customDiscount": "Descuento en customs",
+      "vipContent": "Contenido VIP extra"
+    },
+    "levelTitle": {
+      "1": "Novato",
+      "2": "Principiante",
+      "3": "Participante",
+      "4": "Colaborador",
+      "5": "Contribuidor",
+      "6": "Experto",
+      "7": "Maestro",
+      "8": "Leyenda",
+      "9": "Élite",
+      "10": "Supremo"
+    },
+    "badgeName": {
+      "first_idea": "Primera Idea",
+      "first_comment": "Primer Comentario",
+      "popular_idea": "Idea Popular",
+      "active_commenter": "Comentarista Activo",
+      "idea_machine": "Fábrica de Ideas",
+      "supporter": "Apoyador",
+      "community_star": "Estrella de la Comunidad",
+      "legend": "Legendario"
     }
   }
 }

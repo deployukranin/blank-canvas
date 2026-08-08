@@ -446,6 +446,31 @@
       "upgrade": "Fazer upgrade",
       "preview": "Pré-visualização",
       "previewDesc": "Pré-visualização ao vivo da sua loja com dados reais."
+    },
+    "gamification": {
+      "title": "Gamificação",
+      "subtitle": "Configure níveis, medalhas e os benefícios liberados em cada patamar. Os pontos são atribuídos automaticamente pela plataforma.",
+      "saved": "Configurações de gamificação salvas!",
+      "saveError": "Não foi possível salvar as configurações.",
+      "enabled": "Ativar gamificação",
+      "enabledDesc": "Mostre reputação, níveis e ranking para seus membros.",
+      "levels": "Níveis e benefícios liberados",
+      "levelsDesc": "Defina nome, ícone e pontos necessários de cada nível e escolha o que ele libera.",
+      "badges": "Medalhas",
+      "badgesDesc": "Ative ou desative medalhas e defina a meta que os membros precisam alcançar.",
+      "colIcon": "Ícone",
+      "colTitle": "Nome do nível",
+      "colPoints": "Pontos necessários",
+      "colName": "Nome da medalha",
+      "colValue": "Meta",
+      "condition": {
+        "points": "Pontos",
+        "level": "Nível",
+        "ideas": "Ideias criadas",
+        "votes_received": "Votos recebidos",
+        "comments": "Comentários",
+        "orders": "Pedidos"
+      }
     }
   },
   "superAdmin": {
@@ -1413,6 +1438,38 @@
     },
     "errors": {
       "generic": "Erro"
+    }
+  },
+  "gamification": {
+    "rewards": {
+      "animatedBanner": "Banner animado (GIF)",
+      "animatedAvatar": "Avatar animado (GIF)",
+      "profileFrame": "Moldura de perfil / destaque no ranking",
+      "chatBadge": "Selo no chat da comunidade",
+      "customDiscount": "Desconto em customs",
+      "vipContent": "Conteúdo VIP extra"
+    },
+    "levelTitle": {
+      "1": "Novato",
+      "2": "Iniciante",
+      "3": "Participante",
+      "4": "Colaborador",
+      "5": "Contribuidor",
+      "6": "Expert",
+      "7": "Mestre",
+      "8": "Lenda",
+      "9": "Elite",
+      "10": "Supremo"
+    },
+    "badgeName": {
+      "first_idea": "Primeira Ideia",
+      "first_comment": "Primeiro Comentário",
+      "popular_idea": "Ideia Popular",
+      "active_commenter": "Comentarista Ativo",
+      "idea_machine": "Fábrica de Ideias",
+      "supporter": "Apoiador",
+      "community_star": "Estrela da Comunidade",
+      "legend": "Lendário"
     }
   }
 }

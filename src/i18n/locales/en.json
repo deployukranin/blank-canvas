@@ -446,6 +446,31 @@
       "upgrade": "Upgrade",
       "preview": "Preview",
       "previewDesc": "Live preview of your storefront with real data."
+    },
+    "gamification": {
+      "title": "Gamification",
+      "subtitle": "Configure levels, medals and the perks unlocked at each rank. Points are awarded automatically by the platform.",
+      "saved": "Gamification settings saved!",
+      "saveError": "Could not save settings.",
+      "enabled": "Enable gamification",
+      "enabledDesc": "Show reputation, levels and ranking to your members.",
+      "levels": "Levels & unlocked perks",
+      "levelsDesc": "Set the name, icon and points required for each level, then choose what it unlocks.",
+      "badges": "Medals",
+      "badgesDesc": "Turn medals on or off and set the goal members must reach.",
+      "colIcon": "Icon",
+      "colTitle": "Level name",
+      "colPoints": "Required points",
+      "colName": "Medal name",
+      "colValue": "Goal",
+      "condition": {
+        "points": "Points",
+        "level": "Level",
+        "ideas": "Ideas created",
+        "votes_received": "Votes received",
+        "comments": "Comments",
+        "orders": "Orders"
+      }
     }
   },
   "superAdmin": {
@@ -1413,6 +1438,38 @@
     },
     "errors": {
       "generic": "Error"
+    }
+  },
+  "gamification": {
+    "rewards": {
+      "animatedBanner": "Animated banner (GIF)",
+      "animatedAvatar": "Animated avatar (GIF)",
+      "profileFrame": "Profile frame / ranking highlight",
+      "chatBadge": "Badge in community chat",
+      "customDiscount": "Discount on customs",
+      "vipContent": "Extra VIP content"
+    },
+    "levelTitle": {
+      "1": "Rookie",
+      "2": "Beginner",
+      "3": "Participant",
+      "4": "Collaborator",
+      "5": "Contributor",
+      "6": "Expert",
+      "7": "Master",
+      "8": "Legend",
+      "9": "Elite",
+      "10": "Supreme"
+    },
+    "badgeName": {
+      "first_idea": "First Idea",
+      "first_comment": "First Comment",
+      "popular_idea": "Popular Idea",
+      "active_commenter": "Active Commenter",
+      "idea_machine": "Idea Machine",
+      "supporter": "Supporter",
+      "community_star": "Community Star",
+      "legend": "Legendary"
     }
   }
 }
