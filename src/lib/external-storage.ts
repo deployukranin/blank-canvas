@@ -135,7 +135,22 @@ export async function getVipMediaSignedUrl(pathOrUrl: string): Promise<string | 
 }
 
 /** Alias for order deliveries — same resolution logic. */
+/** Alias for order deliveries — same resolution logic. */
 export const getDeliverySignedUrl = getVipMediaSignedUrl;
+
+/** Resolves a playable URL plus its mime type, so deliveries can play inline. */
+export async function getDriveMedia(
+  ref: string,
+): Promise<{ url: string; mimeType: string | null } | null> {
+  if (!ref) return null;
+  if (isDriveRef(ref)) {
+    const { data, error } = await supabase.functions.invoke('drive-sign', { body: { ref } });
+    if (error || !data?.success || !data?.url) return null;
+    return { url: data.url as string, mimeType: (data.mimeType as string) || null };
+  }
+  const url = await getVipMediaSignedUrl(ref);
+  return url ? { url, mimeType: null } : null;
+}
 
 function extractFilePath(pathOrUrl: string): string | null {
   if (!pathOrUrl.startsWith('http')) return pathOrUrl;
