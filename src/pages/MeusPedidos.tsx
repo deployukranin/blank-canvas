@@ -26,7 +26,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
-import { getDeliverySignedUrl } from '@/lib/external-storage';
+import { getDeliverySignedUrl, getDriveMedia } from '@/lib/external-storage';
 
 import {
   Dialog,
