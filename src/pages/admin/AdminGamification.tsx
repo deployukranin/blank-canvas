@@ -89,7 +89,7 @@ const AdminGamification: React.FC = () => {
       <div className="space-y-6 max-w-4xl">
         <div className="flex items-start justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            {t('admin.gamification.subtitle', 'Configure points, levels, medals and the perks unlocked at each rank.')}
+            {t('admin.gamification.subtitle', 'Configure levels, medals and the perks unlocked at each rank. Points are awarded automatically by the platform.')}
           </p>
           <Button onClick={handleSave} disabled={isSaving} className="gap-2 shrink-0">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
