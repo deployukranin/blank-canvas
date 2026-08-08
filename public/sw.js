@@ -30,6 +30,10 @@ function isBypass(request) {
   try {
     const url = new URL(request.url);
     if (request.method !== 'GET') return true;
+    // Never intercept cross-origin requests: fetches issued from inside the SW
+    // are subject to the SW script's CSP (connect-src), which would block
+    // third-party images/fonts (i.ytimg.com, fonts.gstatic.com, ...).
+    if (url.origin !== self.location.origin) return true;
     if (request.headers.get('Authorization')) return true;
     if (request.headers.get('authorization')) return true;
     if (request.headers.get('range')) return true; // audio/video partials
