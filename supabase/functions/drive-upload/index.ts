@@ -238,6 +238,16 @@ async function resolveKindFolder(
   storeId: string,
   kind: string,
 ): Promise<string> {
+  const { folders } = await provisionStoreTree(admin, storeId);
+  return folders[KIND_FOLDER[kind] || 'config'];
+}
+
+/** Creates the tenant folder plus the three standard sub-folders in Drive. */
+async function provisionStoreTree(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+  storeId: string,
+): Promise<{ storeFolderId: string; folders: Record<string, string> }> {
   const { data: storeRow } = await admin
     .from('stores')
     .select('slug, name, created_by')
@@ -252,8 +262,7 @@ async function resolveKindFolder(
     .filter(Boolean)
     .join(' ');
 
-  const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
-  return await ensureFolder(KIND_FOLDER[kind] || 'config', storeFolder);
+  return await ensureStoreTree(storeId, label, DRIVE_ROOT_FOLDER_ID);
 }
 
 
