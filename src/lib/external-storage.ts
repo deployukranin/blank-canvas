@@ -12,9 +12,10 @@ export function isDriveRef(value?: string | null): boolean {
 interface UploadResult {
   ref: string;
   name: string;
+  url?: string | null;
 }
 
-export type UploadKind = 'vip' | 'custom' | 'preview';
+export type UploadKind = 'vip' | 'custom' | 'preview' | 'config';
 
 /** Maps backend error codes to a readable message. */
 export function describeUploadError(raw?: string | null): string {
