@@ -4,8 +4,10 @@ import {
   MAX_UPLOAD_BYTES,
   deleteFile,
   ensureFolder,
+  ensureStoreFolder,
   uploadFile,
 } from "../_shared/drive.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
