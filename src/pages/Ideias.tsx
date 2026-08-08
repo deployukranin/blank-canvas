@@ -102,6 +102,46 @@ const IdeiasPage = () => {
     );
   }
 
+  if (isCinematicDesktop) {
+    return (
+      <MobileLayout title={t('nav.ideas')} fullBleed>
+        <IdeasBoardDesktop
+          ideas={sortedIdeas}
+          isLoading={isLoading}
+          isAuthenticated={isAuthenticated}
+          isSubmitting={isSubmitting}
+          newIdea={newIdea}
+          onChangeIdea={setNewIdea}
+          onSubmit={handleSubmitIdea}
+          onVote={handleVote}
+          onReport={setReportingId}
+          locale={i18n.language === 'pt-BR' ? 'pt-BR' : i18n.language === 'es' ? 'es' : 'en-US'}
+        />
+
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} message={authMessage} />
+
+        <Dialog open={!!reportingId} onOpenChange={() => setReportingId(null)}>
+          <DialogContent className="glass mx-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                {t('storefront.reportIdea')}
+              </DialogTitle>
+              <DialogDescription>{t('storefront.reportReasonDesc')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea placeholder={t('storefront.reasonPlaceholder')} value={reportReason} onChange={e => setReportReason(e.target.value)} className="glass border-white/10" />
+              <div className="flex gap-2">
+                <Button variant="ghost" className="flex-1" onClick={() => setReportingId(null)}>{t('common.cancel')}</Button>
+                <Button variant="destructive" className="flex-1" onClick={() => reportingId && handleReport(reportingId)}>{t('common.confirm')}</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout title={t('nav.ideas')}>
       <div className="px-4 py-6 space-y-4">
@@ -115,6 +155,7 @@ const IdeiasPage = () => {
             </Button>
           </form>
         </GlassCard>
+
 
         {isLoading && (
           <div className="flex items-center justify-center py-8">
