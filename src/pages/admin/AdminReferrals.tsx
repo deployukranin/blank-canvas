@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/public-url';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Copy, Gift, Loader2 } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
@@ -64,7 +65,7 @@ const AdminReferrals: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const refLink = refCode ? `${window.location.origin}/auth?tab=signup&ref=${refCode}` : '';
+  const refLink = refCode ? publicUrl(`/auth?tab=signup&ref=${refCode}`) : '';
   const totals = items.reduce((acc, c) => {
     acc[c.status] = (acc[c.status] || 0) + c.commission_cents;
     return acc;

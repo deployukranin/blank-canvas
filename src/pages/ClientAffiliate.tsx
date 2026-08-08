@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/public-url';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Copy, Loader2, Share2, Wallet } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -105,7 +106,7 @@ const ClientAffiliate: React.FC = () => {
   }
 
   const refLink = aff
-    ? `${window.location.origin}${basePath}?aff=${aff.code}`
+    ? publicUrl(`${basePath}?aff=${aff.code}`)
     : '';
   const available = totals.available || 0;
   const minPayout = config.min_payout_cents || 0;

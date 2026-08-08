@@ -1,3 +1,4 @@
+import { getPublicOrigin } from '@/lib/public-url';
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Loader2, MousePointerClick, Users, Store, Percent, TrendingUp,
@@ -47,7 +48,7 @@ const TrackerDashboard: React.FC = () => {
   const [links, setLinks] = useState<LinkRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const origin = getPublicOrigin();
 
   const loadMetrics = useCallback(async () => {
     const { data: res } = await supabase.functions.invoke("tracker-dashboard", { body: {} });

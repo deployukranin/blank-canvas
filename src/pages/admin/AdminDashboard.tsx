@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { loadConfig } from '@/lib/config-storage';
+import { publicUrl } from '@/lib/public-url';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
@@ -54,12 +55,7 @@ const AdminDashboard: React.FC = () => {
 
   const [paymentConfigured, setPaymentConfigured] = useState(false);
 
-  const getPublishedOrigin = () => {
-    const host = window.location.hostname;
-    if (host.includes('lovableproject.com')) return 'https://cozy-corner-seed.lovable.app';
-    return window.location.origin;
-  };
-  const platformUrl = storeSlug ? `${getPublishedOrigin()}/${storeSlug}` : getPublishedOrigin();
+  const platformUrl = storeSlug ? publicUrl(`/${storeSlug}`) : publicUrl();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(platformUrl);
