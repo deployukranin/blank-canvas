@@ -134,10 +134,14 @@ const AdminPersonalizacao: React.FC = () => {
         toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 50MB'), variant: 'destructive' });
         return;
       }
+      if (!store?.id) {
+        toast({ title: t('admin.platformIcon.uploadError', 'Upload failed'), variant: 'destructive' });
+        return;
+      }
       setIconUploading(true);
       try {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-        const path = `platform-icon/${Date.now()}.${ext}`;
+        const path = `${store.id}/platform-icon/${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
