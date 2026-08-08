@@ -21,7 +21,7 @@ export interface StorefrontData {
   allVideos: YouTubeVideoItem[];
   favoriteVideos: YouTubeVideoItem[];
   videosLoading: boolean;
-  favoriteIds: string[];
+  favoriteIds: Set<string>;
   toggleFavorite: (videoId: string) => void;
   feedPosts: FeedPostRow[];
   isAuthenticated: boolean;
