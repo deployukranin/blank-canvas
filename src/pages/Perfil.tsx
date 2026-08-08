@@ -102,46 +102,95 @@ const PerfilPage = () => {
   return (
     <MobileLayout title={t('nav.profile')} hideHeader>
       <div className="px-4 py-6 space-y-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <GlassCard className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-                {profile?.avatar_url || user?.avatar ? (
-                  <img src={profile?.avatar_url || user?.avatar} alt={profile?.handle || user?.username} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-bold text-primary-foreground">
-                    {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              {!isAdmin && !isCEO && (
-                <button onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <Camera className="w-3 h-3 text-primary-foreground" />
-                </button>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-bold text-lg">
-                  {profile?.handle ? `@${profile.handle}` : user?.username}
-                </h2>
-                {user?.isVIP && (
-                  <span className="px-2 py-0.5 rounded-full bg-vip/20 text-vip text-xs font-medium">VIP 👑</span>
-                )}
-              </div>
-              <p className="text-muted-foreground text-sm">{user?.email}</p>
-            </div>
-          </GlassCard>
+        <PremiumProfileHeader
+          isVIP={isVIP}
+          vipPath={withBase('/vip')}
+          fallbackName={profile?.display_name || profile?.handle || user?.username || 'User'}
+          handle={profile?.handle}
+          fallbackAvatar={profile?.avatar_url || user?.avatar}
+          reputation={reputation}
+        />
 
-          {editingAvatar && !isAdmin && !isCEO && (
-            <div className="mt-3 flex gap-2 items-center">
-              <Input placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="flex-1 h-9 text-sm" />
-              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}><Check className="w-4 h-4" /></Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}><X className="w-4 h-4" /></Button>
+        {/* Reputation & ranking */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-display font-bold text-base flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-primary" />
+                  {t('profile.reputationTitle', 'Your reputation')}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {reputation.icon} {reputation.title} · {t('profile.premium.level', 'Lv.')}{reputation.level}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xl font-bold text-primary">{reputation.totalPoints}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{t('profile.points', 'points')}</p>
+              </div>
             </div>
-          )}
+
+            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                initial={{ width: 0 }}
+                animate={{ width: `${reputation.progressPercent}%` }}
+                transition={{ duration: 0.6 }}
+              />
+            </div>
+            {reputation.nextLevelPoints !== null && (
+              <p className="text-[11px] text-muted-foreground">
+                {t('profile.pointsToNext', '{{points}} points to the next level', {
+                  points: Math.max(0, reputation.nextLevelPoints - reputation.totalPoints),
+                })}
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.ideasCreated}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statIdeas', 'ideas')}</p>
+              </div>
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.votesReceived}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statVotes', 'votes')}</p>
+              </div>
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.commentsGiven}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statComments', 'comments')}</p>
+              </div>
+            </div>
+
+            {reputation.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {reputation.badges.map((badge) => (
+                  <span key={badge.id} title={badge.description} className="px-2 py-1 rounded-lg bg-white/[0.05] text-xs">
+                    {badge.icon} {badge.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {leaderboard.length > 0 && (
+              <div className="pt-2 border-t border-border/40 space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">{t('profile.topMembers', 'Top members')}</p>
+                {leaderboard.slice(0, 5).map((entry, index) => (
+                  <div
+                    key={entry.userId}
+                    className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg ${entry.userId === user?.id ? 'bg-primary/10' : ''}`}
+                  >
+                    <span className="w-5 text-xs text-muted-foreground">{index + 1}</span>
+                    <span className="flex-1 truncate">
+                      {entry.icon} {entry.displayName || (entry.handle ? `@${entry.handle}` : t('profile.member', 'Member'))}
+                    </span>
+                    <span className="text-xs font-semibold">{entry.totalPoints}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
         </motion.div>
+
 
         {(isAdmin || isCEO) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
