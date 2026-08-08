@@ -209,7 +209,7 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
         </div>
       </header>
 
-      <main className="flex-1 pt-16 pb-24 px-4">{children}</main>
+      <main className="flex-1 pt-16 pb-32 px-4">{children}</main>
 
       {/* Bottom rail — cinematic styling */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
