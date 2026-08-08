@@ -114,11 +114,15 @@ const AdminDashboard: React.FC = () => {
         }
         // Load payment config for checklist
         const payConf = await loadConfig<any>('payment_config', sid);
-        if (!cancelled && payConf) {
-          const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
-          setPaymentConfigured(hasPayment);
+        if (!cancelled) {
+          if (payConf) {
+            const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
+            setPaymentConfigured(hasPayment);
+          }
+          setPaymentLoaded(true);
         }
       }
+
     };
     resolve();
     return () => { cancelled = true; };
