@@ -97,6 +97,25 @@ export async function migrateConfigAsset(url: string, storeId: string): Promise<
   return data.url as string;
 }
 
+/**
+ * Ensures the tenant folder (`TingleBox/<loja> (email)`) exists in Drive with
+ * the three standard sub-folders: config, vip and customs. Runs once per store.
+ */
+export async function provisionStoreDrive(storeId: string): Promise<void> {
+  if (!storeId) return;
+  const key = `drive:provisioned:${storeId}`;
+  try {
+    if (localStorage.getItem(key)) return;
+  } catch { /* ignore */ }
+  const { data, error } = await supabase.functions.invoke('drive-upload', {
+    body: { action: 'provision', store_id: storeId },
+  });
+  if (error || !data?.success) return;
+  try {
+    localStorage.setItem(key, '1');
+  } catch { /* ignore */ }
+}
+
 
 /** Extracts the Drive file id from a `gdrive:` ref or a drive-media URL. */
 export function driveFileIdFromUrl(value?: string | null): string | null {

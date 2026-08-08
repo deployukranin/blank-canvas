@@ -14,6 +14,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { expiresAtMs, isTrialExpired as checkTrialExpired } from '@/lib/trial';
+import { provisionStoreDrive } from '@/lib/external-storage';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -39,6 +40,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     try { return localStorage.getItem(COLLAPSE_KEY) === '1'; } catch { return false; }
   });
   const [query, setQuery] = React.useState('');
+
+  // Garante a estrutura de pastas do cliente no Drive (config/vip/customs)
+  React.useEffect(() => {
+    if (store?.id) void provisionStoreDrive(store.id);
+  }, [store?.id]);
+
+
 
   const toggleCollapsed = () => {
     setCollapsed(prev => {

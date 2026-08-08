@@ -3,8 +3,7 @@ import {
   DRIVE_ROOT_FOLDER_ID,
   MAX_UPLOAD_BYTES,
   deleteFile,
-  ensureFolder,
-  ensureStoreFolder,
+  ensureStoreTree,
   signMediaToken,
   uploadFile,
 } from "../_shared/drive.ts";
@@ -92,6 +91,18 @@ Deno.serve(async (req) => {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
       const body = await req.json().catch(() => ({}));
+
+      // Create the tenant folder tree (config/vip/customs) even before any upload
+      if (body?.action === 'provision') {
+        const provStoreId = String(body.store_id || '').trim();
+        if (!provStoreId) return json({ success: false, error: 'store_id required' }, 400);
+        if (!(await isStoreManager(admin, userId, provStoreId))) {
+          return json({ success: false, error: 'Forbidden' }, 403);
+        }
+        const tree = await provisionStoreTree(admin, provStoreId);
+        return json({ success: true, folderId: tree.storeFolderId, folders: tree.folders });
+      }
+
       if (body?.action !== 'migrate_config') {
         return json({ success: false, error: 'invalid action' }, 400);
       }
@@ -238,6 +249,16 @@ async function resolveKindFolder(
   storeId: string,
   kind: string,
 ): Promise<string> {
+  const { folders } = await provisionStoreTree(admin, storeId);
+  return folders[KIND_FOLDER[kind] || 'config'];
+}
+
+/** Creates the tenant folder plus the three standard sub-folders in Drive. */
+async function provisionStoreTree(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+  storeId: string,
+): Promise<{ storeFolderId: string; folders: Record<string, string> }> {
   const { data: storeRow } = await admin
     .from('stores')
     .select('slug, name, created_by')
@@ -252,8 +273,7 @@ async function resolveKindFolder(
     .filter(Boolean)
     .join(' ');
 
-  const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
-  return await ensureFolder(KIND_FOLDER[kind] || 'config', storeFolder);
+  return await ensureStoreTree(storeId, label, DRIVE_ROOT_FOLDER_ID);
 }
 
 
