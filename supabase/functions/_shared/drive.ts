@@ -107,6 +107,26 @@ export async function ensureStoreFolder(
 }
 
 
+/** Fixed sub-folders every tenant folder must have. */
+export const STORE_SUBFOLDERS = ['config', 'vip', 'customs'] as const;
+
+/**
+ * Ensures `TingleBox/<tenant>` exists with all three standard sub-folders,
+ * returning the tenant folder id plus a name → id map of the sub-folders.
+ */
+export async function ensureStoreTree(
+  storeId: string,
+  label: string,
+  parentId: string,
+): Promise<{ storeFolderId: string; folders: Record<string, string> }> {
+  const storeFolderId = await ensureStoreFolder(storeId, label, parentId);
+  const folders: Record<string, string> = {};
+  for (const name of STORE_SUBFOLDERS) {
+    folders[name] = await ensureFolder(name, storeFolderId);
+  }
+  return { storeFolderId, folders };
+}
+
 /** Multipart upload of a small/medium file. Returns the Drive file id. */
 export async function uploadFile(
   bytes: Uint8Array,
