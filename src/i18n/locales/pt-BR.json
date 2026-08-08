@@ -1525,6 +1525,7 @@
     "newCategory": "Nova categoria",
     "newCategoryDesc": "Descrição da categoria",
     "newDuration": "Nova duração",
-    "newRule": "Nova regra"
+    "newRule": "Nova regra",
+    "audioUnsupported": "Seu navegador não suporta áudio."
   }
 }
