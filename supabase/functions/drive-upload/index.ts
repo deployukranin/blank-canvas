@@ -5,8 +5,20 @@ import {
   deleteFile,
   ensureFolder,
   ensureStoreFolder,
+  signMediaToken,
   uploadFile,
 } from "../_shared/drive.ts";
+
+/** Sub-folder per content kind inside the tenant folder. */
+const KIND_FOLDER: Record<string, string> = {
+  config: 'config',
+  vip: 'vip',
+  custom: 'customs',
+  preview: 'customs',
+};
+
+/** Brand assets (banners/icon) need a long-lived public link. */
+const CONFIG_URL_TTL_SECONDS = 60 * 60 * 24 * 365 * 5; // 5 years
 
 
 const corsHeaders = {
@@ -84,7 +96,7 @@ Deno.serve(async (req) => {
 
     if (!(file instanceof File)) return json({ success: false, error: 'file required' }, 400);
     if (!storeId) return json({ success: false, error: 'store_id required' }, 400);
-    if (!['vip', 'custom', 'preview'].includes(kind)) return json({ success: false, error: 'invalid kind' }, 400);
+    if (!KIND_FOLDER[kind]) return json({ success: false, error: 'invalid kind' }, 400);
     if (file.size > MAX_UPLOAD_BYTES) {
       return json({ success: false, error: 'Arquivo maior que 100MB' }, 413);
     }
@@ -136,10 +148,7 @@ Deno.serve(async (req) => {
       .join(' ');
 
     const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
-    const kindFolder = await ensureFolder(
-      kind === 'vip' ? 'vip' : kind === 'preview' ? 'previews' : 'customs',
-      storeFolder,
-    );
+    const kindFolder = await ensureFolder(KIND_FOLDER[kind], storeFolder);
 
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
@@ -162,7 +171,15 @@ Deno.serve(async (req) => {
       created_by: userId,
     });
 
-    return json({ success: true, ref: `gdrive:${driveId}`, fileId: driveId, name: safeName });
+    // Brand assets are public: return a ready-to-use long-lived media URL
+    let publicUrl: string | null = null;
+    if (kind === 'config') {
+      const exp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
+      const sig = await signMediaToken(driveId, exp);
+      publicUrl = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(driveId)}&exp=${exp}&sig=${sig}`;
+    }
+
+    return json({ success: true, ref: `gdrive:${driveId}`, fileId: driveId, name: safeName, url: publicUrl });
   } catch (err) {
     console.error('drive-upload error:', err);
     return json({ success: false, error: (err as Error).message || 'Upload failed' }, 500);

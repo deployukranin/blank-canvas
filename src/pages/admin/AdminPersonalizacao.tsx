@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
 
 import { supabase } from '@/integrations/supabase/client';
+import { uploadConfigAsset, deleteDriveAsset } from '@/lib/external-storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
@@ -155,6 +156,7 @@ const AdminPersonalizacao: React.FC = () => {
       try {
         // Old icon versions are replaced, so they must not count against the quota
         await purgeStorageFolder('platform-icon');
+        await deleteDriveAsset(store.avatar_url);
         const current = await fetchStorageQuota(store.id);
         if (current) setQuota(current);
         if (!fitsInQuota(current, file.size)) {
@@ -166,12 +168,7 @@ const AdminPersonalizacao: React.FC = () => {
           return;
         }
 
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-        const fileName = `${Date.now()}.${ext}`;
-        const path = `${store.id}/platform-icon/${fileName}`;
-        const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+        const { url: publicUrl } = await uploadConfigAsset(file, store.id);
         const { data: updatedStore, error: updateError } = await supabase
           .from('stores')
           .update({ avatar_url: publicUrl })
@@ -195,6 +192,7 @@ const AdminPersonalizacao: React.FC = () => {
   const handleRemoveUploadedIcon = async () => {
     if (store?.id) {
       await purgeStorageFolder('platform-icon');
+      await deleteDriveAsset(store.avatar_url);
       await supabase.from('stores').update({ avatar_url: null }).eq('id', store.id);
       toast({ title: t('admin.platformIcon.removed', 'Icon removed') });
       window.location.reload();
@@ -227,9 +225,16 @@ const AdminPersonalizacao: React.FC = () => {
 
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
   const removeBanner = (id: string) => {
+    const removed = banners.find(b => b.id === id);
     setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
-    // Free the storage used by the removed banner
-    purgeStorageFolder(id).then(() => fetchStorageQuota(store?.id)).then(q => q && setQuota(q));
+    // Free the storage used by the removed banner (legacy bucket + Drive)
+    Promise.all([
+      purgeStorageFolder(id),
+      deleteDriveAsset(removed?.desktopUrl),
+      deleteDriveAsset(removed?.mobileUrl),
+    ])
+      .then(() => fetchStorageQuota(store?.id))
+      .then(q => q && setQuota(q));
   };
 
   const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean, persist = false) => {
@@ -244,11 +249,15 @@ const AdminPersonalizacao: React.FC = () => {
     const uploadKey = `${bannerId}-${variant}`;
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
     try {
+      if (!store?.id) throw new Error('Store not found');
+
       // Replacing an image must not keep the previous file counting against the quota
+      const previous = banners.find(b => b.id === bannerId)?.[variant === 'desktop' ? 'desktopUrl' : 'mobileUrl'];
       await purgeStorageFolder(bannerId, undefined, `${variant}-`);
+      await deleteDriveAsset(previous);
 
       // Enforce storage quota (trial stores are capped at 100MB total)
-      const current = await fetchStorageQuota(store?.id);
+      const current = await fetchStorageQuota(store.id);
       if (current) setQuota(current);
       if (!fitsInQuota(current, file.size)) {
         toast({
@@ -259,15 +268,10 @@ const AdminPersonalizacao: React.FC = () => {
         return;
       }
 
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const prefix = store?.id ? `${store.id}/` : '';
-      const path = `${prefix}${bannerId}/${variant}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl, true);
+      const { url } = await uploadConfigAsset(file, store.id);
+      updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', url, true);
       toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
-      fetchStorageQuota(store?.id).then(q => q && setQuota(q));
+      fetchStorageQuota(store.id).then(q => q && setQuota(q));
     } catch (err: any) {
       toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
 
@@ -275,6 +279,7 @@ const AdminPersonalizacao: React.FC = () => {
       setUploading(prev => ({ ...prev, [uploadKey]: false }));
     }
   };
+
 
   const handleFileSelect = (bannerId: string, variant: 'desktop' | 'mobile') => {
     const input = document.createElement('input');

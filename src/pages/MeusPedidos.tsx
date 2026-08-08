@@ -26,7 +26,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
-import { getDeliverySignedUrl } from '@/lib/external-storage';
+import { getDeliverySignedUrl, getDriveMedia } from '@/lib/external-storage';
 
 import {
   Dialog,
@@ -118,6 +118,7 @@ const MeusPedidosPage = () => {
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [loadingDelivery, setLoadingDelivery] = useState(false);
+  const [deliveryMedia, setDeliveryMedia] = useState<{ url: string; mimeType: string | null } | null>(null);
 
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
@@ -208,6 +209,19 @@ const MeusPedidosPage = () => {
       setLoadingDelivery(false);
     }
   };
+
+  // Resolve the delivered media so it can be played inline (no download needed)
+  useEffect(() => {
+    let active = true;
+    setDeliveryMedia(null);
+    const ref = selectedOrder?.delivery_file_id;
+    if (!ref) return;
+    getDriveMedia(ref).then(media => {
+      if (active && media) setDeliveryMedia(media);
+    });
+    return () => { active = false; };
+  }, [selectedOrder?.delivery_file_id]);
+
 
 
   if (isLoading) {
@@ -415,6 +429,20 @@ const MeusPedidosPage = () => {
                           <h4 className="font-medium text-sm text-emerald-400 mb-2">
                             {t('orders.deliveryReady', 'Seu pedido está pronto!')}
                           </h4>
+                          {deliveryMedia && (deliveryMedia.mimeType?.startsWith('video') || deliveryMedia.mimeType?.startsWith('audio')) && (
+                            <div className="mb-3">
+                              {deliveryMedia.mimeType?.startsWith('video') ? (
+                                <video
+                                  src={deliveryMedia.url}
+                                  controls
+                                  playsInline
+                                  className="w-full rounded-lg bg-black"
+                                />
+                              ) : (
+                                <audio src={deliveryMedia.url} controls className="w-full" />
+                              )}
+                            </div>
+                          )}
                           <Button
                             size="sm"
                             className="gap-2"
