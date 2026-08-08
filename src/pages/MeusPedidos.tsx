@@ -209,6 +209,19 @@ const MeusPedidosPage = () => {
     }
   };
 
+  // Resolve the delivered media so it can be played inline (no download needed)
+  useEffect(() => {
+    let active = true;
+    setDeliveryMedia(null);
+    const ref = selectedOrder?.delivery_file_id;
+    if (!ref) return;
+    getDriveMedia(ref).then(media => {
+      if (active && media) setDeliveryMedia(media);
+    });
+    return () => { active = false; };
+  }, [selectedOrder?.delivery_file_id]);
+
+
 
   if (isLoading) {
     return (
