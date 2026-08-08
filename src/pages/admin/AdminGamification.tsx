@@ -118,29 +118,8 @@ const AdminGamification: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* Points */}
-        <GlassCard className="p-5 space-y-4">
-          <p className="font-semibold flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary" />
-            {t('admin.gamification.points', 'Points per action')}
-          </p>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {REPUTATION_EVENTS.map((event) => (
-              <div key={event} className="flex items-center gap-3">
-                <Label className="flex-1 text-sm">
-                  {t(`admin.gamification.event.${event}`, event.replace('_', ' '))}
-                </Label>
-                <Input
-                  type="number"
-                  min={0}
-                  className="w-24 h-9"
-                  value={config.points[event]}
-                  onChange={(e) => updatePoints(event, Number(e.target.value))}
-                />
-              </div>
-            ))}
-          </div>
-        </GlassCard>
+
+
 
         {/* Levels & rewards */}
         <GlassCard className="p-5 space-y-4">
