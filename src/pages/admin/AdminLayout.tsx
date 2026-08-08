@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, Lightbulb, ShoppingCart, Users, FileText,
+  LayoutDashboard, Lightbulb, Trophy, ShoppingCart, Users, FileText,
   Settings, LogOut, Menu, X, ArrowLeft, CreditCard,
   Crown, Youtube, Palette, Star, Gem, LifeBuoy, Share2, Globe, Sparkles,
   AlertTriangle, Gift, Handshake, PanelLeftClose, PanelLeftOpen, Search, ChevronDown,
@@ -83,6 +83,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         { path: `${base}/youtube`, icon: Youtube, label: t('admin.youtube') },
         { path: `${base}/content`, icon: FileText, label: t('admin.content') },
         { path: `${base}/ideas`, icon: Lightbulb, label: t('admin.ideas') },
+        { path: `${base}/rewards`, icon: Trophy, label: t('admin.gamification.title', 'Gamification') },
       ],
     },
     {
