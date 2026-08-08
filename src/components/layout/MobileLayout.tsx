@@ -32,9 +32,17 @@ export const MobileLayout = ({ children, title, showBack, hideHeader, fullBleed 
       ? previewParam
       : normalizeLayout(config.layout?.variant, store?.plan_type);
 
-  if (variant === 'cinematic' && !isMobile) {
-    return <DesktopShell title={title} fullBleed={fullBleed}>{children}</DesktopShell>;
+  if (variant === 'cinematic') {
+    if (!isMobile) {
+      return <DesktopShell title={title} fullBleed={fullBleed}>{children}</DesktopShell>;
+    }
+    return (
+      <CinematicMobileShell title={hideHeader ? undefined : title} showBack={showBack}>
+        {children}
+      </CinematicMobileShell>
+    );
   }
+
 
   return (
     <div className="min-h-screen flex flex-col pb-20">
