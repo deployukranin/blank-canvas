@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, Save, Trophy, Award, Sparkles } from 'lucide-react';
+import { Loader2, Save, Award, Sparkles } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -13,10 +12,8 @@ import { useTenant } from '@/contexts/TenantContext';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import {
   DEFAULT_GAMIFICATION_CONFIG,
-  REPUTATION_EVENTS,
   REWARD_OPTIONS,
   type GamificationConfig,
-  type ReputationEventType,
   type RewardId,
 } from '@/lib/gamification';
 
@@ -61,9 +58,6 @@ const AdminGamification: React.FC = () => {
     }
   };
 
-  const updatePoints = (event: ReputationEventType, value: number) =>
-    setConfig((c) => ({ ...c, points: { ...c.points, [event]: Math.max(0, value) } }));
-
   const updateLevel = (index: number, patch: Partial<GamificationConfig['levels'][number]>) =>
     setConfig((c) => ({ ...c, levels: c.levels.map((l, i) => (i === index ? { ...l, ...patch } : l)) }));
 
@@ -95,7 +89,7 @@ const AdminGamification: React.FC = () => {
       <div className="space-y-6 max-w-4xl">
         <div className="flex items-start justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            {t('admin.gamification.subtitle', 'Configure points, levels, medals and the perks unlocked at each rank.')}
+            {t('admin.gamification.subtitle', 'Configure levels, medals and the perks unlocked at each rank. Points are awarded automatically by the platform.')}
           </p>
           <Button onClick={handleSave} disabled={isSaving} className="gap-2 shrink-0">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -118,29 +112,8 @@ const AdminGamification: React.FC = () => {
           </div>
         </GlassCard>
 
-        {/* Points */}
-        <GlassCard className="p-5 space-y-4">
-          <p className="font-semibold flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary" />
-            {t('admin.gamification.points', 'Points per action')}
-          </p>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {REPUTATION_EVENTS.map((event) => (
-              <div key={event} className="flex items-center gap-3">
-                <Label className="flex-1 text-sm">
-                  {t(`admin.gamification.event.${event}`, event.replace('_', ' '))}
-                </Label>
-                <Input
-                  type="number"
-                  min={0}
-                  className="w-24 h-9"
-                  value={config.points[event]}
-                  onChange={(e) => updatePoints(event, Number(e.target.value))}
-                />
-              </div>
-            ))}
-          </div>
-        </GlassCard>
+
+
 
         {/* Levels & rewards */}
         <GlassCard className="p-5 space-y-4">
