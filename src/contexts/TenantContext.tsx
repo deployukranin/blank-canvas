@@ -144,7 +144,8 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         document.title = data.name;
 
         // Dynamically set favicon to the store's avatar
-        if (data.avatar_url) {
+        const hasCustomIcon = !!document.querySelector("link[data-source='whitelabel']");
+        if (data.avatar_url && !hasCustomIcon) {
           let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
           if (!link) {
             link = document.createElement('link');
