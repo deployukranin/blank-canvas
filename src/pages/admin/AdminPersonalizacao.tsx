@@ -243,6 +243,9 @@ const AdminPersonalizacao: React.FC = () => {
     const uploadKey = `${bannerId}-${variant}`;
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
     try {
+      // Replacing an image must not keep the previous file counting against the quota
+      await purgeStorageFolder(bannerId, undefined, `${variant}-`);
+
       // Enforce storage quota (trial stores are capped at 100MB total)
       const current = await fetchStorageQuota(store?.id);
       if (current) setQuota(current);
@@ -266,6 +269,7 @@ const AdminPersonalizacao: React.FC = () => {
       fetchStorageQuota(store?.id).then(q => q && setQuota(q));
     } catch (err: any) {
       toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+
     } finally {
       setUploading(prev => ({ ...prev, [uploadKey]: false }));
     }
