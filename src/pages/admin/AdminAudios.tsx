@@ -21,6 +21,8 @@ import {
 const MIN_PRICE = 10;
 
 const AdminAudios = () => {
+  const { t, i18n } = useTranslation();
+  const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
   const { toast } = useToast();
   const { store } = useTenant();
   const { 
@@ -113,17 +115,14 @@ const AdminAudios = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout title="Áudios">
+      <AdminLayout title={t('admin.audios')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Carregando configurações...</span>
+          <span className="text-muted-foreground">{t('adminVideos.loading')}</span>
         </div>
       </AdminLayout>
     );
   }
-
-  const { t, i18n } = useTranslation();
-  const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
 
   return (
     <AdminLayout title={t('admin.audios')}>
@@ -194,7 +193,7 @@ const AdminAudios = () => {
               <div className="p-3 bg-muted/30 rounded-lg">
                 <p className="text-sm font-medium mb-2">{t('audiosAdmin.previewLabel', 'Preview:')}</p>
                 <audio controls className="w-full" src={config.audioPreviewUrl}>
-                  Your browser does not support audio.
+                  {t('adminVideos.audioUnsupported', 'Your browser does not support audio.')}
                 </audio>
               </div>
             )}
@@ -223,7 +222,7 @@ const AdminAudios = () => {
               >
                 <Input
                   className="w-32"
-                  placeholder="Label"
+                  placeholder={t('adminVideos.label')}
                   value={duration.label}
                   onChange={e => updateDuration(index, 'label', e.target.value)}
                 />

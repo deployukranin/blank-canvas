@@ -491,7 +491,7 @@ const AdminCustoms = () => {
               <div className="space-y-3">
                 {config.durations.map((duration, index) => (
                   <motion.div key={duration.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <Input className="w-full sm:w-32" placeholder="Label" value={getLocalizedDurationLabel(duration)} onChange={e => updateVideoDuration(index, 'label', e.target.value)} />
+                    <Input className="w-full sm:w-32" placeholder={t('adminVideos.label')} value={getLocalizedDurationLabel(duration)} onChange={e => updateVideoDuration(index, 'label', e.target.value)} />
                     <div className="flex items-center gap-2">
                       <Input type="number" className="w-20" min={1} value={duration.minutes} onChange={e => updateVideoDuration(index, 'minutes', parseInt(e.target.value) || 1)} />
                       <span className="text-sm text-muted-foreground">min</span>
@@ -609,7 +609,7 @@ const AdminCustoms = () => {
                 {config.audioPreviewEnabled && config.audioPreviewUrl && (
                   <div className="p-3 bg-muted/30 rounded-lg">
                     <p className="text-sm font-medium mb-2">{t('audiosAdmin.previewLabel', 'Preview:')}</p>
-                    <audio controls className="w-full" src={config.audioPreviewUrl}>Your browser does not support audio.</audio>
+                    <audio controls className="w-full" src={config.audioPreviewUrl}>{t('adminVideos.audioUnsupported', 'Your browser does not support audio.')}</audio>
                   </div>
                 )}
               </div>
@@ -664,7 +664,7 @@ const AdminCustoms = () => {
               <div className="space-y-3">
                 {config.audioDurations.map((duration, index) => (
                   <motion.div key={duration.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <Input className="w-full sm:w-32" placeholder="Label" value={getLocalizedDurationLabel(duration)} onChange={e => updateAudioDuration(index, 'label', e.target.value)} />
+                    <Input className="w-full sm:w-32" placeholder={t('adminVideos.label')} value={getLocalizedDurationLabel(duration)} onChange={e => updateAudioDuration(index, 'label', e.target.value)} />
                     <div className="flex items-center gap-2">
                       <Input type="number" className="w-20" min={1} value={duration.minutes} onChange={e => updateAudioDuration(index, 'minutes', parseInt(e.target.value) || 1)} />
                       <span className="text-sm text-muted-foreground">min</span>
