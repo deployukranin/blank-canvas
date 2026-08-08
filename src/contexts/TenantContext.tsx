@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { applyTenantFavicon } from '@/lib/tenant-favicon';
+
 
 export interface StoreInfo {
   id: string;
@@ -143,34 +145,10 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // Dynamically set page title to the store name
         document.title = data.name;
 
-        // Each tenant owns its favicon. Remove every static/previous-tenant icon
-        // before installing the icon saved in /customize.
-        if (data.avatar_url) {
-          document.querySelectorAll("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']")
-            .forEach((element) => element.remove());
+        // Each tenant owns its favicon. Installed idempotently (and cached for
+        // the pre-paint script) so it doesn't blink on reload.
+        applyTenantFavicon(data.avatar_url, data.id, data.slug);
 
-          const cacheSeparator = data.avatar_url.includes('?') ? '&' : '?';
-          const tenantIconUrl = `${data.avatar_url}${cacheSeparator}tenant=${encodeURIComponent(data.id)}`;
-          const iconLink = document.createElement('link');
-          iconLink.rel = 'icon';
-          iconLink.type = 'image/png';
-          iconLink.href = tenantIconUrl;
-          iconLink.dataset.source = 'tenant';
-          document.head.appendChild(iconLink);
-
-          const shortcutLink = document.createElement('link');
-          shortcutLink.rel = 'shortcut icon';
-          shortcutLink.type = 'image/png';
-          shortcutLink.href = tenantIconUrl;
-          shortcutLink.dataset.source = 'tenant';
-          document.head.appendChild(shortcutLink);
-
-          const appleLink = document.createElement('link');
-          appleLink.rel = 'apple-touch-icon';
-          appleLink.href = tenantIconUrl;
-          appleLink.dataset.source = 'tenant';
-          document.head.appendChild(appleLink);
-        }
 
         // Resolve theme color from cached whitelabel config
         let themeColorHex = '#8b5cf6';
