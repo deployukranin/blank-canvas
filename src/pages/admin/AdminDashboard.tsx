@@ -52,8 +52,11 @@ const AdminDashboard: React.FC = () => {
   const [checklistDismissed, setChecklistDismissed] = useState<boolean>(() => {
     try { return localStorage.getItem('admin_setup_checklist_dismissed') === '1'; } catch { return false; }
   });
+  const [checklistCompleted, setChecklistCompleted] = useState<boolean>(false);
+  const [paymentLoaded, setPaymentLoaded] = useState(false);
 
   const [paymentConfigured, setPaymentConfigured] = useState(false);
+
 
   const platformUrl = storeSlug ? publicUrl(`/${storeSlug}`) : publicUrl();
 
@@ -77,8 +80,10 @@ const AdminDashboard: React.FC = () => {
         const payConf = await loadConfig<any>('payment_config', tenantStore.id);
         if (!cancelled) {
           setPaymentConfigured(!!(payConf?.stripe?.secretKey || payConf?.pixManual?.key));
+          setPaymentLoaded(true);
         }
       };
+
 
       loadTenantPaymentConfig();
       return () => { cancelled = true; };
@@ -109,15 +114,56 @@ const AdminDashboard: React.FC = () => {
         }
         // Load payment config for checklist
         const payConf = await loadConfig<any>('payment_config', sid);
-        if (!cancelled && payConf) {
-          const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
-          setPaymentConfigured(hasPayment);
+        if (!cancelled) {
+          if (payConf) {
+            const hasPayment = !!(payConf.stripe?.secretKey) || !!(payConf.pixManual?.key);
+            setPaymentConfigured(hasPayment);
+          }
+          setPaymentLoaded(true);
         }
       }
+
     };
     resolve();
     return () => { cancelled = true; };
   }, [session?.user?.id, tenantLoading, tenantStore?.id, tenantStore?.slug, tenantStore?.plan_type, tenantStore?.plan_expires_at, tenantStore?.name, tenantStore?.description, tenantStore?.avatar_url]);
+
+  // Once the checklist has been fully completed for this store, never show it again
+  const checklistDoneKey = storeId ? `admin_setup_checklist_done:${storeId}` : null;
+  useEffect(() => {
+    if (!checklistDoneKey) return;
+    try { setChecklistCompleted(localStorage.getItem(checklistDoneKey) === '1'); } catch { setChecklistCompleted(false); }
+  }, [checklistDoneKey]);
+
+  const checklist = useMemo(() => {
+    if (!storeInfo || !paymentLoaded) return null;
+    const defaultNames = ['WhisperScape', 'TingleBox', 'My Tingle Box'];
+    const checks = [
+      { key: 'storeName', done: !!storeInfo?.name && !defaultNames.includes(storeInfo.name), label: t('admin.checklist.storeName'), path: `${base}/customize` },
+      { key: 'colors', done: !!config.setup?.colorsConfirmed || config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
+      { key: 'icon', done: !!storeInfo?.avatar_url || !!config.icons?.logoIcon?.value, label: t('admin.checklist.icon', 'Defina o ícone da plataforma'), path: `${base}/customize` },
+      { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/customize` },
+      { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/payments` },
+      { key: 'youtube', done: !!config.youtube?.channelId?.trim(), label: t('admin.checklist.youtube', 'Conecte seu canal do YouTube'), path: `${base}/youtube` },
+    ];
+    const doneCount = checks.filter(c => c.done).length;
+    return {
+      checks,
+      doneCount,
+      allDone: doneCount === checks.length,
+      pct: Math.round((doneCount / checks.length) * 100),
+      nextStep: checks.find(c => !c.done),
+    };
+  }, [storeInfo, paymentLoaded, paymentConfigured, config, base, t]);
+
+  // Persist completion so the checklist never reappears
+  useEffect(() => {
+    if (!checklistDoneKey || !checklist?.allDone) return;
+    try { localStorage.setItem(checklistDoneKey, '1'); } catch { /* ignore */ }
+    setChecklistCompleted(true);
+  }, [checklistDoneKey, checklist?.allDone]);
+
+
 
   const [ytHistory, setYtHistory] = useState<Array<{ recorded_at: string; subscriber_count: number; views_last_30d: number; total_view_count: number }>>([]);
 
@@ -330,20 +376,11 @@ const AdminDashboard: React.FC = () => {
 
         {/* Setup Checklist */}
         {(() => {
-          const defaultNames = ['WhisperScape', 'TingleBox', 'My Tingle Box'];
-          const checks = [
-            { key: 'storeName', done: !!storeInfo?.name && !defaultNames.includes(storeInfo.name), label: t('admin.checklist.storeName'), path: `${base}/customize` },
-            { key: 'colors', done: !!config.setup?.colorsConfirmed || config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
-            { key: 'icon', done: !!storeInfo?.avatar_url || !!config.icons?.logoIcon?.value, label: t('admin.checklist.icon', 'Defina o ícone da plataforma'), path: `${base}/customize` },
-            { key: 'banners', done: (config.banners?.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl)).length || 0) > 0, label: t('admin.checklist.banners'), path: `${base}/customize` },
-            { key: 'payments', done: paymentConfigured, label: t('admin.checklist.payments'), path: `${base}/payments` },
-            { key: 'youtube', done: !!config.youtube?.channelId?.trim(), label: t('admin.checklist.youtube', 'Conecte seu canal do YouTube'), path: `${base}/youtube` },
-          ];
-          const doneCount = checks.filter(c => c.done).length;
-          const allDone = doneCount === checks.length;
-          const pct = Math.round((doneCount / checks.length) * 100);
-          const nextStep = checks.find(c => !c.done);
+          // Don't render until store + payment config are resolved (avoids flash)
+          if (checklistCompleted || !checklist) return null;
+          const { checks, doneCount, allDone, pct, nextStep } = checklist;
           if (allDone && checklistDismissed) return null;
+
           return (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <GlassCard className="p-4">
