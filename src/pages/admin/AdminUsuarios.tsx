@@ -58,7 +58,7 @@ const AdminUsuarios: React.FC = () => {
       // Get user IDs that belong to this store
       const { data: storeUsersData, error: storeUsersError } = await supabase
         .from('store_users')
-        .select('user_id, id, banned_at')
+        .select('user_id, id, banned_at, created_at')
         .eq('store_id', storeId);
 
       if (storeUsersError) throw storeUsersError;
@@ -90,15 +90,25 @@ const AdminUsuarios: React.FC = () => {
 
       const vipUserIds = new Set(vipSubs?.map(s => s.user_id) || []);
 
-      const usersWithVIP = (profiles || []).map(profile => {
-        const storeUser = storeUsersMap.get(profile.user_id);
+      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+      // Build the list from store memberships so members without a profile row
+      // still appear (matches the count shown on the dashboard).
+      const usersWithVIP = userIds.map((userId) => {
+        const storeUser: any = storeUsersMap.get(userId);
+        const profile: any = profileMap.get(userId);
         return {
-          ...profile,
-          isVIP: vipUserIds.has(profile.user_id),
-          banned_at: (storeUser as any)?.banned_at || null,
-          store_user_id: (storeUser as any)?.id || '',
-        };
-      });
+          id: profile?.id || storeUser?.id || userId,
+          user_id: userId,
+          display_name: profile?.display_name ?? null,
+          handle: profile?.handle ?? null,
+          avatar_url: profile?.avatar_url ?? null,
+          created_at: profile?.created_at || storeUser?.created_at || new Date().toISOString(),
+          isVIP: vipUserIds.has(userId),
+          banned_at: storeUser?.banned_at || null,
+          store_user_id: storeUser?.id || '',
+        } as UserProfile;
+      }).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
       setUsers(usersWithVIP);
     } catch (error) {
