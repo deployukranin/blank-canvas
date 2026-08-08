@@ -130,8 +130,8 @@ const AdminPersonalizacao: React.FC = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 2MB'), variant: 'destructive' });
+      if (file.size > 50 * 1024 * 1024) {
+        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 50MB'), variant: 'destructive' });
         return;
       }
       setIconUploading(true);
