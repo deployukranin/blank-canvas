@@ -1,6 +1,13 @@
 import { ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { BottomNav } from './BottomNav';
 import { MobileHeader } from './MobileHeader';
+import { DesktopShell } from './DesktopShell';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useTenant } from '@/contexts/TenantContext';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { LAYOUT_VARIANTS, normalizeLayout, type LayoutVariant } from '@/lib/store-layouts';
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -10,6 +17,21 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ children, title, showBack, hideHeader }: MobileLayoutProps) => {
+  const isMobile = useIsMobile();
+  const { store } = useTenant();
+  const { config } = useWhiteLabel();
+  const [searchParams] = useSearchParams();
+
+  const previewParam = searchParams.get('preview_layout') as LayoutVariant | null;
+  const variant =
+    previewParam && LAYOUT_VARIANTS.includes(previewParam)
+      ? previewParam
+      : normalizeLayout(config.layout?.variant, store?.plan_type);
+
+  if (variant === 'cinematic' && !isMobile) {
+    return <DesktopShell title={title}>{children}</DesktopShell>;
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-20">
       {!hideHeader && <MobileHeader title={title} showBack={showBack} />}
