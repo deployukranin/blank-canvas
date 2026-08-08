@@ -8,7 +8,6 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
-import logo from '@/assets/mytinglebox-logo.png';
 
 const pathToI18nKey: Record<string, string> = {
   '/': 'nav.home',
@@ -50,7 +49,9 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
     .filter((tab) => tab.enabled && tab.path !== '/loja')
     .sort((a, b) => a.order - b.order);
 
-  const storeName = config.siteName || store?.name || '';
+  const storeName = store?.name || config.siteName || '';
+  const homePath = withBase('/');
+  const isHome = location.pathname === homePath || location.pathname === `${homePath}/`;
 
   return (
     <div className="min-h-screen w-full bg-background flex">
@@ -138,14 +139,23 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
       <div className="flex-1 min-w-0 flex flex-col bg-gradient-to-b from-primary/[0.06] to-background">
         <header className="h-20 shrink-0 flex items-center justify-between px-10 border-b border-border/40 sticky top-0 z-40 bg-background/70 backdrop-blur-xl">
           <div className="flex items-center gap-4 min-w-0">
-            <img src={logo} alt="MyTingleBox" className="h-7 w-auto opacity-70" />
+            {config.logoImage ? (
+              <img src={config.logoImage} alt={storeName} className="h-8 w-8 rounded-lg object-cover" />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <span className="font-display font-bold text-base text-foreground truncate">{storeName}</span>
             {title && (
               <>
                 <span className="h-6 w-px bg-border" />
-                <h1 className="font-display font-semibold text-lg text-foreground truncate">{title}</h1>
+                <h1 className="font-display font-semibold text-lg text-muted-foreground truncate">{title}</h1>
               </>
             )}
           </div>
+
+
 
           <div className="flex items-center gap-5">
             <Link
@@ -174,7 +184,15 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
           </div>
         </header>
 
-        <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">{children}</main>
+        <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">
+          {isHome ? (
+            children
+          ) : (
+            <div className="rounded-[32px] border border-border/40 bg-card/30 backdrop-blur-xl shadow-2xl overflow-hidden [&_.pb-20]:pb-0 [&_.min-h-screen]:min-h-0">
+              {children}
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

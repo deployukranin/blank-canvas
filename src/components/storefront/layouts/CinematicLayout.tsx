@@ -52,7 +52,7 @@ const VideoCardItem = ({
 
 export const CinematicLayout = ({
   config, greeting, subtitle, quickActions, youtubeEnabled, videos, favoriteVideos,
-  favoriteIds, toggleFavorite, feedPosts, isAuthenticated, withBase, onSelectVideo,
+  favoriteIds, toggleFavorite, feedPosts, isAuthenticated, withBase, onSelectVideo, storeName,
 }: StorefrontLayoutProps) => {
   const { t } = useTranslation();
 
@@ -81,8 +81,11 @@ export const CinematicLayout = ({
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/25 blur-[120px] pointer-events-none" />
 
         <div className="absolute bottom-0 left-0 p-14 w-full max-w-3xl">
-          <span className="inline-block px-4 py-1.5 mb-6 bg-primary text-primary-foreground text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-[0_0_24px_-4px_hsl(var(--primary)/0.8)]">
-            {config.siteName}
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 bg-primary text-primary-foreground text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-[0_0_24px_-4px_hsl(var(--primary)/0.8)]">
+            {config.logoImage && (
+              <img src={config.logoImage} alt={storeName} className="w-4 h-4 rounded-full object-cover" />
+            )}
+            {storeName}
           </span>
           <h1 className="text-6xl font-display font-black text-foreground leading-[0.95] tracking-tight mb-5">
             {greeting}
