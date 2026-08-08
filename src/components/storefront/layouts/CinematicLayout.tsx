@@ -67,13 +67,13 @@ export const CinematicLayout = ({
     bannerStudio;
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-10 md:space-y-16">
       {/* Immersive hero */}
       <motion.section
         initial={{ opacity: 0, scale: 0.99 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative h-[460px] rounded-[40px] overflow-hidden border border-border/50 shadow-2xl group"
+        className="relative h-[440px] md:h-[460px] rounded-[28px] md:rounded-[40px] overflow-hidden border border-border/50 shadow-2xl group"
       >
         <img
           src={heroImage}
@@ -85,28 +85,28 @@ export const CinematicLayout = ({
 
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/25 blur-[120px] pointer-events-none" />
 
-        <div className="absolute bottom-0 left-0 p-14 w-full max-w-3xl">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 bg-primary text-primary-foreground text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-[0_0_24px_-4px_hsl(var(--primary)/0.8)]">
+        <div className="absolute bottom-0 left-0 p-6 md:p-14 w-full max-w-3xl">
+          <span className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 mb-4 md:mb-6 bg-primary text-primary-foreground text-[10px] md:text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-[0_0_24px_-4px_hsl(var(--primary)/0.8)]">
             {brandLogo && (
               <img src={brandLogo} alt={storeName} className="w-4 h-4 rounded-full object-cover" />
             )}
             {storeName}
           </span>
-          <h1 className="text-6xl font-display font-black text-foreground leading-[0.95] tracking-tight mb-5">
+          <h1 className="text-3xl md:text-6xl font-display font-black text-foreground leading-[1.05] md:leading-[0.95] tracking-tight mb-3 md:mb-5">
             {greeting}
           </h1>
-          <p className="text-xl text-muted-foreground mb-9 leading-relaxed">{subtitle}</p>
+          <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-9 leading-relaxed line-clamp-3">{subtitle}</p>
 
           {!isAuthenticated ? (
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <Link to={`${withBase('/login')}?tab=signup`}>
-                <Button size="lg" className="h-14 px-9 rounded-2xl font-bold gap-3 shadow-[0_0_40px_-8px_hsl(var(--primary)/0.8)]">
+                <Button size="lg" className="w-full sm:w-auto h-12 md:h-14 px-6 md:px-9 rounded-2xl font-bold gap-3 shadow-[0_0_40px_-8px_hsl(var(--primary)/0.8)]">
                   <UserPlus className="w-5 h-5" />
                   {t('storefront.signUp')}
                 </Button>
               </Link>
               <Link to={withBase('/login')}>
-                <Button size="lg" variant="outline" className="h-14 px-9 rounded-2xl font-semibold gap-3 backdrop-blur-md">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 md:h-14 px-6 md:px-9 rounded-2xl font-semibold gap-3 backdrop-blur-md">
                   <LogIn className="w-5 h-5" />
                   {t('storefront.signIn')}
                 </Button>
@@ -114,7 +114,7 @@ export const CinematicLayout = ({
             </div>
           ) : (
             <Link to={withBase('/gallery')}>
-              <Button size="lg" className="h-14 px-9 rounded-2xl font-bold gap-3">
+              <Button size="lg" className="h-12 md:h-14 px-6 md:px-9 rounded-2xl font-bold gap-3">
                 <Play className="w-5 h-5 fill-current" />
                 {t('storefront.explore')}
               </Button>
@@ -124,7 +124,8 @@ export const CinematicLayout = ({
       </motion.section>
 
       {/* Quick actions row */}
-      <section className="grid grid-cols-2 lg:grid-cols-5 gap-5">
+      <section className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
+
         {quickActions.map((action, index) => (
           <motion.div
             key={action.label}
