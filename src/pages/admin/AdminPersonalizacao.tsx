@@ -145,10 +145,14 @@ const AdminPersonalizacao: React.FC = () => {
         const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
-        // Update store avatar_url
-        if (store?.id) {
-          await supabase.from('stores').update({ avatar_url: publicUrl }).eq('id', store.id);
-        }
+        const { data: updatedStore, error: updateError } = await supabase
+          .from('stores')
+          .update({ avatar_url: publicUrl })
+          .eq('id', store.id)
+          .select('avatar_url')
+          .maybeSingle();
+        if (updateError) throw updateError;
+        if (!updatedStore) throw new Error(t('admin.platformIcon.saveError', 'The icon was uploaded, but could not be saved.'));
         toast({ title: t('admin.platformIcon.uploaded', 'Icon uploaded!') });
         // Force reload to pick up new avatar
         window.location.reload();
