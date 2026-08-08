@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { loadConfig } from '@/lib/config-storage';
+import { publicUrl } from '@/lib/public-url';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
