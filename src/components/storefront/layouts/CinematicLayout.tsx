@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import bannerStudio from '@/assets/banner-studio.jpg';
 import { translatePathLabel } from '@/lib/nav-i18n';
+import { useTenant } from '@/contexts/TenantContext';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 const VideoCardItem = ({
@@ -56,6 +57,9 @@ export const CinematicLayout = ({
   favoriteIds, toggleFavorite, feedPosts, isAuthenticated, withBase, onSelectVideo, storeName,
 }: StorefrontLayoutProps) => {
   const { t } = useTranslation();
+  const { store } = useTenant();
+  // Reuse the favicon/icon uploaded in /customize as the brand mark
+  const brandLogo = config.logoImage || store?.avatar_url || '';
 
   const heroImage =
     config.banners?.find((b) => b.enabled && b.desktopUrl)?.desktopUrl ||
@@ -83,8 +87,8 @@ export const CinematicLayout = ({
 
         <div className="absolute bottom-0 left-0 p-14 w-full max-w-3xl">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 bg-primary text-primary-foreground text-[11px] font-bold rounded-full uppercase tracking-[0.2em] shadow-[0_0_24px_-4px_hsl(var(--primary)/0.8)]">
-            {config.logoImage && (
-              <img src={config.logoImage} alt={storeName} className="w-4 h-4 rounded-full object-cover" />
+            {brandLogo && (
+              <img src={brandLogo} alt={storeName} className="w-4 h-4 rounded-full object-cover" />
             )}
             {storeName}
           </span>
