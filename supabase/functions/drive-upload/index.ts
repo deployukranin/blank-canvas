@@ -191,22 +191,8 @@ Deno.serve(async (req) => {
     }
 
     // Folder named after the tenant (slug/name + owner email) instead of the raw UUID
-    const { data: storeRow } = await admin
-      .from('stores')
-      .select('slug, name, created_by')
-      .eq('id', storeId)
-      .maybeSingle();
-    let ownerEmail = '';
-    if (storeRow?.created_by) {
-      const { data: ownerData } = await admin.auth.admin.getUserById(storeRow.created_by);
-      ownerEmail = ownerData?.user?.email || '';
-    }
-    const label = [storeRow?.slug || storeRow?.name || storeId, ownerEmail ? `(${ownerEmail})` : '']
-      .filter(Boolean)
-      .join(' ');
+    const kindFolder = await resolveKindFolder(admin, storeId, kind);
 
-    const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
-    const kindFolder = await ensureFolder(KIND_FOLDER[kind], storeFolder);
 
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
