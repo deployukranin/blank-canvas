@@ -176,10 +176,26 @@ const AdminPersonalizacao: React.FC = () => {
     toast({ title: t('admin.platformIcon.saved', 'Icon saved!') });
   };
 
+  // Persist banners into the white-label config (keeps the setup checklist in sync)
+  const persistBanners = (next: BannerConfig[]) => {
+    const enabledBanners = next.filter(b => b.enabled && (b.desktopUrl || b.mobileUrl));
+    const bannerImages = enabledBanners.map(b => b.desktopUrl || b.mobileUrl).filter(Boolean) as string[];
+    setConfig({
+      ...config,
+      banners: next,
+      bannerImages: bannerImages.length > 0 ? bannerImages : config.bannerImages,
+      bannerImage: bannerImages[0] || config.bannerImage,
+    });
+  };
+
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
-  const removeBanner = (id: string) => setBanners(prev => prev.filter(b => b.id !== id));
-  const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean) => {
-    setBanners(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
+  const removeBanner = (id: string) => setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
+  const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean, persist = false) => {
+    setBanners(prev => {
+      const next = prev.map(b => b.id === id ? { ...b, [field]: value } : b);
+      if (persist) persistBanners(next);
+      return next;
+    });
   };
 
   const uploadFile = async (file: File, bannerId: string, variant: 'desktop' | 'mobile') => {
