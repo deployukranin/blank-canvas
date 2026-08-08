@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Video, Clock, ShieldCheck, ShieldX, Eye, EyeOff, ImageIcon, Loader2 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 
 const AdminVideos = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { store } = useTenant();
   const { 
@@ -60,8 +62,8 @@ const AdminVideos = () => {
   const addCategory = () => {
     const newCategory: VideoCategory = {
       id: `video-category-${Date.now()}`,
-      name: 'Nova Categoria',
-      description: 'Descrição da categoria',
+      name: t('adminVideos.newCategory'),
+      description: t('adminVideos.newCategoryDesc'),
       icon: '🎬',
       surcharge: 0,
     };
@@ -87,7 +89,7 @@ const AdminVideos = () => {
   const addDuration = () => {
     const newDuration: VideoDuration = {
       id: `duration-${Date.now()}`,
-      label: 'Nova duração',
+      label: t('adminVideos.newDuration'),
       minutes: 5,
       price: 49.90,
     };
@@ -113,7 +115,7 @@ const AdminVideos = () => {
   const addRule = (type: 'allowed' | 'notAllowed') => {
     setConfig(prev => {
       const newRules = { ...prev.rules };
-      newRules[type] = [...newRules[type], 'Nova regra'];
+      newRules[type] = [...newRules[type], t('adminVideos.newRule')];
       return { ...prev, rules: newRules };
     });
   };
@@ -136,43 +138,43 @@ const AdminVideos = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout title="Vídeos">
+      <AdminLayout title={t('adminVideos.title')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Carregando configurações...</span>
+          <span className="text-muted-foreground">{t('adminVideos.loading')}</span>
         </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Vídeos">
+    <AdminLayout title={t('adminVideos.title')}>
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              Configure vídeos personalizados, categorias, preços e regras
+              {t('adminVideos.subtitle')}
             </p>
             {isSaving && (
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                Salvando...
+                {t('adminVideos.saving')}
               </span>
             )}
           </div>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Salvando...' : 'Salvar no servidor'}
+            {isSaving ? t('adminVideos.saving') : t('adminVideos.save')}
           </Button>
         </div>
 
         <Tabs defaultValue="geral" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="geral">Geral</TabsTrigger>
-            <TabsTrigger value="categorias">Categorias</TabsTrigger>
-            <TabsTrigger value="precos">Preços</TabsTrigger>
-            <TabsTrigger value="regras">Regras</TabsTrigger>
+            <TabsTrigger value="geral">{t('adminVideos.tabGeneral')}</TabsTrigger>
+            <TabsTrigger value="categorias">{t('adminVideos.tabCategories')}</TabsTrigger>
+            <TabsTrigger value="precos">{t('adminVideos.tabPrices')}</TabsTrigger>
+            <TabsTrigger value="regras">{t('adminVideos.tabRules')}</TabsTrigger>
           </TabsList>
 
           {/* Tab: Geral */}
@@ -180,7 +182,7 @@ const AdminVideos = () => {
             <GlassCard className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Video className="w-5 h-5 text-primary" />
-                Seção "Como Funciona"
+                {t('adminVideos.howItWorks')}
               </h3>
               
               {/* Toggle: Show/Hide Preview Section */}
@@ -192,9 +194,9 @@ const AdminVideos = () => {
                     <EyeOff className="w-5 h-5 text-muted-foreground" />
                   )}
                   <div>
-                    <span className="font-medium text-sm">Exibir Seção</span>
+                    <span className="font-medium text-sm">{t('adminVideos.showSection')}</span>
                     <p className="text-xs text-muted-foreground">
-                      {config.previewEnabled ? 'Visível na página de pedidos' : 'Oculto da página de pedidos'}
+                      {config.previewEnabled ? t('adminVideos.visible') : t('adminVideos.hidden')}
                     </p>
                   </div>
                 </div>
@@ -215,14 +217,14 @@ const AdminVideos = () => {
                     <ImageIcon className="w-5 h-5 text-primary" />
                   )}
                   <div>
-                    <span className="font-medium text-sm">Tipo de Mídia</span>
+                    <span className="font-medium text-sm">{t('adminVideos.mediaType')}</span>
                     <p className="text-xs text-muted-foreground">
-                      {config.previewType === 'video' ? 'Vídeo do YouTube' : 'Imagem'}
+                      {config.previewType === 'video' ? t('adminVideos.youtubeVideo') : t('adminVideos.image')}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Imagem</span>
+                  <span className="text-xs text-muted-foreground">{t('adminVideos.image')}</span>
                   <Switch
                     checked={config.previewType === 'video'}
                     onCheckedChange={(checked) => 
@@ -230,14 +232,14 @@ const AdminVideos = () => {
                     }
                     disabled={!config.previewEnabled}
                   />
-                  <span className="text-xs text-muted-foreground">Vídeo</span>
+                  <span className="text-xs text-muted-foreground">{t('adminVideos.video')}</span>
                 </div>
               </div>
 
               <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                 {config.previewType === 'video' ? (
                   <div>
-                    <label className="text-sm font-medium mb-2 block">URL do Vídeo (YouTube Embed)</label>
+                    <label className="text-sm font-medium mb-2 block">{t('adminVideos.videoUrl')}</label>
                     <Input
                       placeholder="https://www.youtube.com/embed/..."
                       value={config.previewVideoUrl}
@@ -245,12 +247,12 @@ const AdminVideos = () => {
                       disabled={!config.previewEnabled}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Use o formato embed: https://www.youtube.com/embed/VIDEO_ID
+                      {t('adminVideos.videoUrlHint')}
                     </p>
                   </div>
                 ) : (
                   <div>
-                    <label className="text-sm font-medium mb-2 block">URL da Imagem</label>
+                    <label className="text-sm font-medium mb-2 block">{t('adminVideos.imageUrl')}</label>
                     <Input
                       placeholder="https://exemplo.com/imagem.jpg"
                       value={config.previewImageUrl}
@@ -258,24 +260,24 @@ const AdminVideos = () => {
                       disabled={!config.previewEnabled}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Insira a URL de uma imagem (JPG, PNG, WebP)
+                      {t('adminVideos.imageUrlHint')}
                     </p>
                   </div>
                 )}
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Título</label>
+                  <label className="text-sm font-medium mb-2 block">{t('adminVideos.titleField')}</label>
                   <Input
-                    placeholder="Título do vídeo"
+                    placeholder={t('adminVideos.titlePlaceholder')}
                     value={config.previewTitle}
                     onChange={e => setConfig({ ...config, previewTitle: e.target.value })}
                     disabled={!config.previewEnabled}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Descrição</label>
+                  <label className="text-sm font-medium mb-2 block">{t('adminVideos.description')}</label>
                   <Textarea
-                    placeholder="Descrição breve"
+                    placeholder={t('adminVideos.descriptionPlaceholder')}
                     value={config.previewDescription}
                     onChange={e => setConfig({ ...config, previewDescription: e.target.value })}
                     className="min-h-[80px]"
@@ -283,7 +285,7 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Prazo de Entrega (dias)</label>
+                  <label className="text-sm font-medium mb-2 block">{t('adminVideos.deliveryDays')}</label>
                   <Input
                     type="number"
                     min={1}
@@ -291,7 +293,7 @@ const AdminVideos = () => {
                     onChange={e => setConfig({ ...config, deliveryDays: parseInt(e.target.value) || 7 })}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Quantos dias úteis para entregar o vídeo personalizado
+                    {t('adminVideos.deliveryHint')}
                   </p>
                 </div>
               </div>
@@ -302,7 +304,7 @@ const AdminVideos = () => {
               <GlassCard className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <Eye className="w-5 h-5 text-primary" />
-                  Pré-visualização
+                  {t('adminVideos.preview')}
                 </h3>
                 <div className="aspect-video w-full max-w-xl rounded-lg overflow-hidden bg-black/50">
                   {config.previewType === 'video' ? (
@@ -335,11 +337,11 @@ const AdminVideos = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <Video className="w-5 h-5 text-primary" />
-                  Categorias de Vídeos
+                  {t('adminVideos.videoCategories')}
                 </h3>
                 <Button size="sm" variant="outline" onClick={addCategory}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar
+                  {t('adminVideos.add')}
                 </Button>
               </div>
               
@@ -360,7 +362,7 @@ const AdminVideos = () => {
                       />
                       <Input
                         className="flex-1"
-                        placeholder="Nome da categoria"
+                        placeholder={t('adminVideos.categoryName')}
                         value={category.name}
                         onChange={e => updateCategory(index, 'name', e.target.value)}
                       />
@@ -374,12 +376,12 @@ const AdminVideos = () => {
                       </Button>
                     </div>
                     <Input
-                      placeholder="Descrição"
+                      placeholder={t('adminVideos.categoryDescription')}
                       value={category.description}
                       onChange={e => updateCategory(index, 'description', e.target.value)}
                     />
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">Taxa fixa: +R$</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">{t('adminVideos.fixedFee')}R$</span>
                       <Input
                         type="number"
                         className="w-24"
@@ -391,7 +393,7 @@ const AdminVideos = () => {
                       />
                       {(category.surcharge || 0) > 0 && (
                         <span className="text-xs text-primary">
-                          +R$ {(category.surcharge || 0).toFixed(2)} por pedido
+                          +R$ {(category.surcharge || 0).toFixed(2)} {t('adminVideos.perOrder')}
                         </span>
                       )}
                     </div>
@@ -401,8 +403,8 @@ const AdminVideos = () => {
                 {config.categories.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Video className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhuma categoria cadastrada</p>
-                    <p className="text-sm">Clique em "Adicionar" para criar uma nova categoria</p>
+                    <p>{t('adminVideos.noCategories')}</p>
+                    <p className="text-sm">{t('adminVideos.noCategoriesHint')}</p>
                   </div>
                 )}
               </div>
@@ -415,11 +417,11 @@ const AdminVideos = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <Clock className="w-5 h-5 text-primary" />
-                  Preços por Tempo
+                  {t('adminVideos.pricesByTime')}
                 </h3>
                 <Button size="sm" variant="outline" onClick={addDuration}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar
+                  {t('adminVideos.add')}
                 </Button>
               </div>
               
@@ -433,7 +435,7 @@ const AdminVideos = () => {
                   >
                     <Input
                       className="w-full sm:w-32"
-                      placeholder="Label"
+                      placeholder={t('adminVideos.label')}
                       value={duration.label}
                       onChange={e => updateDuration(index, 'label', e.target.value)}
                     />
@@ -445,7 +447,7 @@ const AdminVideos = () => {
                         value={duration.minutes}
                         onChange={e => updateDuration(index, 'minutes', parseInt(e.target.value) || 1)}
                       />
-                      <span className="text-sm text-muted-foreground">min</span>
+                      <span className="text-sm text-muted-foreground">{t('adminVideos.min')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">R$</span>
@@ -458,7 +460,7 @@ const AdminVideos = () => {
                         onChange={e => updateDuration(index, 'price', parseFloat(e.target.value) || 10)}
                       />
                       {duration.price < 10 && (
-                        <span className="text-xs text-destructive whitespace-nowrap">Mín. R$10</span>
+                        <span className="text-xs text-destructive whitespace-nowrap">{t('adminVideos.minPrice', { value: 'R$10' })}</span>
                       )}
                     </div>
                     <Button
@@ -475,8 +477,8 @@ const AdminVideos = () => {
                 {config.durations.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhuma duração cadastrada</p>
-                    <p className="text-sm">Clique em "Adicionar" para criar uma nova opção</p>
+                    <p>{t('adminVideos.noDurations')}</p>
+                    <p className="text-sm">{t('adminVideos.noDurationsHint')}</p>
                   </div>
                 )}
               </div>
@@ -488,7 +490,7 @@ const AdminVideos = () => {
             <div className="flex justify-end">
               <Button variant="outline" size="sm" onClick={() => setShowPreview(true)}>
                 <Eye className="w-4 h-4 mr-2" />
-                Visualizar
+                {t('adminVideos.view')}
               </Button>
             </div>
 
@@ -497,11 +499,11 @@ const AdminVideos = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-green-500" />
-                  O que PODE
+                  {t('adminVideos.allowed')}
                 </h3>
                 <Button size="sm" variant="outline" onClick={() => addRule('allowed')}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar
+                  {t('adminVideos.add')}
                 </Button>
               </div>
               <div className="space-y-2">
@@ -524,7 +526,7 @@ const AdminVideos = () => {
                 ))}
                 {config.rules.allowed.length === 0 && (
                   <p className="text-center py-4 text-muted-foreground">
-                    Nenhuma regra "permitido" cadastrada
+                    {t('adminVideos.noAllowed')}
                   </p>
                 )}
               </div>
@@ -535,11 +537,11 @@ const AdminVideos = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <ShieldX className="w-5 h-5 text-red-500" />
-                  O que NÃO PODE
+                  {t('adminVideos.notAllowed')}
                 </h3>
                 <Button size="sm" variant="outline" onClick={() => addRule('notAllowed')}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Adicionar
+                  {t('adminVideos.add')}
                 </Button>
               </div>
               <div className="space-y-2">
@@ -562,7 +564,7 @@ const AdminVideos = () => {
                 ))}
                 {config.rules.notAllowed.length === 0 && (
                   <p className="text-center py-4 text-muted-foreground">
-                    Nenhuma regra "proibido" cadastrada
+                    {t('adminVideos.noNotAllowed')}
                   </p>
                 )}
               </div>
@@ -574,16 +576,16 @@ const AdminVideos = () => {
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Visualização das Regras</DialogTitle>
+              <DialogTitle>{t('adminVideos.rulesPreview')}</DialogTitle>
               <DialogDescription>
-                Como os usuários verão as regras na página de vídeos
+                {t('adminVideos.rulesPreviewDesc')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                 <h4 className="font-semibold text-green-500 mb-3 flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5" />
-                  O que pode
+                  {t('adminVideos.allowed')}
                 </h4>
                 <ul className="space-y-1">
                   {config.rules.allowed.map((rule, idx) => (
@@ -597,7 +599,7 @@ const AdminVideos = () => {
               <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
                 <h4 className="font-semibold text-red-500 mb-3 flex items-center gap-2">
                   <ShieldX className="w-5 h-5" />
-                  O que NÃO pode
+                  {t('adminVideos.notAllowed')}
                 </h4>
                 <ul className="space-y-1">
                   {config.rules.notAllowed.map((rule, idx) => (
