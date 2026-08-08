@@ -52,8 +52,11 @@ const AdminDashboard: React.FC = () => {
   const [checklistDismissed, setChecklistDismissed] = useState<boolean>(() => {
     try { return localStorage.getItem('admin_setup_checklist_dismissed') === '1'; } catch { return false; }
   });
+  const [checklistCompleted, setChecklistCompleted] = useState<boolean>(false);
+  const [paymentLoaded, setPaymentLoaded] = useState(false);
 
   const [paymentConfigured, setPaymentConfigured] = useState(false);
+
 
   const platformUrl = storeSlug ? publicUrl(`/${storeSlug}`) : publicUrl();
 
