@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router-dom';
+
 import { useTenant } from '@/contexts/TenantContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
@@ -5,13 +7,19 @@ import { useStorefrontData } from '@/components/storefront/use-storefront-data';
 import { ClassicLayout } from '@/components/storefront/layouts/ClassicLayout';
 import { SpotlightLayout } from '@/components/storefront/layouts/SpotlightLayout';
 import { MagazineLayout } from '@/components/storefront/layouts/MagazineLayout';
-import { normalizeLayout } from '@/lib/store-layouts';
+import { LAYOUT_VARIANTS, normalizeLayout, type LayoutVariant } from '@/lib/store-layouts';
 
 const Index = () => {
   const { store } = useTenant();
+  const [searchParams] = useSearchParams();
   const { selectedVideoId, setSelectedVideoId, selectedVideo, ...data } = useStorefrontData();
 
-  const variant = normalizeLayout(data.config.layout?.variant, store?.plan_type);
+  // Admin preview override (?preview_layout=spotlight) — visual only, never persisted
+  const previewParam = searchParams.get('preview_layout') as LayoutVariant | null;
+  const variant = previewParam && LAYOUT_VARIANTS.includes(previewParam)
+    ? previewParam
+    : normalizeLayout(data.config.layout?.variant, store?.plan_type);
+
   const LayoutComponent =
     variant === 'spotlight' ? SpotlightLayout : variant === 'magazine' ? MagazineLayout : ClassicLayout;
 
