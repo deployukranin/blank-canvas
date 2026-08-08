@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X, Globe } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -18,14 +18,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
 import { useCinematicDesktop } from '@/hooks/use-cinematic-desktop';
+import { PremiumProfileHeader } from '@/components/profile/PremiumProfileHeader';
+import { useReputation, useLeaderboard } from '@/hooks/use-gamification';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [editingAvatar, setEditingAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [savingAvatar, setSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
   const { profile, refetch: refetchProfile } = useProfile();
@@ -37,6 +36,8 @@ const PerfilPage = () => {
 
   const { isVIP } = useVIPSubscription();
   const isCinematic = useCinematicDesktop();
+  const { reputation } = useReputation();
+  const { entries: leaderboard } = useLeaderboard(10);
 
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: withBase('/orders'), gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -58,26 +59,6 @@ const PerfilPage = () => {
     { icon: FileText, label: t('profile.terms', 'Terms of Use'), description: t('profile.readTerms', 'Read our terms'), path: withBase('/terms') },
     { icon: Shield, label: t('profile.privacy', 'Privacy'), description: t('profile.privacyPolicy', 'Privacy policy'), path: withBase('/privacy') },
   ];
-
-  const handleSaveAvatar = async () => {
-    if (!user || !avatarUrl.trim()) return;
-    setSavingAvatar(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({ user_id: user.id, avatar_url: avatarUrl.trim() }, { onConflict: 'user_id' });
-      if (error) throw error;
-      toast.success(t('profile.avatarSaved', 'Profile photo updated!'));
-      setEditingAvatar(false);
-      setAvatarUrl('');
-      refetchProfile();
-    } catch (err) {
-      console.error('Error saving avatar:', err);
-      toast.error(t('profile.avatarError', 'Error updating profile photo'));
-    } finally {
-      setSavingAvatar(false);
-    }
-  };
 
   if (!isAuthenticated) {
     return (
