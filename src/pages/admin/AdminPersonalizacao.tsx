@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
 
 import { motion } from 'framer-motion';
@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
 
 import { supabase } from '@/integrations/supabase/client';
-import { uploadConfigAsset, deleteDriveAsset } from '@/lib/external-storage';
+import { uploadConfigAsset, deleteDriveAsset, isLegacyStorageAsset, migrateConfigAsset } from '@/lib/external-storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
