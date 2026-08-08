@@ -148,10 +148,7 @@ Deno.serve(async (req) => {
       .join(' ');
 
     const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
-    const kindFolder = await ensureFolder(
-      kind === 'vip' ? 'vip' : kind === 'preview' ? 'previews' : 'customs',
-      storeFolder,
-    );
+    const kindFolder = await ensureFolder(KIND_FOLDER[kind], storeFolder);
 
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
