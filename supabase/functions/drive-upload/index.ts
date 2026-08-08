@@ -103,6 +103,23 @@ Deno.serve(async (req) => {
         return json({ success: true, folderId: tree.storeFolderId, folders: tree.folders });
       }
 
+      // Some clients cannot send a DELETE body: accept { fileId } over POST too
+      if (body?.fileId) {
+        const fileId = String(body.fileId).replace(/^gdrive:/, '').trim();
+        const { data: row } = await admin
+          .from('drive_files')
+          .select('id, store_id')
+          .eq('file_id', fileId)
+          .maybeSingle();
+        if (!row) return json({ success: true });
+        if (!(await isStoreManager(admin, userId, row.store_id))) {
+          return json({ success: false, error: 'Forbidden' }, 403);
+        }
+        await deleteFile(fileId);
+        await admin.from('drive_files').delete().eq('id', row.id);
+        return json({ success: true });
+      }
+
       if (body?.action !== 'migrate_config') {
         return json({ success: false, error: 'invalid action' }, 400);
       }
