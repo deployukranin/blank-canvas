@@ -253,7 +253,7 @@ const AdminPersonalizacao: React.FC = () => {
         // Force reload to pick up new avatar
         window.location.reload();
       } catch (err: any) {
-        toast({ title: t('admin.platformIcon.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+        await notifyUploadError(err, t('admin.platformIcon.uploadError', 'Upload failed'));
       } finally {
         setIconUploading(false);
       }
@@ -345,7 +345,7 @@ const AdminPersonalizacao: React.FC = () => {
       toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
       fetchStorageQuota(store.id).then(q => q && setQuota(q));
     } catch (err: any) {
-      toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+      await notifyUploadError(err, t('admin.banners.uploadError', 'Upload failed'));
 
     } finally {
       setUploading(prev => ({ ...prev, [uploadKey]: false }));
