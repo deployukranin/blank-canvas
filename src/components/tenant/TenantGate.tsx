@@ -1,5 +1,6 @@
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStoreMembership } from '@/hooks/use-store-membership';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { StoreOffline } from './StoreOffline';
@@ -31,6 +32,7 @@ import { isTrialExpired } from '@/lib/trial';
 export const TenantGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { slug, store, isLoading, error } = useTenant();
   const { user } = useAuth();
+  useStoreMembership();
 
   if (isLoading) {
     return (
