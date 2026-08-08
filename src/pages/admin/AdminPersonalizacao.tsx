@@ -106,6 +106,39 @@ const AdminPersonalizacao: React.FC = () => {
     return () => { cancelled = true; };
   }, [store?.id]);
 
+  /**
+   * Shows a readable toast for an upload failure. Quota rejections (client-side
+   * pre-check or the 413 returned by the edge function) get the plan message
+   * with the exact used/limit numbers, and the quota bar is refreshed.
+   */
+  const notifyUploadError = async (err: unknown, fallbackTitle: string) => {
+    const code = (err as Error)?.message || '';
+    const fresh = store?.id ? await fetchStorageQuota(store.id) : null;
+    if (fresh) setQuota(fresh);
+
+    if (code === 'quota' || code.includes('storage_quota_exceeded')) {
+      const usage = fresh && !fresh.unlimited
+        ? ` (${formatBytes(fresh.used_bytes)} / ${formatBytes(fresh.limit_bytes)})`
+        : '';
+      toast({
+        title: t('admin.storage.quotaExceeded', 'Limite de armazenamento atingido'),
+        description: t('admin.storage.quotaExceededDesc', 'Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço.') + usage,
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (code === 'size') {
+      toast({ title: fallbackTitle, description: t('admin.storage.fileTooLarge', 'Arquivo maior que 100MB.'), variant: 'destructive' });
+      return;
+    }
+    if (code === 'forbidden') {
+      toast({ title: fallbackTitle, description: t('admin.storage.forbidden', 'Você não tem permissão para enviar arquivos nesta loja.'), variant: 'destructive' });
+      return;
+    }
+    toast({ title: fallbackTitle, description: code || undefined, variant: 'destructive' });
+  };
+
+
   // One-time migration: brand assets still in the legacy bucket move to Drive (config folder)
   const migratedRef = useRef(false);
   useEffect(() => {
