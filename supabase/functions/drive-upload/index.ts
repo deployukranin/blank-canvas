@@ -111,8 +111,9 @@ Deno.serve(async (req) => {
         return json({ success: false, error: 'unsupported source' }, 400);
       }
 
+      // Legacy file already deleted/unavailable: nothing to migrate, not an error
       const srcRes = await fetch(sourceUrl);
-      if (!srcRes.ok) return json({ success: false, error: 'source not reachable' }, 400);
+      if (!srcRes.ok) return json({ success: true, gone: true, url: null });
       const srcBytes = new Uint8Array(await srcRes.arrayBuffer());
       if (srcBytes.length > MAX_UPLOAD_BYTES) return json({ success: false, error: 'file too large' }, 413);
 
