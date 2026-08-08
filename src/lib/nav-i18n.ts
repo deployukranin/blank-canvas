@@ -16,7 +16,7 @@ export const PATH_I18N_KEYS: Record<string, string> = {
 
 /** Returns the translated label for a path, falling back to the admin-configured label. */
 export const translatePathLabel = (
-  t: (key: string, fallback?: string) => string,
+  t: (key: string, fallback: string) => string,
   path: string,
   fallbackLabel: string,
 ): string => {
