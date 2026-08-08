@@ -18,6 +18,29 @@
       localStorage.removeItem('whitelabel_config_cache');
     } catch (_) {}
 
+    // Install the cached tenant favicon BEFORE first paint so the icon doesn't
+    // blink from the platform default to the store icon on every reload.
+    try {
+      if (isTenantRoute) {
+        var cachedIcon = localStorage.getItem('tenant_favicon_v1_' + seg);
+        if (cachedIcon) {
+          var old = document.querySelectorAll("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']");
+          for (var j = 0; j < old.length; j++) old[j].parentNode.removeChild(old[j]);
+          var rels = [['icon', 'image/png'], ['shortcut icon', 'image/png'], ['apple-touch-icon', '']];
+          for (var n = 0; n < rels.length; n++) {
+            var l = document.createElement('link');
+            l.rel = rels[n][0];
+            if (rels[n][1]) l.type = rels[n][1];
+            l.href = cachedIcon;
+            l.setAttribute('data-source', 'tenant');
+            document.head.appendChild(l);
+          }
+        }
+      }
+    } catch (_) {}
+
+
+
     var cfg = null;
     // SSR-injected config always wins over localStorage (which can be stale)
     var meta = document.querySelector('meta[name="theme-bootstrap"]');
