@@ -1180,28 +1180,9 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // The tenant record is the source of truth for the icon uploaded in
   // /customize. Never let a cached config from another tenant override it.
   useEffect(() => {
-    if (!store?.id || !store.avatar_url) return;
+    applyTenantFavicon(store?.avatar_url, store?.id, store?.slug);
+  }, [store?.id, store?.avatar_url, store?.slug]);
 
-    document.querySelectorAll("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']")
-      .forEach((element) => element.remove());
-
-    const cacheSeparator = store.avatar_url.includes('?') ? '&' : '?';
-    const iconUrl = `${store.avatar_url}${cacheSeparator}tenant=${encodeURIComponent(store.id)}`;
-    const links = [
-      { rel: 'icon', type: 'image/png' },
-      { rel: 'shortcut icon', type: 'image/png' },
-      { rel: 'apple-touch-icon', type: '' },
-    ];
-
-    links.forEach(({ rel, type }) => {
-      const link = document.createElement('link');
-      link.rel = rel;
-      if (type) link.type = type;
-      link.href = iconUrl;
-      link.dataset.source = 'tenant';
-      document.head.appendChild(link);
-    });
-  }, [store?.id, store?.avatar_url]);
 
   // Debounced save to database whenever config changes
 
