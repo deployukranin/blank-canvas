@@ -22,6 +22,7 @@ const normalizeForSearch = (value: string) =>
 
 export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
   const { config } = useWhiteLabel();
+  const { store } = useTenant();
   const { t } = useTranslation();
   const channelId = config.youtube?.channelId?.trim() || "";
 
