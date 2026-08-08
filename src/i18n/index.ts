@@ -39,6 +39,4 @@ i18n
     },
   });
 
-if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__i18n = i18n;
-
 export default i18n;
