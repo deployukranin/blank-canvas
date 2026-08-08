@@ -36,7 +36,7 @@ const LAYOUT_META: Record<LayoutVariant, { name: string; desc: string; sketch: R
   },
   cinematic: {
     name: 'Cinematic Desktop',
-    desc: 'Desktop-first: persistent sidebar, topbar and wide hero — no bottom bar.',
+    desc: 'Sidebar + topbar on desktop, drawer menu and floating tab bar on mobile.',
     sketch: (
       <div className="flex gap-1.5">
         <div className="w-1/4 space-y-1">
