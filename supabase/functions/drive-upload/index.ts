@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     // ── JSON: migrate a legacy Supabase Storage asset into the tenant's Drive folder ──
     const contentType = req.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
+    if (!contentType.includes('multipart/form-data')) {
       const body = await req.json().catch(() => ({}));
       if (body?.action !== 'migrate_config') {
         return json({ success: false, error: 'invalid action' }, 400);
