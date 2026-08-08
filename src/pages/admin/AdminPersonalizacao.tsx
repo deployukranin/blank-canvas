@@ -281,7 +281,7 @@ const AdminPersonalizacao: React.FC = () => {
               <img src={url} alt={`${variant} Banner ${index + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/70 hover:bg-background text-foreground" onClick={() => setPreviewBanner({ url, type: isDesktop ? 'Desktop' : 'Mobile' })}><Eye className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 bg-destructive/70 hover:bg-destructive text-destructive-foreground" onClick={() => updateBanner(banner.id, field, '')}><X className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 bg-destructive/70 hover:bg-destructive text-destructive-foreground" onClick={() => updateBanner(banner.id, field, '', true)}><X className="w-4 h-4" /></Button>
               </div>
             </div>
           </div>
@@ -514,7 +514,7 @@ const AdminPersonalizacao: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           <Label htmlFor={`en-${banner.id}`} className="text-xs text-muted-foreground">{banner.enabled ? t('admin.banners.enabled', 'Active') : t('admin.banners.disabled', 'Disabled')}</Label>
-                          <Switch id={`en-${banner.id}`} checked={banner.enabled} onCheckedChange={(v) => updateBanner(banner.id, 'enabled', v)} />
+                          <Switch id={`en-${banner.id}`} checked={banner.enabled} onCheckedChange={(v) => updateBanner(banner.id, 'enabled', v, true)} />
                         </div>
                         {banners.length > 1 && (
                           <Button variant="ghost" size="icon" className="text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => removeBanner(banner.id)}><Trash2 className="w-4 h-4" /></Button>
