@@ -14,9 +14,11 @@ interface MobileLayoutProps {
   title?: string;
   showBack?: boolean;
   hideHeader?: boolean;
+  /** Desktop cinematic shell: render children without the framed card wrapper */
+  fullBleed?: boolean;
 }
 
-export const MobileLayout = ({ children, title, showBack, hideHeader }: MobileLayoutProps) => {
+export const MobileLayout = ({ children, title, showBack, hideHeader, fullBleed }: MobileLayoutProps) => {
   const isMobile = useIsMobile();
   const { store } = useTenant();
   const { config } = useWhiteLabel();
@@ -29,7 +31,7 @@ export const MobileLayout = ({ children, title, showBack, hideHeader }: MobileLa
       : normalizeLayout(config.layout?.variant, store?.plan_type);
 
   if (variant === 'cinematic' && !isMobile) {
-    return <DesktopShell title={title}>{children}</DesktopShell>;
+    return <DesktopShell title={title} fullBleed={fullBleed}>{children}</DesktopShell>;
   }
 
   return (
