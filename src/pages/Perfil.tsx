@@ -24,7 +24,7 @@ const PerfilPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile, refetch: refetchProfile } = useProfile();
+  const { profile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
