@@ -130,8 +130,8 @@ const AdminPersonalizacao: React.FC = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 2MB'), variant: 'destructive' });
+      if (file.size > 50 * 1024 * 1024) {
+        toast({ title: t('admin.platformIcon.fileTooLarge', 'Max 50MB'), variant: 'destructive' });
         return;
       }
       setIconUploading(true);
@@ -376,7 +376,7 @@ const AdminPersonalizacao: React.FC = () => {
                     <Upload className="w-4 h-4 text-primary" />
                     {t('admin.platformIcon.uploadTitle', 'Upload Custom Icon')}
                   </h3>
-                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.uploadHint', 'PNG, JPG or WebP. Recommended: 512×512px, max 2MB.')}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.uploadHint', 'PNG, JPG or WebP. Recommended: 512×512px, max 50MB.')}</p>
                   <div className="flex items-center gap-3">
                     <Button onClick={handleIconUpload} variant="outline" size="sm" disabled={iconUploading} className="gap-2">
                       {iconUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
