@@ -152,49 +152,98 @@ const PerfilPage = () => {
           </motion.div>
         )}
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground px-1">{t('storefront.quickAccess')}</h3>
-          {quickAccessItems.map((item) => {
-            const badgeCount = item.badge === 'orders' ? pendingOrdersCount : item.badge === 'notifications' ? unreadCount : 0;
-            return (
-              <Link key={item.path} to={item.path}>
-                <GlassCard className="p-4" hover>
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
-                      <item.icon className="w-5 h-5 text-white" />
-                      {badgeCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
-                          {badgeCount > 9 ? '9+' : badgeCount}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{item.label}</p>
-                      <p className="text-xs text-muted-foreground">{item.description}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </GlassCard>
-              </Link>
-            );
-          })}
-        </motion.div>
+        {/* Membership journey — conversion mechanic */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+          <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-display font-bold text-base">{t('profile.journeyTitle', 'Your journey')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('profile.journeySubtitle', 'Complete the steps and unlock exclusive perks')}
+                </p>
+              </div>
+              <span className="text-sm font-bold text-primary">{completed}/{steps.length}</span>
+            </div>
 
-        {/* Language Selector */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-sm">{t('profile.language', 'Language')}</p>
-                <p className="text-xs text-muted-foreground">{t('profile.changeLanguage', 'Change app language')}</p>
-              </div>
-              <LanguageSelector variant="minimal" />
+            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                initial={{ width: 0 }}
+                animate={{ width: `${(completed / steps.length) * 100}%` }}
+                transition={{ duration: 0.6 }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              {steps.map((step) => (
+                <Link key={step.label} to={step.path} className="block">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${step.done ? 'bg-primary text-primary-foreground' : 'bg-white/5 text-muted-foreground'}`}>
+                      {step.done ? <Check className="w-4 h-4" /> : <step.icon className="w-4 h-4" />}
+                    </div>
+                    <p className={`flex-1 text-sm ${step.done ? 'text-muted-foreground line-through' : 'font-medium'}`}>
+                      {step.label}
+                    </p>
+                    {!step.done && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                </Link>
+              ))}
             </div>
           </GlassCard>
         </motion.div>
+
+        {/* VIP upsell */}
+        {!isVIP && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
+            <Link to={withBase('/vip')}>
+              <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
+                <div className="relative z-10">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
+                    {t('nav.vip')}
+                  </p>
+                  <p className="text-sm font-semibold text-primary-foreground mb-3 max-w-[80%]">
+                    {t('profile.vipUpsell', 'Unlock exclusive content and priority on your custom videos')}
+                  </p>
+                  <Button size="sm" variant="secondary" className="text-xs font-bold uppercase">
+                    {t('profile.vipCta', 'Become VIP')}
+                  </Button>
+                </div>
+                <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary-foreground/10 rounded-full blur-2xl" />
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Quick access (mobile only — desktop shows these in the sidebar) */}
+        {!isCinematic && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground px-1">{t('storefront.quickAccess')}</h3>
+            {quickAccessItems.map((item) => {
+              const badgeCount = item.badge === 'orders' ? pendingOrdersCount : item.badge === 'notifications' ? unreadCount : 0;
+              return (
+                <Link key={item.path} to={item.path}>
+                  <GlassCard className="p-4" hover>
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
+                        <item.icon className="w-5 h-5 text-white" />
+                        {badgeCount > 0 && (
+                          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                            {badgeCount > 9 ? '9+' : badgeCount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  </GlassCard>
+                </Link>
+              );
+            })}
+          </motion.div>
+        )}
 
         <div className="space-y-2">
           {menuItems.map((item, index) => (
