@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
     // 4c. Layout gating — trial/free stores can only publish the "classic" layout
     if (config_key === "white_label_config" && store_id) {
       const variant = (config_value as Record<string, any>)?.layout?.variant;
-      const allowedVariants = ["classic", "spotlight", "magazine"];
+      const allowedVariants = ["classic", "spotlight", "magazine", "cinematic"];
       if (variant && !allowedVariants.includes(variant)) {
         (config_value as Record<string, any>).layout = { variant: "classic" };
       } else if (variant && variant !== "classic") {

@@ -67,7 +67,26 @@ const LAYOUT_META: Record<LayoutVariant, { name: string; desc: string; sketch: R
       </div>
     ),
   },
+  cinematic: {
+    name: 'Cinematic Desktop',
+    desc: 'Desktop-first: persistent sidebar, topbar and wide hero — no bottom bar.',
+    sketch: (
+      <div className="flex gap-1.5">
+        <div className="w-1/4 space-y-1">
+          {[0, 1, 2, 3].map(i => <div key={i} className="h-2 rounded bg-foreground/20" />)}
+        </div>
+        <div className="flex-1 space-y-1">
+          <div className="h-2 rounded bg-foreground/15" />
+          <div className="h-8 rounded bg-primary/35" />
+          <div className="grid grid-cols-4 gap-1">
+            {[0, 1, 2, 3].map(i => <div key={i} className="h-4 rounded bg-foreground/10" />)}
+          </div>
+        </div>
+      </div>
+    ),
+  },
 };
+
 
 export const LayoutPicker: React.FC = () => {
   const { t } = useTranslation();

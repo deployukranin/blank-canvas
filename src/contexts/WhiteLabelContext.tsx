@@ -666,7 +666,7 @@ export interface WhiteLabelConfig {
 
   // Storefront layout variant
   layout?: {
-    variant: 'classic' | 'spotlight' | 'magazine';
+    variant: 'classic' | 'spotlight' | 'magazine' | 'cinematic';
   };
 
   // Hero Banner Text
