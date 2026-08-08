@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { trackEvent } from '@/lib/integrations';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
+import { useCinematicDesktop } from '@/hooks/use-cinematic-desktop';
+import { IdeasBoardDesktop } from '@/components/storefront/pages/IdeasBoardDesktop';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
