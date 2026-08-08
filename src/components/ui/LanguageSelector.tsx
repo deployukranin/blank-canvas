@@ -59,17 +59,33 @@ const languages = [
 ];
 
 interface LanguageSelectorProps {
-  variant?: 'default' | 'minimal';
+  variant?: 'default' | 'minimal' | 'store';
 }
+
+/** Matches 'pt', 'pt-br', 'pt-PT', 'en-US'… to a supported language */
+const resolveLanguage = (lng?: string) => {
+  const code = (lng || '').toLowerCase();
+  return (
+    languages.find(l => l.code.toLowerCase() === code) ||
+    languages.find(l => code.startsWith(l.code.split('-')[0].toLowerCase())) ||
+    languages[0]
+  );
+};
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'default' }) => {
   const { i18n } = useTranslation();
-  const current = languages.find(l => l.code === i18n.language) || languages[0];
+  const current = resolveLanguage(i18n.language);
+  const isStore = variant === 'store';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {variant === 'minimal' ? (
+        {isStore ? (
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground text-xs">
+            <current.Flag className="w-4 h-3 rounded-sm overflow-hidden" />
+            <span>{current.short}</span>
+          </Button>
+        ) : variant === 'minimal' ? (
           <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-white/50 hover:text-white/80 hover:bg-white/5 text-xs">
             <current.Flag className="w-4 h-3 rounded-sm overflow-hidden" />
             <span>{current.short}</span>
@@ -81,19 +97,27 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'd
           </Button>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-black border-purple-500/20 min-w-[140px]">
-        {languages.map(lang => (
-          <DropdownMenuItem
-            key={lang.code}
-            onClick={() => i18n.changeLanguage(lang.code)}
-            className={`gap-2 text-sm cursor-pointer ${
-              i18n.language === lang.code ? 'text-purple-400' : 'text-white/70'
-            } hover:text-white hover:bg-white/5`}
-          >
-            <lang.Flag className="w-5 h-3.5 rounded-sm overflow-hidden" />
-            <span>{lang.label}</span>
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent
+        align="end"
+        className={isStore ? 'min-w-[140px]' : 'bg-black border-purple-500/20 min-w-[140px]'}
+      >
+        {languages.map(lang => {
+          const active = current.code === lang.code;
+          return (
+            <DropdownMenuItem
+              key={lang.code}
+              onClick={() => i18n.changeLanguage(lang.code)}
+              className={
+                isStore
+                  ? `gap-2 text-sm cursor-pointer ${active ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`
+                  : `gap-2 text-sm cursor-pointer ${active ? 'text-purple-400' : 'text-white/70'} hover:text-white hover:bg-white/5`
+              }
+            >
+              <lang.Flag className="w-5 h-3.5 rounded-sm overflow-hidden" />
+              <span>{lang.label}</span>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
