@@ -75,7 +75,9 @@ export const CinematicLayout = ({
           alt={greeting}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
+
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/25 blur-[120px] pointer-events-none" />
 
         <div className="absolute bottom-0 left-0 p-14 w-full max-w-3xl">
