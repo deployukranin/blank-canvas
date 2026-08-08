@@ -429,6 +429,20 @@ const MeusPedidosPage = () => {
                           <h4 className="font-medium text-sm text-emerald-400 mb-2">
                             {t('orders.deliveryReady', 'Seu pedido está pronto!')}
                           </h4>
+                          {deliveryMedia && (deliveryMedia.mimeType?.startsWith('video') || deliveryMedia.mimeType?.startsWith('audio')) && (
+                            <div className="mb-3">
+                              {deliveryMedia.mimeType?.startsWith('video') ? (
+                                <video
+                                  src={deliveryMedia.url}
+                                  controls
+                                  playsInline
+                                  className="w-full rounded-lg bg-black"
+                                />
+                              ) : (
+                                <audio src={deliveryMedia.url} controls className="w-full" />
+                              )}
+                            </div>
+                          )}
                           <Button
                             size="sm"
                             className="gap-2"
