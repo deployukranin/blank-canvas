@@ -1177,27 +1177,31 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     `;
   }, [config.colors]);
 
-  // Apply the icon uploaded in /customize as the browser favicon
+  // The tenant record is the source of truth for the icon uploaded in
+  // /customize. Never let a cached config from another tenant override it.
   useEffect(() => {
-    const iconUrl = config.logoImage;
-    if (!iconUrl) return;
-    const setLink = (rel: string) => {
-      let link = document.querySelector(`link[rel='${rel}']`) as HTMLLinkElement | null;
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = rel;
-        document.head.appendChild(link);
-      }
+    if (!store?.id || !store.avatar_url) return;
+
+    document.querySelectorAll("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']")
+      .forEach((element) => element.remove());
+
+    const cacheSeparator = store.avatar_url.includes('?') ? '&' : '?';
+    const iconUrl = `${store.avatar_url}${cacheSeparator}tenant=${encodeURIComponent(store.id)}`;
+    const links = [
+      { rel: 'icon', type: 'image/png' },
+      { rel: 'shortcut icon', type: 'image/png' },
+      { rel: 'apple-touch-icon', type: '' },
+    ];
+
+    links.forEach(({ rel, type }) => {
+      const link = document.createElement('link');
+      link.rel = rel;
+      if (type) link.type = type;
       link.href = iconUrl;
-      link.dataset.source = 'whitelabel';
-    };
-    // Remove static icons so the dynamic one wins
-    document.querySelectorAll("link[rel~='icon']").forEach((el) => {
-      if ((el as HTMLLinkElement).href !== iconUrl) el.parentElement?.removeChild(el);
+      link.dataset.source = 'tenant';
+      document.head.appendChild(link);
     });
-    setLink('icon');
-    setLink('apple-touch-icon');
-  }, [config.logoImage]);
+  }, [store?.id, store?.avatar_url]);
 
   // Debounced save to database whenever config changes
 
