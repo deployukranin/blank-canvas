@@ -39,6 +39,7 @@ import ResetPassword from "./pages/ResetPassword";
 // AdminLogin removed — admin is now under /:slug/admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminIdeias from "./pages/admin/AdminIdeias";
+import AdminGamification from "./pages/admin/AdminGamification";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminPagamentosPix from "./pages/admin/AdminPagamentosPix";
 import AdminVipPrecos from "./pages/admin/AdminVipPrecos";
@@ -120,6 +121,7 @@ const App = () => (
                 <Route path="/admin" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/customs" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminCustoms /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/ideas" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></CustomDomainGate>} />
+                <Route path="/admin/rewards" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminGamification /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/orders" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/payments" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></CustomDomainGate>} />
                 <Route path="/admin/vip" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></CustomDomainGate>} />
@@ -155,6 +157,7 @@ const App = () => (
                 <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/customs" element={<TenantGate><AdminRoute requiredRole="admin"><AdminCustoms /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/ideas" element={<TenantGate><AdminRoute requiredRole="admin"><AdminIdeias /></AdminRoute></TenantGate>} />
+                <Route path="/:slug/admin/rewards" element={<TenantGate><AdminRoute requiredRole="admin"><AdminGamification /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/orders" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPedidos /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/payments" element={<TenantGate><AdminRoute requiredRole="admin"><AdminPagamentosPix /></AdminRoute></TenantGate>} />
                 <Route path="/:slug/admin/vip" element={<TenantGate><AdminRoute requiredRole="admin"><AdminVipPrecos /></AdminRoute></TenantGate>} />

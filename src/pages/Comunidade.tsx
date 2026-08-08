@@ -622,7 +622,7 @@ const ComunidadePage = () => {
     }));
 
     // Add reputation points for commenting
-    addPoints('comment_given', ideaId);
+    addPoints();
 
     if (idea && idea.authorUsername !== user.username) {
       addNotification({
@@ -738,7 +738,7 @@ const ComunidadePage = () => {
     setNewIdea({ title: '', description: '' });
     setIsCreateOpen(false);
 
-    if (result.idea?.id) addPoints('idea_created', result.idea.id);
+    if (result.idea?.id) addPoints();
 
     toast({
       title: (result as { pending?: boolean }).pending ? t('storefront.ideaPendingTitle', 'Idea submitted!') : t('storefront.ideaCreated'),
@@ -1071,7 +1071,7 @@ const ComunidadePage = () => {
               <h3 className="text-sm font-medium text-muted-foreground">{t('storefront.topCommunity')}</h3>
               <LeaderboardCard 
                 leaderboard={leaderboard} 
-                currentUsername={user?.username}
+                currentUserId={user?.id}
                 limit={15}
               />
             </div>

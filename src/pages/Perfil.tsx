@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, X, Globe } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getPendingOrdersCount } from '@/lib/order-store';
@@ -14,21 +13,18 @@ import { useCommunityNotifications } from '@/hooks/use-community-notifications';
 import { useProfile } from '@/hooks/use-profile';
 import { useUserRole } from '@/hooks/use-user-role';
 import { useTenant } from '@/contexts/TenantContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
 import { useCinematicDesktop } from '@/hooks/use-cinematic-desktop';
+import { PremiumProfileHeader } from '@/components/profile/PremiumProfileHeader';
+import { useReputation, useLeaderboard } from '@/hooks/use-gamification';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useTranslation();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [editingAvatar, setEditingAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [savingAvatar, setSavingAvatar] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile, refetch: refetchProfile } = useProfile();
+  const { profile } = useProfile();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
   const isCEO = isCEOFn();
@@ -37,6 +33,8 @@ const PerfilPage = () => {
 
   const { isVIP } = useVIPSubscription();
   const isCinematic = useCinematicDesktop();
+  const { reputation } = useReputation();
+  const { entries: leaderboard } = useLeaderboard(10);
 
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: withBase('/orders'), gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -58,26 +56,6 @@ const PerfilPage = () => {
     { icon: FileText, label: t('profile.terms', 'Terms of Use'), description: t('profile.readTerms', 'Read our terms'), path: withBase('/terms') },
     { icon: Shield, label: t('profile.privacy', 'Privacy'), description: t('profile.privacyPolicy', 'Privacy policy'), path: withBase('/privacy') },
   ];
-
-  const handleSaveAvatar = async () => {
-    if (!user || !avatarUrl.trim()) return;
-    setSavingAvatar(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({ user_id: user.id, avatar_url: avatarUrl.trim() }, { onConflict: 'user_id' });
-      if (error) throw error;
-      toast.success(t('profile.avatarSaved', 'Profile photo updated!'));
-      setEditingAvatar(false);
-      setAvatarUrl('');
-      refetchProfile();
-    } catch (err) {
-      console.error('Error saving avatar:', err);
-      toast.error(t('profile.avatarError', 'Error updating profile photo'));
-    } finally {
-      setSavingAvatar(false);
-    }
-  };
 
   if (!isAuthenticated) {
     return (
@@ -102,46 +80,95 @@ const PerfilPage = () => {
   return (
     <MobileLayout title={t('nav.profile')} hideHeader>
       <div className="px-4 py-6 space-y-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <GlassCard className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-                {profile?.avatar_url || user?.avatar ? (
-                  <img src={profile?.avatar_url || user?.avatar} alt={profile?.handle || user?.username} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-bold text-primary-foreground">
-                    {profile?.handle?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              {!isAdmin && !isCEO && (
-                <button onClick={() => { setEditingAvatar(!editingAvatar); setAvatarUrl(profile?.avatar_url || ''); }}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <Camera className="w-3 h-3 text-primary-foreground" />
-                </button>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-bold text-lg">
-                  {profile?.handle ? `@${profile.handle}` : user?.username}
-                </h2>
-                {user?.isVIP && (
-                  <span className="px-2 py-0.5 rounded-full bg-vip/20 text-vip text-xs font-medium">VIP 👑</span>
-                )}
-              </div>
-              <p className="text-muted-foreground text-sm">{user?.email}</p>
-            </div>
-          </GlassCard>
+        <PremiumProfileHeader
+          isVIP={isVIP}
+          vipPath={withBase('/vip')}
+          fallbackName={profile?.display_name || profile?.handle || user?.username || 'User'}
+          handle={profile?.handle}
+          fallbackAvatar={profile?.avatar_url || user?.avatar}
+          reputation={reputation}
+        />
 
-          {editingAvatar && !isAdmin && !isCEO && (
-            <div className="mt-3 flex gap-2 items-center">
-              <Input placeholder={t('profile.avatarUrlPlaceholder', 'Paste image URL...')} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="flex-1 h-9 text-sm" />
-              <Button size="sm" variant="ghost" onClick={handleSaveAvatar} disabled={savingAvatar || !avatarUrl.trim()}><Check className="w-4 h-4" /></Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditingAvatar(false)}><X className="w-4 h-4" /></Button>
+        {/* Reputation & ranking */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-display font-bold text-base flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-primary" />
+                  {t('profile.reputationTitle', 'Your reputation')}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {reputation.icon} {reputation.title} · {t('profile.premium.level', 'Lv.')}{reputation.level}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xl font-bold text-primary">{reputation.totalPoints}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{t('profile.points', 'points')}</p>
+              </div>
             </div>
-          )}
+
+            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                initial={{ width: 0 }}
+                animate={{ width: `${reputation.progressPercent}%` }}
+                transition={{ duration: 0.6 }}
+              />
+            </div>
+            {reputation.nextLevelPoints !== null && (
+              <p className="text-[11px] text-muted-foreground">
+                {t('profile.pointsToNext', '{{points}} points to the next level', {
+                  points: Math.max(0, reputation.nextLevelPoints - reputation.totalPoints),
+                })}
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.ideasCreated}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statIdeas', 'ideas')}</p>
+              </div>
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.votesReceived}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statVotes', 'votes')}</p>
+              </div>
+              <div className="rounded-xl bg-white/[0.03] py-2">
+                <p className="text-sm font-bold">{reputation.commentsGiven}</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.statComments', 'comments')}</p>
+              </div>
+            </div>
+
+            {reputation.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {reputation.badges.map((badge) => (
+                  <span key={badge.id} title={badge.description} className="px-2 py-1 rounded-lg bg-white/[0.05] text-xs">
+                    {badge.icon} {badge.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {leaderboard.length > 0 && (
+              <div className="pt-2 border-t border-border/40 space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">{t('profile.topMembers', 'Top members')}</p>
+                {leaderboard.slice(0, 5).map((entry, index) => (
+                  <div
+                    key={entry.userId}
+                    className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg ${entry.userId === user?.id ? 'bg-primary/10' : ''}`}
+                  >
+                    <span className="w-5 text-xs text-muted-foreground">{index + 1}</span>
+                    <span className="flex-1 truncate">
+                      {entry.icon} {entry.displayName || (entry.handle ? `@${entry.handle}` : t('profile.member', 'Member'))}
+                    </span>
+                    <span className="text-xs font-semibold">{entry.totalPoints}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
         </motion.div>
+
 
         {(isAdmin || isCEO) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>

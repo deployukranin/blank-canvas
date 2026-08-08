@@ -1,0 +1,97 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+
+export interface ProfileCustomization {
+  banner_url: string | null;
+  avatar_url: string | null;
+  display_name: string | null;
+  pronouns: string | null;
+  status_text: string | null;
+}
+
+const EMPTY: ProfileCustomization = {
+  banner_url: null,
+  avatar_url: null,
+  display_name: null,
+  pronouns: null,
+  status_text: null,
+};
+
+export const MAX_PROFILE_MEDIA_BYTES = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+export const useProfileCustomization = () => {
+  const { session } = useAuth();
+  const { store } = useTenant();
+  const userId = session?.user?.id ?? null;
+  const storeId = store?.id ?? null;
+
+  const [customization, setCustomization] = useState<ProfileCustomization>(EMPTY);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const refresh = useCallback(async () => {
+    if (!userId || !storeId) {
+      setCustomization(EMPTY);
+      setIsLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from('profile_customizations')
+      .select('banner_url, avatar_url, display_name, pronouns, status_text')
+      .eq('user_id', userId)
+      .eq('store_id', storeId)
+      .maybeSingle();
+    setCustomization((data as ProfileCustomization) || EMPTY);
+    setIsLoading(false);
+  }, [userId, storeId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const save = useCallback(
+    async (patch: Partial<ProfileCustomization>) => {
+      if (!userId || !storeId) throw new Error('not_ready');
+      setIsSaving(true);
+      try {
+        const next = { ...customization, ...patch };
+        const { error } = await supabase
+          .from('profile_customizations')
+          .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
+        if (error) throw error;
+        setCustomization(next);
+        return next;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [customization, userId, storeId]
+  );
+
+  const uploadMedia = useCallback(
+    async (file: File, kind: 'banner' | 'avatar') => {
+      if (!userId || !storeId) throw new Error('not_ready');
+      if (!ALLOWED_TYPES.includes(file.type)) throw new Error('invalid_type');
+      if (file.size > MAX_PROFILE_MEDIA_BYTES) throw new Error('too_large');
+
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `profiles/${storeId}/${userId}/${kind}-${Date.now()}.${ext}`;
+
+      const { error } = await supabase.storage.from('banners').upload(path, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: file.type,
+      });
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('banners').getPublicUrl(path);
+      return data.publicUrl;
+    },
+    [userId, storeId]
+  );
+
+  return { customization, isLoading, isSaving, save, uploadMedia, refresh, storeId };
+};

@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     // Validate config_key
-    const validKeys = ["video_config", "vip_config", "white_label_config", "global_default_categories", "payment_config", "youtube_channel", "social_links", "platform_settings", "platform_plans", "content_settings"];
+    const validKeys = ["video_config", "vip_config", "white_label_config", "global_default_categories", "payment_config", "youtube_channel", "social_links", "platform_settings", "platform_plans", "content_settings", "gamification_config"];
     if (!validKeys.includes(config_key)) {
       return jsonResponse({ success: false, error: "config_key inválido" }, 400);
     }
@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
       "youtube_channel",
       "social_links",
       "content_settings",
+      "gamification_config",
     ]);
 
     // Older frontend bundles could send tenant configs without store_id, which

@@ -624,6 +624,60 @@ export type Database = {
           },
         ]
       }
+      profile_customizations: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          pronouns: string | null
+          status_text: string | null
+          store_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          pronouns?: string | null
+          status_text?: string | null
+          store_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          pronouns?: string | null
+          status_text?: string | null
+          store_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_customizations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_customizations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -764,6 +818,51 @@ export type Database = {
           {
             foreignKeyName: "referral_commissions_referrer_store_id_fkey"
             columns: ["referrer_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reputation_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          points: number
+          source_id: string | null
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          points?: number
+          source_id?: string | null
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          points?: number
+          source_id?: string | null
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_events_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_store_id_fkey"
+            columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores_public"
             referencedColumns: ["id"]
@@ -1885,6 +1984,16 @@ export type Database = {
         Args: { p_partner_user_id: string; p_store_id: string }
         Returns: Json
       }
+      award_reputation: {
+        Args: {
+          p_event_type: string
+          p_points?: number
+          p_source_id?: string
+          p_store_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       cancel_vip_subscription: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -1898,6 +2007,7 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_daily_reputation: { Args: { p_store_id: string }; Returns: Json }
       cleanup_old_rate_limits: { Args: never; Returns: number }
       create_vip_subscription: {
         Args: {
@@ -1920,8 +2030,22 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_store_leaderboard: {
+        Args: { p_limit?: number; p_store_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          handle: string
+          total_points: number
+          user_id: string
+        }[]
+      }
       get_store_storage_quota: { Args: { p_store_id: string }; Returns: Json }
       get_store_trial_status: { Args: { p_store_id: string }; Returns: Json }
+      get_user_reputation: {
+        Args: { p_store_id: string; p_user_id?: string }
+        Returns: Json
+      }
       get_video_reaction_counts: {
         Args: { p_video_id: string }
         Returns: {

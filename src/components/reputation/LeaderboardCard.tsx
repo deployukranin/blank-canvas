@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { UserLevelBadge } from './UserLevelBadge';
-import type { UserReputation } from '@/lib/user-reputation';
+import type { LeaderboardEntry } from '@/hooks/use-gamification';
 
 interface LeaderboardCardProps {
-  leaderboard: UserReputation[];
-  currentUsername?: string;
+  leaderboard: LeaderboardEntry[];
+  currentUserId?: string | null;
   limit?: number;
 }
 
-export const LeaderboardCard = ({ leaderboard, currentUsername, limit = 5 }: LeaderboardCardProps) => {
-  const displayedLeaderboard = leaderboard.slice(0, limit);
+export const LeaderboardCard = ({ leaderboard, currentUserId, limit = 5 }: LeaderboardCardProps) => {
+  const { t } = useTranslation();
+  const displayed = leaderboard.slice(0, limit);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -39,13 +41,11 @@ export const LeaderboardCard = ({ leaderboard, currentUsername, limit = 5 }: Lea
     }
   };
 
-  if (displayedLeaderboard.length === 0) {
+  if (displayed.length === 0) {
     return (
       <GlassCard className="p-4 text-center">
         <Trophy className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Nenhum ranking ainda
-        </p>
+        <p className="text-sm text-muted-foreground">{t('storefront.noRankingYet', 'No ranking yet')}</p>
       </GlassCard>
     );
   }
@@ -54,17 +54,18 @@ export const LeaderboardCard = ({ leaderboard, currentUsername, limit = 5 }: Lea
     <GlassCard className="p-4">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold">Ranking da Comunidade</h3>
+        <h3 className="font-semibold">{t('storefront.communityRanking', 'Community ranking')}</h3>
       </div>
 
       <div className="space-y-2">
-        {displayedLeaderboard.map((user, index) => {
+        {displayed.map((entry, index) => {
           const rank = index + 1;
-          const isCurrentUser = user.username === currentUsername;
+          const isCurrentUser = entry.userId === currentUserId;
+          const name = entry.displayName || (entry.handle ? `@${entry.handle}` : t('profile.member', 'Member'));
 
           return (
             <motion.div
-              key={user.username}
+              key={entry.userId}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -72,28 +73,25 @@ export const LeaderboardCard = ({ leaderboard, currentUsername, limit = 5 }: Lea
                 isCurrentUser ? 'ring-1 ring-primary' : ''
               }`}
             >
-              <div className="w-6 flex items-center justify-center">
-                {getRankIcon(rank)}
-              </div>
+              <div className="w-6 flex items-center justify-center">{getRankIcon(rank)}</div>
 
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/50 to-accent/50 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-medium">
-                  {user.username.charAt(0).toUpperCase()}
-                </span>
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-primary/50 to-accent/50 flex items-center justify-center flex-shrink-0">
+                {entry.avatarUrl ? (
+                  <img src={entry.avatarUrl} alt={name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-medium">{name.replace('@', '').charAt(0).toUpperCase()}</span>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className={`font-medium text-sm truncate ${isCurrentUser ? 'text-primary' : ''}`}>
-                    @{user.username}
-                    {isCurrentUser && <span className="text-xs ml-1">(você)</span>}
-                  </span>
-                  <UserLevelBadge username={user.username} size="sm" />
+                  <span className={`font-medium text-sm truncate ${isCurrentUser ? 'text-primary' : ''}`}>{name}</span>
+                  <UserLevelBadge level={entry.level} title={entry.title} icon={entry.icon} points={entry.totalPoints} size="sm" />
                 </div>
               </div>
 
               <div className="text-right">
-                <p className="font-bold text-sm">{user.totalPoints}</p>
+                <p className="font-bold text-sm">{entry.totalPoints}</p>
                 <p className="text-xs text-muted-foreground">pts</p>
               </div>
             </motion.div>
