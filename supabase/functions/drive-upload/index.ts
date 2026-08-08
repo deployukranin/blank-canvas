@@ -3,8 +3,7 @@ import {
   DRIVE_ROOT_FOLDER_ID,
   MAX_UPLOAD_BYTES,
   deleteFile,
-  ensureFolder,
-  ensureStoreFolder,
+  ensureStoreTree,
   signMediaToken,
   uploadFile,
 } from "../_shared/drive.ts";
