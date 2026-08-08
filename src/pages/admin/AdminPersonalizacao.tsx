@@ -562,20 +562,29 @@ const AdminPersonalizacao: React.FC = () => {
                 </div>
               </GlassCard>
 
-              {quota && !quota.unlimited && (
+              {quota && (
                 <GlassCard className="p-4 space-y-2">
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-foreground">{t('admin.storage.title', 'Armazenamento')}</span>
+                    <span className="font-medium text-foreground flex items-center gap-2">
+                      {t('admin.storage.title', 'Armazenamento')}
+                      <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border border-border/40 text-muted-foreground">
+                        {quota.is_trial ? t('admin.storage.planTrial', 'Trial') : t('admin.storage.planPaid', 'Plano ativo')}
+                      </span>
+                    </span>
                     <span className="text-muted-foreground text-xs">
-                      {formatBytes(quota.used_bytes)} / {formatBytes(quota.limit_bytes)}
+                      {quota.unlimited
+                        ? `${formatBytes(quota.used_bytes)} / ${t('admin.storage.unlimited', 'Ilimitado')}`
+                        : `${formatBytes(quota.used_bytes)} / ${formatBytes(quota.limit_bytes)}`}
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${quota.used_bytes / quota.limit_bytes > 0.9 ? 'bg-destructive' : 'bg-primary'}`}
-                      style={{ width: `${Math.min(100, Math.round((quota.used_bytes / quota.limit_bytes) * 100))}%` }}
-                    />
-                  </div>
+                  {!quota.unlimited && (
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${quota.used_bytes / quota.limit_bytes > 0.9 ? 'bg-destructive' : 'bg-primary'}`}
+                        style={{ width: `${Math.min(100, Math.round((quota.used_bytes / quota.limit_bytes) * 100))}%` }}
+                      />
+                    </div>
+                  )}
                   {quota.is_trial && (
                     <p className="text-xs text-muted-foreground">
                       {t('admin.storage.trialHint', 'Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.')}
@@ -583,6 +592,7 @@ const AdminPersonalizacao: React.FC = () => {
                   )}
                 </GlassCard>
               )}
+
 
 
 
