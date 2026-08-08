@@ -50,7 +50,9 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
     .filter((tab) => tab.enabled && tab.path !== '/loja')
     .sort((a, b) => a.order - b.order);
 
-  const storeName = config.siteName || store?.name || '';
+  const storeName = store?.name || config.siteName || '';
+  const homePath = withBase('/');
+  const isHome = location.pathname === homePath || location.pathname === `${homePath}/`;
 
   return (
     <div className="min-h-screen w-full bg-background flex">
