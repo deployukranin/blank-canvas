@@ -97,7 +97,7 @@ export const LayoutPicker: React.FC = () => {
         </GlassCard>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {LAYOUT_VARIANTS.map((variant, i) => {
           const meta = LAYOUT_META[variant];
           const isCurrent = current === variant;
