@@ -192,6 +192,7 @@ const AdminPersonalizacao: React.FC = () => {
   const handleRemoveUploadedIcon = async () => {
     if (store?.id) {
       await purgeStorageFolder('platform-icon');
+      await deleteDriveAsset(store.avatar_url);
       await supabase.from('stores').update({ avatar_url: null }).eq('id', store.id);
       toast({ title: t('admin.platformIcon.removed', 'Icon removed') });
       window.location.reload();
