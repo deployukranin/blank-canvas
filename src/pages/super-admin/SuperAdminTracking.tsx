@@ -1,3 +1,4 @@
+import { getPublicOrigin } from '@/lib/public-url';
 import React, { useEffect, useState } from "react";
 import { Plus, Copy, Trash2, ExternalLink, Loader2, Link2, ChevronDown, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +26,7 @@ const SuperAdminTracking: React.FC = () => {
   const [creating, setCreating] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const origin = getPublicOrigin();
 
   const call = async (action: string, payload: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("super-admin-trackers", {
