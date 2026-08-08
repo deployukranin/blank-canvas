@@ -67,7 +67,15 @@
     "logout": "Log out",
     "avatarSaved": "Profile photo updated!",
     "avatarError": "Error updating profile photo",
-    "avatarUrlPlaceholder": "Paste image URL..."
+    "avatarUrlPlaceholder": "Paste image URL...",
+    "journeyTitle": "Your journey",
+    "journeySubtitle": "Complete the steps and unlock exclusive perks",
+    "stepAvatar": "Add a profile photo",
+    "stepOrder": "Request your first custom video",
+    "stepIdea": "Share a video idea",
+    "stepVip": "Join the VIP community",
+    "vipUpsell": "Unlock exclusive content and priority on your custom videos",
+    "vipCta": "Become VIP"
   },
   "auth": {
     "enterButton": "Login",
