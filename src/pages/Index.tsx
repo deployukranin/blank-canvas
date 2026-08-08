@@ -7,6 +7,7 @@ import { useStorefrontData } from '@/components/storefront/use-storefront-data';
 import { ClassicLayout } from '@/components/storefront/layouts/ClassicLayout';
 import { SpotlightLayout } from '@/components/storefront/layouts/SpotlightLayout';
 import { MagazineLayout } from '@/components/storefront/layouts/MagazineLayout';
+import { CinematicLayout } from '@/components/storefront/layouts/CinematicLayout';
 import { LAYOUT_VARIANTS, normalizeLayout, type LayoutVariant } from '@/lib/store-layouts';
 
 const Index = () => {
@@ -21,7 +22,13 @@ const Index = () => {
     : normalizeLayout(data.config.layout?.variant, store?.plan_type);
 
   const LayoutComponent =
-    variant === 'spotlight' ? SpotlightLayout : variant === 'magazine' ? MagazineLayout : ClassicLayout;
+    variant === 'spotlight'
+      ? SpotlightLayout
+      : variant === 'magazine'
+        ? MagazineLayout
+        : variant === 'cinematic'
+          ? CinematicLayout
+          : ClassicLayout;
 
   return (
     <MobileLayout hideHeader>
