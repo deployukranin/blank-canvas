@@ -31,12 +31,18 @@ type ThemeConfig = {
   };
 };
 
-async function fetchTheme(slug: string | null): Promise<ThemeConfig | null> {
+type TenantBootstrap = {
+  theme: ThemeConfig | null;
+  storeId: string | null;
+  avatarUrl: string | null;
+};
+
+async function fetchTenantBootstrap(slug: string | null): Promise<TenantBootstrap> {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 400);
     const url = slug
-      ? `${SUPABASE_URL}/rest/v1/stores?slug=eq.${encodeURIComponent(slug)}&select=id,app_configurations(config_value,config_key)&app_configurations.config_key=eq.white_label_config`
+      ? `${SUPABASE_URL}/rest/v1/stores?slug=eq.${encodeURIComponent(slug)}&select=id,avatar_url,app_configurations(config_value,config_key)&app_configurations.config_key=eq.white_label_config`
       : `${SUPABASE_URL}/rest/v1/app_configurations?store_id=is.null&config_key=eq.white_label_config&select=config_value`;
     const res = await fetch(url, {
       signal: ctrl.signal,
@@ -49,16 +55,51 @@ async function fetchTheme(slug: string | null): Promise<ThemeConfig | null> {
       cache: 'no-store',
     });
     clearTimeout(t);
-    if (!res.ok) return null;
+    if (!res.ok) return { theme: null, storeId: null, avatarUrl: null };
     const data: any = await res.json();
     if (slug) {
-      const cfg = data?.[0]?.app_configurations?.[0]?.config_value;
-      return cfg ?? null;
+      const store = data?.[0];
+      return {
+        theme: store?.app_configurations?.[0]?.config_value ?? null,
+        storeId: typeof store?.id === 'string' ? store.id : null,
+        avatarUrl: typeof store?.avatar_url === 'string' ? store.avatar_url : null,
+      };
     }
-    return data?.[0]?.config_value ?? null;
+    return {
+      theme: data?.[0]?.config_value ?? null,
+      storeId: null,
+      avatarUrl: null,
+    };
   } catch {
-    return null;
+    return { theme: null, storeId: null, avatarUrl: null };
   }
+}
+
+function escapeAttribute(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function injectTenantFavicon(html: string, avatarUrl: string, storeId: string): string {
+  const separator = avatarUrl.includes('?') ? '&' : '?';
+  const iconUrl = escapeAttribute(`${avatarUrl}${separator}tenant=${encodeURIComponent(storeId)}`);
+
+  // The tenant icon must be present in the first HTML response. Leaving the
+  // platform icons in place, even briefly, makes browsers visibly swap icons.
+  const withoutStaticIcons = html.replace(
+    /\s*<link\s+rel=(?:"|')(?:icon|shortcut icon|apple-touch-icon|mask-icon)(?:"|')[^>]*>/gi,
+    '',
+  );
+  const links =
+    `<link rel="icon" href="${iconUrl}" data-source="tenant">` +
+    `<link rel="shortcut icon" href="${iconUrl}" data-source="tenant">` +
+    `<link rel="apple-touch-icon" href="${iconUrl}" data-source="tenant">`;
+
+  return withoutStaticIcons.replace('</head>', `${links}</head>`);
 }
 
 function buildStyle(cfg: ThemeConfig): { css: string; mode: 'dark' | 'light'; hue: string } {
@@ -93,7 +134,8 @@ export default async function middleware(req: Request): Promise<Response> {
   }
   let html = await assetRes.text();
 
-  const cfg = await fetchTheme(slug);
+  const bootstrap = await fetchTenantBootstrap(slug);
+  const cfg = bootstrap.theme;
   if (cfg && cfg.colors) {
     const { css, mode } = buildStyle(cfg);
     const themeClass = `${mode} theme-${mode}`;
@@ -110,6 +152,10 @@ export default async function middleware(req: Request): Promise<Response> {
       `<style id="ssr-theme">${css}</style>` +
       `<meta name="theme-bootstrap" content='${bootstrap.replace(/'/g, '&#39;')}'>`;
     html = html.replace('</head>', `${injection}</head>`);
+  }
+
+  if (slug && bootstrap.avatarUrl && bootstrap.storeId) {
+    html = injectTenantFavicon(html, bootstrap.avatarUrl, bootstrap.storeId);
   }
 
   const headers = new Headers(assetRes.headers);
