@@ -1,4 +1,6 @@
 import { devLog } from '@/lib/logger';
+import { applyTenantFavicon } from '@/lib/tenant-favicon';
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import { useTenant } from '@/contexts/TenantContext';
