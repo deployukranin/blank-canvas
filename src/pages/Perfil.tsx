@@ -16,7 +16,8 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useTenant } from '@/contexts/TenantContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { useVIPSubscription } from '@/hooks/use-vip-subscription';
+import { useCinematicDesktop } from '@/hooks/use-cinematic-desktop';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -34,12 +35,23 @@ const PerfilPage = () => {
   const { basePath } = useTenant();
   const withBase = (p: string) => (basePath ? `${basePath}${p}` : p);
 
+  const { isVIP } = useVIPSubscription();
+  const isCinematic = useCinematicDesktop();
+
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: withBase('/orders'), gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
     { icon: Bell, label: t('profile.notifications', 'Notifications'), description: t('profile.commentsVotes', 'Comments and votes'), path: withBase('/notifications'), gradient: 'from-blue-400 to-cyan-500', badge: 'notifications' as const },
     { icon: Lightbulb, label: t('profile.videoIdeas', 'Video Ideas'), description: t('profile.suggestVote', 'Suggest and vote on ideas'), path: withBase('/ideas'), gradient: 'from-amber-400 to-orange-500' },
     { icon: Crown, label: t('profile.vipCommunity', 'VIP Community'), description: t('profile.exclusiveAccess', 'Exclusive access'), path: withBase('/vip'), gradient: 'from-vip to-amber-500' },
   ];
+
+  const steps = [
+    { label: t('profile.stepAvatar', 'Add a profile photo'), done: !!profile?.avatar_url, icon: Camera, path: withBase('/profile') },
+    { label: t('profile.stepOrder', 'Request your first custom video'), done: pendingOrdersCount > 0, icon: Package, path: withBase('/customs') },
+    { label: t('profile.stepIdea', 'Share a video idea'), done: false, icon: Lightbulb, path: withBase('/ideas') },
+    { label: t('profile.stepVip', 'Join the VIP community'), done: isVIP, icon: Crown, path: withBase('/vip') },
+  ];
+  const completed = steps.filter((s) => s.done).length;
 
   const menuItems = [
     { icon: HelpCircle, label: t('profile.help', 'Help'), description: t('profile.faqSupport', 'FAQ and support'), path: withBase('/help') },
