@@ -420,6 +420,19 @@
       "trialHint": "During the trial you have 100 MB in total. Choose a plan to unlock more space.",
       "quotaExceeded": "Storage limit reached",
       "quotaExceededDesc": "You reached your plan limit. Choose a plan to unlock more space."
+    },
+    "layout": {
+      "tab": "Layout",
+      "active": "Active",
+      "inUse": "In use",
+      "use": "Use this layout",
+      "saved": "Layout updated!",
+      "locked": "Layout available on paid plans",
+      "lockedDesc": "Upgrade your plan to unlock this layout.",
+      "trialNotice": "On the trial plan only the Classic layout can be published. You can still preview the others.",
+      "upgrade": "Upgrade",
+      "preview": "Preview",
+      "previewDesc": "Live preview of your storefront with real data."
     }
   },
   "superAdmin": {

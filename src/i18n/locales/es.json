@@ -420,6 +420,19 @@
       "trialHint": "Durante la prueba tienes 100 MB en total. Elige un plan para liberar más espacio.",
       "quotaExceeded": "Límite de almacenamiento alcanzado",
       "quotaExceededDesc": "Has alcanzado el límite de tu plan. Elige un plan para liberar más espacio."
+    },
+    "layout": {
+      "tab": "Diseño",
+      "active": "Activo",
+      "inUse": "En uso",
+      "use": "Usar este diseño",
+      "saved": "¡Diseño actualizado!",
+      "locked": "Diseño disponible en planes de pago",
+      "lockedDesc": "Mejora tu plan para desbloquear este diseño.",
+      "trialNotice": "En el plan de prueba solo se puede publicar el diseño Classic. Aún puedes previsualizar los demás.",
+      "upgrade": "Mejorar plan",
+      "preview": "Vista previa",
+      "previewDesc": "Vista previa en vivo de tu tienda con datos reales."
     }
   },
   "superAdmin": {
