@@ -171,7 +171,15 @@ Deno.serve(async (req) => {
       created_by: userId,
     });
 
-    return json({ success: true, ref: `gdrive:${driveId}`, fileId: driveId, name: safeName });
+    // Brand assets are public: return a ready-to-use long-lived media URL
+    let publicUrl: string | null = null;
+    if (kind === 'config') {
+      const exp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
+      const sig = await signMediaToken(driveId, exp);
+      publicUrl = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(driveId)}&exp=${exp}&sig=${sig}`;
+    }
+
+    return json({ success: true, ref: `gdrive:${driveId}`, fileId: driveId, name: safeName, url: publicUrl });
   } catch (err) {
     console.error('drive-upload error:', err);
     return json({ success: false, error: (err as Error).message || 'Upload failed' }, 500);
