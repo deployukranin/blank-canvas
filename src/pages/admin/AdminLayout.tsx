@@ -40,6 +40,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   });
   const [query, setQuery] = React.useState('');
 
+  // Garante a estrutura de pastas do cliente no Drive (config/vip/customs)
+  React.useEffect(() => {
+    if (store?.id) void provisionStoreDrive(store.id);
+  }, [store?.id]);
+
+
+
   const toggleCollapsed = () => {
     setCollapsed(prev => {
       const next = !prev;
