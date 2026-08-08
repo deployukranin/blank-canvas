@@ -121,6 +121,27 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 4c. Layout gating — trial/free stores can only publish the "classic" layout
+    if (config_key === "white_label_config" && store_id) {
+      const variant = (config_value as Record<string, any>)?.layout?.variant;
+      const allowedVariants = ["classic", "spotlight", "magazine"];
+      if (variant && !allowedVariants.includes(variant)) {
+        (config_value as Record<string, any>).layout = { variant: "classic" };
+      } else if (variant && variant !== "classic") {
+        const { data: storeRow } = await serviceClient
+          .from("stores")
+          .select("plan_type")
+          .eq("id", store_id)
+          .maybeSingle();
+        const plan = (storeRow?.plan_type || "trial").toLowerCase();
+        if (["trial", "free", "none"].includes(plan)) {
+          (config_value as Record<string, any>).layout = { variant: "classic" };
+        }
+      }
+    }
+
+
+
     // 5. Use service role to save config (bypasses RLS for the actual save operation)
     // serviceClient already created above for role check
 

@@ -420,6 +420,19 @@
       "trialHint": "Durante o período de teste você tem 100 MB no total. Escolha um plano para liberar mais espaço.",
       "quotaExceeded": "Limite de armazenamento atingido",
       "quotaExceededDesc": "Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço."
+    },
+    "layout": {
+      "tab": "Layout",
+      "active": "Ativo",
+      "inUse": "Em uso",
+      "use": "Usar este layout",
+      "saved": "Layout atualizado!",
+      "locked": "Layout disponível nos planos pagos",
+      "lockedDesc": "Faça upgrade do seu plano para desbloquear este layout.",
+      "trialNotice": "No plano trial apenas o layout Classic pode ser publicado. Você ainda pode visualizar os outros.",
+      "upgrade": "Fazer upgrade",
+      "preview": "Pré-visualização",
+      "previewDesc": "Pré-visualização ao vivo da sua loja com dados reais."
     }
   },
   "superAdmin": {

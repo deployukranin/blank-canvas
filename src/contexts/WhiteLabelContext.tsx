@@ -664,6 +664,11 @@ export interface WhiteLabelConfig {
   logoImage: string;
   banners: BannerConfig[];
 
+  // Storefront layout variant
+  layout?: {
+    variant: 'classic' | 'spotlight' | 'magazine';
+  };
+
   // Hero Banner Text
   heroGreeting: string;
   heroSubtitle: string;
@@ -797,6 +802,7 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
   banners: [],
+  layout: { variant: 'classic' },
   heroGreeting: 'Bem-vindo! 🤍',
   heroSubtitle: 'Relaxe com ASMR de qualidade',
   navigationTabs: defaultNavigationTabs,
