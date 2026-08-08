@@ -220,7 +220,7 @@ const AdminPersonalizacao: React.FC = () => {
       const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl);
+      updateBanner(bannerId, variant === 'desktop' ? 'desktopUrl' : 'mobileUrl', publicUrl, true);
       toast({ title: t('admin.banners.uploadSuccess', 'Image uploaded!') });
       fetchStorageQuota(store?.id).then(q => q && setQuota(q));
     } catch (err: any) {
