@@ -8,7 +8,6 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
-import logo from '@/assets/mytinglebox-logo.png';
 
 const pathToI18nKey: Record<string, string> = {
   '/': 'nav.home',
