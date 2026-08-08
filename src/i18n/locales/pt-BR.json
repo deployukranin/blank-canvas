@@ -1054,7 +1054,11 @@
     "watchNow": "Assistir Agora",
     "noVipContent": "Nenhum conteúdo disponível no momento.",
     "vipAccessError": "Erro de Acesso",
-    "vipAccessErrorDesc": "Não foi possível carregar o conteúdo exclusivo."
+    "vipAccessErrorDesc": "Não foi possível carregar o conteúdo exclusivo.",
+    "trending": "Em alta",
+    "endOfList": "Fim da lista",
+    "ideasIntro": "Ajude a definir o próximo vídeo. A comunidade vota nas melhores sugestões.",
+    "ideasEmptyDesc": "Seja o primeiro a sugerir algo novo usando o formulário ao lado."
   },
   "customs": {
     "videos": "Vídeos",

@@ -8,20 +8,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
-
-const pathToI18nKey: Record<string, string> = {
-  '/': 'nav.home',
-  '/customs': 'nav.customs',
-  '/vip': 'nav.vip',
-  '/community': 'nav.community',
-  '/profile': 'nav.profile',
-  '/videos': 'nav.videos',
-  '/ideas': 'nav.ideas',
-  '/help': 'nav.help',
-  '/notifications': 'nav.notifications',
-  '/orders': 'nav.myOrders',
-  '/subscriptions': 'nav.subscriptions',
-};
+import { translatePathLabel } from '@/lib/nav-i18n';
 
 interface DesktopShellProps {
   children: ReactNode;
@@ -79,8 +66,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
               const isActive =
                 location.pathname === resolved ||
                 (item.path === '/' && (location.pathname === basePath || location.pathname === '/'));
-              const key = pathToI18nKey[item.path];
-              const label = key ? t(key) : item.label;
+              const label = translatePathLabel(t, item.path, item.label);
 
               return (
                 <Link
