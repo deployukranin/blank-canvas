@@ -347,7 +347,10 @@ const AdminDashboard: React.FC = () => {
 
         {/* Setup Checklist */}
         {(() => {
+          // Don't render until store + payment config are resolved (avoids flash)
+          if (checklistCompleted || !storeInfo || !paymentLoaded) return null;
           const defaultNames = ['WhisperScape', 'TingleBox', 'My Tingle Box'];
+
           const checks = [
             { key: 'storeName', done: !!storeInfo?.name && !defaultNames.includes(storeInfo.name), label: t('admin.checklist.storeName'), path: `${base}/customize` },
             { key: 'colors', done: !!config.setup?.colorsConfirmed || config.colors.primary !== '263 70% 58%' || config.colors.mode !== 'dark', label: t('admin.checklist.colors'), path: `${base}/customize` },
