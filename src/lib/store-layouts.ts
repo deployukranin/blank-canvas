@@ -1,6 +1,6 @@
-export type LayoutVariant = 'classic' | 'spotlight' | 'magazine' | 'cinematic';
+export type LayoutVariant = 'classic' | 'cinematic';
 
-export const LAYOUT_VARIANTS: LayoutVariant[] = ['classic', 'spotlight', 'magazine', 'cinematic'];
+export const LAYOUT_VARIANTS: LayoutVariant[] = ['classic', 'cinematic'];
 
 export const DEFAULT_LAYOUT: LayoutVariant = 'classic';
 

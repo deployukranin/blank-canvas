@@ -9,6 +9,7 @@ import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
 import { translatePathLabel } from '@/lib/nav-i18n';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 interface DesktopShellProps {
   children: ReactNode;
@@ -137,6 +138,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
 
 
           <div className="flex items-center gap-5">
+            <LanguageSelector variant="store" />
             <Link
               to={withBase('/notifications')}
               className="text-muted-foreground hover:text-foreground transition-colors"
