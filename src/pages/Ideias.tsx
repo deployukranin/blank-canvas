@@ -21,6 +21,7 @@ import {
 const IdeiasPage = () => {
   const { t, i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const isCinematicDesktop = useCinematicDesktop();
   const { toast } = useToast();
   const { ideas, isLoading, toggleVote, submitIdea, reportIdea, contentSettings } = useVideoIdeas();
   const [newIdea, setNewIdea] = useState({ title: '', description: '' });

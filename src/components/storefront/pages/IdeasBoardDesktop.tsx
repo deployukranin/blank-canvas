@@ -11,7 +11,7 @@ export interface IdeaItem {
   title: string;
   description: string;
   votes: number;
-  hasVoted: boolean;
+  hasVoted?: boolean;
   authorName?: string | null;
   created_at: string;
 }
