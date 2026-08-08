@@ -802,6 +802,7 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
   banners: [],
+  layout: { variant: 'classic' },
   heroGreeting: 'Bem-vindo! 🤍',
   heroSubtitle: 'Relaxe com ASMR de qualidade',
   navigationTabs: defaultNavigationTabs,
