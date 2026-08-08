@@ -19,6 +19,7 @@ i18n
     supportedLngs: ['en', 'pt-BR', 'es'],
     nonExplicitSupportedLngs: true,
     load: 'currentOnly',
+    interpolation: {
       escapeValue: false,
     },
     detection: {
