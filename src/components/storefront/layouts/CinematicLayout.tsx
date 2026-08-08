@@ -52,7 +52,7 @@ const VideoCardItem = ({
 
 export const CinematicLayout = ({
   config, greeting, subtitle, quickActions, youtubeEnabled, videos, favoriteVideos,
-  favoriteIds, toggleFavorite, feedPosts, isAuthenticated, withBase, onSelectVideo,
+  favoriteIds, toggleFavorite, feedPosts, isAuthenticated, withBase, onSelectVideo, storeName,
 }: StorefrontLayoutProps) => {
   const { t } = useTranslation();
 
