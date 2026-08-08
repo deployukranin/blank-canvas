@@ -1189,6 +1189,7 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         document.head.appendChild(link);
       }
       link.href = iconUrl;
+      link.dataset.source = 'whitelabel';
     };
     // Remove static icons so the dynamic one wins
     document.querySelectorAll("link[rel~='icon']").forEach((el) => {
