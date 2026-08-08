@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
 
 import { supabase } from '@/integrations/supabase/client';
+import { uploadConfigAsset, deleteDriveAsset } from '@/lib/external-storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
