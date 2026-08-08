@@ -155,6 +155,7 @@ const AdminPersonalizacao: React.FC = () => {
       try {
         // Old icon versions are replaced, so they must not count against the quota
         await purgeStorageFolder('platform-icon');
+        await deleteDriveAsset(store.avatar_url);
         const current = await fetchStorageQuota(store.id);
         if (current) setQuota(current);
         if (!fitsInQuota(current, file.size)) {
@@ -166,12 +167,7 @@ const AdminPersonalizacao: React.FC = () => {
           return;
         }
 
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-        const fileName = `${Date.now()}.${ext}`;
-        const path = `${store.id}/platform-icon/${fileName}`;
-        const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+        const { url: publicUrl } = await uploadConfigAsset(file, store.id);
         const { data: updatedStore, error: updateError } = await supabase
           .from('stores')
           .update({ avatar_url: publicUrl })
