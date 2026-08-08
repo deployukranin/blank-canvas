@@ -230,6 +230,32 @@ Deno.serve(async (req) => {
   }
 });
 
+/** Resolves (creating if needed) `TingleBox/<tenant>/<kind>` and returns its folder id. */
+async function resolveKindFolder(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+  storeId: string,
+  kind: string,
+): Promise<string> {
+  const { data: storeRow } = await admin
+    .from('stores')
+    .select('slug, name, created_by')
+    .eq('id', storeId)
+    .maybeSingle();
+  let ownerEmail = '';
+  if (storeRow?.created_by) {
+    const { data: ownerData } = await admin.auth.admin.getUserById(storeRow.created_by);
+    ownerEmail = ownerData?.user?.email || '';
+  }
+  const label = [storeRow?.slug || storeRow?.name || storeId, ownerEmail ? `(${ownerEmail})` : '']
+    .filter(Boolean)
+    .join(' ');
+
+  const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
+  return await ensureFolder(KIND_FOLDER[kind] || 'config', storeFolder);
+}
+
+
 async function isStoreManager(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   admin: any,
