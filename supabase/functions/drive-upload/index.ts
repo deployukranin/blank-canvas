@@ -5,8 +5,20 @@ import {
   deleteFile,
   ensureFolder,
   ensureStoreFolder,
+  signMediaToken,
   uploadFile,
 } from "../_shared/drive.ts";
+
+/** Sub-folder per content kind inside the tenant folder. */
+const KIND_FOLDER: Record<string, string> = {
+  config: 'config',
+  vip: 'vip',
+  custom: 'customs',
+  preview: 'customs',
+};
+
+/** Brand assets (banners/icon) need a long-lived public link. */
+const CONFIG_URL_TTL_SECONDS = 60 * 60 * 24 * 365 * 5; // 5 years
 
 
 const corsHeaders = {
