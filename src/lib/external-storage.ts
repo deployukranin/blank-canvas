@@ -79,6 +79,25 @@ export async function uploadConfigAsset(file: File, storeId: string): Promise<{ 
   return { url, ref };
 }
 
+/** True for legacy assets still stored in the Supabase `banners` bucket. */
+export function isLegacyStorageAsset(value?: string | null): boolean {
+  return !!value && value.includes('/storage/v1/object/public/banners/');
+}
+
+/**
+ * Moves a legacy Supabase Storage brand asset into the tenant's Drive `config`
+ * folder. Returns the new public URL, or null when nothing was migrated.
+ */
+export async function migrateConfigAsset(url: string, storeId: string): Promise<string | null> {
+  if (!isLegacyStorageAsset(url) || !storeId) return null;
+  const { data, error } = await supabase.functions.invoke('drive-upload', {
+    body: { action: 'migrate_config', store_id: storeId, url },
+  });
+  if (error || !data?.success || !data?.url) return null;
+  return data.url as string;
+}
+
+
 /** Extracts the Drive file id from a `gdrive:` ref or a drive-media URL. */
 export function driveFileIdFromUrl(value?: string | null): string | null {
   if (!value) return null;

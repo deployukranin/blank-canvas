@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
 
 import { motion } from 'framer-motion';
@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { isLegacyGreeting, isLegacySubtitle } from '@/lib/hero-defaults';
 
 import { supabase } from '@/integrations/supabase/client';
-import { uploadConfigAsset, deleteDriveAsset } from '@/lib/external-storage';
+import { uploadConfigAsset, deleteDriveAsset, isLegacyStorageAsset, migrateConfigAsset } from '@/lib/external-storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ── Color Templates ──
@@ -105,6 +105,45 @@ const AdminPersonalizacao: React.FC = () => {
     fetchStorageQuota(store?.id).then(q => { if (!cancelled && q) setQuota(q); });
     return () => { cancelled = true; };
   }, [store?.id]);
+
+  // One-time migration: brand assets still in the legacy bucket move to Drive (config folder)
+  const migratedRef = useRef(false);
+  useEffect(() => {
+    if (!store?.id || migratedRef.current) return;
+    const legacyBanners = banners.some(b => isLegacyStorageAsset(b.desktopUrl) || isLegacyStorageAsset(b.mobileUrl));
+    const legacyIcon = isLegacyStorageAsset(store.avatar_url);
+    if (!legacyBanners && !legacyIcon) return;
+    migratedRef.current = true;
+
+    (async () => {
+      let nextBanners = banners;
+      if (legacyBanners) {
+        nextBanners = await Promise.all(
+          banners.map(async (b) => ({
+            ...b,
+            desktopUrl: (await migrateConfigAsset(b.desktopUrl, store.id)) || b.desktopUrl,
+            mobileUrl: (await migrateConfigAsset(b.mobileUrl, store.id)) || b.mobileUrl,
+          })),
+        );
+        setBanners(nextBanners);
+        const images = nextBanners.filter(b => b.enabled).map(b => b.desktopUrl || b.mobileUrl).filter(Boolean);
+        setConfig({
+          ...config,
+          banners: nextBanners,
+          bannerImages: images.length ? images : config.bannerImages,
+          bannerImage: images[0] || config.bannerImage,
+        });
+      }
+      if (legacyIcon) {
+        const newIcon = await migrateConfigAsset(store.avatar_url as string, store.id);
+        if (newIcon) await supabase.from('stores').update({ avatar_url: newIcon }).eq('id', store.id);
+      }
+      fetchStorageQuota(store.id).then(q => q && setQuota(q));
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store?.id, banners.length]);
+
+
 
 
   // ── Platform Icon state ──
