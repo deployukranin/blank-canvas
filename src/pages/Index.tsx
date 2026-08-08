@@ -5,8 +5,6 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { VideoWatchModal } from '@/components/video/VideoWatchModal';
 import { useStorefrontData } from '@/components/storefront/use-storefront-data';
 import { ClassicLayout } from '@/components/storefront/layouts/ClassicLayout';
-import { SpotlightLayout } from '@/components/storefront/layouts/SpotlightLayout';
-import { MagazineLayout } from '@/components/storefront/layouts/MagazineLayout';
 import { CinematicLayout } from '@/components/storefront/layouts/CinematicLayout';
 import { LAYOUT_VARIANTS, normalizeLayout, type LayoutVariant } from '@/lib/store-layouts';
 
