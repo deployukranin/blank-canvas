@@ -45,9 +45,8 @@ async function fetchTheme(slug: string | null): Promise<ThemeConfig | null> {
         authorization: `Bearer ${SUPABASE_ANON}`,
         accept: 'application/json',
       },
-      // Edge cache: theme changes rarely; SWR keeps first paint instant.
-      // @ts-ignore Vercel-specific cache directives
-      cache: 'force-cache',
+      // Always read fresh config: admins expect color changes to show immediately.
+      cache: 'no-store',
     });
     clearTimeout(t);
     if (!res.ok) return null;

@@ -19,20 +19,18 @@
     } catch (_) {}
 
     var cfg = null;
-    if (cached) {
-      try { cfg = JSON.parse(cached); } catch (_) { cfg = null; }
+    // SSR-injected config always wins over localStorage (which can be stale)
+    var meta = document.querySelector('meta[name="theme-bootstrap"]');
+    if (meta) {
+      try {
+        cfg = JSON.parse(meta.getAttribute('content') || 'null');
+        if (cfg) {
+          try { localStorage.setItem('whitelabel_cache_v4_' + seg, JSON.stringify(cfg)); } catch (_) {}
+        }
+      } catch (_) { cfg = null; }
     }
-    if (!cfg) {
-      // Fallback: theme was injected server-side via Vercel Edge Middleware
-      var meta = document.querySelector('meta[name="theme-bootstrap"]');
-      if (meta) {
-        try {
-          cfg = JSON.parse(meta.getAttribute('content') || 'null');
-          if (cfg) {
-            try { localStorage.setItem('whitelabel_cache_v4_' + seg, JSON.stringify(cfg)); } catch (_) {}
-          }
-        } catch (_) { cfg = null; }
-      }
+    if (!cfg && cached) {
+      try { cfg = JSON.parse(cached); } catch (_) { cfg = null; }
     }
     if (!cfg) return;
     var colors = cfg && cfg.colors;
