@@ -22,7 +22,7 @@ const VideoCardItem = ({
   onToggleFavorite: (id: string) => void;
 }) => (
   <div className="group cursor-pointer" onClick={() => onSelect(video.video_id)}>
-    <div className="relative aspect-video rounded-3xl overflow-hidden mb-4 border border-border/50 bg-muted shadow-xl">
+    <div className="relative aspect-video rounded-2xl md:rounded-3xl overflow-hidden mb-3 md:mb-4 border border-border/50 bg-muted shadow-xl">
       <img
         src={video.thumbnail_url}
         alt={video.video_title}
@@ -46,7 +46,7 @@ const VideoCardItem = ({
         <Heart className={`w-4 h-4 ${isFavorite ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
       </button>
     </div>
-    <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 px-1">
+    <h3 className="text-sm md:text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 px-1">
       {video.video_title}
     </h3>
   </div>
@@ -134,11 +134,11 @@ export const CinematicLayout = ({
             transition={{ delay: index * 0.05 }}
           >
             <Link to={withBase(action.path)}>
-              <div className="group rounded-2xl p-5 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/40 hover:bg-card transition-all flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+              <div className="group h-full rounded-2xl p-3.5 md:p-5 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/40 hover:bg-card transition-all flex flex-col md:flex-row items-start md:items-center gap-2.5 md:gap-4">
+                <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
                   <DynamicIcon icon={action.icon} size={20} className="text-primary" />
                 </div>
-                <span className="text-sm font-semibold text-foreground">{translatePathLabel(t, action.path, action.label)}</span>
+                <span className="text-xs md:text-sm font-semibold text-foreground">{translatePathLabel(t, action.path, action.label)}</span>
               </div>
             </Link>
           </motion.div>
@@ -147,16 +147,16 @@ export const CinematicLayout = ({
 
       {youtubeEnabled && favoriteVideos.length > 0 && (
         <section>
-          <div className="flex items-end justify-between mb-8">
-            <h2 className="text-3xl font-display font-black text-foreground tracking-tight flex items-center gap-3">
-              <Heart className="w-6 h-6 fill-primary text-primary" />
+          <div className="flex items-end justify-between mb-5 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-display font-black text-foreground tracking-tight flex items-center gap-2 md:gap-3">
+              <Heart className="w-5 h-5 md:w-6 md:h-6 fill-primary text-primary" />
               {t('storefront.myFavorites')}
             </h2>
-            <Link to={withBase('/gallery')} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
+            <Link to={withBase('/gallery')} className="text-[11px] md:text-sm font-bold uppercase tracking-widest shrink-0 text-muted-foreground hover:text-primary transition-colors">
               {t('storefront.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-7">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-7">
             {favoriteVideos.slice(0, 4).map((v) => (
               <VideoCardItem
                 key={v.video_id}
@@ -172,15 +172,15 @@ export const CinematicLayout = ({
 
       {youtubeEnabled && videos.length > 0 && (
         <section>
-          <div className="flex items-end justify-between mb-8">
-            <h2 className="text-3xl font-display font-black text-foreground tracking-tight">
+          <div className="flex items-end justify-between mb-5 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-display font-black text-foreground tracking-tight">
               {t('storefront.recentVideos')}
             </h2>
-            <Link to={withBase('/gallery')} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
+            <Link to={withBase('/gallery')} className="text-[11px] md:text-sm font-bold uppercase tracking-widest shrink-0 text-muted-foreground hover:text-primary transition-colors">
               {t('storefront.viewAll')}
             </Link>
           </div>
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-7">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-7">
             {videos.slice(0, 8).map((v) => (
               <VideoCardItem
                 key={v.video_id}
@@ -196,17 +196,17 @@ export const CinematicLayout = ({
 
       {feedPosts.length > 0 && (
         <section>
-          <div className="flex items-end justify-between mb-8">
-            <h2 className="text-3xl font-display font-black text-foreground tracking-tight">
+          <div className="flex items-end justify-between mb-5 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-display font-black text-foreground tracking-tight">
               {t('storefront.news')}
             </h2>
-            <Link to={withBase('/community')} className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
+            <Link to={withBase('/community')} className="text-[11px] md:text-sm font-bold uppercase tracking-widest shrink-0 text-muted-foreground hover:text-primary transition-colors">
               {t('storefront.viewAllNews')}
             </Link>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {feedPosts.slice(0, 3).map((post) => (
-              <div key={post.id} className="rounded-3xl p-6 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/30 transition-colors">
+              <div key={post.id} className="rounded-3xl p-5 md:p-6 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/30 transition-colors">
                 <p className="font-semibold text-foreground mb-2 line-clamp-1">{post.title}</p>
                 <p className="text-sm text-muted-foreground line-clamp-3">{post.content}</p>
               </div>
