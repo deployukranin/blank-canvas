@@ -67,7 +67,15 @@
     "logout": "Cerrar sesión",
     "avatarSaved": "¡Foto de perfil actualizada!",
     "avatarError": "Error al actualizar foto de perfil",
-    "avatarUrlPlaceholder": "Pega la URL de la imagen..."
+    "avatarUrlPlaceholder": "Pega la URL de la imagen...",
+    "journeyTitle": "Tu recorrido",
+    "journeySubtitle": "Completa los pasos y desbloquea ventajas exclusivas",
+    "stepAvatar": "Agrega una foto de perfil",
+    "stepOrder": "Pide tu primer video personalizado",
+    "stepIdea": "Comparte una idea de video",
+    "stepVip": "Únete a la comunidad VIP",
+    "vipUpsell": "Desbloquea contenido exclusivo y prioridad en tus videos personalizados",
+    "vipCta": "Hazte VIP"
   },
   "auth": {
     "enterButton": "Entrar",

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, LogIn, Sparkles, User } from 'lucide-react';
+import { Bell, Lightbulb, LogIn, Package, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +38,12 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const navItems = config.navigationTabs
     .filter((tab) => tab.enabled && tab.path !== '/loja')
     .sort((a, b) => a.order - b.order);
+
+  const navPaths = new Set(navItems.map((tab) => tab.path));
+  const secondaryItems = [
+    { path: '/orders', icon: Package, label: t('nav.myOrders', 'My Orders') },
+    { path: '/ideas', icon: Lightbulb, label: t('nav.ideas', 'Ideas') },
+  ].filter((item) => !navPaths.has(item.path));
 
   const storeName = store?.name || config.siteName || '';
   // The favicon uploaded in /customize is the tenant brand mark — reuse it as the shell logo
@@ -86,6 +92,27 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
                 </Link>
               );
             })}
+
+            <div className="pt-4 mt-4 border-t border-border/40 space-y-1.5">
+              {secondaryItems.map((item) => {
+                const resolved = withBase(item.path);
+                const isActive = location.pathname === resolved;
+                return (
+                  <Link
+                    key={item.path}
+                    to={resolved}
+                    className={`flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all border ${
+                      isActive
+                        ? 'bg-primary/10 text-primary font-semibold border-primary/20'
+                        : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-foreground/5'
+                    }`}
+                  >
+                    <item.icon className="w-[18px] h-[18px]" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
         </div>
 

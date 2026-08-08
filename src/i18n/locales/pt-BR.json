@@ -67,7 +67,15 @@
     "logout": "Sair",
     "avatarSaved": "Foto de perfil atualizada!",
     "avatarError": "Erro ao atualizar foto de perfil",
-    "avatarUrlPlaceholder": "Cole a URL da imagem..."
+    "avatarUrlPlaceholder": "Cole a URL da imagem...",
+    "journeyTitle": "Sua jornada",
+    "journeySubtitle": "Complete as etapas e desbloqueie vantagens exclusivas",
+    "stepAvatar": "Adicione uma foto de perfil",
+    "stepOrder": "Peça seu primeiro vídeo personalizado",
+    "stepIdea": "Compartilhe uma ideia de vídeo",
+    "stepVip": "Entre na comunidade VIP",
+    "vipUpsell": "Desbloqueie conteúdo exclusivo e prioridade nos seus vídeos personalizados",
+    "vipCta": "Virar VIP"
   },
   "auth": {
     "enterButton": "Entrar",
