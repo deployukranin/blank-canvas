@@ -2,7 +2,7 @@
 // - Never caches authenticated/API/Supabase/edge-function requests
 // - Cache-first only for static assets we control
 // - Network-first for navigations to avoid stale HTML/theme
-const CACHE_NAME = 'mytinglebox-sw-v8';
+const CACHE_NAME = 'mytinglebox-sw-v9';
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
   '/icon-192.png',
@@ -30,6 +30,9 @@ function isBypass(request) {
   try {
     const url = new URL(request.url);
     if (request.method !== 'GET') return true;
+    // Dev / preview environments: never cache app modules (stale JS breaks HMR)
+    if (/localhost|127\.0\.0\.1|lovableproject\.com|lovable\.app/i.test(url.hostname)) return true;
+    if (/^\/(src|node_modules|@vite|@react-refresh|@id)\//.test(url.pathname)) return true;
     // Never intercept cross-origin requests: fetches issued from inside the SW
     // are subject to the SW script's CSP (connect-src), which would block
     // third-party images/fonts (i.ytimg.com, fonts.gstatic.com, ...).
