@@ -88,7 +88,65 @@ Deno.serve(async (req) => {
       return json({ success: false, error: 'Too many uploads, try again later' }, 429);
     }
 
+    // ── JSON: migrate a legacy Supabase Storage asset into the tenant's Drive folder ──
+    const contentType = req.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const body = await req.json().catch(() => ({}));
+      if (body?.action !== 'migrate_config') {
+        return json({ success: false, error: 'invalid action' }, 400);
+      }
+      const storeId = String(body.store_id || '').trim();
+      const sourceUrl = String(body.url || '').trim();
+      if (!storeId || !sourceUrl) return json({ success: false, error: 'store_id and url required' }, 400);
+      if (!(await isStoreManager(admin, userId, storeId))) {
+        return json({ success: false, error: 'Forbidden' }, 403);
+      }
+      const publicPrefix = `${SUPABASE_URL}/storage/v1/object/public/`;
+      if (!sourceUrl.startsWith(publicPrefix)) {
+        return json({ success: false, error: 'unsupported source' }, 400);
+      }
+      const objectPath = sourceUrl.slice(publicPrefix.length).split('?')[0];
+      const [bucket, ...rest] = objectPath.split('/');
+      if (!bucket || rest.length === 0 || rest[0] !== storeId) {
+        return json({ success: false, error: 'unsupported source' }, 400);
+      }
+
+      const srcRes = await fetch(sourceUrl);
+      if (!srcRes.ok) return json({ success: false, error: 'source not reachable' }, 400);
+      const srcBytes = new Uint8Array(await srcRes.arrayBuffer());
+      if (srcBytes.length > MAX_UPLOAD_BYTES) return json({ success: false, error: 'file too large' }, 413);
+
+      const srcMime = srcRes.headers.get('content-type') || 'application/octet-stream';
+      const srcName = decodeURIComponent(rest[rest.length - 1] || 'asset');
+
+      const configFolder = await resolveKindFolder(admin, storeId, 'config');
+      const migratedId = await uploadFile(srcBytes, `${Date.now()}-${srcName}`, srcMime, configFolder);
+
+      await admin.from('drive_files').insert({
+        store_id: storeId,
+        file_id: migratedId,
+        name: srcName,
+        mime_type: srcMime,
+        size_bytes: srcBytes.length,
+        kind: 'config',
+        created_by: userId,
+      });
+
+      await admin.storage.from(bucket).remove([rest.join('/')]);
+
+      const migExp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
+      const migSig = await signMediaToken(migratedId, migExp);
+      return json({
+        success: true,
+        ref: `gdrive:${migratedId}`,
+        fileId: migratedId,
+        name: srcName,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(migratedId)}&exp=${migExp}&sig=${migSig}`,
+      });
+    }
+
     const form = await req.formData();
+
     const file = form.get('file');
     const storeId = String(form.get('store_id') || '').trim();
     const kind = String(form.get('kind') || 'vip').trim();
