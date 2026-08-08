@@ -51,7 +51,11 @@ async function uploadToDrive(
   if (!data?.success || !data?.ref) {
     throw new Error(describeUploadError(data?.error));
   }
-  return { ref: data.ref as string, name: (data.name as string) || file.name };
+  return {
+    ref: data.ref as string,
+    name: (data.name as string) || file.name,
+    url: (data.url as string) || null,
+  };
 }
 
 /** Uploads VIP media to Google Drive and returns a `gdrive:<id>` reference. */
@@ -63,6 +67,35 @@ export async function uploadVipMedia(file: File, storeId: string): Promise<strin
 /** Uploads a public preview asset (customs/videos page banner or teaser video). */
 export async function uploadPreviewMedia(file: File, storeId: string): Promise<UploadResult> {
   return await uploadToDrive(file, storeId, 'preview');
+}
+
+/**
+ * Uploads a brand/config asset (banner, platform icon) into the tenant's
+ * `config` folder in Drive. Returns a long-lived public URL.
+ */
+export async function uploadConfigAsset(file: File, storeId: string): Promise<{ url: string; ref: string }> {
+  const { ref, url } = await uploadToDrive(file, storeId, 'config');
+  if (!url) throw new Error('Falha ao gerar link do arquivo');
+  return { url, ref };
+}
+
+/** Extracts the Drive file id from a `gdrive:` ref or a drive-media URL. */
+export function driveFileIdFromUrl(value?: string | null): string | null {
+  if (!value) return null;
+  if (isDriveRef(value)) return value.slice(DRIVE_PREFIX.length);
+  if (!value.includes('drive-media')) return null;
+  try {
+    return new URL(value).searchParams.get('f');
+  } catch {
+    return null;
+  }
+}
+
+/** Deletes a Drive-backed asset given its stored URL or ref (no-op otherwise). */
+export async function deleteDriveAsset(value?: string | null): Promise<void> {
+  const fileId = driveFileIdFromUrl(value);
+  if (!fileId) return;
+  await supabase.functions.invoke('drive-upload', { method: 'DELETE', body: { fileId } });
 }
 
 /** Uploads a delivery file for a custom order. */
