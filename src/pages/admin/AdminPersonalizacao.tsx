@@ -225,7 +225,12 @@ const AdminPersonalizacao: React.FC = () => {
   };
 
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
-  const removeBanner = (id: string) => setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
+  const removeBanner = (id: string) => {
+    setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
+    // Free the storage used by the removed banner
+    purgeStorageFolder(id).then(() => fetchStorageQuota(store?.id)).then(q => q && setQuota(q));
+  };
+
   const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean, persist = false) => {
     setBanners(prev => {
       const next = prev.map(b => b.id === id ? { ...b, [field]: value } : b);
