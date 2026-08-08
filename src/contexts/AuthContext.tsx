@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { getLocalProfile } from "@/lib/local-profile";
+import { getPublicOrigin, publicUrl } from '@/lib/public-url';
 
 export interface User {
   id: string;
@@ -100,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = useCallback(async (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => {
     try {
-      const redirectUrl = redirectTo || `${window.location.origin}/auth`;
+      const redirectUrl = redirectTo || `${getPublicOrigin()}/auth`;
 
       // Email verification is temporarily disabled: create the account directly
       // and let Supabase return an active session immediately.
@@ -134,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = useCallback(async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      const redirectUrl = `${getPublicOrigin()}/reset-password`;
       const { data, error } = await supabase.functions.invoke("send-auth-email", {
         body: {
           type: "recovery",

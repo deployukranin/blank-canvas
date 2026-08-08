@@ -111,7 +111,7 @@ const AdminPagamentosPix = () => {
     }
     setConnectingStripe(true);
     try {
-      const returnUrl = window.location.href;
+      const returnUrl = publicUrl(window.location.pathname);
       const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
         body: { store_id: storeId, return_url: returnUrl },
       });

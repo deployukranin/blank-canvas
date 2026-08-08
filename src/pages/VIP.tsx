@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
+import { getPublicOrigin, publicUrl } from '@/lib/public-url';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -299,8 +300,8 @@ const VIPPage = () => {
           storeId: resolvedStoreId,
           currency: displayCurrencyForLang(i18n.language),
           affiliateCode: getAffiliateCode(resolvedStoreId) || undefined,
-          successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
-          cancelUrl: `${window.location.origin}${window.location.pathname}?payment=cancelled`,
+          successUrl: `${getPublicOrigin()}${window.location.pathname}?payment=success`,
+          cancelUrl: `${getPublicOrigin()}${window.location.pathname}?payment=cancelled`,
         },
       });
 
