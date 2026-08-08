@@ -4,8 +4,10 @@ import {
   MAX_UPLOAD_BYTES,
   deleteFile,
   ensureFolder,
+  ensureStoreFolder,
   uploadFile,
 } from "../_shared/drive.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -118,11 +120,27 @@ Deno.serve(async (req) => {
       }
     }
 
-    const storeFolder = await ensureFolder(storeId, DRIVE_ROOT_FOLDER_ID);
+    // Folder named after the tenant (slug/name + owner email) instead of the raw UUID
+    const { data: storeRow } = await admin
+      .from('stores')
+      .select('slug, name, created_by')
+      .eq('id', storeId)
+      .maybeSingle();
+    let ownerEmail = '';
+    if (storeRow?.created_by) {
+      const { data: ownerData } = await admin.auth.admin.getUserById(storeRow.created_by);
+      ownerEmail = ownerData?.user?.email || '';
+    }
+    const label = [storeRow?.slug || storeRow?.name || storeId, ownerEmail ? `(${ownerEmail})` : '']
+      .filter(Boolean)
+      .join(' ');
+
+    const storeFolder = await ensureStoreFolder(storeId, label, DRIVE_ROOT_FOLDER_ID);
     const kindFolder = await ensureFolder(
       kind === 'vip' ? 'vip' : kind === 'preview' ? 'previews' : 'customs',
       storeFolder,
     );
+
 
     const safeName = (file.name || 'arquivo').replace(/[\\/\r\n]/g, '_').slice(0, 180);
     const bytes = new Uint8Array(await file.arrayBuffer());
