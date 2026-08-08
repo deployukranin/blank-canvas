@@ -13,20 +13,13 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const { selectedVideoId, setSelectedVideoId, selectedVideo, ...data } = useStorefrontData();
 
-  // Admin preview override (?preview_layout=spotlight) — visual only, never persisted
+  // Admin preview override (?preview_layout=cinematic) — visual only, never persisted
   const previewParam = searchParams.get('preview_layout') as LayoutVariant | null;
   const variant = previewParam && LAYOUT_VARIANTS.includes(previewParam)
     ? previewParam
     : normalizeLayout(data.config.layout?.variant, store?.plan_type);
 
-  const LayoutComponent =
-    variant === 'spotlight'
-      ? SpotlightLayout
-      : variant === 'magazine'
-        ? MagazineLayout
-        : variant === 'cinematic'
-          ? CinematicLayout
-          : ClassicLayout;
+  const LayoutComponent = variant === 'cinematic' ? CinematicLayout : ClassicLayout;
 
   return (
     <MobileLayout hideHeader>

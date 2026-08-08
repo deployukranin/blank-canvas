@@ -34,41 +34,7 @@ const LAYOUT_META: Record<LayoutVariant, { name: string; desc: string; sketch: R
       </div>
     ),
   },
-  spotlight: {
-    name: 'Spotlight',
-    desc: 'Cinematic full-screen hero, pill navigation and one featured video.',
-    sketch: (
-      <div className="space-y-1.5">
-        <div className="h-12 rounded bg-primary/40" />
-        <div className="flex gap-1">
-          {[0, 1, 2].map(i => <div key={i} className="h-3 w-8 rounded-full bg-foreground/20" />)}
-        </div>
-        <div className="grid grid-cols-2 gap-1">
-          {[0, 1].map(i => <div key={i} className="h-5 rounded bg-foreground/10" />)}
-        </div>
-      </div>
-    ),
-  },
-  magazine: {
-    name: 'Magazine',
-    desc: 'Editorial masthead, side-by-side hero and numbered video list.',
-    sketch: (
-      <div className="space-y-1.5">
-        <div className="h-2 w-1/2 rounded bg-foreground/25" />
-        <div className="grid grid-cols-2 gap-1">
-          <div className="h-8 rounded bg-primary/30" />
-          <div className="grid grid-cols-2 gap-1">
-            {[0, 1, 2, 3].map(i => <div key={i} className="h-3.5 rounded bg-foreground/15" />)}
-          </div>
-        </div>
-        <div className="space-y-1">
-          {[0, 1].map(i => <div key={i} className="h-2.5 rounded bg-foreground/10" />)}
-        </div>
-      </div>
-    ),
-  },
   cinematic: {
-    name: 'Cinematic Desktop',
     desc: 'Desktop-first: persistent sidebar, topbar and wide hero — no bottom bar.',
     sketch: (
       <div className="flex gap-1.5">
