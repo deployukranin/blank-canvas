@@ -54,12 +54,7 @@ const AdminDashboard: React.FC = () => {
 
   const [paymentConfigured, setPaymentConfigured] = useState(false);
 
-  const getPublishedOrigin = () => {
-    const host = window.location.hostname;
-    if (host.includes('lovableproject.com')) return 'https://cozy-corner-seed.lovable.app';
-    return window.location.origin;
-  };
-  const platformUrl = storeSlug ? `${getPublishedOrigin()}/${storeSlug}` : getPublishedOrigin();
+  const platformUrl = storeSlug ? publicUrl(`/${storeSlug}`) : publicUrl();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(platformUrl);
