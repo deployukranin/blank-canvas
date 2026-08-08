@@ -1054,7 +1054,11 @@
     "watchNow": "Watch Now",
     "noVipContent": "No content available at the moment.",
     "vipAccessError": "Access Error",
-    "vipAccessErrorDesc": "Could not load exclusive content."
+    "vipAccessErrorDesc": "Could not load exclusive content.",
+    "trending": "Trending",
+    "endOfList": "End of the line",
+    "ideasIntro": "Help shape the next video. The community votes on the best suggestions.",
+    "ideasEmptyDesc": "Be the first to suggest something fresh using the form on the left."
   },
   "customs": {
     "videos": "Videos",
