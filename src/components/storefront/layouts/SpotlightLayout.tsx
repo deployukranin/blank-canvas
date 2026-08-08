@@ -37,7 +37,7 @@ export const SpotlightLayout = ({
   return (
     <>
       {/* Cinematic neon hero */}
-      <section className="relative min-h-[68vh] w-full overflow-hidden">
+      <section className="relative min-h-[68vh] w-full overflow-hidden flex flex-col justify-end">
         <motion.img
           src={heroImage}
           alt={storeName}
@@ -56,7 +56,7 @@ export const SpotlightLayout = ({
           className="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 h-64 w-[120%] rounded-full bg-primary/25 blur-[90px]"
         />
 
-        <div className="relative pt-[38vh] px-6 pb-9 space-y-4">
+        <div className="relative px-6 pt-40 pb-9 space-y-4">
           <motion.span
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             className={`block font-mono text-[10px] uppercase tracking-[0.4em] text-primary ${textGlow}`}
