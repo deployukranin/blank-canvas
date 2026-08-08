@@ -43,7 +43,23 @@
     return;
   }
 
+  // Keep open tabs in sync with the latest deploy: when a new service worker
+  // takes control, reload once so the newest bundle is used immediately.
+  var reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').catch(function () {});
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      // Check for a new version right away, on focus and every 15 minutes.
+      var check = function () { reg.update().catch(function () {}); };
+      check();
+      window.addEventListener('focus', check);
+      setInterval(check, 15 * 60 * 1000);
+    }).catch(function () {});
   });
 })();
+
