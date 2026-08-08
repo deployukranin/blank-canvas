@@ -33,7 +33,7 @@ export const SpotlightLayout = ({
   return (
     <>
       {/* Cinematic hero */}
-      <section className="relative h-[78vh] min-h-[440px] w-full overflow-hidden">
+      <section className="relative h-[62vh] min-h-[380px] w-full overflow-hidden">
         <motion.img
           src={heroImage}
           alt={storeName}
@@ -76,7 +76,7 @@ export const SpotlightLayout = ({
         </div>
       </section>
 
-      <div className="px-4 pb-8 -mt-4 space-y-8">
+      <div className="px-4 pt-5 pb-8 space-y-8">
         {/* Horizontal quick actions */}
         <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-1 px-1">
           {quickActions.map((action, i) => (
