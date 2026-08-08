@@ -135,7 +135,6 @@ export async function getVipMediaSignedUrl(pathOrUrl: string): Promise<string | 
 }
 
 /** Alias for order deliveries — same resolution logic. */
-/** Alias for order deliveries — same resolution logic. */
 export const getDeliverySignedUrl = getVipMediaSignedUrl;
 
 /** Resolves a playable URL plus its mime type, so deliveries can play inline. */
