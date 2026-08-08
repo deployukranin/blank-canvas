@@ -138,7 +138,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
 
 
           <div className="flex items-center gap-5">
-            <LanguageSelector variant="minimal" />
+            <LanguageSelector variant="store" />
             <Link
               to={withBase('/notifications')}
               className="text-muted-foreground hover:text-foreground transition-colors"
