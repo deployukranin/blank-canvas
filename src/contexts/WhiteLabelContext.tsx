@@ -1177,7 +1177,29 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     `;
   }, [config.colors]);
 
+  // Apply the icon uploaded in /customize as the browser favicon
+  useEffect(() => {
+    const iconUrl = config.logoImage;
+    if (!iconUrl) return;
+    const setLink = (rel: string) => {
+      let link = document.querySelector(`link[rel='${rel}']`) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        document.head.appendChild(link);
+      }
+      link.href = iconUrl;
+    };
+    // Remove static icons so the dynamic one wins
+    document.querySelectorAll("link[rel~='icon']").forEach((el) => {
+      if ((el as HTMLLinkElement).href !== iconUrl) el.parentElement?.removeChild(el);
+    });
+    setLink('icon');
+    setLink('apple-touch-icon');
+  }, [config.logoImage]);
+
   // Debounced save to database whenever config changes
+
   useEffect(() => {
     if (!initialLoadRef.current) return;
     
