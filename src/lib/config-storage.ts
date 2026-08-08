@@ -15,6 +15,7 @@ export type ConfigKey =
   | 'social_links'
   | 'platform_settings'
   | 'platform_plans'
+  | 'gamification_config'
   | 'content_settings';
 
 const CONFIG_ADMIN_ROLES = ['admin', 'creator', 'ceo', 'super_admin'] as const;
