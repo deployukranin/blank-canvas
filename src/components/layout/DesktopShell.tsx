@@ -39,6 +39,8 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
     .sort((a, b) => a.order - b.order);
 
   const storeName = store?.name || config.siteName || '';
+  // The favicon uploaded in /customize is the tenant brand mark — reuse it as the shell logo
+  const brandLogo = config.logoImage || store?.avatar_url || '';
   const homePath = withBase('/');
   const isHome = location.pathname === homePath || location.pathname === `${homePath}/`;
 
@@ -48,8 +50,8 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
       <aside className="w-72 shrink-0 flex flex-col border-r border-border/40 bg-card/40 backdrop-blur-xl sticky top-0 h-screen">
         <div className="p-7">
           <Link to={withBase('/')} className="flex items-center gap-3 mb-9">
-            {config.logoImage ? (
-              <img src={config.logoImage} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
+            {brandLogo ? (
+              <img src={brandLogo} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_-2px_hsl(var(--primary)/0.6)]">
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
@@ -127,8 +129,8 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
       <div className="flex-1 min-w-0 flex flex-col bg-gradient-to-b from-primary/[0.06] to-background">
         <header className="h-20 shrink-0 flex items-center justify-between px-10 border-b border-border/40 sticky top-0 z-40 bg-background/70 backdrop-blur-xl">
           <div className="flex items-center gap-4 min-w-0">
-            {config.logoImage ? (
-              <img src={config.logoImage} alt={storeName} className="h-8 w-8 rounded-lg object-cover" />
+            {brandLogo ? (
+              <img src={brandLogo} alt={storeName} className="h-8 w-8 rounded-lg object-cover" />
             ) : (
               <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary" />
