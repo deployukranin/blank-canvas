@@ -59,6 +59,54 @@ export async function ensureFolder(name: string, parentId: string): Promise<stri
   return created.id as string;
 }
 
+/** Sanitizes a tenant label so it is safe as a Drive folder name. */
+export function safeFolderName(label: string): string {
+  return label.replace(/[\\/\r\n']/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+}
+
+/**
+ * Folder for a tenant, named after the store (slug/name/email) instead of its UUID.
+ * Migrates any legacy folder still named with the raw store id.
+ */
+export async function ensureStoreFolder(
+  storeId: string,
+  label: string,
+  parentId: string,
+): Promise<string> {
+  const name = safeFolderName(label) || storeId;
+
+  const find = async (folderName: string): Promise<string | null> => {
+    const q = encodeURIComponent(
+      `name='${folderName.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
+    );
+    const res = await driveFetch(`/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1`);
+    if (!res.ok) {
+      console.error('drive list folder failed:', await readError(res));
+      return null;
+    }
+    const data = await res.json();
+    return data?.files?.length ? (data.files[0].id as string) : null;
+  };
+
+  const existing = await find(name);
+  if (existing) return existing;
+
+  // Legacy folder named with the store UUID → rename it, keeping the files
+  const legacy = await find(storeId);
+  if (legacy) {
+    const renameRes = await driveFetch(`/drive/v3/files/${encodeURIComponent(legacy)}?fields=id`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!renameRes.ok) console.error('drive folder rename failed:', await readError(renameRes));
+    return legacy;
+  }
+
+  return await ensureFolder(name, parentId);
+}
+
+
 /** Multipart upload of a small/medium file. Returns the Drive file id. */
 export async function uploadFile(
   bytes: Uint8Array,
