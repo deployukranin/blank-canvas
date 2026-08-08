@@ -664,6 +664,11 @@ export interface WhiteLabelConfig {
   logoImage: string;
   banners: BannerConfig[];
 
+  // Storefront layout variant
+  layout?: {
+    variant: 'classic' | 'spotlight' | 'magazine';
+  };
+
   // Hero Banner Text
   heroGreeting: string;
   heroSubtitle: string;
