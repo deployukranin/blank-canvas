@@ -80,8 +80,10 @@ const AdminDashboard: React.FC = () => {
         const payConf = await loadConfig<any>('payment_config', tenantStore.id);
         if (!cancelled) {
           setPaymentConfigured(!!(payConf?.stripe?.secretKey || payConf?.pixManual?.key));
+          setPaymentLoaded(true);
         }
       };
+
 
       loadTenantPaymentConfig();
       return () => { cancelled = true; };
