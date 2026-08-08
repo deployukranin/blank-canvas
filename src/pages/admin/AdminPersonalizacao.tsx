@@ -123,6 +123,18 @@ const AdminPersonalizacao: React.FC = () => {
     ? predefinedIcons.filter(name => name.toLowerCase().includes(iconSearch.toLowerCase()))
     : predefinedIcons;
 
+  /** Removes every stored object under `<storeId>/<folder>` (optionally keeping one file). */
+  const purgeStorageFolder = async (folder: string, keepName?: string, filterPrefix?: string) => {
+    if (!store?.id) return;
+    const dir = `${store.id}/${folder}`;
+    const { data: files } = await supabase.storage.from(BUCKET).list(dir, { limit: 100 });
+    if (!files?.length) return;
+    const targets = files
+      .filter(f => f.name !== keepName && (!filterPrefix || f.name.startsWith(filterPrefix)))
+      .map(f => `${dir}/${f.name}`);
+    if (targets.length) await supabase.storage.from(BUCKET).remove(targets);
+  };
+
   const handleIconUpload = async () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -140,8 +152,22 @@ const AdminPersonalizacao: React.FC = () => {
       }
       setIconUploading(true);
       try {
+        // Old icon versions are replaced, so they must not count against the quota
+        await purgeStorageFolder('platform-icon');
+        const current = await fetchStorageQuota(store.id);
+        if (current) setQuota(current);
+        if (!fitsInQuota(current, file.size)) {
+          toast({
+            title: t('admin.storage.quotaExceeded', 'Limite de armazenamento atingido'),
+            description: t('admin.storage.quotaExceededDesc', 'Você atingiu o limite do seu plano. Escolha um plano para liberar mais espaço.'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
         const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-        const path = `${store.id}/platform-icon/${Date.now()}.${ext}`;
+        const fileName = `${Date.now()}.${ext}`;
+        const path = `${store.id}/platform-icon/${fileName}`;
         const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
@@ -167,11 +193,13 @@ const AdminPersonalizacao: React.FC = () => {
 
   const handleRemoveUploadedIcon = async () => {
     if (store?.id) {
+      await purgeStorageFolder('platform-icon');
       await supabase.from('stores').update({ avatar_url: null }).eq('id', store.id);
       toast({ title: t('admin.platformIcon.removed', 'Icon removed') });
       window.location.reload();
     }
   };
+
 
   const handleSelectLucideIcon = (iconName: string) => {
     setConfig({
@@ -197,7 +225,12 @@ const AdminPersonalizacao: React.FC = () => {
   };
 
   const addBanner = () => { if (canAdd) setBanners(prev => [...prev, { id: generateId(), desktopUrl: '', mobileUrl: '', enabled: true }]); };
-  const removeBanner = (id: string) => setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
+  const removeBanner = (id: string) => {
+    setBanners(prev => { const next = prev.filter(b => b.id !== id); persistBanners(next); return next; });
+    // Free the storage used by the removed banner
+    purgeStorageFolder(id).then(() => fetchStorageQuota(store?.id)).then(q => q && setQuota(q));
+  };
+
   const updateBanner = (id: string, field: keyof BannerConfig, value: string | boolean, persist = false) => {
     setBanners(prev => {
       const next = prev.map(b => b.id === id ? { ...b, [field]: value } : b);
@@ -210,6 +243,9 @@ const AdminPersonalizacao: React.FC = () => {
     const uploadKey = `${bannerId}-${variant}`;
     setUploading(prev => ({ ...prev, [uploadKey]: true }));
     try {
+      // Replacing an image must not keep the previous file counting against the quota
+      await purgeStorageFolder(bannerId, undefined, `${variant}-`);
+
       // Enforce storage quota (trial stores are capped at 100MB total)
       const current = await fetchStorageQuota(store?.id);
       if (current) setQuota(current);
@@ -233,6 +269,7 @@ const AdminPersonalizacao: React.FC = () => {
       fetchStorageQuota(store?.id).then(q => q && setQuota(q));
     } catch (err: any) {
       toast({ title: t('admin.banners.uploadError', 'Upload failed'), description: err.message, variant: 'destructive' });
+
     } finally {
       setUploading(prev => ({ ...prev, [uploadKey]: false }));
     }
