@@ -185,7 +185,15 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
           </div>
         </header>
 
-        <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">{children}</main>
+        <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">
+          {isHome ? (
+            children
+          ) : (
+            <div className="rounded-[32px] border border-border/40 bg-card/30 backdrop-blur-xl shadow-2xl overflow-hidden [&_.pb-20]:pb-0 [&_.min-h-screen]:min-h-0">
+              {children}
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
