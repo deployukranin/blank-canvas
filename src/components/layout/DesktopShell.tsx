@@ -1,0 +1,183 @@
+import { ReactNode } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Bell, LogIn, Sparkles, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
+import { DynamicIcon } from '@/components/ui/DynamicIcon';
+import { Button } from '@/components/ui/button';
+import logo from '@/assets/mytinglebox-logo.png';
+
+const pathToI18nKey: Record<string, string> = {
+  '/': 'nav.home',
+  '/customs': 'nav.customs',
+  '/vip': 'nav.vip',
+  '/community': 'nav.community',
+  '/profile': 'nav.profile',
+  '/videos': 'nav.videos',
+  '/ideas': 'nav.ideas',
+  '/help': 'nav.help',
+  '/notifications': 'nav.notifications',
+  '/orders': 'nav.myOrders',
+  '/subscriptions': 'nav.subscriptions',
+};
+
+interface DesktopShellProps {
+  children: ReactNode;
+  title?: string;
+}
+
+/**
+ * Desktop-first application shell used by the "cinematic" storefront layout.
+ * Replaces the mobile header + bottom tab bar with a persistent sidebar and topbar.
+ */
+export const DesktopShell = ({ children, title }: DesktopShellProps) => {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const { config } = useWhiteLabel();
+  const { basePath, isTenantScope, store } = useTenant();
+  const { isAuthenticated, user } = useAuth();
+
+  const withBase = (path: string) => {
+    if (!isTenantScope) return path;
+    if (path === '/') return basePath || '/';
+    return `${basePath}${path}`;
+  };
+
+  const navItems = config.navigationTabs
+    .filter((tab) => tab.enabled && tab.path !== '/loja')
+    .sort((a, b) => a.order - b.order);
+
+  const storeName = config.siteName || store?.name || '';
+
+  return (
+    <div className="min-h-screen w-full bg-background flex">
+      {/* Persistent sidebar */}
+      <aside className="w-72 shrink-0 flex flex-col border-r border-border/40 bg-card/40 backdrop-blur-xl sticky top-0 h-screen">
+        <div className="p-7">
+          <Link to={withBase('/')} className="flex items-center gap-3 mb-9">
+            {config.logoImage ? (
+              <img src={config.logoImage} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_-2px_hsl(var(--primary)/0.6)]">
+                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              </div>
+            )}
+            <span className="text-lg font-display font-bold tracking-tight text-foreground truncate">
+              {storeName}
+            </span>
+          </Link>
+
+          <nav className="space-y-1.5">
+            {navItems.map((item) => {
+              const resolved = withBase(item.path);
+              const isActive =
+                location.pathname === resolved ||
+                (item.path === '/' && (location.pathname === basePath || location.pathname === '/'));
+              const key = pathToI18nKey[item.path];
+              const label = key ? t(key) : item.label;
+
+              return (
+                <Link
+                  key={item.id}
+                  to={resolved}
+                  className={`flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all border ${
+                    isActive
+                      ? 'bg-primary/10 text-primary font-semibold border-primary/20'
+                      : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-foreground/5'
+                  }`}
+                >
+                  <DynamicIcon icon={item.icon} size={18} />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="mt-auto p-5 space-y-4">
+          <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
+            <div className="relative z-10">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
+                {t('nav.vip')}
+              </p>
+              <p className="text-sm font-semibold text-primary-foreground mb-3">
+                {t('storefront.joinCommunityDesc')}
+              </p>
+              <Link to={withBase('/vip')}>
+                <Button size="sm" variant="secondary" className="w-full text-xs font-bold uppercase">
+                  {t('storefront.viewAll')}
+                </Button>
+              </Link>
+            </div>
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl" />
+          </div>
+
+          <Link
+            to={isAuthenticated ? withBase('/profile') : withBase('/login')}
+            className="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-foreground/5 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
+              <User className="w-5 h-5" />
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-semibold text-foreground truncate">
+                {isAuthenticated ? user?.email : t('storefront.signIn')}
+              </p>
+              <p className="text-[10px] uppercase font-bold tracking-tight text-muted-foreground">
+                {isAuthenticated ? t('nav.profile') : t('storefront.joinCommunity')}
+              </p>
+            </div>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main canvas */}
+      <div className="flex-1 min-w-0 flex flex-col bg-gradient-to-b from-primary/[0.06] to-background">
+        <header className="h-20 shrink-0 flex items-center justify-between px-10 border-b border-border/40 sticky top-0 z-40 bg-background/70 backdrop-blur-xl">
+          <div className="flex items-center gap-4 min-w-0">
+            <img src={logo} alt="MyTingleBox" className="h-7 w-auto opacity-70" />
+            {title && (
+              <>
+                <span className="h-6 w-px bg-border" />
+                <h1 className="font-display font-semibold text-lg text-foreground truncate">{title}</h1>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-5">
+            <Link
+              to={withBase('/notifications')}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={t('nav.notifications')}
+            >
+              <Bell className="w-5 h-5" />
+            </Link>
+            <span className="h-8 w-px bg-border" />
+            {isAuthenticated ? (
+              <Link to={withBase('/profile')}>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <User className="w-4 h-4" />
+                  {t('nav.profile')}
+                </Button>
+              </Link>
+            ) : (
+              <Link to={withBase('/login')}>
+                <Button size="sm" className="gap-2 font-semibold">
+                  <LogIn className="w-4 h-4" />
+                  {t('storefront.signIn')}
+                </Button>
+              </Link>
+            )}
+          </div>
+        </header>
+
+        <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">{children}</main>
+      </div>
+    </div>
+  );
+};
+
+export default DesktopShell;
