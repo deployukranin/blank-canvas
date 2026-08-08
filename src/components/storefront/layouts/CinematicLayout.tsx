@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import bannerStudio from '@/assets/banner-studio.jpg';
+import { translatePathLabel } from '@/lib/nav-i18n';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 const VideoCardItem = ({
@@ -132,7 +133,7 @@ export const CinematicLayout = ({
                 <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
                   <DynamicIcon icon={action.icon} size={20} className="text-primary" />
                 </div>
-                <span className="text-sm font-semibold text-foreground">{action.label}</span>
+                <span className="text-sm font-semibold text-foreground">{translatePathLabel(t, action.path, action.label)}</span>
               </div>
             </Link>
           </motion.div>
