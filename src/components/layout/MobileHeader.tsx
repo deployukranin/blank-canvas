@@ -3,6 +3,7 @@ import { ArrowLeft, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import logo from '@/assets/mytinglebox-logo.png';
 
 interface MobileHeaderProps {
@@ -34,16 +35,16 @@ export const MobileHeader = ({ title, showBack }: MobileHeaderProps) => {
           {title || ''}
         </h1>
 
-        {/* Login button for unauthenticated users */}
-        {!isAuthenticated ? (
-          <Link to={loginPath}>
-            <Button variant="ghost" size="sm" className="text-primary h-9 w-9 p-0">
-              <LogIn className="w-4 h-4" />
-            </Button>
-          </Link>
-        ) : (
-          <div className="w-10" />
-        )}
+        <div className="flex items-center gap-1">
+          <LanguageSelector variant="store" />
+          {!isAuthenticated && (
+            <Link to={loginPath}>
+              <Button variant="ghost" size="sm" className="text-primary h-9 w-9 p-0">
+                <LogIn className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
