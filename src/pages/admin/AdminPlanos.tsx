@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getPublicOrigin, publicUrl } from '@/lib/public-url';
 
 interface PlanLimits {
   maxUsers?: number;
@@ -142,7 +143,7 @@ const AdminPlanos: React.FC = () => {
 
     setCheckoutPlanId(planId);
     try {
-      const returnBase = window.location.origin + window.location.pathname;
+      const returnBase = getPublicOrigin() + window.location.pathname;
       const { data, error } = await supabase.functions.invoke('platform-subscription-checkout', {
         body: {
           store_id: storeId,

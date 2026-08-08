@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackConversion } from "@/lib/tracking";
+import { getPublicOrigin, publicUrl } from '@/lib/public-url';
 
 const ClientAuth = () => {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ const ClientAuth = () => {
 
     setIsSubmitting(true);
     try {
-      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}${homePath}`, {
+      const result = await signUp(signupEmail, signupPassword, `${getPublicOrigin()}${homePath}`, {
         full_name: signupName.trim(),
       });
 

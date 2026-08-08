@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import { useWhiteLabel } from "@/contexts/WhiteLabelContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { useYouTubeVideos } from "@/hooks/use-youtube-videos";
 import { VideoGalleryByCategory } from "@/components/video/VideoGalleryByCategory";
 import { VideoWatchModal } from "@/components/video/VideoWatchModal";
@@ -21,6 +22,7 @@ const normalizeForSearch = (value: string) =>
 
 export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
   const { config } = useWhiteLabel();
+  const { store } = useTenant();
   const { t } = useTranslation();
   const channelId = config.youtube?.channelId?.trim() || "";
 
@@ -62,7 +64,7 @@ export const VideoGalleryPanel = ({ className }: VideoGalleryPanelProps) => {
   );
 
   const title = config.youtube?.enabled
-    ? t('storefront.galleryTitle', { name: config.siteName })
+    ? t('storefront.galleryTitle', { name: store?.name || config.siteName })
     : t('storefront.forYou');
 
   const categorization = useMemo(

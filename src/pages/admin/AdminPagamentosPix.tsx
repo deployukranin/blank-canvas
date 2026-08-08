@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
+import { publicUrl } from '@/lib/public-url';
 
 export type PaymentCurrency = 'BRL' | 'USD' | 'EUR';
 
@@ -111,7 +112,7 @@ const AdminPagamentosPix = () => {
     }
     setConnectingStripe(true);
     try {
-      const returnUrl = window.location.href;
+      const returnUrl = publicUrl(window.location.pathname);
       const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
         body: { store_id: storeId, return_url: returnUrl },
       });

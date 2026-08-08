@@ -15,6 +15,7 @@ import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@
 import { trackConversion } from "@/lib/tracking";
 import { Container, Grid } from "@/components/layout/primitives";
 import platformLogo from "@/assets/mytinglebox-logo.png";
+import { getPublicOrigin, publicUrl } from '@/lib/public-url';
 
 const Starfield = () => (
   <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
@@ -344,7 +345,7 @@ const Auth = () => {
         return;
       }
 
-      const result = await signUp(signupEmail, signupPassword, `${window.location.origin}/auth`, {
+      const result = await signUp(signupEmail, signupPassword, `${getPublicOrigin()}/auth`, {
         full_name: storeName.trim(),
       });
 
