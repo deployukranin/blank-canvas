@@ -26,13 +26,15 @@ const pathToI18nKey: Record<string, string> = {
 interface DesktopShellProps {
   children: ReactNode;
   title?: string;
+  /** Render children without the framed card wrapper */
+  fullBleed?: boolean;
 }
 
 /**
  * Desktop-first application shell used by the "cinematic" storefront layout.
  * Replaces the mobile header + bottom tab bar with a persistent sidebar and topbar.
  */
-export const DesktopShell = ({ children, title }: DesktopShellProps) => {
+export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const { config } = useWhiteLabel();
@@ -185,7 +187,7 @@ export const DesktopShell = ({ children, title }: DesktopShellProps) => {
         </header>
 
         <main className="flex-1 px-10 py-8 max-w-[1600px] w-full mx-auto">
-          {isHome ? (
+          {isHome || fullBleed ? (
             children
           ) : (
             <div className="rounded-[32px] border border-border/40 bg-card/30 backdrop-blur-xl shadow-2xl overflow-hidden [&_.pb-20]:pb-0 [&_.min-h-screen]:min-h-0">
