@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 import { MobileHeader } from './MobileHeader';
 import { DesktopShell } from './DesktopShell';
+import { CinematicMobileShell } from './CinematicMobileShell';
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTenant } from '@/contexts/TenantContext';
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
