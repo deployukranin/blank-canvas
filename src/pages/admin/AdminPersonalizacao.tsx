@@ -376,7 +376,7 @@ const AdminPersonalizacao: React.FC = () => {
                     <Upload className="w-4 h-4 text-primary" />
                     {t('admin.platformIcon.uploadTitle', 'Upload Custom Icon')}
                   </h3>
-                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.uploadHint', 'PNG, JPG or WebP. Recommended: 512×512px, max 2MB.')}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.platformIcon.uploadHint', 'PNG, JPG or WebP. Recommended: 512×512px, max 50MB.')}</p>
                   <div className="flex items-center gap-3">
                     <Button onClick={handleIconUpload} variant="outline" size="sm" disabled={iconUploading} className="gap-2">
                       {iconUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
