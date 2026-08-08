@@ -143,23 +143,33 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // Dynamically set page title to the store name
         document.title = data.name;
 
-        // Dynamically set favicon to the store's avatar
-        const hasCustomIcon = !!document.querySelector("link[data-source='whitelabel']");
-        if (data.avatar_url && !hasCustomIcon) {
-          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
-          if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-          }
-          link.href = data.avatar_url;
-          link.type = 'image/png';
+        // Each tenant owns its favicon. Remove every static/previous-tenant icon
+        // before installing the icon saved in /customize.
+        if (data.avatar_url) {
+          document.querySelectorAll("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='mask-icon']")
+            .forEach((element) => element.remove());
 
-          // Also update apple-touch-icon
-          let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null;
-          if (appleLink) {
-            appleLink.href = data.avatar_url;
-          }
+          const cacheSeparator = data.avatar_url.includes('?') ? '&' : '?';
+          const tenantIconUrl = `${data.avatar_url}${cacheSeparator}tenant=${encodeURIComponent(data.id)}`;
+          const iconLink = document.createElement('link');
+          iconLink.rel = 'icon';
+          iconLink.type = 'image/png';
+          iconLink.href = tenantIconUrl;
+          iconLink.dataset.source = 'tenant';
+          document.head.appendChild(iconLink);
+
+          const shortcutLink = document.createElement('link');
+          shortcutLink.rel = 'shortcut icon';
+          shortcutLink.type = 'image/png';
+          shortcutLink.href = tenantIconUrl;
+          shortcutLink.dataset.source = 'tenant';
+          document.head.appendChild(shortcutLink);
+
+          const appleLink = document.createElement('link');
+          appleLink.rel = 'apple-touch-icon';
+          appleLink.href = tenantIconUrl;
+          appleLink.dataset.source = 'tenant';
+          document.head.appendChild(appleLink);
         }
 
         // Resolve theme color from cached whitelabel config
