@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, Save, Trophy, Award, Sparkles } from 'lucide-react';
+import { Loader2, Save, Award, Sparkles } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -13,10 +12,8 @@ import { useTenant } from '@/contexts/TenantContext';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
 import {
   DEFAULT_GAMIFICATION_CONFIG,
-  REPUTATION_EVENTS,
   REWARD_OPTIONS,
   type GamificationConfig,
-  type ReputationEventType,
   type RewardId,
 } from '@/lib/gamification';
 
@@ -60,9 +57,6 @@ const AdminGamification: React.FC = () => {
       setIsSaving(false);
     }
   };
-
-  const updatePoints = (event: ReputationEventType, value: number) =>
-    setConfig((c) => ({ ...c, points: { ...c.points, [event]: Math.max(0, value) } }));
 
   const updateLevel = (index: number, patch: Partial<GamificationConfig['levels'][number]>) =>
     setConfig((c) => ({ ...c, levels: c.levels.map((l, i) => (i === index ? { ...l, ...patch } : l)) }));
