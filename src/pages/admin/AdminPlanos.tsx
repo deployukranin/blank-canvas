@@ -290,7 +290,7 @@ const AdminPlanos: React.FC = () => {
                   </ul>
 
                   <Button
-                    className="w-full bg-primary hover:bg-primary/90 py-3 text-base font-semibold"
+                    className="w-full bg-primary hover:bg-primary/90 py-3 text-base font-semibold rounded-full"
                     disabled={currentPlan === plan.id || checkoutPlanId !== null}
                     onClick={() => handlePayment(plan.id)}
                   >
