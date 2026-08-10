@@ -448,7 +448,7 @@ export function YouTubeCategoryManager({
                               <SelectContent>
                                 <SelectItem value={NONE_VALUE}>{t("admin.noCategory")}</SelectItem>
                                 {categoriesSorted.map((c) => (
-                                  <SelectItem key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.name}</SelectItem>
+                                  <SelectItem key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{catLabel(c)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
