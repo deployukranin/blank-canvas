@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { PROFILE_UPDATED_EVENT } from '@/lib/profile-events';
 
 export interface Profile {
   id: string;
@@ -75,6 +76,12 @@ export const useProfile = () => {
       supabase.removeChannel(channel);
     };
   }, [user, isAuthenticated, fetchProfile]);
+
+  useEffect(() => {
+    const refresh = () => void fetchProfile();
+    window.addEventListener(PROFILE_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(PROFILE_UPDATED_EVENT, refresh);
+  }, [fetchProfile]);
 
   return { profile, isLoading, refetch: fetchProfile };
 };

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { notifyProfileUpdated } from '@/lib/profile-events';
 
 interface HandleSelectorProps {
   currentHandle?: string | null;
@@ -60,6 +61,7 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
       });
 
       onHandleSet(savedHandle);
+      notifyProfileUpdated();
     } catch (err) {
       console.error('Error setting handle:', err);
       setError(t('profile.handle.error', 'Could not set your username'));
