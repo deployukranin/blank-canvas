@@ -13,10 +13,16 @@ export interface Profile {
   handle_set_at: string | null;
 }
 
+// Module-level cache so the profile survives route changes (shells remount per page)
+const profileCache = new Map<string, Profile>();
+
 export const useProfile = () => {
   const { user, isAuthenticated } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(() =>
+    user?.id ? profileCache.get(user.id) ?? null : null
+  );
+  const [isLoading, setIsLoading] = useState(() => !(user?.id && profileCache.has(user.id)));
+
 
   const fetchProfile = useCallback(async () => {
     if (!isAuthenticated || !user) {
