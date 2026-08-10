@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
 
 import { motion } from 'framer-motion';
-import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon, LayoutGrid } from 'lucide-react';
+import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon, LayoutGrid, Smile } from 'lucide-react';
 import { LayoutPicker } from '@/components/admin/LayoutPicker';
+import { ReactionsEditor } from '@/components/admin/ReactionsEditor';
 import * as LucideIcons from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
