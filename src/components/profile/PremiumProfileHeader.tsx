@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { useProfileCustomization, MAX_PROFILE_MEDIA_BYTES } from '@/hooks/use-profile-customization';
+import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import type { ReputationSummary } from '@/lib/gamification';
 import defaultBanner from '@/assets/default-profile-banner.jpg.asset.json';
 import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
@@ -154,14 +154,10 @@ export const PremiumProfileHeader = ({
           )}
         </div>
 
-        {!isVIP ? (
+        {!isVIP && (
           <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
             {t('profile.premium.teaser', 'VIP members can set a custom banner and avatar (image or GIF).')}
-          </p>
-        ) : (
-          <p className="text-[11px] text-muted-foreground pt-1">
-            {t('profile.premium.limits', 'JPG, PNG, WEBP or GIF up to {{mb}}MB.', { mb: Math.round(MAX_PROFILE_MEDIA_BYTES / (1024 * 1024)) })}
           </p>
         )}
       </div>
