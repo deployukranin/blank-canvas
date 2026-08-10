@@ -1130,7 +1130,8 @@
     "trending": "Tendencias",
     "endOfList": "Fin de la lista",
     "ideasIntro": "Ayuda a definir el próximo video. La comunidad vota las mejores sugerencias.",
-    "ideasEmptyDesc": "Sé el primero en sugerir algo nuevo usando el formulario de la izquierda."
+    "ideasEmptyDesc": "Sé el primero en sugerir algo nuevo usando el formulario de la izquierda.",
+    "alreadyReported": "Ya denunciaste este contenido."
   },
   "customs": {
     "videos": "Videos",
@@ -1561,5 +1562,56 @@
     "newDuration": "Nueva duración",
     "newRule": "Nueva regla",
     "audioUnsupported": "Tu navegador no admite audio."
+  },
+  "reportReasons": {
+    "spam": "Spam o publicidad",
+    "inappropriate": "Contenido inapropiado o sexual",
+    "harassment": "Acoso o discurso de odio",
+    "personalData": "Divulgación de datos personales",
+    "misleading": "Contenido engañoso",
+    "other": "Otro motivo"
+  },
+  "filter": {
+    "blockedTitle": "Contenido bloqueado",
+    "generic": "No se permiten contactos ni enlaces.",
+    "noContactInfo": "No incluyas enlaces, correos ni teléfonos.",
+    "links": "No se permiten enlaces.",
+    "email": "No se permiten correos electrónicos.",
+    "phone": "No se permiten números de teléfono.",
+    "social": "No se permiten perfiles de redes sociales."
+  },
+  "bugs": {
+    "pageTitle": "Reportes de errores",
+    "trigger": "Reportar un error",
+    "dialogTitle": "Reportar un error",
+    "dialogDesc": "Cuéntanos qué pasó. No incluyas datos personales.",
+    "category": "¿Qué ocurrió?",
+    "severity": "¿Qué tan grave es?",
+    "description": "Detalles (opcional)",
+    "submit": "Enviar reporte",
+    "sent": "Error reportado",
+    "sentDesc": "¡Gracias! Nuestro equipo lo revisará.",
+    "empty": "Aún no hay reportes",
+    "loadError": "No se pudieron cargar los reportes",
+    "adminNote": "Nota interna",
+    "cat": {
+      "pageLoad": "La página no carga",
+      "payment": "Error de pago",
+      "media": "Problema de video o audio",
+      "account": "Inicio de sesión o cuenta",
+      "layout": "Diseño roto",
+      "other": "Otro"
+    },
+    "sev": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "status": {
+      "open": "Abierto",
+      "in_review": "En revisión",
+      "resolved": "Resuelto",
+      "dismissed": "Descartado"
+    }
   }
 }
