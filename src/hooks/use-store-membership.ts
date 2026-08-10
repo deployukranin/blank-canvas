@@ -37,9 +37,24 @@ export function useStoreMembership() {
             .insert({ store_id: storeId, user_id: userId });
           await supabase.rpc("assign_client_role" as any, { p_store_id: storeId });
         }
+
+        // Make sure a profile row exists so the user shows up with a name in
+        // the admin panel (the @ handle is still chosen by the user later).
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (!profile) {
+          const fallbackName = (user?.email || "").split("@")[0] || null;
+          await supabase
+            .from("profiles")
+            .insert({ user_id: userId, display_name: fallbackName });
+        }
       } catch {
         // membership registration is best-effort
       }
     })();
-  }, [store?.id, user?.id]);
+  }, [store?.id, user?.id, user?.email]);
 }
