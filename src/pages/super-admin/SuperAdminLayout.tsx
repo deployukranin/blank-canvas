@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Store, TrendingUp, Settings, LogOut, Menu, X, ArrowLeft,
-  LifeBuoy, Crown, Users, Handshake, Gift, Radar, ShieldAlert,
+  LifeBuoy, Crown, Users, Handshake, Gift, Radar, ShieldAlert, Bug,
   PanelLeftClose, PanelLeftOpen, Search, ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -64,6 +64,7 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
         { path: '/admin-master/partners', icon: Handshake, label: t('nav.partners') },
         { path: '/admin-master/referrals', icon: Gift, label: t('nav.referrals') },
         { path: '/admin-master/tracking', icon: Radar, label: t('superAdmin.tracking', 'Tracking') },
+        { path: '/admin-master/bugs', icon: Bug, label: t('bugs.pageTitle', 'Bug reports') },
         { path: '/admin-master/csp', icon: ShieldAlert, label: 'CSP Reports' },
         { path: '/admin-master/plans', icon: Crown, label: t('superAdmin.planConfig.navLabel', 'Planos') },
         { path: '/admin-master/ranking', icon: TrendingUp, label: t('superAdmin.ranking') },
