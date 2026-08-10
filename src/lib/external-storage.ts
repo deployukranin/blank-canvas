@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { maskMediaUrl } from '@/lib/public-url';
 
 const VIP_MEDIA_BUCKET = 'vip-media';
 const DRIVE_PREFIX = 'gdrive:';
@@ -76,7 +77,7 @@ export async function uploadPreviewMedia(file: File, storeId: string): Promise<U
 export async function uploadConfigAsset(file: File, storeId: string): Promise<{ url: string; ref: string }> {
   const { ref, url } = await uploadToDrive(file, storeId, 'config');
   if (!url) throw new Error('Falha ao gerar link do arquivo');
-  return { url, ref };
+  return { url: maskMediaUrl(url)!, ref };
 }
 
 /** True for legacy assets still stored in the Supabase `banners` bucket. */
@@ -158,7 +159,7 @@ export async function getVipMediaSignedUrl(pathOrUrl: string): Promise<string | 
       body: { ref: pathOrUrl },
     });
     if (error || !data?.success || !data?.url) return null;
-    return data.url as string;
+    return maskMediaUrl(data.url as string);
   }
 
   const filePath = extractFilePath(pathOrUrl);
@@ -183,7 +184,7 @@ export async function getDriveMedia(
   if (isDriveRef(ref)) {
     const { data, error } = await supabase.functions.invoke('drive-sign', { body: { ref } });
     if (error || !data?.success || !data?.url) return null;
-    return { url: data.url as string, mimeType: (data.mimeType as string) || null };
+    return { url: maskMediaUrl(data.url as string)!, mimeType: (data.mimeType as string) || null };
   }
   const url = await getVipMediaSignedUrl(ref);
   return url ? { url, mimeType: null } : null;
