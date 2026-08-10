@@ -11,7 +11,7 @@
 
 export const config = {
   // Match any path that doesn't contain a dot (no extensions) and isn't /api or /assets
-  matcher: ['/((?!api/|assets/|_vercel/|.*\\..*).*)'],
+  matcher: ['/((?!api/|media|assets/|_vercel/|.*\\..*).*)'],
 };
 
 const RESERVED = new Set([
