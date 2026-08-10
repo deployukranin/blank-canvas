@@ -7,6 +7,7 @@ import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { VipMediaViewer } from "@/components/vip/VipMediaViewer";
+import { VipMediaEmbed } from "@/components/vip/VipMediaEmbed";
 import { useTenant } from "@/contexts/TenantContext";
 
 interface VipContent {
@@ -132,11 +133,10 @@ export const VIPAreaContent = () => {
               {item.description}
             </p>
             {item.video_url && (
-              <Button className="w-full" onClick={() => setViewerMedia({ ref: item.video_url, title: item.title })}>
-                {t('storefront.watchNow')}
-              </Button>
+              <VipMediaEmbed mediaRef={item.video_url} title={item.title} />
             )}
           </CardContent>
+
         </Card>
       ))}
       

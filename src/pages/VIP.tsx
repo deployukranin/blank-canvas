@@ -12,6 +12,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { VipMediaViewer } from '@/components/vip/VipMediaViewer';
+import { VipMediaEmbed } from '@/components/vip/VipMediaEmbed';
 import { formatPriceForLang, displayCurrencyForLang } from '@/lib/currency';
 import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import {
@@ -450,16 +451,9 @@ const VIPPage = () => {
                         <h4 className="font-semibold text-sm">{item.title}</h4>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{item.content}</p>
                         {item.media_url && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mt-2 h-7 text-xs"
-                            onClick={() => setViewerMedia({ ref: item.media_url!, title: item.title })}
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            View Media
-                          </Button>
+                          <VipMediaEmbed mediaRef={item.media_url} title={item.title} className="mt-3" />
                         )}
+
                         <span className="text-[10px] text-muted-foreground block mt-2">
                           {new Date(item.created_at).toLocaleDateString()}
                         </span>
