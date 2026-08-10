@@ -23,14 +23,14 @@ export const useUserHandles = (userIds: string[]) => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, handle')
-          .in('id', userIds);
+          .select('user_id, handle')
+          .in('user_id', userIds);
 
         if (error) throw error;
 
         const handleMap: HandleMap = {};
         data?.forEach((profile) => {
-          handleMap[profile.id] = profile.handle;
+          handleMap[profile.user_id] = profile.handle;
         });
 
         setHandles(handleMap);
