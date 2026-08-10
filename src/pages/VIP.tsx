@@ -478,6 +478,7 @@ const VIPPage = () => {
 
         </div>
       {adultWarningDialog}
+      <VipMediaViewer mediaRef={viewerMedia?.ref ?? null} title={viewerMedia?.title} onClose={() => setViewerMedia(null)} />
       </MobileLayout>
     );
   }
@@ -693,6 +694,7 @@ const VIPPage = () => {
         </DialogContent>
       </Dialog>
       {adultWarningDialog}
+      <VipMediaViewer mediaRef={viewerMedia?.ref ?? null} title={viewerMedia?.title} onClose={() => setViewerMedia(null)} />
     </MobileLayout>
   );
 };
