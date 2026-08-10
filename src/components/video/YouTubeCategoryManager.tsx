@@ -353,7 +353,7 @@ export function YouTubeCategoryManager({
                               ) : (
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-sm">
-                                    {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                                    {cat.icon ? `${cat.icon} ` : ""}{catLabel(cat)}
                                   </span>
                                   <Button
                                     variant="ghost"
