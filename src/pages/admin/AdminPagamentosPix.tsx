@@ -81,29 +81,44 @@ const AdminPagamentosPix = () => {
   });
 
   // Check Stripe Connect status
-  useEffect(() => {
+  const checkStripeStatus = useCallback(async (opts?: { silent?: boolean }) => {
     if (!storeId) return;
-    const checkStatus = async () => {
-      setStripeLoading(true);
-      try {
-        const { data, error } = await supabase.functions.invoke('stripe-connect-status', {
-          body: { store_id: storeId },
-        });
-        if (!error && data) {
-          setStripeStatus(data);
-          // If connected and charges enabled, auto-set gateway
-          if (data.connected && data.charges_enabled && config.activeGateway !== 'stripe') {
-            setConfig(prev => ({ ...prev, activeGateway: 'stripe' as const }));
-          }
+    if (!opts?.silent) setStripeLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-connect-status', {
+        body: { store_id: storeId },
+      });
+      if (!error && data) {
+        setStripeStatus(data);
+        // If connected and charges enabled, auto-set gateway
+        if (data.connected && data.charges_enabled) {
+          setConfig(prev => (prev.activeGateway === 'stripe' ? prev : { ...prev, activeGateway: 'stripe' as const }));
         }
-      } catch (err) {
-        console.error('Error checking Stripe status:', err);
-      } finally {
-        setStripeLoading(false);
       }
+    } catch (err) {
+      console.error('Error checking Stripe status:', err);
+    } finally {
+      setStripeLoading(false);
+    }
+  }, [storeId, setConfig]);
+
+  useEffect(() => {
+    checkStripeStatus();
+  }, [checkStripeStatus]);
+
+  // Re-check when the user comes back from the Stripe onboarding tab
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkStripeStatus({ silent: true });
     };
-    checkStatus();
-  }, [storeId]);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [checkStripeStatus]);
+
 
   const handleConnectStripe = async () => {
     if (!storeId) {
