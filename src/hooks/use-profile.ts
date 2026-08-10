@@ -29,7 +29,7 @@ export const useProfile = () => {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('user_id', user.id)
           .maybeSingle();
 
         if (error) throw error;
@@ -43,19 +43,21 @@ export const useProfile = () => {
 
     fetchProfile();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates (unique channel per hook instance to avoid
+    // "cannot add postgres_changes callbacks after subscribe()" crashes when the
+    // hook is mounted in several components at once).
     const channel = supabase
-      .channel('profile-changes')
+      .channel(`profile-changes-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'profiles',
-          filter: `id=eq.${user.id}`,
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          if (payload.eventType === 'UPDATE') {
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setProfile(payload.new as Profile);
           }
         }
@@ -63,7 +65,7 @@ export const useProfile = () => {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [user, isAuthenticated]);
 
