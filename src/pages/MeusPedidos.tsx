@@ -197,18 +197,9 @@ const MeusPedidosPage = () => {
     return statusConfig[status] || statusConfig.pending;
   };
 
-  const handleOpenDelivery = async (order: DBOrder) => {
-    if (!order.delivery_file_id) return;
-    setLoadingDelivery(true);
-    try {
-      const url = await getDeliverySignedUrl(order.delivery_file_id);
-      if (url) {
-        window.open(url, '_blank', 'noopener');
-      }
-    } finally {
-      setLoadingDelivery(false);
-    }
-  };
+  // Delivered files are premium content: they are streamed inline only,
+  // never opened as a standalone tab/download.
+
 
   // Resolve the delivered media so it can be played inline (no download needed)
   useEffect(() => {
