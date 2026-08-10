@@ -123,7 +123,34 @@ export const CinematicLayout = ({
         </div>
       </motion.section>
 
+      {/* News — kept near the top so members see updates first */}
+      {feedPosts.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-end justify-between mb-5 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-display font-black text-foreground tracking-tight">
+              {t('storefront.news')}
+            </h2>
+            <Link to={withBase('/community')} className="text-[11px] md:text-sm font-bold uppercase tracking-widest shrink-0 text-muted-foreground hover:text-primary transition-colors">
+              {t('storefront.viewAllNews')}
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            {feedPosts.slice(0, 3).map((post) => (
+              <div key={post.id} className="rounded-3xl p-5 md:p-6 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/30 transition-colors">
+                <p className="font-semibold text-foreground mb-2 line-clamp-1">{post.title}</p>
+                <p className="text-sm text-muted-foreground line-clamp-3">{post.content}</p>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
       {/* Quick actions row */}
+
       <section className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
 
         {quickActions.map((action, index) => (
