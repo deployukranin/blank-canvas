@@ -59,6 +59,9 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const homePath = withBase('/');
   const isHome = location.pathname === homePath || location.pathname === `${homePath}/`;
   const accountAvatar = customization.avatar_url || profile?.avatar_url || user?.avatar || defaultAvatar.url;
+  const accountName = profile?.handle
+    ? `@${profile.handle}`
+    : profile?.display_name || user?.username || t('profile.member', 'Member');
   const [visibleAccountAvatar, setVisibleAccountAvatar] = useState(accountAvatar);
   useEffect(() => setVisibleAccountAvatar(accountAvatar), [accountAvatar]);
 
@@ -155,7 +158,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
               {isAuthenticated ? (
                 <img
                   src={visibleAccountAvatar}
-                  alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')}
+                  alt={accountName}
                   className="w-full h-full object-cover"
                   onError={() => setVisibleAccountAvatar(profile?.avatar_url || user?.avatar || defaultAvatar.url)}
                 />
@@ -166,8 +169,8 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
             <div className="flex-1 overflow-hidden">
               <p className="text-sm font-semibold text-foreground truncate">
                 {isAuthenticated
-                  ? profile?.handle
-                    ? `@${profile.handle}`
+                  ? profile?.handle || profile?.display_name || user?.username
+                    ? accountName
                     : profileLoading
                       ? '\u00A0'
                       : t('profile.member', 'Member')

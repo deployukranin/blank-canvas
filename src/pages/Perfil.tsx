@@ -143,7 +143,7 @@ const PerfilPage = () => {
         <PremiumProfileHeader
           isVIP={isVIP}
           vipPath={withBase('/vip')}
-          fallbackName={t('profile.member', 'Member')}
+          fallbackName={profile?.display_name || user?.username || t('profile.member', 'Member')}
           handle={visibleHandle}
           fallbackAvatar={profile?.avatar_url || user?.avatar}
           reputation={reputation}
