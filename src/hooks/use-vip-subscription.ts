@@ -38,17 +38,24 @@ export interface VIPChargeResult {
   error?: string;
 }
 
+// Module-level cache so the VIP status survives route changes (no UI flicker)
+const vipCache = new Map<string, VIPSubscription | null>();
+
 export const useVIPSubscription = () => {
   const { session } = useAuth();
   const { toast } = useToast();
-  const [subscription, setSubscription] = useState<VIPSubscription | null>(null);
-  const [isVIP, setIsVIP] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedUserId = session?.user?.id;
+  const hasCache = Boolean(cachedUserId && vipCache.has(cachedUserId));
+  const cached = cachedUserId ? vipCache.get(cachedUserId) ?? null : null;
+  const [subscription, setSubscription] = useState<VIPSubscription | null>(cached);
+  const [isVIP, setIsVIP] = useState(Boolean(cached));
+  const [isLoading, setIsLoading] = useState(!hasCache);
   const [vipContent, setVIPContent] = useState<VIPContent[]>([]);
 
   // Get the real Supabase user ID from session
   const userId = session?.user?.id;
   const isAuthenticated = !!session?.user;
+
 
   // Fetch user's VIP subscription
   useEffect(() => {
