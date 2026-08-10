@@ -11,7 +11,7 @@
 
 export const config = {
   // Match any path that doesn't contain a dot (no extensions) and isn't /api or /assets
-  matcher: ['/((?!api/|media|assets/|_vercel/|.*\\..*).*)'],
+  matcher: ['/((?!api/|assets/|_vercel/|.*\\..*).*)'],
 };
 
 const RESERVED = new Set([
@@ -22,6 +22,39 @@ const RESERVED = new Set([
 const SUPABASE_URL = 'https://lkwvlzcapuptcxvwukcm.supabase.co';
 const SUPABASE_ANON =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxrd3ZsemNhcHVwdGN4dnd1a2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MjExNTQsImV4cCI6MjA4NDQ5NzE1NH0.owIJ82z7AxBazVKp2UxU_44WC2myqjL8ThX7ixNcDq8';
+
+const DRIVE_MEDIA_URL = `${SUPABASE_URL}/functions/v1/drive-media`;
+
+function mediaViewerHtml(url: URL): string {
+  const rawUrl = new URL(url.toString());
+  rawUrl.searchParams.set('raw', '1');
+  const safeRawUrl = escapeAttribute(`${rawUrl.pathname}${rawUrl.search}`);
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyTingleBox Media</title><meta name="theme-color" content="#0a0612"><link rel="shortcut icon" href="/favicon.ico?v=8"><link rel="icon" type="image/png" href="/favicon.png?v=8"><link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8"><style>html,body{width:100%;height:100%;margin:0;background:#09070d}body{display:grid;place-items:center}object{width:100%;height:100%;border:0}p{font:14px system-ui;color:#fff}a{color:#a78bfa}</style></head><body><object data="${safeRawUrl}"><p>Não foi possível exibir esta mídia. <a href="${safeRawUrl}">Abrir arquivo</a></p></object></body></html>`;
+}
+
+async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
+  const isRaw = url.searchParams.get('raw') === '1';
+  const isDocument = req.headers.get('sec-fetch-dest') === 'document';
+  if (isDocument && !isRaw) {
+    return new Response(mediaViewerHtml(url), {
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'no-store, no-cache, must-revalidate',
+        'x-content-type-options': 'nosniff',
+      },
+    });
+  }
+
+  const upstream = new URL(DRIVE_MEDIA_URL);
+  url.searchParams.forEach((value, key) => {
+    if (key !== 'raw') upstream.searchParams.append(key, value);
+  });
+  return fetch(upstream, {
+    method: req.method,
+    headers: req.headers,
+    redirect: 'follow',
+  });
+}
 
 type ThemeConfig = {
   colors?: {
@@ -122,6 +155,9 @@ function buildStyle(cfg: ThemeConfig): { css: string; mode: 'dark' | 'light'; hu
 
 export default async function middleware(req: Request): Promise<Response> {
   const url = new URL(req.url);
+  if (url.pathname === '/media') {
+    return handleMediaRequest(req, url);
+  }
   const seg = (url.pathname.split('/').filter(Boolean)[0] || '').toLowerCase();
   const slug = seg && !RESERVED.has(seg) ? seg : null;
 
