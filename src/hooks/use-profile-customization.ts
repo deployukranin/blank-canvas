@@ -23,14 +23,20 @@ const EMPTY: ProfileCustomization = {
 export const MAX_PROFILE_MEDIA_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
+// Module-level cache keyed by user+store so the avatar survives route changes
+const customizationCache = new Map<string, ProfileCustomization>();
+
 export const useProfileCustomization = () => {
   const { session } = useAuth();
   const { store } = useTenant();
   const userId = session?.user?.id ?? null;
   const storeId = store?.id ?? null;
+  const cacheKey = userId && storeId ? `${userId}:${storeId}` : null;
 
-  const [customization, setCustomization] = useState<ProfileCustomization>(EMPTY);
-  const [isLoading, setIsLoading] = useState(true);
+  const [customization, setCustomization] = useState<ProfileCustomization>(
+    () => (cacheKey ? customizationCache.get(cacheKey) : undefined) ?? EMPTY
+  );
+  const [isLoading, setIsLoading] = useState(() => !(cacheKey && customizationCache.has(cacheKey)));
   const [isSaving, setIsSaving] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -39,15 +45,19 @@ export const useProfileCustomization = () => {
       setIsLoading(false);
       return;
     }
+    const key = `${userId}:${storeId}`;
     const { data } = await supabase
       .from('profile_customizations')
       .select('banner_url, avatar_url, display_name, pronouns, status_text')
       .eq('user_id', userId)
       .eq('store_id', storeId)
       .maybeSingle();
-    setCustomization((data as ProfileCustomization) || EMPTY);
+    const next = (data as ProfileCustomization) || EMPTY;
+    customizationCache.set(key, next);
+    setCustomization(next);
     setIsLoading(false);
   }, [userId, storeId]);
+
 
   useEffect(() => {
     void refresh();
@@ -69,7 +79,9 @@ export const useProfileCustomization = () => {
           .from('profile_customizations')
           .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
         if (error) throw error;
+        customizationCache.set(`${userId}:${storeId}`, next);
         setCustomization(next);
+
         notifyProfileUpdated();
         return next;
       } finally {

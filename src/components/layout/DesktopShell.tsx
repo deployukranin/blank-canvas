@@ -33,9 +33,10 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope, store } = useTenant();
   const { isAuthenticated, user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, isLoading: profileLoading } = useProfile();
   const { customization } = useProfileCustomization();
-  const { isVIP } = useVIPSubscription();
+  const { isVIP, isLoading: vipLoading } = useVIPSubscription();
+
 
   const withBase = (path: string) => {
     if (!isTenantScope) return path;
@@ -127,7 +128,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
         </div>
 
         <div className="mt-auto p-5 space-y-4">
-          {!isVIP && (
+          {!vipLoading && !isVIP && (
             <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
               <div className="relative z-10">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
@@ -162,13 +163,16 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
                 {isAuthenticated
                   ? profile?.handle
                     ? `@${profile.handle}`
-                    : t('profile.member', 'Member')
+                    : profileLoading
+                      ? '\u00A0'
+                      : t('profile.member', 'Member')
                   : t('storefront.signIn')}
               </p>
               <p className="text-[10px] uppercase font-bold tracking-tight text-muted-foreground">
                 {isAuthenticated ? t('nav.profile') : t('storefront.joinCommunity')}
               </p>
             </div>
+
           </Link>
         </div>
       </aside>

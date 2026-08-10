@@ -13,10 +13,16 @@ export interface Profile {
   handle_set_at: string | null;
 }
 
+// Module-level cache so the profile survives route changes (shells remount per page)
+const profileCache = new Map<string, Profile>();
+
 export const useProfile = () => {
   const { user, isAuthenticated } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(() =>
+    user?.id ? profileCache.get(user.id) ?? null : null
+  );
+  const [isLoading, setIsLoading] = useState(() => !(user?.id && profileCache.has(user.id)));
+
 
   const fetchProfile = useCallback(async () => {
     if (!isAuthenticated || !user) {
@@ -25,7 +31,8 @@ export const useProfile = () => {
       return;
     }
 
-    setIsLoading(true);
+    // Keep showing the cached profile while revalidating in the background
+    if (!profileCache.has(user.id)) setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -34,6 +41,8 @@ export const useProfile = () => {
         .maybeSingle();
 
       if (error) throw error;
+      if (data) profileCache.set(user.id, data as Profile);
+      else profileCache.delete(user.id);
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -41,6 +50,7 @@ export const useProfile = () => {
       setIsLoading(false);
     }
   }, [isAuthenticated, user]);
+
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -66,9 +76,11 @@ export const useProfile = () => {
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            profileCache.set(user.id, payload.new as Profile);
             setProfile(payload.new as Profile);
           }
         }
+
       )
       .subscribe();
 
