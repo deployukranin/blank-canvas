@@ -11,7 +11,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getVipMediaSignedUrl } from '@/lib/external-storage';
+import { VipMediaViewer } from '@/components/vip/VipMediaViewer';
 import { formatPriceForLang, displayCurrencyForLang } from '@/lib/currency';
 import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import {
@@ -77,6 +77,7 @@ const VIPPage = () => {
   const userId = session?.user?.id;
   const tenantStoreId = store?.id;
 
+  const [viewerMedia, setViewerMedia] = useState<{ ref: string; title: string } | null>(null);
   const [resolvedStoreId, setResolvedStoreId] = useState<string | undefined>(tenantStoreId);
   useAffiliateCapture(resolvedStoreId);
   const [isLoading, setIsLoading] = useState(true);
@@ -453,10 +454,7 @@ const VIPPage = () => {
                             size="sm"
                             variant="outline"
                             className="mt-2 h-7 text-xs"
-                            onClick={async () => {
-                              const url = await getVipMediaSignedUrl(item.media_url!);
-                              if (url) window.open(url, '_blank');
-                            }}
+                            onClick={() => setViewerMedia({ ref: item.media_url!, title: item.title })}
                           >
                             <Play className="w-3 h-3 mr-1" />
                             View Media
