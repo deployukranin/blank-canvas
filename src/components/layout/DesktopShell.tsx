@@ -135,20 +135,21 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
             <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
               <div className="relative z-10">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
-                  {t('nav.vip')}
+                  {isAuthenticated ? t('nav.vip') : t('storefront.joinCommunity')}
                 </p>
                 <p className="text-sm font-semibold text-primary-foreground mb-3">
-                  {t('storefront.joinCommunityDesc')}
+                  {isAuthenticated ? t('storefront.vipTeaserDesc') : t('storefront.joinCommunityDesc')}
                 </p>
-                <Link to={withBase('/vip')}>
+                <Link to={isAuthenticated ? withBase('/vip') : `${withBase('/login')}?tab=signup`}>
                   <Button size="sm" variant="secondary" className="w-full text-xs font-bold uppercase">
-                    {t('storefront.viewAll')}
+                    {isAuthenticated ? t('storefront.vipTeaser') : t('storefront.signUp')}
                   </Button>
                 </Link>
               </div>
               <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl" />
             </div>
           )}
+
 
           <Link
             to={isAuthenticated ? withBase('/profile') : withBase('/login')}
