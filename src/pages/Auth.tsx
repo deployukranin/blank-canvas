@@ -456,6 +456,14 @@ const Auth = () => {
 
       clearPendingReferral();
       if (store) await trackConversion({ type: "store_signup", subjectId: store.id, storeId: store.id, email: signupEmail, name: storeName.trim() });
+
+      // Fire-and-forget: send the verification email; the panel shows the banner meanwhile.
+      supabase.rpc('mark_email_verification_sent').then(() => {
+        supabase.functions.invoke('send-auth-email', {
+          body: { type: 'verify', email: signupEmail, redirect_to: `${getPublicOrigin()}/verify` },
+        });
+      });
+
       toast.success(t("auth.accountCreated"));
       navigate(`/${storeSlug}/admin`, { replace: true });
     } catch (err) {
