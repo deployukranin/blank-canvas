@@ -298,7 +298,7 @@ export function YouTubeCategoryManager({
                     <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("admin.categoryName")} aria-label={t("admin.categoryName")} />
                     <Button type="button" variant="secondary" className="gap-2" onClick={addCategory} disabled={!newName.trim()}>
                       <Plus className="w-4 h-4" />
-                      Add
+                      {t("common.add", "Add")}
                     </Button>
                   </div>
                 </div>
