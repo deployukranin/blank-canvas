@@ -95,6 +95,7 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [showAdultWarning, setShowAdultWarning] = useState(false);
   const [adultAccepted, setAdultAccepted] = useState(false);
+  const adultKey = resolvedStoreId ? `tinglebox:adult18:${resolvedStoreId}` : null;
   const [isAdultContent, setIsAdultContent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -159,13 +160,21 @@ const VIPPage = () => {
         .maybeSingle();
       if (data?.config_value && (data.config_value as any).enabled === true) {
         setIsAdultContent(true);
-        if (!adultAccepted) {
+        let alreadyAccepted = false;
+        try {
+          alreadyAccepted = localStorage.getItem(`tinglebox:adult18:${resolvedStoreId}`) === '1';
+        } catch { /* storage unavailable */ }
+        if (alreadyAccepted) {
+          setAdultAccepted(true);
+        } else if (!adultAccepted) {
           setShowAdultWarning(true);
         }
       }
     };
     checkAdult();
-  }, [resolvedStoreId, adultAccepted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedStoreId]);
+
 
   // Load VIP plans strictly from this store's config (never fall back to global)
   useEffect(() => {
@@ -386,7 +395,7 @@ const VIPPage = () => {
           <AlertDialogCancel onClick={() => window.history.back()}>
             {t('vip.adultWarningLeave', 'Sair')}
           </AlertDialogCancel>
-          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); }} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); try { if (adultKey) localStorage.setItem(adultKey, '1'); } catch { /* storage unavailable */ } }} className="bg-destructive hover:bg-destructive/90">
             {t('vip.adultWarningAccept', 'Tenho +18, continuar')}
           </AlertDialogAction>
         </AlertDialogFooter>
