@@ -290,7 +290,7 @@ const AdminPlanos: React.FC = () => {
                   </ul>
 
                   <Button
-                    className="w-full bg-primary hover:bg-primary/90"
+                    className="w-full bg-primary hover:bg-primary/90 py-3 text-base font-semibold"
                     disabled={currentPlan === plan.id || checkoutPlanId !== null}
                     onClick={() => handlePayment(plan.id)}
                   >
@@ -300,7 +300,7 @@ const AdminPlanos: React.FC = () => {
                       t('common.loading', 'Carregando...')
                     ) : (
                       <span className="flex items-center justify-center gap-2">
-                        <CreditCard className="w-4 h-4" />
+                        <CreditCard className="w-5 h-5" />
                         {t('admin.plans.payWithStripe', 'Assinar com Stripe')}
                       </span>
                     )}
