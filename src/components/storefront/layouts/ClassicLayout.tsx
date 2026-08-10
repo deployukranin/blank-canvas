@@ -9,7 +9,6 @@ import { HeroBanner } from '@/components/layout/HeroBanner';
 import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
-import { useIsMobile } from '@/hooks/use-mobile';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 export const ClassicLayout = ({
@@ -18,7 +17,6 @@ export const ClassicLayout = ({
   onSelectVideo,
 }: StorefrontLayoutProps) => {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
 
   return (
     <>
@@ -79,25 +77,23 @@ export const ClassicLayout = ({
         )}
 
 
-        {isMobile !== true && (
-          <div>
-            <h3 className="font-display font-semibold mb-3 text-foreground">{t('storefront.explore')}</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {quickActions.map((action, index) => (
-                <motion.div key={action.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.05 }}>
-                  <Link to={withBase(action.path)}>
-                    <div className="glass glass-hover rounded-xl p-4 text-center group">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
-                        <DynamicIcon icon={action.icon} size={20} className="text-primary" />
-                      </div>
-                      <span className="text-xs font-medium text-foreground">{action.label}</span>
+        <div className="hidden md:block">
+          <h3 className="font-display font-semibold mb-3 text-foreground">{t('storefront.explore')}</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {quickActions.map((action, index) => (
+              <motion.div key={action.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.05 }}>
+                <Link to={withBase(action.path)}>
+                  <div className="glass glass-hover rounded-xl p-4 text-center group">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+                      <DynamicIcon icon={action.icon} size={20} className="text-primary" />
                     </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+                    <span className="text-xs font-medium text-foreground">{action.label}</span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
-        )}
+        </div>
 
         {youtubeEnabled && favoriteVideos.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
