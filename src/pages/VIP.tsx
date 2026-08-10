@@ -160,13 +160,21 @@ const VIPPage = () => {
         .maybeSingle();
       if (data?.config_value && (data.config_value as any).enabled === true) {
         setIsAdultContent(true);
-        if (!adultAccepted) {
+        let alreadyAccepted = false;
+        try {
+          alreadyAccepted = localStorage.getItem(`tinglebox:adult18:${resolvedStoreId}`) === '1';
+        } catch { /* storage unavailable */ }
+        if (alreadyAccepted) {
+          setAdultAccepted(true);
+        } else if (!adultAccepted) {
           setShowAdultWarning(true);
         }
       }
     };
     checkAdult();
-  }, [resolvedStoreId, adultAccepted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedStoreId]);
+
 
   // Load VIP plans strictly from this store's config (never fall back to global)
   useEffect(() => {
