@@ -21,7 +21,7 @@ export const ClassicLayout = ({
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <HeroBanner images={[bannerStudio]} banners={config.banners} greeting={greeting} subtitle={subtitle} />
+        <HeroBanner images={[]} banners={config.banners} greeting={greeting} subtitle={subtitle} />
       </motion.div>
 
       <div className="px-4 py-6 space-y-6">
