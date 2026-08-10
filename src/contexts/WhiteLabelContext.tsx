@@ -832,7 +832,9 @@ const defaultConfig: WhiteLabelConfig = {
     ],
     videoCategoryMap: {},
   },
+  reactions: defaultReactions,
   icons: defaultIcons,
+
   quickActions: defaultQuickActions,
   community: defaultCommunityConfig,
   colors: {
