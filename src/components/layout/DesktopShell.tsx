@@ -128,7 +128,7 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
         </div>
 
         <div className="mt-auto p-5 space-y-4">
-          {!isVIP && (
+          {!vipLoading && !isVIP && (
             <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
               <div className="relative z-10">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
