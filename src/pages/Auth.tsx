@@ -481,48 +481,8 @@ const Auth = () => {
     );
   }
 
-  if (signupConfirmationSent) {
-    return (
-      <div className="min-h-screen font-body flex items-center justify-center bg-[#0a0a0f] px-5 py-14 relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%' } as React.CSSProperties}>
-        <Starfield />
-        <div className="absolute top-4 right-4 z-20">
-          <LanguageSelector variant="minimal" />
-        </div>
-        <Container width="form" className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <div className="flex items-center mb-8 justify-center">
-              <img src={platformLogo} alt="My Tingle Box" className="w-[180px] max-w-[60%] h-auto" />
-            </div>
-            <div className="border border-white/[0.08] bg-[#1a1030]/40 backdrop-blur-xl rounded-3xl p-8 text-center space-y-4 shadow-[0_24px_60px_-24px_rgba(139,92,246,0.45)]">
 
-              <div className="w-14 h-14 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto">
-                <Mail className="w-7 h-7 text-purple-400" />
-              </div>
-              <h2 className="font-display text-2xl font-bold text-white">Confirme seu email</h2>
-              <p className="text-gray-400 text-sm">
-                Enviamos um link de confirmação para <span className="text-white font-medium">{signupEmail}</span>.
-                Clique no link para ativar sua conta — sua loja será criada automaticamente.
-              </p>
-              <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
-              <EmailVerificationBanner email={signupEmail} className="text-left" />
 
-              <Button
-                onClick={() => { setSignupConfirmationSent(false); }}
-                variant="ghost"
-                className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-              >
-                Voltar
-              </Button>
-            </div>
-          </motion.div>
-        </Container>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen font-body flex bg-[#0a0a0f] relative overflow-hidden" style={{ '--ring': '263 70% 58%', '--primary': '263 70% 58%', '--input': '0 0% 12%' } as React.CSSProperties}>
