@@ -65,6 +65,7 @@ const AdminPagamentosPix = () => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { store } = useTenant();
+  const { verified: emailVerified } = useEmailVerification();
   const storeId = store?.id ?? null;
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);

@@ -65,6 +65,7 @@ const AdminDominio: React.FC = () => {
     },
   }[lang];
   const { store: tenantStore, basePath } = useTenant();
+  const { verified: emailVerified } = useEmailVerification();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [ownStore, setOwnStore] = useState<typeof tenantStore>(null);
