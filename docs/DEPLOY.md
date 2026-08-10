@@ -1,6 +1,13 @@
 # Guia de Deploy - Projeto White Label Influencer
 
-Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do Lovable Cloud).
+Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do Lovable Cloud) e como manter um fluxo seguro de atualizações sem publicar mudanças na URL principal acidentalmente.
+
+## Resumo do fluxo de deploy (Staging + Produção)
+
+- **Branch `develop`**: ambiente de homologação/staging. Recebe alterações vindas do Lovable automaticamente.
+- **Branch `main`**: ambiente de produção. Apenas quando `develop` é promovida manualmente para cá, o site principal é atualizado.
+- **Deploys na Vercel**: controlados por workflows do GitHub Actions, não mais pelo sync automático nativo da Vercel.
+- **Backend (Lovable Cloud/Supabase)**: é compartilhado entre staging e produção. Mudanças destrutivas no banco devem ser testadas primeiro no preview da Lovable.
 
 ## Pré-requisitos
 
@@ -99,14 +106,52 @@ npm install
 npm run build
 ```
 
-### 6.2 Deploy no Vercel
+### 6.2 Deploy no Vercel com controle de versões
 
-1. Conecte o repositório ao [Vercel](https://vercel.com)
-2. Configure as variáveis de ambiente:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
-   - `VITE_SUPABASE_PROJECT_ID`
-3. Deploy automático em cada push
+Este projeto usa dois workflows do GitHub Actions para separar staging e produção:
+
+| Branch | Ambiente | Quando atualiza | URL principal |
+|---|---|---|---|
+| `develop` | Staging/Homologação | A cada push (vindo do Lovable) | Preview da Vercel |
+| `main` | Produção | Apenas promoção manual de `develop` | URL principal (`mytinglebox.com`) |
+
+#### 6.2.1 Configurar a Vercel
+
+1. Acesse o projeto na Vercel e desabilite o deploy automático nativo do GitHub: **Settings > Git > Ignored Build Step** ou desabilite o deploy automático para evitar conflitos com o workflow.
+2. Anote na Vercel:
+   - **Organization ID** (Settings > General)
+   - **Project ID** (Settings > General)
+3. No GitHub, adicione os seguintes **Secrets** no repositório (`Settings > Secrets and variables > Actions`):
+   - `VERCEL_TOKEN` — crie em [vercel.com/account/tokens](https://vercel.com/account/tokens)
+   - `VERCEL_ORG_ID` — ID da organização na Vercel
+   - `VERCEL_PROJECT_ID` — ID do projeto na Vercel
+
+#### 6.2.2 Configurar o sync do Lovable
+
+1. No Lovable, conecte o projeto ao GitHub normalmente.
+2. Altere a branch padrão do sync para `develop` (em vez de `main`). Dessa forma, todas as alterações feitas no editor vão primeiro para staging.
+3. Caso precise fazer um hotfix direto em produção, use um PR isolado para `main`.
+
+#### 6.2.3 Como publicar uma atualização em produção
+
+1. Teste tudo na branch `develop` (URL de preview da Vercel).
+2. No GitHub, vá em **Actions > Promote to Production**.
+3. Clique em **Run workflow**.
+4. O workflow fará merge de `develop` em `main` automaticamente e a Vercel fará deploy da produção.
+
+#### 6.2.4 Deploy manual de emergência
+
+Caso precise forçar um deploy sem merge, use o workflow **Vercel Deploy** com `workflow_dispatch` e escolha o ambiente `production` ou `preview`.
+
+#### 6.2.5 Variáveis de ambiente no Vercel
+
+Configure no dashboard da Vercel (`Project > Settings > Environment Variables`):
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
+
+As mesmas variáveis devem existir tanto para **Production** quanto para **Preview**.
 
 ---
 
