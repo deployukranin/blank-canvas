@@ -1367,7 +1367,18 @@
     "adultWarningTitle": "Aviso de Conteúdo +18",
     "adultWarningDesc": "Esta área contém conteúdo exclusivo para maiores de 18 anos. Ao continuar, você confirma que tem idade legal para visualizar este tipo de conteúdo.",
     "adultWarningLeave": "Sair",
-    "adultWarningAccept": "Tenho +18, continuar"
+    "adultWarningAccept": "Tenho +18, continuar",
+    "statusTitle": "Você é VIP! 👑",
+    "planSuffix": "Plano",
+    "daysRemaining": "{{count}} dias restantes",
+    "expiresOn": "Expira em {{date}}",
+    "exclusiveContent": "Conteúdo Exclusivo",
+    "noContentYet": "Ainda não há conteúdo exclusivo. Volte em breve!",
+    "plans": {
+      "monthly": "Mensal",
+      "quarterly": "Trimestral",
+      "yearly": "Anual"
+    }
   },
   "adminPayments": {
     "title": "Pagamentos",
