@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DefaultBanner } from "@/components/layout/DefaultBanner";
 import type { BannerConfig } from "@/contexts/WhiteLabelContext";
 
 interface HeroBannerProps {
