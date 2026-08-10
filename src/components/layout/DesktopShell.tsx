@@ -10,6 +10,9 @@ import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { useProfile } from '@/hooks/use-profile';
+import { useVIPSubscription } from '@/hooks/use-vip-subscription';
+import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
 
 interface DesktopShellProps {
   children: ReactNode;
