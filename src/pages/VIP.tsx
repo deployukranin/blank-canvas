@@ -435,7 +435,8 @@ const VIPPage = () => {
           <div>
             <h3 className="font-display font-semibold mb-3 flex items-center gap-2">
               <Crown className="w-4 h-4 text-primary" />
-              Exclusive Content
+              {t('vip.exclusiveContent')}
+
             </h3>
             <div className="space-y-3">
               {vipContent.map((item, index) => (
