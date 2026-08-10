@@ -270,6 +270,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             </div>
 
             <div className="flex items-center gap-2 ml-auto shrink-0">
+              <BugReportDialog variant="ghost" className="hidden sm:flex" />
               <LanguageSelector variant="minimal" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
