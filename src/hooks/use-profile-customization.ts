@@ -79,7 +79,9 @@ export const useProfileCustomization = () => {
           .from('profile_customizations')
           .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
         if (error) throw error;
+        customizationCache.set(`${userId}:${storeId}`, next);
         setCustomization(next);
+
         notifyProfileUpdated();
         return next;
       } finally {
