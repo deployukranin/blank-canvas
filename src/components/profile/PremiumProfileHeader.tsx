@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Crown, ImagePlus, Loader2, Lock, Sparkles } from 'lucide-react';
+import { Camera, Crown, ImagePlus, Loader2, Lock, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -34,14 +34,24 @@ export const PremiumProfileHeader = ({
   const bannerInput = useRef<HTMLInputElement>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
 
-  const banner = (isVIP ? customization.banner_url : null) || defaultBanner.url;
-  const avatar = (isVIP ? customization.avatar_url : null) || fallbackAvatar || defaultAvatar.url;
+  // Existing premium media remains visible while VIP status is revalidated.
+  // VIP still controls whether the editing controls are available.
+  const banner = customization.banner_url || defaultBanner.url;
+  const avatar = customization.avatar_url || fallbackAvatar || defaultAvatar.url;
   const name = handle ? `@${handle}` : fallbackName;
   const [visibleBanner, setVisibleBanner] = useState(banner);
   const [visibleAvatar, setVisibleAvatar] = useState(avatar);
+  const [bannerFailed, setBannerFailed] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
-  useEffect(() => setVisibleBanner(banner), [banner]);
-  useEffect(() => setVisibleAvatar(avatar), [avatar]);
+  useEffect(() => {
+    setVisibleBanner(banner);
+    setBannerFailed(false);
+  }, [banner]);
+  useEffect(() => {
+    setVisibleAvatar(avatar);
+    setAvatarFailed(false);
+  }, [avatar]);
 
   const handleUpload = async (file: File | undefined, kind: 'banner' | 'avatar') => {
     if (!file) return;
@@ -70,12 +80,14 @@ export const PremiumProfileHeader = ({
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl overflow-hidden border border-border/60 bg-card/60 backdrop-blur">
       {/* Banner */}
       <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/40 via-accent/30 to-primary/10">
-        <img
-          src={visibleBanner}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={() => setVisibleBanner(defaultBanner.url)}
-        />
+        {!bannerFailed && (
+          <img
+            src={visibleBanner}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setBannerFailed(true)}
+          />
+        )}
         {!isVIP && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
             <Link to={vipPath}>
@@ -99,12 +111,16 @@ export const PremiumProfileHeader = ({
         {/* Avatar */}
         <div className="absolute -bottom-8 left-4">
           <div className={`w-20 h-20 rounded-full overflow-hidden border-4 ${isVIP ? 'border-primary' : 'border-background'} bg-gradient-to-br from-primary to-accent flex items-center justify-center`}>
-            <img
-              src={visibleAvatar}
-              alt={name}
-              className="w-full h-full object-cover"
-              onError={() => setVisibleAvatar(fallbackAvatar || defaultAvatar.url)}
-            />
+            {avatarFailed ? (
+              <User className="w-8 h-8 text-primary-foreground" aria-label={name} />
+            ) : (
+              <img
+                src={visibleAvatar}
+                alt={name}
+                className="w-full h-full object-cover"
+                onError={() => setAvatarFailed(true)}
+              />
+            )}
           </div>
           {isVIP && (
             <button

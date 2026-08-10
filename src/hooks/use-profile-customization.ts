@@ -50,10 +50,14 @@ const cacheCustomization = (key: string, value: ProfileCustomization) => {
 
 export const useProfileCustomization = () => {
   const { session } = useAuth();
-  const { store } = useTenant();
+  const { store, slug } = useTenant();
   const userId = session?.user?.id ?? null;
   const storeId = store?.id ?? null;
-  const cacheKey = userId && storeId ? `${userId}:${storeId}` : null;
+  // The slug is available synchronously from the route, before the tenant query
+  // resolves. Its alias lets the avatar survive a hard refresh without leaking
+  // customization data between stores.
+  const slugCacheKey = userId && slug ? `${userId}:slug:${slug}` : null;
+  const cacheKey = userId && storeId ? `${userId}:${storeId}` : slugCacheKey;
 
   const [customization, setCustomization] = useState<ProfileCustomization>(
     () => (cacheKey ? readCachedCustomization(cacheKey) : null) ?? EMPTY
@@ -78,9 +82,10 @@ export const useProfileCustomization = () => {
       .maybeSingle();
     const next = (data as ProfileCustomization) || EMPTY;
     cacheCustomization(key, next);
+    if (slugCacheKey) cacheCustomization(slugCacheKey, next);
     setCustomization(next);
     setIsLoading(false);
-  }, [userId, storeId]);
+  }, [userId, storeId, slugCacheKey]);
 
 
   useEffect(() => {
@@ -104,6 +109,7 @@ export const useProfileCustomization = () => {
           .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
         if (error) throw error;
         cacheCustomization(`${userId}:${storeId}`, next);
+        if (slugCacheKey) cacheCustomization(slugCacheKey, next);
         setCustomization(next);
 
         notifyProfileUpdated();
@@ -112,7 +118,7 @@ export const useProfileCustomization = () => {
         setIsSaving(false);
       }
     },
-    [customization, userId, storeId]
+    [customization, userId, storeId, slugCacheKey]
   );
 
   const uploadMedia = useCallback(
