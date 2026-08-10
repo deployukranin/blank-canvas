@@ -7,6 +7,7 @@ import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { VipMediaViewer } from "@/components/vip/VipMediaViewer";
+import { VipMediaEmbed } from "@/components/vip/VipMediaEmbed";
 import { useTenant } from "@/contexts/TenantContext";
 
 interface VipContent {
