@@ -25,18 +25,22 @@ const SUPABASE_ANON =
 
 const DRIVE_MEDIA_URL = `${SUPABASE_URL}/functions/v1/drive-media`;
 
-function mediaViewerHtml(url: URL): string {
-  const rawUrl = new URL(url.toString());
-  rawUrl.searchParams.set('raw', '1');
-  const safeRawUrl = escapeAttribute(`${rawUrl.pathname}${rawUrl.search}`);
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyTingleBox Media</title><meta name="theme-color" content="#0a0612"><link rel="shortcut icon" href="/favicon.ico?v=8"><link rel="icon" type="image/png" href="/favicon.png?v=8"><link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8"><style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#09070d}body{overflow:hidden}iframe{display:block}</style></head><body><iframe src="${safeRawUrl}" title="Mídia MyTingleBox" allow="autoplay; fullscreen" referrerpolicy="same-origin"></iframe></body></html>`;
-}
+const BLOCKED_HTML =
+  `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>MyTingleBox</title>` +
+  `<link rel="shortcut icon" href="/favicon.ico?v=8"><link rel="icon" type="image/png" href="/favicon.png?v=8">` +
+  `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#09070d;color:#e9e6f2;font:15px/1.5 system-ui,sans-serif;text-align:center;padding:24px}</style>` +
+  `</head><body><div><h1 style="font-size:18px;margin:0 0 8px">Conteúdo protegido</h1>` +
+  `<p style="margin:0;color:#9b95ad">Este arquivo só pode ser visto dentro da plataforma MyTingleBox.</p></div></body></html>`;
 
+/**
+ * Pure proxy for protected media. Direct navigation (opening the URL in a tab,
+ * sharing the link) is refused — only embedded players on our own pages load it.
+ */
 async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
-  const isRaw = url.searchParams.get('raw') === '1';
-  const isDocument = req.headers.get('sec-fetch-dest') === 'document';
-  if (isDocument && !isRaw) {
-    return new Response(mediaViewerHtml(url), {
+  const dest = (req.headers.get('sec-fetch-dest') || '').toLowerCase();
+  if (!dest || ['document', 'iframe', 'frame', 'object', 'embed'].includes(dest)) {
+    return new Response(BLOCKED_HTML, {
+      status: 403,
       headers: {
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'no-store, no-cache, must-revalidate',
@@ -47,14 +51,20 @@ async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
 
   const upstream = new URL(DRIVE_MEDIA_URL);
   url.searchParams.forEach((value, key) => {
-    if (key !== 'raw') upstream.searchParams.append(key, value);
+    upstream.searchParams.append(key, value);
   });
-  return fetch(upstream, {
-    method: req.method,
-    headers: req.headers,
-    redirect: 'follow',
-  });
+
+  const headers = new Headers();
+  for (const h of ['range', 'origin', 'referer', 'sec-fetch-dest', 'sec-fetch-site', 'sec-fetch-mode', 'accept']) {
+    const v = req.headers.get(h);
+    if (v) headers.set(h, v);
+  }
+  if (!headers.has('origin')) headers.set('origin', url.origin);
+  if (!headers.has('referer')) headers.set('referer', `${url.origin}/`);
+
+  return fetch(upstream, { method: req.method, headers, redirect: 'follow' });
 }
+
 
 type ThemeConfig = {
   colors?: {

@@ -26,7 +26,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
-import { getDeliverySignedUrl, getDriveMedia } from '@/lib/external-storage';
+import { getDriveMedia } from '@/lib/external-storage';
 
 import {
   Dialog,
@@ -117,7 +117,6 @@ const MeusPedidosPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [loadingDelivery, setLoadingDelivery] = useState(false);
   const [deliveryMedia, setDeliveryMedia] = useState<{ url: string; mimeType: string | null } | null>(null);
 
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
@@ -197,18 +196,9 @@ const MeusPedidosPage = () => {
     return statusConfig[status] || statusConfig.pending;
   };
 
-  const handleOpenDelivery = async (order: DBOrder) => {
-    if (!order.delivery_file_id) return;
-    setLoadingDelivery(true);
-    try {
-      const url = await getDeliverySignedUrl(order.delivery_file_id);
-      if (url) {
-        window.open(url, '_blank', 'noopener');
-      }
-    } finally {
-      setLoadingDelivery(false);
-    }
-  };
+  // Delivered files are premium content: they are streamed inline only,
+  // never opened as a standalone tab/download.
+
 
   // Resolve the delivered media so it can be played inline (no download needed)
   useEffect(() => {
@@ -429,33 +419,36 @@ const MeusPedidosPage = () => {
                           <h4 className="font-medium text-sm text-emerald-400 mb-2">
                             {t('orders.deliveryReady', 'Seu pedido está pronto!')}
                           </h4>
-                          {deliveryMedia && (deliveryMedia.mimeType?.startsWith('video') || deliveryMedia.mimeType?.startsWith('audio')) && (
-                            <div className="mb-3">
+                          {deliveryMedia ? (
+                            <div className="mb-1">
                               {deliveryMedia.mimeType?.startsWith('video') ? (
                                 <video
                                   src={deliveryMedia.url}
                                   controls
                                   playsInline
+                                  controlsList="nodownload"
+                                  onContextMenu={(e) => e.preventDefault()}
                                   className="w-full rounded-lg bg-black"
                                 />
+                              ) : deliveryMedia.mimeType?.startsWith('audio') ? (
+                                <audio src={deliveryMedia.url} controls controlsList="nodownload" className="w-full" />
                               ) : (
-                                <audio src={deliveryMedia.url} controls className="w-full" />
+                                <img
+                                  src={deliveryMedia.url}
+                                  alt=""
+                                  draggable={false}
+                                  onContextMenu={(e) => e.preventDefault()}
+                                  className="w-full rounded-lg bg-black object-contain select-none"
+                                />
                               )}
                             </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              {t('orders.loadingDelivery', 'Carregando conteúdo...')}
+                            </div>
                           )}
-                          <Button
-                            size="sm"
-                            className="gap-2"
-                            disabled={loadingDelivery}
-                            onClick={() => handleOpenDelivery(selectedOrder)}
-                          >
-                            {loadingDelivery ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Download className="w-4 h-4" />
-                            )}
-                            {t('orders.openDelivery', 'Abrir arquivo')}
-                          </Button>
+
                         </div>
                       </div>
                     </GlassCard>

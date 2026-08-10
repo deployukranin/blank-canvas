@@ -164,14 +164,15 @@ Deno.serve(async (req) => {
       await admin.storage.from(bucket).remove([rest.join('/')]);
 
       const migExp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
-      const migSig = await signMediaToken(migratedId, migExp);
+      const migSig = await signMediaToken(migratedId, migExp, 'config');
       return json({
         success: true,
         ref: `gdrive:${migratedId}`,
         fileId: migratedId,
         name: srcName,
-        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(migratedId)}&exp=${migExp}&sig=${migSig}`,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(migratedId)}&exp=${migExp}&sig=${migSig}&k=config`,
       });
+
     }
 
     const form = await req.formData();
@@ -248,8 +249,9 @@ Deno.serve(async (req) => {
     let publicUrl: string | null = null;
     if (kind === 'config') {
       const exp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
-      const sig = await signMediaToken(driveId, exp);
-      publicUrl = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(driveId)}&exp=${exp}&sig=${sig}`;
+      const sig = await signMediaToken(driveId, exp, 'config');
+      publicUrl = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(driveId)}&exp=${exp}&sig=${sig}&k=config`;
+
     }
 
     return json({ success: true, ref: `gdrive:${driveId}`, fileId: driveId, name: safeName, url: publicUrl });

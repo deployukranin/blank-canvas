@@ -188,15 +188,35 @@ async function hmac(payload: string): Promise<string> {
   return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload)));
 }
 
-export async function signMediaToken(fileId: string, expiresAtSec: number): Promise<string> {
-  return await hmac(`${fileId}.${expiresAtSec}`);
+/**
+ * Signs a media token. `kind` binds the token to the content class so a
+ * protected (vip/custom) link can never be replayed as a public asset.
+ * Tokens signed without a kind stay valid (legacy config/brand assets).
+ */
+export async function signMediaToken(
+  fileId: string,
+  expiresAtSec: number,
+  kind?: string,
+): Promise<string> {
+  const payload = kind ? `${fileId}.${expiresAtSec}.${kind}` : `${fileId}.${expiresAtSec}`;
+  return await hmac(payload);
 }
 
-export async function verifyMediaToken(fileId: string, expiresAtSec: number, sig: string): Promise<boolean> {
-  if (!Number.isFinite(expiresAtSec) || expiresAtSec * 1000 < Date.now()) return false;
-  const expected = await signMediaToken(fileId, expiresAtSec);
-  if (expected.length !== sig.length) return false;
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
 }
+
+export async function verifyMediaToken(
+  fileId: string,
+  expiresAtSec: number,
+  sig: string,
+  kind?: string,
+): Promise<boolean> {
+  if (!Number.isFinite(expiresAtSec) || expiresAtSec * 1000 < Date.now()) return false;
+  const expected = await signMediaToken(fileId, expiresAtSec, kind || undefined);
+  return safeEqual(expected, sig);
+}
+

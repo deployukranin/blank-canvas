@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const TTL_SECONDS = 60 * 60 * 2; // 2h
+const TTL_SECONDS = 5 * 60; // protected media: 5 min, renewed by the player
 
 function json(payload: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(payload), {
@@ -35,17 +35,18 @@ Deno.serve(async (req) => {
 
     // Public assets (store landing/customs teaser, brand config files) need no authentication.
     if (row.kind === 'preview' || row.kind === 'config') {
-      const ttl = row.kind === 'config' ? 60 * 60 * 24 * 365 * 5 : TTL_SECONDS;
+      const ttl = row.kind === 'config' ? 60 * 60 * 24 * 365 * 5 : 60 * 60 * 2;
       const previewExp = Math.floor(Date.now() / 1000) + ttl;
-      const previewSig = await signMediaToken(fileId, previewExp);
+      const previewSig = await signMediaToken(fileId, previewExp, row.kind);
       return json({
         success: true,
-        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${previewExp}&sig=${previewSig}`,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${previewExp}&sig=${previewSig}&k=${row.kind}`,
         expiresAt: previewExp,
         name: row.name,
         mimeType: row.mime_type,
       });
     }
+
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -107,9 +108,11 @@ Deno.serve(async (req) => {
 
     if (!allowed) return json({ success: false, error: 'Acesso negado' }, 403);
 
+    const kind = String(row.kind || 'vip');
     const exp = Math.floor(Date.now() / 1000) + TTL_SECONDS;
-    const sig = await signMediaToken(fileId, exp);
-    const url = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${exp}&sig=${sig}`;
+    const sig = await signMediaToken(fileId, exp, kind);
+    const url = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${exp}&sig=${sig}&k=${encodeURIComponent(kind)}`;
+
 
     return json({ success: true, url, expiresAt: exp, name: row.name, mimeType: row.mime_type });
   } catch (err) {
