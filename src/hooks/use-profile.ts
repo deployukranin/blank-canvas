@@ -76,9 +76,11 @@ export const useProfile = () => {
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            profileCache.set(user.id, payload.new as Profile);
             setProfile(payload.new as Profile);
           }
         }
+
       )
       .subscribe();
 
