@@ -23,3 +23,22 @@ export const publicUrl = (path = ''): string => {
   const suffix = path && !path.startsWith('/') ? `/${path}` : path;
   return `${getPublicOrigin()}${suffix}`;
 };
+
+/**
+ * Rewrites an internal media-proxy URL to our own domain path (`/media?...`),
+ * so shared/rendered links never expose the backend host.
+ * Falls back to the original URL on internal preview hosts (no rewrite there).
+ */
+export const maskMediaUrl = (url?: string | null): string | null => {
+  if (!url) return url ?? null;
+  if (!url.includes('/functions/v1/drive-media')) return url;
+  try {
+    const parsed = new URL(url);
+    const host = typeof window !== 'undefined' ? window.location.hostname : '';
+    const isInternal = INTERNAL_HOST_PATTERNS.some((p) => host.includes(p));
+    if (isInternal) return url;
+    return `${window.location.origin}/media${parsed.search}`;
+  } catch {
+    return url;
+  }
+};

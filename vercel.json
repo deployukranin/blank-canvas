@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/media",
+      "destination": "https://lkwvlzcapuptcxvwukcm.supabase.co/functions/v1/drive-media"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
