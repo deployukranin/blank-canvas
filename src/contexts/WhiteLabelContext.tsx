@@ -3,6 +3,8 @@ import { applyTenantFavicon } from '@/lib/tenant-favicon';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
+import { defaultReactions, normalizeReactions, type ReactionConfigItem } from '@/lib/video-reactions-config';
+
 import { useTenant } from '@/contexts/TenantContext';
 // Available Lucide icons for customization
 export const availableLucideIcons = [
