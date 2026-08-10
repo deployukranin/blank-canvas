@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bell, Lightbulb, LogIn, Package, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +59,8 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const homePath = withBase('/');
   const isHome = location.pathname === homePath || location.pathname === `${homePath}/`;
   const accountAvatar = customization.avatar_url || profile?.avatar_url || user?.avatar || defaultAvatar.url;
+  const [visibleAccountAvatar, setVisibleAccountAvatar] = useState(accountAvatar);
+  useEffect(() => setVisibleAccountAvatar(accountAvatar), [accountAvatar]);
 
   return (
     <div className="min-h-screen w-full bg-background flex">
@@ -151,7 +153,12 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
           >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
               {isAuthenticated ? (
-                <img src={accountAvatar} alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')} className="w-full h-full object-cover" />
+                <img
+                  src={visibleAccountAvatar}
+                  alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')}
+                  className="w-full h-full object-cover"
+                  onError={() => setVisibleAccountAvatar(profile?.avatar_url || user?.avatar || defaultAvatar.url)}
+                />
               ) : (
                 <User className="w-5 h-5" />
               )}
