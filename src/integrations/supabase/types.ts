@@ -803,6 +803,8 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email_verification_sent_at: string | null
+          email_verified_at: string | null
           handle: string | null
           handle_set_at: string | null
           id: string
@@ -813,6 +815,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_verification_sent_at?: string | null
+          email_verified_at?: string | null
           handle?: string | null
           handle_set_at?: string | null
           id?: string
@@ -823,6 +827,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_verification_sent_at?: string | null
+          email_verified_at?: string | null
           handle?: string | null
           handle_set_at?: string | null
           id?: string
@@ -2150,6 +2156,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_email_verification_status: { Args: never; Returns: Json }
       get_store_leaderboard: {
         Args: { p_limit?: number; p_store_id: string }
         Returns: {
@@ -2198,6 +2205,8 @@ export type Database = {
         Returns: undefined
       }
       mark_eligible_commissions: { Args: never; Returns: number }
+      mark_email_verification_sent: { Args: never; Returns: Json }
+      mark_email_verified: { Args: never; Returns: Json }
       owns_tracker: { Args: { _tracker_id: string }; Returns: boolean }
       record_youtube_channel_change: {
         Args: { p_channel_id: string; p_store_id: string }
