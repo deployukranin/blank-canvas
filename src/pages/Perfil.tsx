@@ -265,6 +265,9 @@ const PerfilPage = () => {
             )}
           </GlassCard>
         </motion.div>
+        )}
+
+
 
 
         {(isAdmin || isCEO) && (
