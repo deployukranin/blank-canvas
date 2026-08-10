@@ -668,9 +668,9 @@ export interface WhiteLabelConfig {
   logoImage: string;
   banners: BannerConfig[];
 
-  // Storefront layout variant
+  // Storefront layout variant (only Cinematic Desktop is available)
   layout?: {
-    variant: 'classic' | 'cinematic';
+    variant: 'cinematic';
   };
 
   // Hero Banner Text
@@ -810,7 +810,7 @@ const defaultConfig: WhiteLabelConfig = {
   bannerImages: ['/placeholder.svg'],
   logoImage: '',
   banners: [],
-  layout: { variant: 'classic' },
+  layout: { variant: 'cinematic' },
   heroGreeting: 'Bem-vindo! 🤍',
   heroSubtitle: 'Relaxe com ASMR de qualidade',
   navigationTabs: defaultNavigationTabs,

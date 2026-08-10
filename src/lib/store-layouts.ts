@@ -1,11 +1,11 @@
-export type LayoutVariant = 'classic' | 'cinematic';
+export type LayoutVariant = 'cinematic';
 
-export const LAYOUT_VARIANTS: LayoutVariant[] = ['classic', 'cinematic'];
+export const LAYOUT_VARIANTS: LayoutVariant[] = ['cinematic'];
 
-export const DEFAULT_LAYOUT: LayoutVariant = 'classic';
+export const DEFAULT_LAYOUT: LayoutVariant = 'cinematic';
 
 /** Variants available on the free trial */
-export const FREE_LAYOUTS: LayoutVariant[] = ['classic'];
+export const FREE_LAYOUTS: LayoutVariant[] = ['cinematic'];
 
 export const isTrialPlan = (planType?: string | null) =>
   !planType || ['trial', 'free', 'none'].includes(planType.toLowerCase());
