@@ -1050,6 +1050,8 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             : defaults.youtube.videoCategoryMap,
       },
       icons: { ...defaultIcons, ...parsed.icons },
+      reactions: normalizeReactions(parsed.reactions),
+
       quickActions: parsed.quickActions || defaultQuickActions,
       navigationTabs: (() => {
         const tabs = parsed.navigationTabs || defaultNavigationTabs;
