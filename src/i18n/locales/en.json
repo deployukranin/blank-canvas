@@ -505,6 +505,20 @@
         "comments": "Comments",
         "orders": "Orders"
       }
+    },
+    "reactions": {
+      "tab": "Reactions",
+      "title": "Video reactions",
+      "desc": "Customize the label, icon and color of each reaction shown under your videos.",
+      "label": "Label",
+      "emoji": "Emoji",
+      "color": "Highlight color",
+      "enabled": "Enabled",
+      "saved": "Reactions updated!",
+      "uploadError": "Upload failed",
+      "fileTooLarge": "File too large",
+      "maxSize": "Maximum 2MB per icon.",
+      "hint": "PNG with transparent background works best (max 2MB)."
     }
   },
   "superAdmin": {
@@ -1613,5 +1627,26 @@
       "resolved": "Resolved",
       "dismissed": "Dismissed"
     }
+  },
+  "video": {
+    "about": "About",
+    "comments": "Comments",
+    "moreFromChannel": "More",
+    "noDescription": "No description.",
+    "noOtherVideos": "No other videos yet.",
+    "requestCustom": "Request a custom ASMR",
+    "requestCustomDesc": "Tell us the style, triggers and any detail you want.",
+    "commentsLocked": "Comments are for members",
+    "commentsLockedDesc": "Create your free account to read and join the conversation.",
+    "commentsLockedCta": "Sign in to comment",
+    "commentPlaceholder": "Write something…",
+    "charLimit": "up to 280 chars",
+    "firstComment": "Be the first to comment."
+  },
+  "reactions": {
+    "relaxing": "Relaxing",
+    "sleep": "Fell asleep",
+    "tingles": "Tingles",
+    "favorite": "Favorite"
   }
 }
