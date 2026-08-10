@@ -31,7 +31,8 @@ export const useProfile = () => {
       return;
     }
 
-    setIsLoading(true);
+    // Keep showing the cached profile while revalidating in the background
+    if (!profileCache.has(user.id)) setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -40,6 +41,8 @@ export const useProfile = () => {
         .maybeSingle();
 
       if (error) throw error;
+      if (data) profileCache.set(user.id, data as Profile);
+      else profileCache.delete(user.id);
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -47,6 +50,7 @@ export const useProfile = () => {
       setIsLoading(false);
     }
   }, [isAuthenticated, user]);
+
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
