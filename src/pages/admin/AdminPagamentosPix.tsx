@@ -49,6 +49,7 @@ const defaultPaymentConfig: PaymentConfig = {
 
 interface StripeConnectStatus {
   connected: boolean;
+  account_connected?: boolean;
   onboarding_started?: boolean;
   charges_enabled?: boolean;
   payouts_enabled?: boolean;
@@ -294,12 +295,12 @@ const AdminPagamentosPix = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                {stripeStatus.connected && (
+                {stripeStatus.account_connected && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> {t('adminPayments.connected')}
                   </Badge>
                 )}
-                {stripeStatus.onboarding_started && !stripeStatus.connected && (
+                {stripeStatus.onboarding_started && !stripeStatus.account_connected && (
                   <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
                     <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.pending')}
                   </Badge>
