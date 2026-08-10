@@ -41,6 +41,7 @@ const PerfilPage = () => {
   const { reputation } = useReputation();
   const { entries: leaderboard } = useLeaderboard(10);
   const [handle, setHandle] = useState<string | null>(null);
+  const visibleHandle = handle ?? profile?.handle ?? null;
   const [hasOrder, setHasOrder] = useState(false);
   const [hasIdea, setHasIdea] = useState(false);
   const [journeyHidden, setJourneyHiddenState] = useState(() => {
@@ -143,14 +144,14 @@ const PerfilPage = () => {
           isVIP={isVIP}
           vipPath={withBase('/vip')}
           fallbackName={t('profile.member', 'Member')}
-          handle={handle}
+          handle={visibleHandle}
           fallbackAvatar={profile?.avatar_url || user?.avatar}
           reputation={reputation}
         />
 
         {/* Handle — can only be chosen once */}
         <HandleSelector
-          currentHandle={handle}
+          currentHandle={visibleHandle}
           onHandleSet={(h) => {
             setHandle(h);
             void refetchProfile();

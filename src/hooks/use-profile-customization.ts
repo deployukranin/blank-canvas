@@ -25,6 +25,28 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 // Module-level cache keyed by user+store so the avatar survives route changes
 const customizationCache = new Map<string, ProfileCustomization>();
+const CUSTOMIZATION_CACHE_PREFIX = 'tinglebox:profile-customization:';
+
+const readCachedCustomization = (key: string): ProfileCustomization | null => {
+  const memoryValue = customizationCache.get(key);
+  if (memoryValue) return memoryValue;
+  try {
+    const stored = localStorage.getItem(`${CUSTOMIZATION_CACHE_PREFIX}${key}`);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as ProfileCustomization;
+    customizationCache.set(key, parsed);
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const cacheCustomization = (key: string, value: ProfileCustomization) => {
+  customizationCache.set(key, value);
+  try {
+    localStorage.setItem(`${CUSTOMIZATION_CACHE_PREFIX}${key}`, JSON.stringify(value));
+  } catch { /* storage may be unavailable */ }
+};
 
 export const useProfileCustomization = () => {
   const { session } = useAuth();
@@ -34,10 +56,12 @@ export const useProfileCustomization = () => {
   const cacheKey = userId && storeId ? `${userId}:${storeId}` : null;
 
   const [customization, setCustomization] = useState<ProfileCustomization>(
-    () => (cacheKey ? customizationCache.get(cacheKey) : undefined) ?? EMPTY
+    () => (cacheKey ? readCachedCustomization(cacheKey) : null) ?? EMPTY
   );
-  const [isLoading, setIsLoading] = useState(() => !(cacheKey && customizationCache.has(cacheKey)));
+  const [isLoading, setIsLoading] = useState(() => !(cacheKey && readCachedCustomization(cacheKey)));
   const [isSaving, setIsSaving] = useState(false);
+  const cachedCustomization = cacheKey ? readCachedCustomization(cacheKey) : null;
+  const resolvedCustomization = cachedCustomization ?? customization;
 
   const refresh = useCallback(async () => {
     if (!userId || !storeId) {
@@ -53,7 +77,7 @@ export const useProfileCustomization = () => {
       .eq('store_id', storeId)
       .maybeSingle();
     const next = (data as ProfileCustomization) || EMPTY;
-    customizationCache.set(key, next);
+    cacheCustomization(key, next);
     setCustomization(next);
     setIsLoading(false);
   }, [userId, storeId]);
@@ -79,7 +103,7 @@ export const useProfileCustomization = () => {
           .from('profile_customizations')
           .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
         if (error) throw error;
-        customizationCache.set(`${userId}:${storeId}`, next);
+        cacheCustomization(`${userId}:${storeId}`, next);
         setCustomization(next);
 
         notifyProfileUpdated();
@@ -113,5 +137,13 @@ export const useProfileCustomization = () => {
     [userId, storeId]
   );
 
-  return { customization, isLoading, isSaving, save, uploadMedia, refresh, storeId };
+  return {
+    customization: resolvedCustomization,
+    isLoading: isLoading && !cachedCustomization,
+    isSaving,
+    save,
+    uploadMedia,
+    refresh,
+    storeId,
+  };
 };
