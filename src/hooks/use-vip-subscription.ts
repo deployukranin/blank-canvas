@@ -38,15 +38,40 @@ export interface VIPChargeResult {
   error?: string;
 }
 
-// Module-level cache so the VIP status survives route changes (no UI flicker)
+// Cache (memory + localStorage) so the VIP status survives route changes AND
+// hard refreshes — otherwise the UI paints the "free" state before the query.
 const vipCache = new Map<string, VIPSubscription | null>();
+const VIP_CACHE_PREFIX = 'tinglebox:vip:';
+
+const readVipCache = (userId: string): { hit: boolean; value: VIPSubscription | null } => {
+  if (vipCache.has(userId)) return { hit: true, value: vipCache.get(userId) ?? null };
+  try {
+    const stored = localStorage.getItem(`${VIP_CACHE_PREFIX}${userId}`);
+    if (!stored) return { hit: false, value: null };
+    const parsed = JSON.parse(stored) as VIPSubscription | null;
+    // Expired cached subscriptions must not be trusted
+    const value = parsed && new Date(parsed.expires_at).getTime() > Date.now() ? parsed : null;
+    vipCache.set(userId, value);
+    return { hit: true, value };
+  } catch {
+    return { hit: false, value: null };
+  }
+};
+
+const writeVipCache = (userId: string, value: VIPSubscription | null) => {
+  vipCache.set(userId, value);
+  try {
+    localStorage.setItem(`${VIP_CACHE_PREFIX}${userId}`, JSON.stringify(value));
+  } catch { /* storage may be unavailable */ }
+};
 
 export const useVIPSubscription = () => {
   const { session } = useAuth();
   const { toast } = useToast();
   const cachedUserId = session?.user?.id;
-  const hasCache = Boolean(cachedUserId && vipCache.has(cachedUserId));
-  const cached = cachedUserId ? vipCache.get(cachedUserId) ?? null : null;
+  const cachedEntry = cachedUserId ? readVipCache(cachedUserId) : { hit: false, value: null };
+  const hasCache = cachedEntry.hit;
+  const cached = cachedEntry.value;
   const [subscription, setSubscription] = useState<VIPSubscription | null>(cached);
   const [isVIP, setIsVIP] = useState(Boolean(cached));
   const [isLoading, setIsLoading] = useState(!hasCache);
@@ -78,7 +103,7 @@ export const useVIPSubscription = () => {
 
         if (error) throw error;
 
-        vipCache.set(userId, (data as VIPSubscription) ?? null);
+        writeVipCache(userId, (data as VIPSubscription) ?? null);
         if (data) {
           setSubscription(data as VIPSubscription);
           setIsVIP(true);
@@ -249,6 +274,7 @@ export const useVIPSubscription = () => {
 
       setSubscription(null);
       setIsVIP(false);
+      if (userId) writeVipCache(userId, null);
 
       toast({
         title: 'Assinatura cancelada',
@@ -265,7 +291,7 @@ export const useVIPSubscription = () => {
       });
       return { success: false };
     }
-  }, [subscription, toast]);
+  }, [subscription, toast, userId]);
 
   // Get days remaining in subscription
   const getDaysRemaining = useCallback(() => {
@@ -292,6 +318,7 @@ export const useVIPSubscription = () => {
     if (data) {
       setSubscription(data as VIPSubscription);
       setIsVIP(true);
+      writeVipCache(userId, data as VIPSubscription);
     }
   }, [userId]);
 

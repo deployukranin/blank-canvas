@@ -28,7 +28,7 @@ const PerfilPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile, refetch: refetchProfile } = useProfile();
+  const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { customization } = useProfileCustomization();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
@@ -36,14 +36,27 @@ const PerfilPage = () => {
   const { basePath, store } = useTenant();
   const withBase = (p: string) => (basePath ? `${basePath}${p}` : p);
 
-  const { isVIP } = useVIPSubscription();
+  const { isVIP, isLoading: vipLoading } = useVIPSubscription();
   const isCinematic = useCinematicDesktop();
-  const { reputation } = useReputation();
+  const { reputation, isLoading: reputationLoading } = useReputation();
   const { entries: leaderboard } = useLeaderboard(10);
   const [handle, setHandle] = useState<string | null>(null);
   const visibleHandle = handle ?? profile?.handle ?? null;
-  const [hasOrder, setHasOrder] = useState(false);
-  const [hasIdea, setHasIdea] = useState(false);
+  // Journey flags are cached so a refresh doesn't paint an empty checklist first
+  const journeyCacheKey = user?.id ? `tinglebox:journey:${user.id}:${store?.id ?? 'none'}` : null;
+  const readJourneyCache = () => {
+    if (!journeyCacheKey) return null;
+    try {
+      const raw = localStorage.getItem(journeyCacheKey);
+      return raw ? (JSON.parse(raw) as { order: boolean; idea: boolean }) : null;
+    } catch {
+      return null;
+    }
+  };
+  const [hasOrder, setHasOrder] = useState(() => readJourneyCache()?.order ?? false);
+  const [hasIdea, setHasIdea] = useState(() => readJourneyCache()?.idea ?? false);
+  const [journeyLoaded, setJourneyLoaded] = useState(() => readJourneyCache() !== null);
+
   const [journeyHidden, setJourneyHiddenState] = useState(() => {
     try {
       return localStorage.getItem('profile:journeyHidden') === '1';
@@ -84,15 +97,24 @@ const PerfilPage = () => {
 
       const [orders, ideas] = await Promise.all([ordersQuery, ideasQuery]);
       if (!active) return;
-      setHasOrder((orders.count ?? 0) > 0);
-      setHasIdea((ideas.count ?? 0) > 0);
+      const order = (orders.count ?? 0) > 0;
+      const idea = (ideas.count ?? 0) > 0;
+      setHasOrder(order);
+      setHasIdea(idea);
+      setJourneyLoaded(true);
+      if (journeyCacheKey) {
+        try {
+          localStorage.setItem(journeyCacheKey, JSON.stringify({ order, idea }));
+        } catch { /* ignore */ }
+      }
     };
 
     void load();
     return () => {
       active = false;
     };
-  }, [user?.id, store?.id]);
+  }, [user?.id, store?.id, journeyCacheKey]);
+
 
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: withBase('/orders'), gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
@@ -149,17 +171,23 @@ const PerfilPage = () => {
           reputation={reputation}
         />
 
-        {/* Handle — can only be chosen once */}
-        <HandleSelector
-          currentHandle={visibleHandle}
-          onHandleSet={(h) => {
-            setHandle(h);
-            void refetchProfile();
-          }}
-        />
+        {/* Handle — can only be chosen once (hidden until the profile resolves) */}
+        {!profileLoading && (
+          <HandleSelector
+            currentHandle={visibleHandle}
+            onHandleSet={(h) => {
+              setHandle(h);
+              void refetchProfile();
+            }}
+          />
+        )}
 
         {/* Reputation & ranking */}
+        {reputationLoading || !reputation ? (
+          <div className="h-44 rounded-2xl bg-white/[0.03] animate-pulse" />
+        ) : (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+
           <GlassCard className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -237,6 +265,9 @@ const PerfilPage = () => {
             )}
           </GlassCard>
         </motion.div>
+        )}
+
+
 
 
         {(isAdmin || isCEO) && (
@@ -261,7 +292,7 @@ const PerfilPage = () => {
         )}
 
         {/* Membership journey — conversion mechanic (dismissible) */}
-        {journeyHidden || completed === steps.length ? (
+        {!journeyLoaded || vipLoading || profileLoading ? null : journeyHidden || completed === steps.length ? (
           completed === steps.length ? null : (
             <button
               type="button"
