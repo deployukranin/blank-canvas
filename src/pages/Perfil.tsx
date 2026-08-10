@@ -396,7 +396,12 @@ const PerfilPage = () => {
               </Link>
             </motion.div>
           ))}
+
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="pt-1">
+            <BugReportDialog variant="ghost" className="px-4 py-2 text-xs" />
+          </motion.div>
         </div>
+
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Button variant="ghost" onClick={logout} className="w-full h-12 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10">
