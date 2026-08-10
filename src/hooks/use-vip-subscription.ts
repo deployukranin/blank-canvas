@@ -291,7 +291,7 @@ export const useVIPSubscription = () => {
       });
       return { success: false };
     }
-  }, [subscription, toast]);
+  }, [subscription, toast, userId]);
 
   // Get days remaining in subscription
   const getDaysRemaining = useCallback(() => {
