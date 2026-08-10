@@ -196,7 +196,13 @@
       "resend": "Reenviar email",
       "resendIn": "Reenviar en {{seconds}}s",
       "resendSuccess": "Email de confirmación reenviado.",
-      "resendError": "No se pudo reenviar el email. Inténtalo de nuevo en unos instantes."
+      "resendError": "No se pudo reenviar el email. Inténtalo de nuevo en unos instantes.",
+      "checking": "Confirmando tu email...",
+      "successTitle": "Email verificado",
+      "successBody": "¡Listo! Ya puedes usar todas las funciones del panel.",
+      "errorTitle": "No se pudo verificar",
+      "errorBody": "El enlace puede haber caducado. Entra al panel y reenvía el email de verificación.",
+      "backToPanel": "Ir al panel"
     }
   },
   "admin": {
@@ -1468,7 +1474,8 @@
     },
     "pixManualConfigured": "¡PIX Manual configurado y activado!",
     "refreshStatus": "Actualizar estado",
-    "pendingRequirements": "Información pendiente en Stripe:"
+    "pendingRequirements": "Información pendiente en Stripe:",
+    "emailVerificationRequired": "Verifica tu email para conectar pagos."
   },
   "adminAffiliates": {
     "title": "Afiliados",
@@ -1692,5 +1699,8 @@
     "personal-attention": "Atención Personal",
     "video-styles": "Estilos de Video",
     "visual-misc": "Visual y Varios"
+  },
+  "adminDomain": {
+    "emailVerificationRequired": "Verifica tu email para gestionar dominios."
   }
 }

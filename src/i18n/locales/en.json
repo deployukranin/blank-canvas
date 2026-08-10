@@ -196,7 +196,13 @@
       "resend": "Resend email",
       "resendIn": "Resend in {{seconds}}s",
       "resendSuccess": "Confirmation email sent again.",
-      "resendError": "Could not resend the email. Try again in a moment."
+      "resendError": "Could not resend the email. Try again in a moment.",
+      "checking": "Confirming your email...",
+      "successTitle": "Email verified",
+      "successBody": "All set! You can now use every panel feature.",
+      "errorTitle": "Couldn't verify",
+      "errorBody": "The link may have expired. Open the panel and resend the verification email.",
+      "backToPanel": "Go to panel"
     }
   },
   "admin": {
@@ -1468,7 +1474,8 @@
     },
     "pixManualConfigured": "Manual PIX configured and activated!",
     "refreshStatus": "Refresh status",
-    "pendingRequirements": "Pending information at Stripe:"
+    "pendingRequirements": "Pending information at Stripe:",
+    "emailVerificationRequired": "Verify your email to connect payments."
   },
   "adminAffiliates": {
     "title": "Affiliates",
@@ -1692,5 +1699,8 @@
     "personal-attention": "Personal Attention",
     "video-styles": "Video Styles",
     "visual-misc": "Visual & Misc"
+  },
+  "adminDomain": {
+    "emailVerificationRequired": "Verify your email to manage domains."
   }
 }
