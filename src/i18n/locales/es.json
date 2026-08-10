@@ -75,7 +75,41 @@
     "stepIdea": "Comparte una idea de video",
     "stepVip": "Únete a la comunidad VIP",
     "vipUpsell": "Desbloquea contenido exclusivo y prioridad en tus videos personalizados",
-    "vipCta": "Hazte VIP"
+    "vipCta": "Hazte VIP",
+    "member": "Miembro",
+    "points": "puntos",
+    "reputationTitle": "Tu reputación",
+    "pointsToNext": "{{points}} puntos para el siguiente nivel",
+    "statIdeas": "ideas",
+    "statVotes": "votos",
+    "statComments": "comentarios",
+    "topMembers": "Miembros destacados",
+    "handle": {
+      "title": "Elige tu usuario",
+      "rules": "3-20 caracteres • minúsculas, números y _",
+      "placeholder": "tuusuario",
+      "submit": "Definir usuario (solo una vez)",
+      "saving": "Guardando...",
+      "required": "Escribe un usuario para continuar",
+      "error": "No se pudo definir tu usuario",
+      "successTitle": "¡Usuario definido!",
+      "successDesc": "Tu usuario ahora es @{{handle}}",
+      "locked": "Tu usuario es permanente y no se puede cambiar."
+    },
+    "premium": {
+      "unlock": "Desbloquear con VIP",
+      "changeBanner": "Banner",
+      "vipBadge": "Premium",
+      "free": "Gratis",
+      "level": "Nv.",
+      "teaser": "Los miembros VIP pueden poner banner y avatar personalizados (imagen o GIF).",
+      "limits": "JPG, PNG, WEBP o GIF hasta {{mb}}MB.",
+      "saved": "¡Perfil actualizado!",
+      "tooLarge": "El archivo es demasiado grande (máx. 5MB).",
+      "invalidType": "Usa JPG, PNG, WEBP o GIF.",
+      "vipRequired": "Se requiere VIP activo para personalizar tu perfil.",
+      "uploadError": "No se pudo subir el archivo."
+    }
   },
   "auth": {
     "enterButton": "Entrar",

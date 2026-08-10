@@ -75,7 +75,41 @@
     "stepIdea": "Compartilhe uma ideia de vídeo",
     "stepVip": "Entre na comunidade VIP",
     "vipUpsell": "Desbloqueie conteúdo exclusivo e prioridade nos seus vídeos personalizados",
-    "vipCta": "Virar VIP"
+    "vipCta": "Virar VIP",
+    "member": "Membro",
+    "points": "pontos",
+    "reputationTitle": "Sua reputação",
+    "pointsToNext": "{{points}} pontos para o próximo nível",
+    "statIdeas": "ideias",
+    "statVotes": "votos",
+    "statComments": "comentários",
+    "topMembers": "Membros em destaque",
+    "handle": {
+      "title": "Escolha seu @",
+      "rules": "3-20 caracteres • minúsculas, números e _",
+      "placeholder": "seuusuario",
+      "submit": "Definir @ (apenas uma vez)",
+      "saving": "Salvando...",
+      "required": "Digite um @ para continuar",
+      "error": "Não foi possível definir seu @",
+      "successTitle": "@ definido!",
+      "successDesc": "Seu @ agora é @{{handle}}",
+      "locked": "Seu @ é permanente e não pode ser alterado."
+    },
+    "premium": {
+      "unlock": "Desbloquear com VIP",
+      "changeBanner": "Banner",
+      "vipBadge": "Premium",
+      "free": "Grátis",
+      "level": "Nv.",
+      "teaser": "Membros VIP podem definir banner e avatar personalizados (imagem ou GIF).",
+      "limits": "JPG, PNG, WEBP ou GIF até {{mb}}MB.",
+      "saved": "Perfil atualizado!",
+      "tooLarge": "Arquivo muito grande (máx. 5MB).",
+      "invalidType": "Use JPG, PNG, WEBP ou GIF.",
+      "vipRequired": "É necessário VIP ativo para personalizar seu perfil.",
+      "uploadError": "Não foi possível enviar o arquivo."
+    }
   },
   "auth": {
     "enterButton": "Entrar",

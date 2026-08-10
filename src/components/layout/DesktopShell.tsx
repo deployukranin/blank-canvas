@@ -10,6 +10,9 @@ import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { Button } from '@/components/ui/button';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { useProfile } from '@/hooks/use-profile';
+import { useVIPSubscription } from '@/hooks/use-vip-subscription';
+import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
 
 interface DesktopShellProps {
   children: ReactNode;
@@ -27,7 +30,9 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const location = useLocation();
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope, store } = useTenant();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { profile } = useProfile();
+  const { isVIP } = useVIPSubscription();
 
   const withBase = (path: string) => {
     if (!isTenantScope) return path;
@@ -117,33 +122,43 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
         </div>
 
         <div className="mt-auto p-5 space-y-4">
-          <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
-            <div className="relative z-10">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
-                {t('nav.vip')}
-              </p>
-              <p className="text-sm font-semibold text-primary-foreground mb-3">
-                {t('storefront.joinCommunityDesc')}
-              </p>
-              <Link to={withBase('/vip')}>
-                <Button size="sm" variant="secondary" className="w-full text-xs font-bold uppercase">
-                  {t('storefront.viewAll')}
-                </Button>
-              </Link>
+          {!isVIP && (
+            <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary to-primary/40">
+              <div className="relative z-10">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mb-1">
+                  {t('nav.vip')}
+                </p>
+                <p className="text-sm font-semibold text-primary-foreground mb-3">
+                  {t('storefront.joinCommunityDesc')}
+                </p>
+                <Link to={withBase('/vip')}>
+                  <Button size="sm" variant="secondary" className="w-full text-xs font-bold uppercase">
+                    {t('storefront.viewAll')}
+                  </Button>
+                </Link>
+              </div>
+              <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl" />
             </div>
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl" />
-          </div>
+          )}
 
           <Link
             to={isAuthenticated ? withBase('/profile') : withBase('/login')}
             className="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-foreground/5 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
-              <User className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
+              {isAuthenticated ? (
+                <img src={profile?.avatar_url || defaultAvatar.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="text-sm font-semibold text-foreground truncate">
-                {isAuthenticated ? user?.email : t('storefront.signIn')}
+                {isAuthenticated
+                  ? profile?.handle
+                    ? `@${profile.handle}`
+                    : t('profile.member', 'Member')
+                  : t('storefront.signIn')}
               </p>
               <p className="text-[10px] uppercase font-bold tracking-tight text-muted-foreground">
                 {isAuthenticated ? t('nav.profile') : t('storefront.joinCommunity')}
