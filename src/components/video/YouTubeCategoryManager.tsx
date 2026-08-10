@@ -359,7 +359,7 @@ export function YouTubeCategoryManager({
                                     variant="ghost"
                                     size="sm"
                                     className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                                    onClick={() => { setEditingCatId(cat.id); setEditingName(cat.name); }}
+                                    onClick={() => { setEditingCatId(cat.id); setEditingName(catLabel(cat)); }}
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </Button>
