@@ -9,7 +9,7 @@ import { HeroBanner } from '@/components/layout/HeroBanner';
 import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
-import bannerStudio from '@/assets/banner-studio.jpg';
+import type { StorefrontLayoutProps } from '../use-storefront-data';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 export const ClassicLayout = ({
