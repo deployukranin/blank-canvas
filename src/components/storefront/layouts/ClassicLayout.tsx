@@ -10,7 +10,6 @@ import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
-import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 export const ClassicLayout = ({
   config, greeting, subtitle, quickActions, youtubeEnabled, videos, favoriteVideos,
