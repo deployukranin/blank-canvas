@@ -17,6 +17,8 @@ export interface VipPlan {
 
 export interface VipConfig {
   plans: VipPlan[];
+  /** Optional banner image shown on top of the VIP page. */
+  bannerUrl?: string;
 }
 
 type Lang = 'pt' | 'en' | 'es';
