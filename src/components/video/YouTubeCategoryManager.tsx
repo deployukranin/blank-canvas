@@ -112,6 +112,12 @@ export function YouTubeCategoryManager({
     }
   }, [autoCategorizeEnabled, draft.categories, videos]);
 
+  // Default categories keep their English name in config; translate them for display
+  const catLabel = (cat: YouTubeCategoryDraft) =>
+    DEFAULT_CATEGORY_NAMES[cat.id] === cat.name
+      ? t(`ytCats.${cat.id}`, { defaultValue: cat.name })
+      : cat.name;
+
   const categoriesSorted = useMemo(() => {
     return [...(draft.categories ?? [])].sort((a, b) => {
       const ao = a.order ?? 9999;
