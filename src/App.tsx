@@ -34,6 +34,7 @@ import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 
 // Admin Pages
 // AdminLogin removed — admin is now under /:slug/admin
