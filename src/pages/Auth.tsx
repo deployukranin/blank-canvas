@@ -53,7 +53,7 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
-  const defaultTab = searchParams.get("tab") === "signup" ? "signup" : "login";
+  const defaultTab = searchParams.get("tab") === "login" ? "login" : "signup";
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
