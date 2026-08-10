@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Lock, Monitor, Smartphone, RefreshCw } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -86,7 +86,7 @@ export const LayoutPicker: React.FC = () => {
       {isTrialPlan(planType) && (
         <GlassCard className="p-4 flex items-center justify-between gap-4 border border-primary/25">
           <p className="text-sm text-muted-foreground">
-            {t('admin.layout.trialNotice', 'On the trial plan only the Classic layout can be published. You can still preview the others.')}
+            {t('admin.layout.trialNotice', 'On the trial plan only the Classic layout can be published.')}
           </p>
           <Link to={`${basePath || ''}/admin/plans`}>
             <Button size="sm">{t('admin.layout.upgrade', 'Upgrade')}</Button>
