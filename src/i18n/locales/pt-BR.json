@@ -189,7 +189,15 @@
     "redirectingToLogin": "Redirecionando para o login...",
     "validatingRecoveryLink": "Validando link de recuperação...",
     "passwordUpdateSuccess": "Senha atualizada com sucesso!",
-    "passwordUpdateError": "Erro ao atualizar senha"
+    "passwordUpdateError": "Erro ao atualizar senha",
+    "verify": {
+      "title": "Email não verificado",
+      "description": "Confirme seu email para liberar todos os recursos.",
+      "resend": "Reenviar email",
+      "resendIn": "Reenviar em {{seconds}}s",
+      "resendSuccess": "Email de confirmação reenviado.",
+      "resendError": "Não foi possível reenviar o email. Tente novamente em instantes."
+    }
   },
   "admin": {
     "panel": "Painel do Criador",

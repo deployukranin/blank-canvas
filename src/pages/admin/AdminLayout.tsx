@@ -21,6 +21,8 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -305,7 +307,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             transition={{ duration: 0.3 }}
             className="p-4 lg:p-6 max-w-[1600px] mx-auto"
           >
+            <EmailVerificationBanner className="mb-4" />
             {children}
+
           </motion.div>
         </main>
       </div>

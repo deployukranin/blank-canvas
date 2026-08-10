@@ -14,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReferralCapture, readPendingReferral, clearPendingReferral } from "@/hooks/use-referral-code";
 import { trackConversion } from "@/lib/tracking";
 import { Container, Grid } from "@/components/layout/primitives";
+import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
+
 import platformLogo from "@/assets/mytinglebox-logo.png";
 import { getPublicOrigin, publicUrl } from '@/lib/public-url';
 
@@ -513,6 +515,8 @@ const Auth = () => {
                 Clique no link para ativar sua conta — sua loja será criada automaticamente.
               </p>
               <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
+              <EmailVerificationBanner email={signupEmail} className="text-left" />
+
               <Button
                 onClick={() => { setSignupConfirmationSent(false); }}
                 variant="ghost"
