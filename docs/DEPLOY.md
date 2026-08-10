@@ -212,3 +212,34 @@ As Edge Functions já incluem headers CORS. Se ainda houver erro:
 Para problemas ou dúvidas:
 - Consulte a documentação do [Supabase](https://supabase.com/docs)
 - Abra uma issue no repositório
+
+## Fluxo com branch `release` (publicação controlada)
+
+Objetivo: as edições feitas na Lovable ficam numa branch de trabalho; só entram em produção
+depois de passarem pela branch `release` e por um merge explícito em `main`.
+
+```
+Lovable (Publish) ──► develop  ──[Cut Release]──► release ──[Promote to Production]──► main ──► Vercel prod
+```
+
+### 1. Branches
+- `develop` — branch de sync da Lovable (Project Settings > GitHub > branch de trabalho).
+- `release` — candidata a produção; gera preview na Vercel.
+- `main` — produção (`mytinglebox.com`).
+
+Proteja `main` em Settings > Branches (exigir PR e status checks).
+
+### 2. Publicar
+1. Edite na Lovable e clique em **Publish** (isso comita em `develop`).
+2. No GitHub: **Actions > Cut Release > Run workflow** (origem `develop`).
+   - Atualiza/cria a branch `release` e abre um PR `release -> main`.
+   - A Vercel gera um preview da `release` para validação.
+3. Validado o preview: **Actions > Promote to Production > Run workflow** (origem `release`)
+   ou faça o merge do PR. Isso publica em `main` e cria a tag `release-<timestamp>`.
+
+### 3. Observações
+- Conflitos no Cut Release interrompem o workflow — resolva manualmente e rode de novo.
+- Backend (Lovable Cloud/Supabase) é compartilhado entre as branches: migrações e edge
+  functions passam a valer imediatamente, independentemente do merge em `main`.
+- Mantenha **Auto-assign Custom Production Domains** desativado na Vercel para que previews
+  não assumam o domínio de produção.
