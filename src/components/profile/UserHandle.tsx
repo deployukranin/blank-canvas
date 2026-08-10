@@ -27,7 +27,7 @@ export const UserHandle = ({ userId, username, className = '', showAt = true }: 
         const { data, error } = await supabase
           .from('profiles')
           .select('handle')
-          .eq('id', userId)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (!error && data?.handle) {
