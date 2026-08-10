@@ -352,11 +352,27 @@ const AdminDashboard: React.FC = () => {
     fetchStats();
   }, [storeId, i18n.language]);
 
-  const chartData = weekData.length ? weekData : buildEmptyWeek().map(b => ({
+  const baseChartData = weekData.length ? weekData : buildEmptyWeek().map(b => ({
     name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
     orders: 0,
     revenue: 0,
   }));
+
+  // Showcase data for the demo storefront
+  const isDemo = (slug ?? storeSlug) === DEMO_SLUG;
+  const displayStats = isDemo ? DEMO.stats : stats;
+  const displayPending = isDemo ? DEMO.pending : pendingOrders;
+  const displayYt = isDemo ? DEMO.yt : ytMetrics;
+  const displayIdeas = isDemo ? DEMO.ideas.toString() : '—';
+  const chartData = isDemo
+    ? buildEmptyWeek().map((b, i) => ({
+        name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
+        orders: DEMO.week[i].orders,
+        revenue: DEMO.week[i].revenue,
+      }))
+    : baseChartData;
+  const displayLoading = isDemo ? false : isLoading;
+
 
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
