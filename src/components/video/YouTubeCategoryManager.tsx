@@ -33,6 +33,14 @@ export type YouTubeCategorizationDraft = {
   autoCategorizeEnabled?: boolean;
 };
 
+const DEFAULT_CATEGORY_NAMES: Record<string, string> = {
+  "mouth-voice": "Mouth & Voice",
+  "tapping-scratching": "Tapping & Scratching",
+  "personal-attention": "Personal Attention",
+  "video-styles": "Video Styles",
+  "visual-misc": "Visual & Misc",
+};
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -111,6 +119,12 @@ export function YouTubeCategoryManager({
       onChange({ ...draft, videoCategoryMap: newMap });
     }
   }, [autoCategorizeEnabled, draft.categories, videos]);
+
+  // Default categories keep their English name in config; translate them for display
+  const catLabel = (cat: YouTubeCategoryDraft) =>
+    DEFAULT_CATEGORY_NAMES[cat.id] === cat.name
+      ? t(`ytCats.${cat.id}`, { defaultValue: cat.name })
+      : cat.name;
 
   const categoriesSorted = useMemo(() => {
     return [...(draft.categories ?? [])].sort((a, b) => {
@@ -298,14 +312,14 @@ export function YouTubeCategoryManager({
                     <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("admin.categoryName")} aria-label={t("admin.categoryName")} />
                     <Button type="button" variant="secondary" className="gap-2" onClick={addCategory} disabled={!newName.trim()}>
                       <Plus className="w-4 h-4" />
-                      Add
+                      {t("common.add", "Add")}
                     </Button>
                   </div>
                 </div>
 
-                {/* Category list with keywords - only show when auto-categorize is enabled */}
+                {/* Category list with keywords */}
                 <AnimatePresence>
-                  {autoCategorizeEnabled && categoriesSorted.length > 0 && (
+                  {categoriesSorted.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -339,13 +353,13 @@ export function YouTubeCategoryManager({
                               ) : (
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-sm">
-                                    {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                                    {cat.icon ? `${cat.icon} ` : ""}{catLabel(cat)}
                                   </span>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                                    onClick={() => { setEditingCatId(cat.id); setEditingName(cat.name); }}
+                                    onClick={() => { setEditingCatId(cat.id); setEditingName(catLabel(cat)); }}
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </Button>
@@ -448,7 +462,7 @@ export function YouTubeCategoryManager({
                               <SelectContent>
                                 <SelectItem value={NONE_VALUE}>{t("admin.noCategory")}</SelectItem>
                                 {categoriesSorted.map((c) => (
-                                  <SelectItem key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.name}</SelectItem>
+                                  <SelectItem key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{catLabel(c)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>

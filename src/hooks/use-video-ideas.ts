@@ -62,6 +62,22 @@ export const useVideoIdeas = () => {
         userVotes = (votesData || []).map(v => v.idea_id);
       }
 
+      // Resolve author handles
+      const authorIds = Array.from(
+        new Set((ideasData || []).map((i) => i.user_id).filter(Boolean) as string[])
+      );
+      const handleMap: Record<string, string> = {};
+      if (authorIds.length) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, handle, display_name')
+          .in('user_id', authorIds);
+        (profilesData || []).forEach((p) => {
+          if (p.handle) handleMap[p.user_id] = `@${p.handle}`;
+          else if (p.display_name) handleMap[p.user_id] = p.display_name;
+        });
+      }
+
       // Map ideas with vote status
       const mappedIdeas: VideoIdea[] = (ideasData || []).map(idea => ({
         id: idea.id,
@@ -72,7 +88,7 @@ export const useVideoIdeas = () => {
         user_id: idea.user_id,
         created_at: idea.created_at,
         hasVoted: userVotes.includes(idea.id),
-        authorName: 'Usuário', // In a real app, join with profiles
+        authorName: (idea.user_id && handleMap[idea.user_id]) || undefined,
       }));
 
       setIdeas(mappedIdeas);
@@ -142,6 +158,12 @@ export const useVideoIdeas = () => {
 
       if (insertError) throw insertError;
 
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('handle, display_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       // Add to local state only if active (pending ideas don't appear publicly)
       const newIdea: VideoIdea = {
         id: data.id,
@@ -152,7 +174,7 @@ export const useVideoIdeas = () => {
         user_id: data.user_id,
         created_at: data.created_at,
         hasVoted: false,
-        authorName: user.username || 'Você',
+        authorName: myProfile?.handle ? `@${myProfile.handle}` : myProfile?.display_name || undefined,
       };
 
       if (newIdea.status === 'active') {

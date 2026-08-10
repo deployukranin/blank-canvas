@@ -25,7 +25,8 @@
     "portuguese": "Portugués",
     "noData": "Sin datos",
     "backHome": "Inicio",
-    "backToSite": "Volver al sitio"
+    "backToSite": "Volver al sitio",
+    "add": "Añadir"
   },
   "nav": {
     "home": "Inicio",
@@ -1648,5 +1649,12 @@
     "sleep": "Me dormí",
     "tingles": "Escalofríos",
     "favorite": "Favorito"
+  },
+  "ytCats": {
+    "mouth-voice": "Boca y Voz",
+    "tapping-scratching": "Tapping y Rasguños",
+    "personal-attention": "Atención Personal",
+    "video-styles": "Estilos de Video",
+    "visual-misc": "Visual y Varios"
   }
 }

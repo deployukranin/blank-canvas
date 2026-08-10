@@ -25,7 +25,8 @@
     "portuguese": "Português",
     "noData": "Sem dados",
     "backHome": "Início",
-    "backToSite": "Voltar ao site"
+    "backToSite": "Voltar ao site",
+    "add": "Adicionar"
   },
   "nav": {
     "home": "Início",
@@ -1649,5 +1650,12 @@
     "tingles": "Arrepios",
     "favorito": "Favorito",
     "favorite": "Favorito"
+  },
+  "ytCats": {
+    "mouth-voice": "Boca & Voz",
+    "tapping-scratching": "Tapping & Arranhões",
+    "personal-attention": "Atenção Pessoal",
+    "video-styles": "Estilos de Vídeo",
+    "visual-misc": "Visual & Diversos"
   }
 }
