@@ -273,7 +273,7 @@ const AdminPlanos: React.FC = () => {
                         <HardDrive className="w-4 h-4 text-primary shrink-0" />
                         <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
                       </div>
-                      <p className="mt-1 text-center text-xs text-muted-foreground">
+                      <p className="mt-1 text-center text-[10px] leading-tight text-muted-foreground whitespace-nowrap">
                         {t('admin.plans.storageHelp', 'Armazenamento para conteúdos e assets da sua loja.')}
                       </p>
                     </div>
