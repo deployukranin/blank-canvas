@@ -103,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const redirectUrl = redirectTo || `${getPublicOrigin()}/auth`;
 
-      // Email verification is temporarily disabled: create the account directly
-      // and let Supabase return an active session immediately.
+      // Email verification is enabled: signUp returns no session until the
+      // user confirms via the emailed link.
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
