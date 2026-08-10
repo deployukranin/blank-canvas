@@ -28,7 +28,7 @@ const PerfilPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile, refetch: refetchProfile } = useProfile();
+  const { profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { customization } = useProfileCustomization();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
@@ -36,14 +36,27 @@ const PerfilPage = () => {
   const { basePath, store } = useTenant();
   const withBase = (p: string) => (basePath ? `${basePath}${p}` : p);
 
-  const { isVIP } = useVIPSubscription();
+  const { isVIP, isLoading: vipLoading } = useVIPSubscription();
   const isCinematic = useCinematicDesktop();
-  const { reputation } = useReputation();
+  const { reputation, isLoading: reputationLoading } = useReputation();
   const { entries: leaderboard } = useLeaderboard(10);
   const [handle, setHandle] = useState<string | null>(null);
   const visibleHandle = handle ?? profile?.handle ?? null;
-  const [hasOrder, setHasOrder] = useState(false);
-  const [hasIdea, setHasIdea] = useState(false);
+  // Journey flags are cached so a refresh doesn't paint an empty checklist first
+  const journeyCacheKey = user?.id ? `tinglebox:journey:${user.id}:${store?.id ?? 'none'}` : null;
+  const readJourneyCache = () => {
+    if (!journeyCacheKey) return null;
+    try {
+      const raw = localStorage.getItem(journeyCacheKey);
+      return raw ? (JSON.parse(raw) as { order: boolean; idea: boolean }) : null;
+    } catch {
+      return null;
+    }
+  };
+  const [hasOrder, setHasOrder] = useState(() => readJourneyCache()?.order ?? false);
+  const [hasIdea, setHasIdea] = useState(() => readJourneyCache()?.idea ?? false);
+  const [journeyLoaded, setJourneyLoaded] = useState(() => readJourneyCache() !== null);
+
   const [journeyHidden, setJourneyHiddenState] = useState(() => {
     try {
       return localStorage.getItem('profile:journeyHidden') === '1';
