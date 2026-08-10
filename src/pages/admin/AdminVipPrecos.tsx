@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Crown, Sparkles, Loader2, TrendingDown } from 'lucide-react';
+import { Save, Plus, Trash2, Crown, Sparkles, Loader2, TrendingDown, Upload, Image as ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '@/contexts/TenantContext';
 import AdminLayout from './AdminLayout';
@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
+import { useToast } from '@/hooks/use-toast';
+import { uploadConfigAsset, describeUploadError } from '@/lib/external-storage';
 import {
   getDefaultVipConfig,
   saveVipConfig,
@@ -31,6 +33,9 @@ const AdminVipPrecos = () => {
   const { t, i18n } = useTranslation();
   const isBR = i18n.language?.startsWith('pt');
   const { store } = useTenant();
+  const { toast } = useToast();
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
   const {
     config,
@@ -80,6 +85,26 @@ const AdminVipPrecos = () => {
     const savings = ((fullPrice - plan.price) / fullPrice) * 100;
     const perMonth = plan.price / months;
     return savings > 0 ? { percent: Math.round(savings), perMonth } : null;
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !store?.id) return;
+    setIsUploadingBanner(true);
+    try {
+      const { url } = await uploadConfigAsset(file, store.id);
+      setConfig(prev => ({ ...prev, bannerUrl: url }));
+      toast({ title: t('vipPricing.bannerUploaded', 'Banner atualizado') });
+    } catch (err: any) {
+      toast({
+        title: t('vipPricing.bannerError', 'Não foi possível enviar o banner'),
+        description: describeUploadError(err?.message),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingBanner(false);
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
+    }
   };
 
   const handleSave = () => saveNow();
