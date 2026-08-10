@@ -513,6 +513,8 @@ const Auth = () => {
                 Clique no link para ativar sua conta — sua loja será criada automaticamente.
               </p>
               <p className="text-gray-500 text-xs pt-2">Não recebeu? Verifique sua caixa de spam.</p>
+              <EmailVerificationBanner email={signupEmail} className="text-left" />
+
               <Button
                 onClick={() => { setSignupConfirmationSent(false); }}
                 variant="ghost"
