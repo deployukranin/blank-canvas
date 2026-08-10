@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { emailUnverifiedResponse } from "../_shared/email-verified.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -160,6 +161,10 @@ Deno.serve(async (req: Request) => {
     }
 
     const user = { id: claimsData.claims.sub as string };
+
+    // Email verification guard (soft block on sensitive actions)
+    const unverified = await emailUnverifiedResponse(user.id, corsHeaders);
+    if (unverified) return unverified;
     const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", user.id);
 
     const userRoles = (roles || []).map((roleRow: { role: string }) => roleRow.role);

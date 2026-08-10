@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { storeBlockedResponse } from "../_shared/store-plan.ts";
+import { emailUnverifiedResponse } from "../_shared/email-verified.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,6 +47,10 @@ Deno.serve(async (req) => {
       );
     }
     const user = { id: claimsData.claims.sub as string, email: claimsData.claims.email as string };
+
+    // Email verification guard (soft block on sensitive actions)
+    const unverified = await emailUnverifiedResponse(user.id, corsHeaders);
+    if (unverified) return unverified;
 
     const { store_id, return_url } = await req.json();
     if (!store_id || !return_url) {
