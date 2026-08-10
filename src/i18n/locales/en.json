@@ -75,7 +75,41 @@
     "stepIdea": "Share a video idea",
     "stepVip": "Join the VIP community",
     "vipUpsell": "Unlock exclusive content and priority on your custom videos",
-    "vipCta": "Become VIP"
+    "vipCta": "Become VIP",
+    "member": "Member",
+    "points": "points",
+    "reputationTitle": "Your reputation",
+    "pointsToNext": "{{points}} points to the next level",
+    "statIdeas": "ideas",
+    "statVotes": "votes",
+    "statComments": "comments",
+    "topMembers": "Top members",
+    "handle": {
+      "title": "Choose your username",
+      "rules": "3-20 characters • lowercase, numbers and _",
+      "placeholder": "yourusername",
+      "submit": "Set username (only once)",
+      "saving": "Saving...",
+      "required": "Type a username to continue",
+      "error": "Could not set your username",
+      "successTitle": "Username set!",
+      "successDesc": "Your username is now @{{handle}}",
+      "locked": "Your username is permanent and cannot be changed."
+    },
+    "premium": {
+      "unlock": "Unlock with VIP",
+      "changeBanner": "Banner",
+      "vipBadge": "Premium",
+      "free": "Free",
+      "level": "Lv.",
+      "teaser": "VIP members can set a custom banner and avatar (image or GIF).",
+      "limits": "JPG, PNG, WEBP or GIF up to {{mb}}MB.",
+      "saved": "Profile updated!",
+      "tooLarge": "File is too large (max 5MB).",
+      "invalidType": "Use JPG, PNG, WEBP or GIF.",
+      "vipRequired": "Active VIP required to customize your profile.",
+      "uploadError": "Could not upload the file."
+    }
   },
   "auth": {
     "enterButton": "Login",
