@@ -33,6 +33,14 @@ export type YouTubeCategorizationDraft = {
   autoCategorizeEnabled?: boolean;
 };
 
+const DEFAULT_CATEGORY_NAMES: Record<string, string> = {
+  "mouth-voice": "Mouth & Voice",
+  "tapping-scratching": "Tapping & Scratching",
+  "personal-attention": "Personal Attention",
+  "video-styles": "Video Styles",
+  "visual-misc": "Visual & Misc",
+};
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
