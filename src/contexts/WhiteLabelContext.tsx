@@ -702,8 +702,12 @@ export interface WhiteLabelConfig {
     autoCategorizeEnabled?: boolean;
   };
 
+  // Video reactions (fully customizable by the store admin)
+  reactions: ReactionConfigItem[];
+
   // Icons
   icons: IconConfig;
+
 
   // Quick Actions (Explorar section)
   quickActions: QuickActionItem[];
