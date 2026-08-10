@@ -14,6 +14,7 @@ import { defaultVipConfig, type VipPlan } from '@/lib/vip-config';
 export interface LoadVipPlansResult {
   plans: VipPlan[];
   source: 'store' | 'defaults' | 'none';
+  bannerUrl?: string;
 }
 
 export async function loadVipPlansForStore(
@@ -32,10 +33,11 @@ export async function loadVipPlansForStore(
     .maybeSingle();
 
   const storePlans = (data?.config_value as any)?.plans as VipPlan[] | undefined;
+  const bannerUrl = ((data?.config_value as any)?.bannerUrl as string | undefined) || undefined;
 
   if (storePlans && storePlans.length > 0) {
-    return { plans: storePlans, source: 'store' };
+    return { plans: storePlans, source: 'store', bannerUrl };
   }
 
-  return { plans: defaultVipConfig.plans, source: 'defaults' };
+  return { plans: defaultVipConfig.plans, source: 'defaults', bannerUrl };
 }

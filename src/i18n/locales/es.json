@@ -356,7 +356,8 @@
         "vipSupport": "Soporte VIP dedicado",
         "premiumAnalytics": "Analytics premium",
         "dailyBackup": "Backup diario"
-      }
+      },
+      "storageHelp": "Espacio para los videos, audios e imágenes que subes: contenido VIP, entregas de customs, banners e ícono de la tienda."
     },
     "support": {
       "title": "Soporte",
@@ -728,7 +729,14 @@
     "noPlans": "No hay planes VIP registrados",
     "createFirst": "Crear Primer Plan",
     "savings": "Ahorra {{percent}}%",
-    "equivalentMonth": "≈ {{value}}/mes"
+    "equivalentMonth": "≈ {{value}}/mes",
+    "bannerTitle": "Banner del VIP",
+    "bannerDesc": "Imagen mostrada en la parte superior de la página VIP.",
+    "bannerUpload": "Subir banner",
+    "bannerRemove": "Quitar banner",
+    "bannerHint": "JPG, PNG, WEBP o GIF. Recomendado 1200x400.",
+    "bannerUploaded": "Banner actualizado",
+    "bannerError": "No se pudo subir el banner"
   },
   "orders": {
     "title": "Gestionar Pedidos",
@@ -1151,7 +1159,9 @@
     "ideasEmptyDesc": "Sé el primero en sugerir algo nuevo usando el formulario de la izquierda.",
     "alreadyReported": "Ya denunciaste este contenido.",
     "vipMedia": "Contenido VIP",
-    "vipMediaError": "No se pudo cargar este contenido. Inténtalo de nuevo."
+    "vipMediaError": "No se pudo cargar este contenido. Inténtalo de nuevo.",
+    "vipTeaser": "Desbloquea el VIP",
+    "vipTeaserDesc": "Suscríbete al VIP y accede a contenido exclusivo, videos anticipados y ventajas."
   },
   "customs": {
     "videos": "Videos",

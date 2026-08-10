@@ -86,6 +86,7 @@ const VIPPage = () => {
   const [subscription, setSubscription] = useState<VipSub | null>(null);
   const [vipContent, setVipContent] = useState<VipContentItem[]>([]);
   const [vipPlans, setVipPlans] = useState<VipPlanConfig[]>([]);
+  const [vipBanner, setVipBanner] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<VipPlanConfig | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
@@ -180,8 +181,9 @@ const VIPPage = () => {
   useEffect(() => {
     const loadPlans = async () => {
       const { loadVipPlansForStore } = await import('@/lib/vip-plans-loader');
-      const { plans } = await loadVipPlansForStore(resolvedStoreId);
+      const { plans, bannerUrl } = await loadVipPlansForStore(resolvedStoreId);
       setVipPlans(plans);
+      setVipBanner(bannerUrl || null);
       setSelectedPlan(plans.length > 0 ? plans[0] : null);
     };
     loadPlans();
@@ -418,6 +420,11 @@ const VIPPage = () => {
     return (
       <MobileLayout title="VIP">
         <div className="px-4 py-6 space-y-6">
+          {vipBanner && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl overflow-hidden border border-border/40">
+              <img src={vipBanner} alt="VIP" className="w-full h-40 object-cover" loading="lazy" />
+            </motion.div>
+          )}
           {/* Status Card */}
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
             <GlassCard glow className="text-center py-8 relative overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
@@ -495,6 +502,11 @@ const VIPPage = () => {
   return (
     <MobileLayout title="VIP">
       <div className="px-4 py-6 space-y-6">
+        {vipBanner && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl overflow-hidden border border-border/40">
+            <img src={vipBanner} alt="VIP" className="w-full h-40 object-cover" loading="lazy" />
+          </motion.div>
+        )}
         {/* Hero */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
           <GlassCard glow className="text-center py-8 relative overflow-hidden">
