@@ -305,7 +305,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             transition={{ duration: 0.3 }}
             className="p-4 lg:p-6 max-w-[1600px] mx-auto"
           >
+            <EmailVerificationBanner className="mb-4" />
             {children}
+
           </motion.div>
         </main>
       </div>
