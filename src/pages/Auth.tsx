@@ -369,22 +369,7 @@ const Auth = () => {
         return;
       }
 
-      // Email confirmation required → store pending data and show confirmation message
-      if (result.needsConfirmation) {
-        // Persist pending store creation data so we can finalize after the user confirms email
-        sessionStorage.setItem('pending_store_setup', JSON.stringify({
-          email: signupEmail,
-          storeName: storeName.trim(),
-          storeSlug,
-          youtubeVerified,
-        }));
-        toast.success("Conta criada! Verifique seu email para confirmar e continuar.", { duration: 8000 });
-        setSignupConfirmationSent(true);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Auto-confirmed (no email verification required) — continue with store creation
+      // Account is usable immediately — email verification happens inside the panel.
       let userId: string | null = null;
       for (let i = 0; i < 3; i++) {
         const { data: { session } } = await supabase.auth.getSession();
