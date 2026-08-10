@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Lock, Play, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { getVipMediaSignedUrl } from "@/lib/external-storage";
+import { VipMediaViewer } from "@/components/vip/VipMediaViewer";
 import { useTenant } from "@/contexts/TenantContext";
 
 interface VipContent {
@@ -21,6 +21,7 @@ export const VIPAreaContent = () => {
   const [content, setContent] = useState<VipContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVip, setIsVip] = useState(false);
+  const [viewerMedia, setViewerMedia] = useState<{ ref: string; title: string } | null>(null);
   const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -131,10 +132,7 @@ export const VIPAreaContent = () => {
               {item.description}
             </p>
             {item.video_url && (
-              <Button className="w-full" onClick={async () => {
-                const url = await getVipMediaSignedUrl(item.video_url);
-                if (url) window.open(url, '_blank');
-              }}>
+              <Button className="w-full" onClick={() => setViewerMedia({ ref: item.video_url, title: item.title })}>
                 {t('storefront.watchNow')}
               </Button>
             )}
@@ -142,6 +140,8 @@ export const VIPAreaContent = () => {
         </Card>
       ))}
       
+      <VipMediaViewer mediaRef={viewerMedia?.ref ?? null} title={viewerMedia?.title} onClose={() => setViewerMedia(null)} />
+
       {content.length === 0 && (
         <div className="col-span-full text-center text-gray-500 py-10">
           {t('storefront.noVipContent')}

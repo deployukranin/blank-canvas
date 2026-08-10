@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, Trophy } from 'lucide-react';
+import { LogOut, Crown, ChevronRight, HelpCircle, FileText, Shield, Lightbulb, Package, Bell, LayoutDashboard, Camera, Check, Trophy, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -20,6 +20,7 @@ import { HandleSelector } from '@/components/profile/HandleSelector';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import { useReputation, useLeaderboard } from '@/hooks/use-gamification';
 import { supabase } from '@/integrations/supabase/client';
+import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -42,6 +43,19 @@ const PerfilPage = () => {
   const [handle, setHandle] = useState<string | null>(null);
   const [hasOrder, setHasOrder] = useState(false);
   const [hasIdea, setHasIdea] = useState(false);
+  const [journeyHidden, setJourneyHiddenState] = useState(() => {
+    try {
+      return localStorage.getItem('profile:journeyHidden') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const setJourneyHidden = (v: boolean) => {
+    try {
+      localStorage.setItem('profile:journeyHidden', v ? '1' : '0');
+    } catch { /* ignore */ }
+    setJourneyHiddenState(v);
+  };
 
   useEffect(() => {
     setHandle(profile?.handle ?? null);
@@ -245,7 +259,18 @@ const PerfilPage = () => {
           </motion.div>
         )}
 
-        {/* Membership journey — conversion mechanic */}
+        {/* Membership journey — conversion mechanic (dismissible) */}
+        {journeyHidden || completed === steps.length ? (
+          completed === steps.length ? null : (
+            <button
+              type="button"
+              onClick={() => setJourneyHidden(false)}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+            >
+              {t('profile.journeyShow', 'Show your journey')}
+            </button>
+          )
+        ) : (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
           <GlassCard className="p-5 space-y-4">
             <div className="flex items-center justify-between">
@@ -255,8 +280,21 @@ const PerfilPage = () => {
                   {t('profile.journeySubtitle', 'Complete the steps and unlock exclusive perks')}
                 </p>
               </div>
-              <span className="text-sm font-bold text-primary">{completed}/{steps.length}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-primary">{completed}/{steps.length}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground"
+                  aria-label={t('profile.journeyHide', 'Hide journey')}
+                  onClick={() => setJourneyHidden(true)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
+
 
             <div className="h-2 rounded-full bg-white/5 overflow-hidden">
               <motion.div
@@ -284,6 +322,8 @@ const PerfilPage = () => {
             </div>
           </GlassCard>
         </motion.div>
+        )}
+
 
         {/* VIP upsell */}
         {!isVIP && (
@@ -357,7 +397,12 @@ const PerfilPage = () => {
               </Link>
             </motion.div>
           ))}
+
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="pt-1">
+            <BugReportDialog variant="ghost" className="px-4 py-2 text-xs" />
+          </motion.div>
         </div>
+
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Button variant="ghost" onClick={logout} className="w-full h-12 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10">

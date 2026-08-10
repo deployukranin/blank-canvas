@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AtSign, Check, Loader2, AlertCircle } from 'lucide-react';
+import { AtSign, Check, Loader2, AlertCircle, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,33 @@ interface HandleSelectorProps {
   onHandleSet: (handle: string) => void;
 }
 
+const NOTICE_KEY = 'profile:handleNoticeSeen';
+
+const readNoticeSeen = () => {
+  try {
+    return localStorage.getItem(NOTICE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorProps) => {
   const { t } = useTranslation();
   const [handle, setHandle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [justSet, setJustSet] = useState(false);
+  const [noticeSeen, setNoticeSeen] = useState(readNoticeSeen);
   const { toast } = useToast();
+
+  const dismissNotice = () => {
+    try {
+      localStorage.setItem(NOTICE_KEY, '1');
+    } catch { /* ignore */ }
+    setNoticeSeen(true);
+    setJustSet(false);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +81,7 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
         description: t('profile.handle.successDesc', 'Your username is now @{{handle}}', { handle: savedHandle }),
       });
 
+      setJustSet(true);
       onHandleSet(savedHandle);
       notifyProfileUpdated();
     } catch (err) {
@@ -70,8 +92,10 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
     }
   };
 
-  // Already defined — permanent, no editing allowed
+  // Already defined — permanent, no editing allowed.
+  // The "permanent" notice is only shown once, right after the handle is set.
   if (currentHandle) {
+    if (!justSet && noticeSeen) return null;
     return (
       <GlassCard className="p-4 bg-gradient-to-r from-primary/10 to-accent/5 border-primary/20">
         <div className="flex items-center gap-3">
@@ -84,6 +108,16 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
               {t('profile.handle.locked', 'Your username is permanent and cannot be changed.')}
             </p>
           </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground"
+            aria-label={t('common.close', 'Close')}
+            onClick={dismissNotice}
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
       </GlassCard>
     );

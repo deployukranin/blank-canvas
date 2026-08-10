@@ -14,7 +14,6 @@ import { useProfile } from '@/hooks/use-profile';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
-import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 
 interface DesktopShellProps {
   children: ReactNode;
@@ -122,7 +121,6 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
                   </Link>
                 );
               })}
-              <BugReportDialog />
             </div>
           </nav>
         </div>

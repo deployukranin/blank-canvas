@@ -26,7 +26,8 @@
     "noData": "Sem dados",
     "backHome": "Início",
     "backToSite": "Voltar ao site",
-    "add": "Adicionar"
+    "add": "Adicionar",
+    "close": "Fechar"
   },
   "nav": {
     "home": "Início",
@@ -110,7 +111,9 @@
       "invalidType": "Use JPG, PNG, WEBP ou GIF.",
       "vipRequired": "É necessário VIP ativo para personalizar seu perfil.",
       "uploadError": "Não foi possível enviar o arquivo."
-    }
+    },
+    "journeyShow": "Mostrar sua jornada",
+    "journeyHide": "Ocultar jornada"
   },
   "auth": {
     "enterButton": "Entrar",
@@ -1146,7 +1149,9 @@
     "endOfList": "Fim da lista",
     "ideasIntro": "Ajude a definir o próximo vídeo. A comunidade vota nas melhores sugestões.",
     "ideasEmptyDesc": "Seja o primeiro a sugerir algo novo usando o formulário ao lado.",
-    "alreadyReported": "Você já denunciou este conteúdo."
+    "alreadyReported": "Você já denunciou este conteúdo.",
+    "vipMedia": "Mídia VIP",
+    "vipMediaError": "Não foi possível carregar este conteúdo. Tente novamente."
   },
   "customs": {
     "videos": "Vídeos",
