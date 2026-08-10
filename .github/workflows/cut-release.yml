@@ -1,0 +1,67 @@
+name: Cut Release
+
+# Sincroniza a branch de trabalho da Lovable (develop) para a branch `release`.
+# Rode este workflow depois de clicar em "Publish" na Lovable.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch de origem (onde a Lovable comita)'
+        required: true
+        default: 'develop'
+        type: string
+      open_pr:
+        description: 'Abrir Pull Request de release -> main'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update release branch
+        run: |
+          SRC="${{ inputs.source_branch }}"
+          git fetch origin "$SRC"
+          if git ls-remote --exit-code --heads origin release; then
+            git fetch origin release
+            git checkout -B release origin/release
+            git merge --no-ff "origin/$SRC" -m "Release: sync from $SRC ($(date -u +%Y-%m-%dT%H:%M:%SZ))" || {
+              echo "::error::Conflito ao mesclar $SRC em release. Resolva manualmente."; exit 1;
+            }
+          else
+            git checkout -B release "origin/$SRC"
+          fi
+          git push origin release
+
+      - name: Open PR release -> main
+        if: ${{ inputs.open_pr }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh pr list --base main --head release --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            echo "PR já aberto: #$EXISTING"
+          else
+            gh pr create \
+              --base main \
+              --head release \
+              --title "Release $(date -u +%Y-%m-%d)" \
+              --body "Release candidate gerado a partir de \`${{ inputs.source_branch }}\`. Faça o merge para publicar em produção."
+          fi
