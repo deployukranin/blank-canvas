@@ -140,45 +140,6 @@ export const LayoutPicker: React.FC = () => {
           );
         })}
       </div>
-
-      {/* Live preview */}
-      <GlassCard className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t('admin.layout.preview', 'Preview')} — {LAYOUT_META[previewVariant].name}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.layout.previewDesc', 'Live preview of your storefront with real data.')}
-            </p>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button size="icon" variant={device === 'mobile' ? 'default' : 'ghost'} className="h-8 w-8" onClick={() => setDevice('mobile')}>
-              <Smartphone className="w-4 h-4" />
-            </Button>
-            <Button size="icon" variant={device === 'desktop' ? 'default' : 'ghost'} className="h-8 w-8" onClick={() => setDevice('desktop')}>
-              <Monitor className="w-4 h-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setReloadKey(k => k + 1)}>
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex justify-center rounded-xl bg-foreground/[0.03] p-4 overflow-hidden">
-          <div
-            className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-xl transition-all"
-            style={{ width: device === 'mobile' ? 390 : '100%', maxWidth: '100%', height: 640 }}
-          >
-            <iframe
-              key={`${previewVariant}-${device}-${reloadKey}`}
-              src={previewSrc}
-              title={`${LAYOUT_META[previewVariant].name} preview`}
-              className="w-full h-full border-0"
-            />
-          </div>
-        </div>
-      </GlassCard>
     </div>
   );
 };
