@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, LogIn, Play, UserPlus } from 'lucide-react';
@@ -5,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
-import bannerStudio from '@/assets/banner-studio.jpg';
+import { DefaultBanner } from '@/components/layout/DefaultBanner';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { useTenant } from '@/contexts/TenantContext';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
