@@ -234,6 +234,126 @@ export type Database = {
         }
         Relationships: []
       }
+      bug_reports: {
+        Row: {
+          admin_note: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          route: string | null
+          severity: string
+          status: string
+          store_id: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          route?: string | null
+          severity?: string
+          status?: string
+          store_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          route?: string | null
+          severity?: string
+          status?: string
+          store_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_reports_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bug_reports_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reports: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          reason_code: string
+          reporter_id: string | null
+          status: string
+          store_id: string | null
+          target_author: string | null
+          target_id: string
+          target_title: string | null
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason_code: string
+          reporter_id?: string | null
+          status?: string
+          store_id?: string | null
+          target_author?: string | null
+          target_id: string
+          target_title?: string | null
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason_code?: string
+          reporter_id?: string | null
+          status?: string
+          store_id?: string | null
+          target_author?: string | null
+          target_id?: string
+          target_title?: string | null
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reports_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reports_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       csp_violations: {
         Row: {
           blocked_uri: string | null
@@ -2084,6 +2204,7 @@ export type Database = {
         Returns: Json
       }
       set_user_handle: { Args: { new_handle: string }; Returns: Json }
+      text_has_personal_data: { Args: { p_text: string }; Returns: boolean }
       toggle_idea_vote: { Args: { p_idea_id: string }; Returns: Json }
       use_invite_code: { Args: { p_code: string }; Returns: Json }
       users_share_store: { Args: { _a: string; _b: string }; Returns: boolean }
