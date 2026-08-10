@@ -30,7 +30,9 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
   const location = useLocation();
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope, store } = useTenant();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { profile } = useProfile();
+  const { isVIP } = useVIPSubscription();
 
   const withBase = (path: string) => {
     if (!isTenantScope) return path;
