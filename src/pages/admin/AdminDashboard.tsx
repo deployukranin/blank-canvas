@@ -380,7 +380,7 @@ const AdminDashboard: React.FC = () => {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-foreground/40 uppercase tracking-wider">{label}</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{isLoading ? '—' : value}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{displayLoading ? '—' : value}</p>
           {sub && <p className="text-[11px] text-primary mt-0.5">{sub}</p>}
         </div>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
@@ -481,14 +481,14 @@ const AdminDashboard: React.FC = () => {
 
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
-          <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
-          <MetricCard label={t('admin.orders')} value={stats.totalOrders} sub={`${stats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
-          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(stats.revenue)} icon={DollarSign} />
+          <MetricCard label={t('admin.totalUsers')} value={displayStats.totalUsers.toLocaleString()} icon={Users} />
+          <MetricCard label={t('admin.vipMembers')} value={displayStats.totalVIP} icon={Crown} />
+          <MetricCard label={t('admin.orders')} value={displayStats.totalOrders} sub={`${displayStats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
+          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(displayStats.revenue)} icon={DollarSign} />
         </div>
 
         {/* YouTube Metrics */}
-        {config.youtube?.channelId && (
+        {(isDemo || config.youtube?.channelId) && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
               <div className="flex items-center gap-2">
@@ -499,37 +499,37 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-              {ytLoading ? (
+              {(!isDemo && ytLoading) ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   {t('common.loading')}
                 </div>
-              ) : ytMetrics ? (
+              ) : displayYt ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <UserPlus className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.subscriber_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.subscriber_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Subscribers')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Video className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_video_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.total_video_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytTotalVideos', 'Total Videos')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_view_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.total_view_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Total Views')}</p>
                     </div>
                   </div>
 
                   {/* Top videos */}
-                  {ytMetrics.top_videos?.length > 0 && (
+                  {displayYt.top_videos?.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytTopVideos')}</p>
                       <div className="space-y-1.5">
-                        {ytMetrics.top_videos.map((video, i) => (
+                        {displayYt.top_videos.map((video, i) => (
                           <div key={video.id} className="flex items-center gap-3 p-2 rounded-lg bg-foreground/[0.02] border border-border/50">
                             <span className="text-xs font-bold text-primary w-5 text-center">{i + 1}</span>
                             {video.thumbnail && (
@@ -579,13 +579,13 @@ const AdminDashboard: React.FC = () => {
               </h3>
               <Link to={`${base}/orders`} className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
             </div>
-            {isLoading ? (
+            {displayLoading ? (
               <p className="text-foreground/30 text-sm">{t('common.loading')}</p>
-            ) : pendingOrders.length === 0 ? (
+            ) : displayPending.length === 0 ? (
               <p className="text-foreground/30 text-sm">{t('common.none')}</p>
             ) : (
               <div className="space-y-2">
-                {pendingOrders.map((order) => (
+                {displayPending.map((order) => (
                   <motion.div key={order.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                     className="flex items-center justify-between p-2.5 rounded-lg bg-foreground/[0.02] border border-border/50">
                     <div>
@@ -606,17 +606,17 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Lightbulb className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">—</p>
+            <p className="text-xl font-bold text-foreground">{displayIdeas}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.ideasLabel')}</p>
           </div>
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.pendingOrders}</p>
+            <p className="text-xl font-bold text-foreground">{displayLoading ? '—' : displayStats.pendingOrders}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.pending')}</p>
           </div>
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Activity className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.newUsersToday}</p>
+            <p className="text-xl font-bold text-foreground">{displayLoading ? '—' : displayStats.newUsersToday}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.newToday')}</p>
           </div>
         </div>
