@@ -357,7 +357,7 @@
         "premiumAnalytics": "Analytics premium",
         "dailyBackup": "Backup diário"
       },
-      "storageHelp": "Espaço para os vídeos, áudios e imagens que você envia: conteúdo VIP, entregas de customs, banners e ícone da loja."
+      "storageHelp": "Armazenamento para conteúdos e assets da sua loja.",
     },
     "support": {
       "title": "Suporte",
