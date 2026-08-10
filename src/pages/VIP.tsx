@@ -459,7 +459,7 @@ const VIPPage = () => {
                         )}
 
                         <span className="text-[10px] text-muted-foreground block mt-2">
-                          {new Date(item.created_at).toLocaleDateString()}
+                          {new Date(item.created_at).toLocaleDateString(i18n.language)}
                         </span>
                       </div>
                     </div>
@@ -468,7 +468,8 @@ const VIPPage = () => {
               ))}
               {vipContent.length === 0 && (
                 <GlassCard className="p-8 text-center">
-                  <p className="text-muted-foreground">No exclusive content yet. Check back soon!</p>
+                  <p className="text-muted-foreground">{t('vip.noContentYet')}</p>
+
                 </GlassCard>
               )}
             </div>
