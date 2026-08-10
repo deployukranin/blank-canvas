@@ -63,13 +63,10 @@ export const LayoutPicker: React.FC = () => {
 
   const current = (config.layout?.variant || DEFAULT_LAYOUT) as LayoutVariant;
   const [previewVariant, setPreviewVariant] = useState<LayoutVariant>(current);
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('mobile');
-  const [reloadKey, setReloadKey] = useState(0);
 
   const planType = store?.plan_type;
   const locked = (v: LayoutVariant) => !isLayoutAllowed(planType, v);
 
-  const previewSrc = `${basePath || ''}/?preview_layout=${previewVariant}&t=${reloadKey}`;
 
   const apply = (variant: LayoutVariant) => {
     if (locked(variant)) {
