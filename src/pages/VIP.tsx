@@ -395,7 +395,7 @@ const VIPPage = () => {
           <AlertDialogCancel onClick={() => window.history.back()}>
             {t('vip.adultWarningLeave', 'Sair')}
           </AlertDialogCancel>
-          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); }} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogAction onClick={() => { setAdultAccepted(true); setShowAdultWarning(false); try { if (adultKey) localStorage.setItem(adultKey, '1'); } catch { /* storage unavailable */ } }} className="bg-destructive hover:bg-destructive/90">
             {t('vip.adultWarningAccept', 'Tenho +18, continuar')}
           </AlertDialogAction>
         </AlertDialogFooter>
