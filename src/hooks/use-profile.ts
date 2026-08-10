@@ -15,13 +15,44 @@ export interface Profile {
 
 // Module-level cache so the profile survives route changes (shells remount per page)
 const profileCache = new Map<string, Profile>();
+const PROFILE_CACHE_PREFIX = 'tinglebox:profile:';
+
+const readCachedProfile = (userId: string): Profile | null => {
+  const memoryProfile = profileCache.get(userId);
+  if (memoryProfile) return memoryProfile;
+  try {
+    const stored = localStorage.getItem(`${PROFILE_CACHE_PREFIX}${userId}`);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as Profile;
+    profileCache.set(userId, parsed);
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const cacheProfile = (userId: string, profile: Profile) => {
+  profileCache.set(userId, profile);
+  try {
+    localStorage.setItem(`${PROFILE_CACHE_PREFIX}${userId}`, JSON.stringify(profile));
+  } catch { /* storage may be unavailable */ }
+};
+
+const removeCachedProfile = (userId: string) => {
+  profileCache.delete(userId);
+  try {
+    localStorage.removeItem(`${PROFILE_CACHE_PREFIX}${userId}`);
+  } catch { /* storage may be unavailable */ }
+};
 
 export const useProfile = () => {
   const { user, isAuthenticated } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(() =>
-    user?.id ? profileCache.get(user.id) ?? null : null
+    user?.id ? readCachedProfile(user.id) : null
   );
-  const [isLoading, setIsLoading] = useState(() => !(user?.id && profileCache.has(user.id)));
+  const [isLoading, setIsLoading] = useState(() => !(user?.id && readCachedProfile(user.id)));
+  const cachedProfile = user?.id ? readCachedProfile(user.id) : null;
+  const resolvedProfile = profile?.id === cachedProfile?.id ? profile : cachedProfile ?? profile;
 
 
   const fetchProfile = useCallback(async () => {
@@ -32,7 +63,7 @@ export const useProfile = () => {
     }
 
     // Keep showing the cached profile while revalidating in the background
-    if (!profileCache.has(user.id)) setIsLoading(true);
+    if (!readCachedProfile(user.id)) setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -41,8 +72,8 @@ export const useProfile = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (data) profileCache.set(user.id, data as Profile);
-      else profileCache.delete(user.id);
+      if (data) cacheProfile(user.id, data as Profile);
+      else removeCachedProfile(user.id);
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -76,7 +107,7 @@ export const useProfile = () => {
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            profileCache.set(user.id, payload.new as Profile);
+            cacheProfile(user.id, payload.new as Profile);
             setProfile(payload.new as Profile);
           }
         }
@@ -95,5 +126,5 @@ export const useProfile = () => {
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, refresh);
   }, [fetchProfile]);
 
-  return { profile, isLoading, refetch: fetchProfile };
+  return { profile: resolvedProfile, isLoading: isLoading && !resolvedProfile, refetch: fetchProfile };
 };

@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Bell, Lightbulb, LogIn, Menu, Package, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +59,8 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
   const storeName = store?.name || config.siteName || '';
   const brandLogo = config.logoImage || store?.avatar_url || '';
   const accountAvatar = customization.avatar_url || profile?.avatar_url || user?.avatar || defaultAvatar.url;
+  const [visibleAccountAvatar, setVisibleAccountAvatar] = useState(accountAvatar);
+  useEffect(() => setVisibleAccountAvatar(accountAvatar), [accountAvatar]);
 
   const isActivePath = (path: string) => {
     const resolved = withBase(path);
@@ -171,7 +173,12 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
                   >
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
                       {isAuthenticated ? (
-                        <img src={accountAvatar} alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')} className="w-full h-full object-cover" />
+                        <img
+                          src={visibleAccountAvatar}
+                          alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')}
+                          className="w-full h-full object-cover"
+                          onError={() => setVisibleAccountAvatar(profile?.avatar_url || user?.avatar || defaultAvatar.url)}
+                        />
                       ) : (
                         <User className="w-5 h-5" />
                       )}
