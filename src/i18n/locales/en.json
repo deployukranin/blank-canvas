@@ -1466,7 +1466,9 @@
       "invalidPhone": "Phone must follow the format +55XXXXXXXXXXX",
       "invalidRandom": "Random key must be a valid UUID"
     },
-    "pixManualConfigured": "Manual PIX configured and activated!"
+    "pixManualConfigured": "Manual PIX configured and activated!",
+    "refreshStatus": "Refresh status",
+    "pendingRequirements": "Pending information at Stripe:"
   },
   "adminAffiliates": {
     "title": "Affiliates",

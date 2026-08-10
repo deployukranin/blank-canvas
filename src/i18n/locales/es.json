@@ -1466,7 +1466,9 @@
       "invalidPhone": "El celular debe seguir el formato +55XXXXXXXXXXX",
       "invalidRandom": "La clave aleatoria debe ser un UUID válido"
     },
-    "pixManualConfigured": "¡PIX Manual configurado y activado!"
+    "pixManualConfigured": "¡PIX Manual configurado y activado!",
+    "refreshStatus": "Actualizar estado",
+    "pendingRequirements": "Información pendiente en Stripe:"
   },
   "adminAffiliates": {
     "title": "Afiliados",
