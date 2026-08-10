@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Lock, Monitor, Smartphone, RefreshCw } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -63,13 +63,10 @@ export const LayoutPicker: React.FC = () => {
 
   const current = (config.layout?.variant || DEFAULT_LAYOUT) as LayoutVariant;
   const [previewVariant, setPreviewVariant] = useState<LayoutVariant>(current);
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('mobile');
-  const [reloadKey, setReloadKey] = useState(0);
 
   const planType = store?.plan_type;
   const locked = (v: LayoutVariant) => !isLayoutAllowed(planType, v);
 
-  const previewSrc = `${basePath || ''}/?preview_layout=${previewVariant}&t=${reloadKey}`;
 
   const apply = (variant: LayoutVariant) => {
     if (locked(variant)) {
@@ -89,7 +86,7 @@ export const LayoutPicker: React.FC = () => {
       {isTrialPlan(planType) && (
         <GlassCard className="p-4 flex items-center justify-between gap-4 border border-primary/25">
           <p className="text-sm text-muted-foreground">
-            {t('admin.layout.trialNotice', 'On the trial plan only the Classic layout can be published. You can still preview the others.')}
+            {t('admin.layout.trialNotice', 'On the trial plan only the Classic layout can be published.')}
           </p>
           <Link to={`${basePath || ''}/admin/plans`}>
             <Button size="sm">{t('admin.layout.upgrade', 'Upgrade')}</Button>
@@ -140,45 +137,6 @@ export const LayoutPicker: React.FC = () => {
           );
         })}
       </div>
-
-      {/* Live preview */}
-      <GlassCard className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t('admin.layout.preview', 'Preview')} — {LAYOUT_META[previewVariant].name}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.layout.previewDesc', 'Live preview of your storefront with real data.')}
-            </p>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button size="icon" variant={device === 'mobile' ? 'default' : 'ghost'} className="h-8 w-8" onClick={() => setDevice('mobile')}>
-              <Smartphone className="w-4 h-4" />
-            </Button>
-            <Button size="icon" variant={device === 'desktop' ? 'default' : 'ghost'} className="h-8 w-8" onClick={() => setDevice('desktop')}>
-              <Monitor className="w-4 h-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setReloadKey(k => k + 1)}>
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex justify-center rounded-xl bg-foreground/[0.03] p-4 overflow-hidden">
-          <div
-            className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-xl transition-all"
-            style={{ width: device === 'mobile' ? 390 : '100%', maxWidth: '100%', height: 640 }}
-          >
-            <iframe
-              key={`${previewVariant}-${device}-${reloadKey}`}
-              src={previewSrc}
-              title={`${LAYOUT_META[previewVariant].name} preview`}
-              className="w-full h-full border-0"
-            />
-          </div>
-        </div>
-      </GlassCard>
     </div>
   );
 };

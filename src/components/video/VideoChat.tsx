@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Send, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -16,6 +17,7 @@ interface ChatMessageRow {
 }
 
 export const VideoChat = ({ videoId }: { videoId: string }) => {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -30,6 +32,13 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
   );
 
   useEffect(() => {
+    // Comments are reserved for members: guests never load the conversation.
+    if (!isAuthenticated) {
+      setMessages([]);
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
 
     const load = async () => {
@@ -42,7 +51,7 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
         .limit(200);
 
       if (!error && data && isMounted) setMessages(data as ChatMessageRow[]);
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     };
 
     load();
@@ -68,7 +77,7 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
       isMounted = false;
       channel.unsubscribe();
     };
-  }, [videoId]);
+  }, [videoId, isAuthenticated]);
 
   useEffect(() => {
     // Auto-scroll to bottom on new messages
@@ -95,31 +104,61 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
     });
 
     if (error) {
-      console.error("Erro ao enviar mensagem:", error);
       // restore draft in case of failure
       setText(content);
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <section className="space-y-3">
+        <div className="rounded-2xl border border-border/60 bg-card/50 p-6 text-center space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
+            <Lock className="w-5 h-5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">
+            {t("video.commentsLocked", "Comments are for members")}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t("video.commentsLockedDesc", "Create your free account to read and join the conversation.")}
+          </p>
+          <Button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
+            className="bg-gradient-to-r from-primary to-accent"
+          >
+            {t("video.commentsLockedCta", "Sign in to comment")}
+          </Button>
+        </div>
+
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          message={t("video.commentsLockedCta", "Sign in to comment")}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Chat</p>
-        <p className="text-[11px] text-muted-foreground">até 280 chars</p>
+        <p className="text-sm font-medium">{t("video.comments", "Comments")}</p>
+        <p className="text-[11px] text-muted-foreground">{t("video.charLimit", "up to 280 chars")}</p>
       </div>
 
       <div className="glass rounded-xl overflow-hidden">
         <div
           ref={listRef}
-          className="h-44 overflow-y-auto p-3 space-y-2"
+          className="h-56 overflow-y-auto p-3 space-y-2"
           role="log"
-          aria-label="Chat do vídeo"
+          aria-label={t("video.comments", "Comments")}
         >
           {isLoading ? (
-            <p className="text-xs text-muted-foreground">Carregando chat…</p>
+            <p className="text-xs text-muted-foreground">{t("common.loading", "Loading…")}</p>
           ) : messages.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              Seja o primeiro a comentar.
+              {t("video.firstComment", "Be the first to comment.")}
             </p>
           ) : (
             messages.map((m) => (
@@ -138,14 +177,13 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={isAuthenticated ? "Escreva algo…" : "Faça login para conversar"}
+            placeholder={t("video.commentPlaceholder", "Write something…")}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
                 send();
               }
             }}
-            disabled={!isAuthenticated}
           />
           <Button
             type="button"
@@ -157,12 +195,6 @@ export const VideoChat = ({ videoId }: { videoId: string }) => {
           </Button>
         </div>
       </div>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        message="Faça login para participar do chat"
-      />
     </section>
   );
 };

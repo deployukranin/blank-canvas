@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { fetchStorageQuota, fitsInQuota, formatBytes, type StorageQuota } from '@/lib/storage-quota';
 
 import { motion } from 'framer-motion';
-import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon, LayoutGrid } from 'lucide-react';
+import { Palette, Check, Image, Trash2, Plus, Monitor, Smartphone, Info, Eye, Upload, Loader2, X, ChevronLeft, ChevronRight, Sparkles, ImageIcon, LayoutGrid, Smile } from 'lucide-react';
 import { LayoutPicker } from '@/components/admin/LayoutPicker';
+import { ReactionsEditor } from '@/components/admin/ReactionsEditor';
 import * as LucideIcons from 'lucide-react';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -444,10 +445,11 @@ const AdminPersonalizacao: React.FC = () => {
     <AdminLayout title={t('admin.personalization')}>
       <div className="max-w-3xl mx-auto">
         <Tabs defaultValue="colors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="colors" className="gap-2"><Palette className="w-4 h-4" />{t('admin.settings.colorTheme', 'Colors')}</TabsTrigger>
             <TabsTrigger value="icon" className="gap-2"><ImageIcon className="w-4 h-4" />{t('admin.platformIcon.tab', 'Icon')}</TabsTrigger>
             <TabsTrigger value="banners" className="gap-2"><Image className="w-4 h-4" />{t('admin.banners.title', 'Banners')}</TabsTrigger>
+            <TabsTrigger value="reactions" className="gap-2"><Smile className="w-4 h-4" />{t('admin.reactions.tab', 'Reactions')}</TabsTrigger>
             <TabsTrigger value="layout" className="gap-2"><LayoutGrid className="w-4 h-4" />{t('admin.layout.tab', 'Layout')}</TabsTrigger>
             <TabsTrigger value="preview" className="gap-2"><Eye className="w-4 h-4" />Preview</TabsTrigger>
           </TabsList>
@@ -456,6 +458,14 @@ const AdminPersonalizacao: React.FC = () => {
           <TabsContent value="layout">
             <LayoutPicker />
           </TabsContent>
+
+          {/* ── Reactions Tab ── */}
+          <TabsContent value="reactions">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <ReactionsEditor />
+            </motion.div>
+          </TabsContent>
+
 
 
           {/* ── Colors Tab ── */}

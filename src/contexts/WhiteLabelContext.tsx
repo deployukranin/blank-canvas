@@ -3,6 +3,8 @@ import { applyTenantFavicon } from '@/lib/tenant-favicon';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { loadConfig, saveConfig } from '@/lib/config-storage';
+import { defaultReactions, normalizeReactions, type ReactionConfigItem } from '@/lib/video-reactions-config';
+
 import { useTenant } from '@/contexts/TenantContext';
 // Available Lucide icons for customization
 export const availableLucideIcons = [
@@ -702,8 +704,12 @@ export interface WhiteLabelConfig {
     autoCategorizeEnabled?: boolean;
   };
 
+  // Video reactions (fully customizable by the store admin)
+  reactions: ReactionConfigItem[];
+
   // Icons
   icons: IconConfig;
+
 
   // Quick Actions (Explorar section)
   quickActions: QuickActionItem[];
@@ -826,7 +832,9 @@ const defaultConfig: WhiteLabelConfig = {
     ],
     videoCategoryMap: {},
   },
+  reactions: defaultReactions,
   icons: defaultIcons,
+
   quickActions: defaultQuickActions,
   community: defaultCommunityConfig,
   colors: {
@@ -1042,6 +1050,8 @@ export const WhiteLabelProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             : defaults.youtube.videoCategoryMap,
       },
       icons: { ...defaultIcons, ...parsed.icons },
+      reactions: normalizeReactions(parsed.reactions),
+
       quickActions: parsed.quickActions || defaultQuickActions,
       navigationTabs: (() => {
         const tabs = parsed.navigationTabs || defaultNavigationTabs;

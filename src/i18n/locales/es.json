@@ -505,6 +505,20 @@
         "comments": "Comentarios",
         "orders": "Pedidos"
       }
+    },
+    "reactions": {
+      "tab": "Reacciones",
+      "title": "Reacciones de video",
+      "desc": "Personaliza el nombre, el icono y el color de cada reacción de tus videos.",
+      "label": "Nombre",
+      "emoji": "Emoji",
+      "color": "Color destacado",
+      "enabled": "Activa",
+      "saved": "¡Reacciones actualizadas!",
+      "uploadError": "Error al subir",
+      "fileTooLarge": "Archivo demasiado grande",
+      "maxSize": "Máximo 2MB por icono.",
+      "hint": "PNG con fondo transparente funciona mejor (máx. 2MB)."
     }
   },
   "superAdmin": {
@@ -1613,5 +1627,26 @@
       "resolved": "Resuelto",
       "dismissed": "Descartado"
     }
+  },
+  "video": {
+    "about": "Acerca de",
+    "comments": "Comentarios",
+    "moreFromChannel": "Más",
+    "noDescription": "Sin descripción.",
+    "noOtherVideos": "Aún no hay otros videos.",
+    "requestCustom": "Pide un ASMR personalizado",
+    "requestCustomDesc": "Cuéntanos el estilo, los triggers y cualquier detalle que quieras.",
+    "commentsLocked": "Los comentarios son para miembros",
+    "commentsLockedDesc": "Crea tu cuenta gratuita para leer y participar en la conversación.",
+    "commentsLockedCta": "Inicia sesión para comentar",
+    "commentPlaceholder": "Escribe algo…",
+    "charLimit": "hasta 280 caracteres",
+    "firstComment": "Sé el primero en comentar."
+  },
+  "reactions": {
+    "relaxing": "Relajante",
+    "sleep": "Me dormí",
+    "tingles": "Escalofríos",
+    "favorite": "Favorito"
   }
 }
