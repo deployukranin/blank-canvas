@@ -35,6 +35,10 @@ export const VipMediaViewer = ({ mediaRef, title, onClose }: VipMediaViewerProps
   const [kind, setKind] = useState<Kind>('other');
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  // Signed links expire quickly on purpose; renew silently while in use.
+  const refresh = () => setAttempt((n) => (n < 3 ? n + 1 : n));
 
   useEffect(() => {
     let active = true;
@@ -57,7 +61,7 @@ export const VipMediaViewer = ({ mediaRef, title, onClose }: VipMediaViewerProps
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [mediaRef]);
+  }, [mediaRef, attempt]);
 
   return (
     <Dialog open={!!mediaRef} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -82,20 +86,39 @@ export const VipMediaViewer = ({ mediaRef, title, onClose }: VipMediaViewerProps
           )}
 
           {!loading && url && kind === 'video' && (
-            <video src={url} controls autoPlay playsInline className="w-full max-h-[80vh] bg-black" />
+            <video
+              src={url}
+              controls
+              autoPlay
+              playsInline
+              controlsList="nodownload"
+              onContextMenu={(e) => e.preventDefault()}
+              onError={refresh}
+              className="w-full max-h-[80vh] bg-black"
+            />
           )}
           {!loading && url && kind === 'image' && (
-            <img src={url} alt={title || ''} className="w-full max-h-[80vh] object-contain" />
+            <img
+              src={url}
+              alt={title || ''}
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              onError={refresh}
+              className="w-full max-h-[80vh] object-contain select-none"
+            />
           )}
           {!loading && url && kind === 'audio' && (
             <div className="w-full p-8">
-              <audio src={url} controls autoPlay className="w-full" />
+              <audio src={url} controls autoPlay controlsList="nodownload" onError={refresh} className="w-full" />
             </div>
           )}
           {!loading && url && kind === 'other' && (
-            <iframe src={url} title={title || 'media'} className="w-full h-[70vh] bg-black" />
+            <p className="text-sm text-white/70 p-8 text-center">
+              {t('storefront.vipMediaError', 'Could not load this content. Please try again.')}
+            </p>
           )}
         </div>
+
       </DialogContent>
     </Dialog>
   );
