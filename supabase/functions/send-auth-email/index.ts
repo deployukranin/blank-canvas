@@ -20,7 +20,7 @@ function renderLogo(): string {
   return `<div style="font-size:24px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;margin:0 auto 24px;">Tingle<span style="color:#a78bfa;">Box</span></div>`
 }
 
-type AuthEmailType = 'signup' | 'recovery'
+type AuthEmailType = 'signup' | 'recovery' | 'verify'
 
 const FN = 'send-auth-email'
 function maskEmail(e: string) {
@@ -67,6 +67,19 @@ function baseTemplate(opts: { title: string; intro: string; cta: string; link: s
 }
 
 function buildEmail(type: AuthEmailType, link: string): { subject: string; html: string } {
+  if (type === 'verify') {
+    return {
+      subject: 'Verifique seu email — TingleBox',
+      html: baseTemplate({
+        title: 'Verifique seu email',
+        intro: 'Clique no botão abaixo para verificar seu endereço de email e liberar todos os recursos do painel.',
+        cta: 'Verificar email',
+        link,
+        footer: 'Se você não solicitou isso, pode ignorar este email com segurança. O link expira em 1 hora.',
+      }),
+    }
+  }
+
   if (type === 'recovery') {
     return {
       subject: 'Redefinir sua senha — TingleBox',
@@ -167,7 +180,8 @@ async function generateLink(params: {
   metadata?: Record<string, unknown>
 }): Promise<{ actionLink?: string; userId?: string; error?: string; alreadyRegistered?: boolean }> {
   const body: Record<string, unknown> = {
-    type: params.type,
+    // 'verify' reuses a magic link: possession of the inbox proves ownership.
+    type: params.type === 'verify' ? 'magiclink' : params.type,
     email: params.email,
   }
   if (params.type === 'signup') {
@@ -242,7 +256,7 @@ Deno.serve(async (req) => {
     const metadata = payload.metadata && typeof payload.metadata === 'object' ? payload.metadata : undefined
 
     // Validation
-    if (type !== 'signup' && type !== 'recovery') {
+    if (type !== 'signup' && type !== 'recovery' && type !== 'verify') {
       return jsonResponse({ success: false, error: 'Tipo inválido' }, 400)
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
