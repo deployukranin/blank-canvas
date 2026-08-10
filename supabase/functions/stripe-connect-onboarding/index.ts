@@ -124,6 +124,8 @@ Deno.serve(async (req) => {
         body: new URLSearchParams({
           type: "standard",
           email: user.email || "",
+          "capabilities[card_payments][requested]": "true",
+          "capabilities[transfers][requested]": "true",
           "metadata[store_id]": store_id,
           "metadata[store_name]": store.name || "",
         }),
