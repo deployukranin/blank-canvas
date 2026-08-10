@@ -274,7 +274,7 @@ const AdminPlanos: React.FC = () => {
                         <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
                       </div>
                       <p className="mt-1 text-center text-xs text-muted-foreground">
-                        {t('admin.plans.storageHelp', 'Espaço para vídeos, áudios e imagens que você envia: conteúdo VIP, entregas de customs, banners e ícone da loja.')}
+                        {t('admin.plans.storageHelp', 'Armazenamento para conteúdos e assets da sua loja.')}
                       </p>
                     </div>
                   )}
