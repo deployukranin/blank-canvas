@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { useProfileCustomization, MAX_PROFILE_MEDIA_BYTES } from '@/hooks/use-profile-customization';
+import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import type { ReputationSummary } from '@/lib/gamification';
 import defaultBanner from '@/assets/default-profile-banner.jpg.asset.json';
 import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
