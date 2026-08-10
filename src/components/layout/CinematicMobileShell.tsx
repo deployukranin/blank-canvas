@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { translatePathLabel } from '@/lib/nav-i18n';
+import { useProfile } from '@/hooks/use-profile';
+import { useVIPSubscription } from '@/hooks/use-vip-subscription';
+import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
 
 interface CinematicMobileShellProps {
   children: ReactNode;
