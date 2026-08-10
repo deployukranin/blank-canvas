@@ -31,7 +31,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Section, Container, Grid } from "@/components/layout/primitives";
 import logo from "@/assets/mytinglebox-logo.png";
-import heroMockup from "@/assets/landing-hero-mockup.jpg";
+import heroMockup from "@/assets/landing-dashboard-mockup.jpg";
 
 interface PlatformPlanConfig {
   id: string;
