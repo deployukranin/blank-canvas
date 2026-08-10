@@ -42,6 +42,19 @@ const PerfilPage = () => {
   const [handle, setHandle] = useState<string | null>(null);
   const [hasOrder, setHasOrder] = useState(false);
   const [hasIdea, setHasIdea] = useState(false);
+  const [journeyHidden, setJourneyHiddenState] = useState(() => {
+    try {
+      return localStorage.getItem('profile:journeyHidden') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const setJourneyHidden = (v: boolean) => {
+    try {
+      localStorage.setItem('profile:journeyHidden', v ? '1' : '0');
+    } catch { /* ignore */ }
+    setJourneyHiddenState(v);
+  };
 
   useEffect(() => {
     setHandle(profile?.handle ?? null);
