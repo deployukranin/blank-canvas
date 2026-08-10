@@ -39,7 +39,7 @@ export type Translate = (key: string, fallback: string) => string;
 export const validateUserText = (
   values: Array<string | null | undefined>,
   t: Translate,
-): { ok: boolean; violation: PersonalDataViolation | null; message: string }: { ok: true } | { ok: false; violation: PersonalDataViolation; message: string } => {
+): { ok: boolean; violation: PersonalDataViolation | null; message: string } => {
   for (const value of values) {
     const violation = findPersonalData(value);
     if (violation) {
