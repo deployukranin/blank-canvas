@@ -303,9 +303,9 @@ export function YouTubeCategoryManager({
                   </div>
                 </div>
 
-                {/* Category list with keywords - only show when auto-categorize is enabled */}
+                {/* Category list with keywords */}
                 <AnimatePresence>
-                  {autoCategorizeEnabled && categoriesSorted.length > 0 && (
+                  {categoriesSorted.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
