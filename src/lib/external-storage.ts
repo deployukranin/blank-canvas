@@ -122,7 +122,7 @@ export async function provisionStoreDrive(storeId: string): Promise<void> {
 export function driveFileIdFromUrl(value?: string | null): string | null {
   if (!value) return null;
   if (isDriveRef(value)) return value.slice(DRIVE_PREFIX.length);
-  if (!value.includes('drive-media')) return null;
+  if (!value.includes('drive-media') && !value.includes('/media?')) return null;
   try {
     return new URL(value).searchParams.get('f');
   } catch {
