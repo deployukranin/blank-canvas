@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { MailCheck, MailWarning, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { getPublicOrigin } from "@/lib/public-url";
 import { cn } from "@/lib/utils";
@@ -18,9 +17,21 @@ interface EmailVerificationBannerProps {
 
 export const EmailVerificationBanner = ({ email, className }: EmailVerificationBannerProps) => {
   const { t } = useTranslation();
-  const { session } = useAuth();
+  const [session, setSession] = useState<any>(null);
   const [sending, setSending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setSession(data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   const sessionEmail = session?.user?.email ?? undefined;
   const confirmed = !!session?.user?.email_confirmed_at;
