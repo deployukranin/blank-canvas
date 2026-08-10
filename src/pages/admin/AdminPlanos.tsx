@@ -187,7 +187,7 @@ const AdminPlanos: React.FC = () => {
 
   return (
     <AdminLayout title={t('admin.plans.title', 'Planos')}>
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Current plan info */}
         {!isLoading && currentPlan && (
           <GlassCard className="p-5">
@@ -268,12 +268,12 @@ const AdminPlanos: React.FC = () => {
                   </div>
 
                   {getStorageLabel(plan) && (
-                    <div className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-3 py-3">
-                      <div className="flex items-center justify-center gap-2">
+                    <div className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-left">
+                      <div className="flex items-center gap-2">
                         <HardDrive className="w-5 h-5 text-primary shrink-0" />
-                        <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
+                        <span className="text-sm font-semibold text-foreground">{getStorageLabel(plan)}</span>
                       </div>
-                      <p className="mt-1 text-center text-[11px] leading-tight text-muted-foreground whitespace-nowrap">
+                      <p className="mt-1 text-[11px] leading-tight text-muted-foreground whitespace-nowrap">
                         {t('admin.plans.storageHelp', 'Armazenamento para conteúdos e assets da sua loja.')}
                       </p>
                     </div>
@@ -290,7 +290,7 @@ const AdminPlanos: React.FC = () => {
                   </ul>
 
                   <Button
-                    className="w-full bg-primary hover:bg-primary/90 py-3 text-base font-semibold"
+                    className="w-full bg-primary hover:bg-primary/90 py-3 text-base font-semibold rounded-full"
                     disabled={currentPlan === plan.id || checkoutPlanId !== null}
                     onClick={() => handlePayment(plan.id)}
                   >
