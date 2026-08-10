@@ -108,9 +108,11 @@ Deno.serve(async (req) => {
 
     if (!allowed) return json({ success: false, error: 'Acesso negado' }, 403);
 
+    const kind = String(row.kind || 'vip');
     const exp = Math.floor(Date.now() / 1000) + TTL_SECONDS;
-    const sig = await signMediaToken(fileId, exp);
-    const url = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${exp}&sig=${sig}`;
+    const sig = await signMediaToken(fileId, exp, kind);
+    const url = `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${exp}&sig=${sig}&k=${encodeURIComponent(kind)}`;
+
 
     return json({ success: true, url, expiresAt: exp, name: row.name, mimeType: row.mime_type });
   } catch (err) {
