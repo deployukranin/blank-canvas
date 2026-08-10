@@ -187,7 +187,7 @@ const AdminPlanos: React.FC = () => {
 
   return (
     <AdminLayout title={t('admin.plans.title', 'Planos')}>
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Current plan info */}
         {!isLoading && currentPlan && (
           <GlassCard className="p-5">
