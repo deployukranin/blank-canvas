@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   CreditCard, 
   QrCode,
@@ -11,6 +11,7 @@ import {
   Link2,
   Link2Off,
   ShieldCheck,
+  RefreshCw,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
@@ -54,6 +55,8 @@ interface StripeConnectStatus {
   details_submitted?: boolean;
   stripe_account_id?: string;
   email?: string;
+  requirements_due?: string[];
+  disabled_reason?: string | null;
 }
 
 const AdminPagamentosPix = () => {
@@ -81,29 +84,44 @@ const AdminPagamentosPix = () => {
   });
 
   // Check Stripe Connect status
-  useEffect(() => {
+  const checkStripeStatus = useCallback(async (opts?: { silent?: boolean }) => {
     if (!storeId) return;
-    const checkStatus = async () => {
-      setStripeLoading(true);
-      try {
-        const { data, error } = await supabase.functions.invoke('stripe-connect-status', {
-          body: { store_id: storeId },
-        });
-        if (!error && data) {
-          setStripeStatus(data);
-          // If connected and charges enabled, auto-set gateway
-          if (data.connected && data.charges_enabled && config.activeGateway !== 'stripe') {
-            setConfig(prev => ({ ...prev, activeGateway: 'stripe' as const }));
-          }
+    if (!opts?.silent) setStripeLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-connect-status', {
+        body: { store_id: storeId },
+      });
+      if (!error && data) {
+        setStripeStatus(data);
+        // If connected and charges enabled, auto-set gateway
+        if (data.connected && data.charges_enabled) {
+          setConfig(prev => (prev.activeGateway === 'stripe' ? prev : { ...prev, activeGateway: 'stripe' as const }));
         }
-      } catch (err) {
-        console.error('Error checking Stripe status:', err);
-      } finally {
-        setStripeLoading(false);
       }
+    } catch (err) {
+      console.error('Error checking Stripe status:', err);
+    } finally {
+      setStripeLoading(false);
+    }
+  }, [storeId, setConfig]);
+
+  useEffect(() => {
+    checkStripeStatus();
+  }, [checkStripeStatus]);
+
+  // Re-check when the user comes back from the Stripe onboarding tab
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') checkStripeStatus({ silent: true });
     };
-    checkStatus();
-  }, [storeId]);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [checkStripeStatus]);
+
 
   const handleConnectStripe = async () => {
     if (!storeId) {
@@ -275,6 +293,7 @@ const AdminPagamentosPix = () => {
                     {t('adminPayments.stripeDescription')}
                   </p>
                 </div>
+                <div className="flex items-center gap-2">
                 {stripeStatus.connected && (
                   <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                     <Check className="w-3 h-3 mr-1" /> {t('adminPayments.connected')}
@@ -285,6 +304,19 @@ const AdminPagamentosPix = () => {
                     <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.pending')}
                   </Badge>
                 )}
+                {stripeStatus.onboarding_started && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => checkStripeStatus()}
+                    disabled={stripeLoading}
+                    className="gap-1.5 text-xs"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${stripeLoading ? 'animate-spin' : ''}`} />
+                    {t('adminPayments.refreshStatus')}
+                  </Button>
+                )}
+                </div>
               </div>
 
               {stripeLoading ? (
@@ -367,6 +399,16 @@ const AdminPagamentosPix = () => {
                       </div>
                     </div>
                   </div>
+                  {!!stripeStatus.requirements_due?.length && (
+                    <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                      <p className="text-xs font-medium text-amber-500 mb-1">{t('adminPayments.pendingRequirements')}</p>
+                      <ul className="text-[11px] text-muted-foreground list-disc pl-4 space-y-0.5">
+                        {stripeStatus.requirements_due.slice(0, 8).map((r) => (
+                          <li key={r}>{r.replace(/_/g, ' ')}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <Button onClick={handleConnectStripe} disabled={connectingStripe} className="w-full">
                     {connectingStripe ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />

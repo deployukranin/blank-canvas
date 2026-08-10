@@ -120,7 +120,13 @@ Deno.serve(async (req) => {
 
     const account = await accountRes.json();
 
-    const fullyConnected = account.charges_enabled && account.details_submitted;
+    const req = account.requirements || {};
+    const currentlyDue: string[] = req.currently_due || [];
+    const pastDue: string[] = req.past_due || [];
+    // An account is usable once Stripe allows charges. `details_submitted`
+    // can lag (or stay false on some Standard accounts) even after the
+    // onboarding form is completed, so it must not block the connected state.
+    const fullyConnected = Boolean(account.charges_enabled);
 
     return new Response(
       JSON.stringify({
@@ -129,6 +135,8 @@ Deno.serve(async (req) => {
         charges_enabled: account.charges_enabled ?? false,
         payouts_enabled: account.payouts_enabled ?? false,
         details_submitted: account.details_submitted ?? false,
+        requirements_due: [...pastDue, ...currentlyDue],
+        disabled_reason: req.disabled_reason ?? null,
         stripe_account_id: store.stripe_account_id,
         email: account.email,
       }),
