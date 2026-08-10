@@ -35,9 +35,10 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope, store } = useTenant();
   const { isAuthenticated, user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, isLoading: profileLoading } = useProfile();
   const { customization } = useProfileCustomization();
-  const { isVIP } = useVIPSubscription();
+  const { isVIP, isLoading: vipLoading } = useVIPSubscription();
+
   const [open, setOpen] = useState(false);
 
   const withBase = (path: string) => {
