@@ -23,7 +23,8 @@ import { Label } from '@/components/ui/label';
 import { type FeedPost, type ForumIdea, type ForumComment } from '@/lib/mock-data';
 import { useFeedPosts } from '@/hooks/use-feed-posts';
 import { useVideoIdeas } from '@/hooks/use-video-ideas';
-import { addCommunityReport, reasonCategories, getReportedContentIds } from '@/lib/community-reports';
+import { getReportedContentIds } from '@/lib/community-reports';
+import { ReportDialog } from '@/components/reports/ReportDialog';
 // Content moderation removed - inline simple check
 const moderateContent = (content: string) => ({ isBlocked: false, blockedWords: [] as string[] });
 import { useWhiteLabel } from '@/contexts/WhiteLabelContext';
@@ -109,93 +110,6 @@ const getRankBadge = (rank: number) => {
         </span>
       );
   }
-};
-
-// Report Dialog Component
-interface ReportDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  contentType: 'idea' | 'comment';
-  contentId: string;
-  contentTitle: string;
-  contentAuthor: string;
-  onReport: (reason: string, category: string) => void;
-}
-
-const ReportDialog = ({ isOpen, onClose, contentType, contentTitle, onReport }: ReportDialogProps) => {
-  const { t } = useTranslation();
-  const [category, setCategory] = useState<string>('');
-  const [reason, setReason] = useState('');
-
-  const handleSubmit = () => {
-    if (category) {
-      onReport(reason || reasonCategories.find(r => r.value === category)?.label || '', category);
-      setCategory('');
-      setReason('');
-      onClose();
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-400">
-            <AlertTriangle className="w-5 h-5" />
-            {contentType === 'idea' ? t('storefront.reportIdeaTitle') : t('storefront.reportCommentTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('storefront.reportHelpText')}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 mt-4">
-          <div className="p-3 bg-muted/30 rounded-lg">
-            <p className="text-xs text-muted-foreground">{t('storefront.reportedContent')}</p>
-            <p className="text-sm font-medium truncate">{contentTitle}</p>
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium mb-2 block">{t('storefront.reportReason')}</Label>
-            <RadioGroup value={category} onValueChange={setCategory}>
-              {reasonCategories.map((cat) => (
-                <div key={cat.value} className="flex items-center space-x-2">
-                  <RadioGroupItem value={cat.value} id={cat.value} />
-                  <Label htmlFor={cat.value} className="text-sm cursor-pointer">{cat.label}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-
-          {category === 'other' && (
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">{t('storefront.describeIssue')}</Label>
-              <Textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={t('storefront.explainProblem')}
-                rows={3}
-              />
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              {t('common.cancel')}
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={!category}
-              className="flex-1 bg-red-500 hover:bg-red-600 gap-2"
-            >
-              <Flag className="w-4 h-4" />
-              {t('storefront.reportContent')}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 };
 
 const AvisoCard = ({ post, index }: { post: FeedPost; index: number }) => {
@@ -672,35 +586,6 @@ const ComunidadePage = () => {
     setReportDialogOpen(true);
   };
 
-  const handleSubmitReport = (reason: string, category: string) => {
-    if (!user || !reportTarget) return;
-
-    try {
-      addCommunityReport({
-        type: reportTarget.type,
-        contentId: reportTarget.id,
-        contentTitle: reportTarget.title,
-        contentAuthor: reportTarget.author,
-        reason,
-        reasonCategory: category as 'spam' | 'inappropriate' | 'harassment' | 'other',
-        reporterUsername: user.username || 'user',
-      });
-
-      toast({
-        title: t('storefront.reportSubmitted'),
-        description: t('storefront.reportSubmittedDesc'),
-      });
-    } catch (error) {
-      toast({
-        title: t('storefront.reportError'),
-        description: error instanceof Error ? error.message : t('storefront.reportSubmitErrorFallback'),
-        variant: 'destructive',
-      });
-    }
-
-    setReportTarget(null);
-  };
-
   const handleCreateIdea = async () => {
     if (!user) {
       requireAuth(() => setIsCreateOpen(true), authPath);
@@ -1027,16 +912,15 @@ const ComunidadePage = () => {
       {/* Report Dialog */}
       {reportTarget && (
         <ReportDialog
-          isOpen={reportDialogOpen}
-          onClose={() => {
-            setReportDialogOpen(false);
-            setReportTarget(null);
+          open={reportDialogOpen}
+          onOpenChange={(v) => {
+            setReportDialogOpen(v);
+            if (!v) setReportTarget(null);
           }}
-          contentType={reportTarget.type}
-          contentId={reportTarget.id}
-          contentTitle={reportTarget.title}
-          contentAuthor={reportTarget.author}
-          onReport={handleSubmitReport}
+          targetType={reportTarget.type}
+          targetId={reportTarget.id}
+          targetTitle={reportTarget.title}
+          targetAuthor={reportTarget.author}
         />
       )}
 
