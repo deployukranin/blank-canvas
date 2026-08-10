@@ -60,7 +60,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(?:js|css|woff2?|png|jpg|jpeg|webp|svg|ico))",
+      "source": "/((?!favicon\\.ico|favicon\\.png|icon-192\\.png|icon-512\\.png|apple-touch-icon\\.png).*\\.(?:js|css|woff2?|png|jpg|jpeg|webp|svg|ico))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -100,11 +100,11 @@
       ]
     },
     {
-      "source": "/(favicon.ico|favicon.png|icon-192.png|icon-512.png|apple-touch-icon.png)",
+      "source": "/(favicon\\.ico|favicon\\.png|icon-192\\.png|icon-512\\.png|apple-touch-icon\\.png|manifest\\.webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-cache, max-age=0, must-revalidate"
         }
       ]
     }
