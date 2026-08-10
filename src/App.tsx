@@ -153,6 +153,9 @@ const App = () => (
                 <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
                 <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/help" element={<TenantGate><Ajuda /></TenantGate>} />
+                <Route path="/:slug/terms" element={<TenantGate><TermosDeUso /></TenantGate>} />
+                <Route path="/:slug/privacy" element={<TenantGate><Privacidade /></TenantGate>} />
 
                 {/* 🛡️ Rotas ADMIN (Creator Panel) — scoped by store slug */}
                 <Route path="/:slug/admin" element={<TenantGate><AdminRoute requiredRole="admin"><AdminDashboard /></AdminRoute></TenantGate>} />
