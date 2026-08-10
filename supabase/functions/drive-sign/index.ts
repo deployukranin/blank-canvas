@@ -35,17 +35,18 @@ Deno.serve(async (req) => {
 
     // Public assets (store landing/customs teaser, brand config files) need no authentication.
     if (row.kind === 'preview' || row.kind === 'config') {
-      const ttl = row.kind === 'config' ? 60 * 60 * 24 * 365 * 5 : TTL_SECONDS;
+      const ttl = row.kind === 'config' ? 60 * 60 * 24 * 365 * 5 : 60 * 60 * 2;
       const previewExp = Math.floor(Date.now() / 1000) + ttl;
-      const previewSig = await signMediaToken(fileId, previewExp);
+      const previewSig = await signMediaToken(fileId, previewExp, row.kind);
       return json({
         success: true,
-        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${previewExp}&sig=${previewSig}`,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(fileId)}&exp=${previewExp}&sig=${previewSig}&k=${row.kind}`,
         expiresAt: previewExp,
         name: row.name,
         mimeType: row.mime_type,
       });
     }
+
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
