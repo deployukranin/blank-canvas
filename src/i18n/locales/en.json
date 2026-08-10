@@ -25,7 +25,8 @@
     "portuguese": "Português",
     "noData": "No data",
     "backHome": "Home",
-    "backToSite": "Back to site"
+    "backToSite": "Back to site",
+    "add": "Add"
   },
   "nav": {
     "home": "Home",
@@ -1648,5 +1649,12 @@
     "sleep": "Fell asleep",
     "tingles": "Tingles",
     "favorite": "Favorite"
+  },
+  "ytCats": {
+    "mouth-voice": "Mouth & Voice",
+    "tapping-scratching": "Tapping & Scratching",
+    "personal-attention": "Personal Attention",
+    "video-styles": "Video Styles",
+    "visual-misc": "Visual & Misc"
   }
 }
