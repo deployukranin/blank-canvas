@@ -1130,7 +1130,8 @@
     "trending": "Em alta",
     "endOfList": "Fim da lista",
     "ideasIntro": "Ajude a definir o próximo vídeo. A comunidade vota nas melhores sugestões.",
-    "ideasEmptyDesc": "Seja o primeiro a sugerir algo novo usando o formulário ao lado."
+    "ideasEmptyDesc": "Seja o primeiro a sugerir algo novo usando o formulário ao lado.",
+    "alreadyReported": "Você já denunciou este conteúdo."
   },
   "customs": {
     "videos": "Vídeos",
@@ -1561,5 +1562,56 @@
     "newDuration": "Nova duração",
     "newRule": "Nova regra",
     "audioUnsupported": "Seu navegador não suporta áudio."
+  },
+  "reportReasons": {
+    "spam": "Spam ou propaganda",
+    "inappropriate": "Conteúdo impróprio ou sexual",
+    "harassment": "Assédio ou discurso de ódio",
+    "personalData": "Divulgação de dados pessoais",
+    "misleading": "Conteúdo enganoso",
+    "other": "Outro motivo"
+  },
+  "filter": {
+    "blockedTitle": "Conteúdo bloqueado",
+    "generic": "Não é permitido incluir contatos ou links.",
+    "noContactInfo": "Não inclua links, e-mails ou telefones.",
+    "links": "Links não são permitidos.",
+    "email": "E-mails não são permitidos.",
+    "phone": "Números de telefone não são permitidos.",
+    "social": "Perfis de redes sociais não são permitidos."
+  },
+  "bugs": {
+    "pageTitle": "Relatos de bugs",
+    "trigger": "Avisar sobre um bug",
+    "dialogTitle": "Avisar sobre um bug",
+    "dialogDesc": "Conte o que aconteceu. Não inclua dados pessoais.",
+    "category": "O que aconteceu?",
+    "severity": "Qual a gravidade?",
+    "description": "Detalhes (opcional)",
+    "submit": "Enviar relato",
+    "sent": "Bug enviado",
+    "sentDesc": "Obrigado! Nossa equipe vai analisar.",
+    "empty": "Nenhum bug relatado ainda",
+    "loadError": "Não foi possível carregar os relatos",
+    "adminNote": "Nota interna",
+    "cat": {
+      "pageLoad": "A página não carrega",
+      "payment": "Erro no pagamento",
+      "media": "Problema em vídeo ou áudio",
+      "account": "Login ou conta",
+      "layout": "Layout quebrado",
+      "other": "Outro"
+    },
+    "sev": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta"
+    },
+    "status": {
+      "open": "Aberto",
+      "in_review": "Em análise",
+      "resolved": "Resolvido",
+      "dismissed": "Descartado"
+    }
   }
 }

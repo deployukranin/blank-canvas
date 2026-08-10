@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
+import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { expiresAtMs, isTrialExpired as checkTrialExpired } from '@/lib/trial';
 import { provisionStoreDrive } from '@/lib/external-storage';
@@ -270,6 +271,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             </div>
 
             <div className="flex items-center gap-2 ml-auto shrink-0">
+              <BugReportDialog variant="ghost" className="hidden sm:flex" />
               <LanguageSelector variant="minimal" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

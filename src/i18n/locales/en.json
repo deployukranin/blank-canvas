@@ -1130,7 +1130,8 @@
     "trending": "Trending",
     "endOfList": "End of the line",
     "ideasIntro": "Help shape the next video. The community votes on the best suggestions.",
-    "ideasEmptyDesc": "Be the first to suggest something fresh using the form on the left."
+    "ideasEmptyDesc": "Be the first to suggest something fresh using the form on the left.",
+    "alreadyReported": "You already reported this content."
   },
   "customs": {
     "videos": "Videos",
@@ -1561,5 +1562,56 @@
     "newDuration": "New duration",
     "newRule": "New rule",
     "audioUnsupported": "Your browser does not support audio."
+  },
+  "reportReasons": {
+    "spam": "Spam or advertising",
+    "inappropriate": "Inappropriate or sexual content",
+    "harassment": "Harassment or hate speech",
+    "personalData": "Sharing personal data",
+    "misleading": "Misleading content",
+    "other": "Other"
+  },
+  "filter": {
+    "blockedTitle": "Content blocked",
+    "generic": "Contact info and links are not allowed.",
+    "noContactInfo": "Do not include links, emails or phone numbers.",
+    "links": "Links are not allowed.",
+    "email": "Email addresses are not allowed.",
+    "phone": "Phone numbers are not allowed.",
+    "social": "Social handles are not allowed."
+  },
+  "bugs": {
+    "pageTitle": "Bug reports",
+    "trigger": "Report a bug",
+    "dialogTitle": "Report a bug",
+    "dialogDesc": "Tell us what went wrong. Do not include personal data.",
+    "category": "What happened?",
+    "severity": "How bad is it?",
+    "description": "Details (optional)",
+    "submit": "Send report",
+    "sent": "Bug reported",
+    "sentDesc": "Thanks! Our team will look into it.",
+    "empty": "No bug reports yet",
+    "loadError": "Could not load bug reports",
+    "adminNote": "Internal note",
+    "cat": {
+      "pageLoad": "Page does not load",
+      "payment": "Payment error",
+      "media": "Video or audio problem",
+      "account": "Login or account",
+      "layout": "Broken layout",
+      "other": "Other"
+    },
+    "sev": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "status": {
+      "open": "Open",
+      "in_review": "In review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    }
   }
 }
