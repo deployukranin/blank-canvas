@@ -318,6 +318,7 @@ export const useVIPSubscription = () => {
     if (data) {
       setSubscription(data as VIPSubscription);
       setIsVIP(true);
+      writeVipCache(userId, data as VIPSubscription);
     }
   }, [userId]);
 
