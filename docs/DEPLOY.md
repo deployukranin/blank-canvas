@@ -1,6 +1,13 @@
 # Guia de Deploy - Projeto White Label Influencer
 
-Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do Lovable Cloud).
+Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do Lovable Cloud) e como manter um fluxo seguro de atualizações sem publicar mudanças na URL principal acidentalmente.
+
+## Resumo do fluxo de deploy (Staging + Produção)
+
+- **Branch `develop`**: ambiente de homologação/staging. Recebe alterações vindas do Lovable automaticamente.
+- **Branch `main`**: ambiente de produção. Apenas quando `develop` é promovida manualmente para cá, o site principal é atualizado.
+- **Deploys na Vercel**: controlados por workflows do GitHub Actions, não mais pelo sync automático nativo da Vercel.
+- **Backend (Lovable Cloud/Supabase)**: é compartilhado entre staging e produção. Mudanças destrutivas no banco devem ser testadas primeiro no preview da Lovable.
 
 ## Pré-requisitos
 
