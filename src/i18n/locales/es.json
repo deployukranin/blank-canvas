@@ -189,7 +189,15 @@
     "redirectingToLogin": "Redirigiendo al inicio de sesión...",
     "validatingRecoveryLink": "Validando enlace de recuperación...",
     "passwordUpdateSuccess": "¡Contraseña actualizada con éxito!",
-    "passwordUpdateError": "Error al actualizar contraseña"
+    "passwordUpdateError": "Error al actualizar contraseña",
+    "verify": {
+      "title": "Email no verificado",
+      "description": "Confirma tu email para desbloquear todas las funciones.",
+      "resend": "Reenviar email",
+      "resendIn": "Reenviar en {{seconds}}s",
+      "resendSuccess": "Email de confirmación reenviado.",
+      "resendError": "No se pudo reenviar el email. Inténtalo de nuevo en unos instantes."
+    }
   },
   "admin": {
     "panel": "Panel del Creador",

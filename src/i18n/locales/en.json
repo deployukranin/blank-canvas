@@ -189,7 +189,15 @@
     "redirectingToLogin": "Redirecting to login...",
     "validatingRecoveryLink": "Validating recovery link...",
     "passwordUpdateSuccess": "Password updated successfully!",
-    "passwordUpdateError": "Error updating password"
+    "passwordUpdateError": "Error updating password",
+    "verify": {
+      "title": "Email not verified",
+      "description": "Confirm your email to unlock all features.",
+      "resend": "Resend email",
+      "resendIn": "Resend in {{seconds}}s",
+      "resendSuccess": "Confirmation email sent again.",
+      "resendError": "Could not resend the email. Try again in a moment."
+    }
   },
   "admin": {
     "panel": "Creator Panel",
