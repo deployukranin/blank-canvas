@@ -77,7 +77,13 @@ export const CinematicLayout = ({
       >
         <img
           src={heroImage}
-          alt={greeting}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (img.src !== bannerStudio) img.src = bannerStudio;
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
