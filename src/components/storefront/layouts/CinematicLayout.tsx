@@ -9,7 +9,6 @@ import { DynamicIcon } from '@/components/ui/DynamicIcon';
 import { DefaultBanner } from '@/components/layout/DefaultBanner';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { useTenant } from '@/contexts/TenantContext';
-import { useIsMobile } from '@/hooks/use-mobile';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 const VideoCardItem = ({
@@ -60,7 +59,6 @@ export const CinematicLayout = ({
 }: StorefrontLayoutProps) => {
   const { t } = useTranslation();
   const { store } = useTenant();
-  const isMobile = useIsMobile();
   // Reuse the favicon/icon uploaded in /customize as the brand mark
   const brandLogo = config.logoImage || store?.avatar_url || '';
 
@@ -162,27 +160,25 @@ export const CinematicLayout = ({
       )}
 
       {/* Quick actions row — hidden on mobile because the bottom nav covers these links */}
-      {isMobile !== true && (
-        <section className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
-          {quickActions.map((action, index) => (
-            <motion.div
-              key={action.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Link to={withBase(action.path)}>
-                <div className="group h-full rounded-2xl p-3.5 md:p-5 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/40 hover:bg-card transition-all flex flex-col md:flex-row items-start md:items-center gap-2.5 md:gap-4">
-                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
-                    <DynamicIcon icon={action.icon} size={20} className="text-primary" />
-                  </div>
-                  <span className="text-xs md:text-sm font-semibold text-foreground">{translatePathLabel(t, action.path, action.label)}</span>
+      <section className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
+        {quickActions.map((action, index) => (
+          <motion.div
+            key={action.label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <Link to={withBase(action.path)}>
+              <div className="group h-full rounded-2xl p-3.5 md:p-5 border border-border/50 bg-card/50 backdrop-blur-md hover:border-primary/40 hover:bg-card transition-all flex flex-col md:flex-row items-start md:items-center gap-2.5 md:gap-4">
+                <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+                  <DynamicIcon icon={action.icon} size={20} className="text-primary" />
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </section>
-      )}
+                <span className="text-xs md:text-sm font-semibold text-foreground">{translatePathLabel(t, action.path, action.label)}</span>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
+      </section>
 
       {youtubeEnabled && favoriteVideos.length > 0 && (
         <section>
