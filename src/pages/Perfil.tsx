@@ -292,7 +292,7 @@ const PerfilPage = () => {
         )}
 
         {/* Membership journey — conversion mechanic (dismissible) */}
-        {journeyHidden || completed === steps.length ? (
+        {!journeyLoaded || vipLoading || profileLoading ? null : journeyHidden || completed === steps.length ? (
           completed === steps.length ? null : (
             <button
               type="button"
