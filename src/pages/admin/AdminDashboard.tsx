@@ -30,6 +30,38 @@ interface YTMetrics {
   fetched_at: string;
 }
 
+/** Demo/showcase data used only for the `februxry` storefront admin. */
+const DEMO_SLUG = 'februxry';
+const DEMO = {
+  stats: { totalUsers: 284, totalVIP: 76, totalOrders: 48, revenue: 6531, pendingOrders: 8, newUsersToday: 490 },
+  ideas: 84,
+  week: [
+    { orders: 4, revenue: 380 },
+    { orders: 6, revenue: 640 },
+    { orders: 3, revenue: 290 },
+    { orders: 9, revenue: 1180 },
+    { orders: 7, revenue: 860 },
+    { orders: 11, revenue: 1490 },
+    { orders: 8, revenue: 1010 },
+  ],
+  yt: {
+    subscriber_count: 148000,
+    total_video_count: 332,
+    total_view_count: 59900000,
+    views_last_30d: 2400000,
+    videos_last_30d: 9,
+    top_videos: [],
+    fetched_at: new Date().toISOString(),
+  } as YTMetrics,
+  pending: [
+    { id: 'demo-1', customer_name: 'Larissa M.', category_name: 'Custom Video', amount_cents: 24900 },
+    { id: 'demo-2', customer_name: 'Bruno S.', category_name: 'Custom Audio', amount_cents: 12900 },
+    { id: 'demo-3', customer_name: 'Kelly R.', category_name: 'Roleplay', amount_cents: 34900 },
+    { id: 'demo-4', customer_name: 'Diego A.', category_name: 'Custom Video', amount_cents: 19900 },
+  ],
+};
+
+
 const AdminDashboard: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
@@ -320,11 +352,27 @@ const AdminDashboard: React.FC = () => {
     fetchStats();
   }, [storeId, i18n.language]);
 
-  const chartData = weekData.length ? weekData : buildEmptyWeek().map(b => ({
+  const baseChartData = weekData.length ? weekData : buildEmptyWeek().map(b => ({
     name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
     orders: 0,
     revenue: 0,
   }));
+
+  // Showcase data for the demo storefront
+  const isDemo = (slug ?? storeSlug) === DEMO_SLUG;
+  const displayStats = isDemo ? DEMO.stats : stats;
+  const displayPending = isDemo ? DEMO.pending : pendingOrders;
+  const displayYt = isDemo ? DEMO.yt : ytMetrics;
+  const displayIdeas = isDemo ? DEMO.ideas.toString() : '—';
+  const chartData = isDemo
+    ? buildEmptyWeek().map((b, i) => ({
+        name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
+        orders: DEMO.week[i].orders,
+        revenue: DEMO.week[i].revenue,
+      }))
+    : baseChartData;
+  const displayLoading = isDemo ? false : isLoading;
+
 
 
   const MetricCard = ({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: any }) => (
@@ -332,7 +380,7 @@ const AdminDashboard: React.FC = () => {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-foreground/40 uppercase tracking-wider">{label}</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{isLoading ? '—' : value}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{displayLoading ? '—' : value}</p>
           {sub && <p className="text-[11px] text-primary mt-0.5">{sub}</p>}
         </div>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20">
@@ -433,14 +481,14 @@ const AdminDashboard: React.FC = () => {
 
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MetricCard label={t('admin.totalUsers')} value={stats.totalUsers.toLocaleString()} icon={Users} />
-          <MetricCard label={t('admin.vipMembers')} value={stats.totalVIP} icon={Crown} />
-          <MetricCard label={t('admin.orders')} value={stats.totalOrders} sub={`${stats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
-          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(stats.revenue)} icon={DollarSign} />
+          <MetricCard label={t('admin.totalUsers')} value={displayStats.totalUsers.toLocaleString()} icon={Users} />
+          <MetricCard label={t('admin.vipMembers')} value={displayStats.totalVIP} icon={Crown} />
+          <MetricCard label={t('admin.orders')} value={displayStats.totalOrders} sub={`${displayStats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
+          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(displayStats.revenue)} icon={DollarSign} />
         </div>
 
         {/* YouTube Metrics */}
-        {config.youtube?.channelId && (
+        {(isDemo || config.youtube?.channelId) && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
               <div className="flex items-center gap-2">
@@ -451,37 +499,37 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-              {ytLoading ? (
+              {(!isDemo && ytLoading) ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   {t('common.loading')}
                 </div>
-              ) : ytMetrics ? (
+              ) : displayYt ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <UserPlus className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.subscriber_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.subscriber_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytSubs', 'Subscribers')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Video className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_video_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.total_video_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytTotalVideos', 'Total Videos')}</p>
                     </div>
                     <div className="bg-foreground/[0.03] border border-primary/10 rounded-lg p-3 text-center">
                       <Eye className="w-4 h-4 mx-auto text-primary mb-1" />
-                      <p className="text-lg font-bold text-foreground">{formatNumber(ytMetrics.total_view_count)}</p>
+                      <p className="text-lg font-bold text-foreground">{formatNumber(displayYt.total_view_count)}</p>
                       <p className="text-[10px] text-foreground/40">{t('admin.ytTotalViews', 'Total Views')}</p>
                     </div>
                   </div>
 
                   {/* Top videos */}
-                  {ytMetrics.top_videos?.length > 0 && (
+                  {displayYt.top_videos?.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-foreground/60 mb-2">{t('admin.ytTopVideos')}</p>
                       <div className="space-y-1.5">
-                        {ytMetrics.top_videos.map((video, i) => (
+                        {displayYt.top_videos.map((video, i) => (
                           <div key={video.id} className="flex items-center gap-3 p-2 rounded-lg bg-foreground/[0.02] border border-border/50">
                             <span className="text-xs font-bold text-primary w-5 text-center">{i + 1}</span>
                             {video.thumbnail && (
@@ -531,13 +579,13 @@ const AdminDashboard: React.FC = () => {
               </h3>
               <Link to={`${base}/orders`} className="text-[11px] text-primary hover:text-primary/80">{t('admin.viewAll')} →</Link>
             </div>
-            {isLoading ? (
+            {displayLoading ? (
               <p className="text-foreground/30 text-sm">{t('common.loading')}</p>
-            ) : pendingOrders.length === 0 ? (
+            ) : displayPending.length === 0 ? (
               <p className="text-foreground/30 text-sm">{t('common.none')}</p>
             ) : (
               <div className="space-y-2">
-                {pendingOrders.map((order) => (
+                {displayPending.map((order) => (
                   <motion.div key={order.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                     className="flex items-center justify-between p-2.5 rounded-lg bg-foreground/[0.02] border border-border/50">
                     <div>
@@ -558,17 +606,17 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Lightbulb className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">—</p>
+            <p className="text-xl font-bold text-foreground">{displayIdeas}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.ideasLabel')}</p>
           </div>
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Clock className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.pendingOrders}</p>
+            <p className="text-xl font-bold text-foreground">{displayLoading ? '—' : displayStats.pendingOrders}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.pending')}</p>
           </div>
           <div className="bg-foreground/[0.03] border border-primary/10 rounded-xl p-4 text-center">
             <Activity className="w-6 h-6 mx-auto text-primary mb-2" />
-            <p className="text-xl font-bold text-foreground">{isLoading ? '—' : stats.newUsersToday}</p>
+            <p className="text-xl font-bold text-foreground">{displayLoading ? '—' : displayStats.newUsersToday}</p>
             <p className="text-[11px] text-foreground/40">{t('admin.newToday')}</p>
           </div>
         </div>
