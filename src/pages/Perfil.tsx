@@ -308,6 +308,8 @@ const PerfilPage = () => {
             </div>
           </GlassCard>
         </motion.div>
+        )}
+
 
         {/* VIP upsell */}
         {!isVIP && (
