@@ -13,6 +13,7 @@ import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { useProfile } from '@/hooks/use-profile';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
+import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
 
 interface CinematicMobileShellProps {
@@ -32,8 +33,9 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
   const location = useLocation();
   const { config } = useWhiteLabel();
   const { basePath, isTenantScope, store } = useTenant();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { profile } = useProfile();
+  const { customization } = useProfileCustomization();
   const { isVIP } = useVIPSubscription();
   const [open, setOpen] = useState(false);
 
@@ -55,6 +57,7 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
 
   const storeName = store?.name || config.siteName || '';
   const brandLogo = config.logoImage || store?.avatar_url || '';
+  const accountAvatar = customization.avatar_url || profile?.avatar_url || user?.avatar || defaultAvatar.url;
 
   const isActivePath = (path: string) => {
     const resolved = withBase(path);
@@ -167,7 +170,7 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
                   >
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-muted border border-border/60 flex items-center justify-center text-muted-foreground">
                       {isAuthenticated ? (
-                        <img src={profile?.avatar_url || defaultAvatar.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                        <img src={accountAvatar} alt={profile?.handle ? `@${profile.handle}` : t('profile.member', 'Member')} className="w-full h-full object-cover" />
                       ) : (
                         <User className="w-5 h-5" />
                       )}

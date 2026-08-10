@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { PROFILE_UPDATED_EVENT } from '@/lib/profile-events';
 
 export interface Profile {
   id: string;
@@ -17,6 +18,30 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchProfile = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setProfile(null);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, user]);
+
   useEffect(() => {
     if (!isAuthenticated || !user) {
       setProfile(null);
@@ -24,24 +49,7 @@ export const useProfile = () => {
       return;
     }
 
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-        setProfile(data);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
+    void fetchProfile();
 
     // Subscribe to realtime updates (unique channel per hook instance to avoid
     // "cannot add postgres_changes callbacks after subscribe()" crashes when the
@@ -67,7 +75,13 @@ export const useProfile = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, fetchProfile]);
 
-  return { profile, isLoading, refetch: () => setIsLoading(true) };
+  useEffect(() => {
+    const refresh = () => void fetchProfile();
+    window.addEventListener(PROFILE_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(PROFILE_UPDATED_EVENT, refresh);
+  }, [fetchProfile]);
+
+  return { profile, isLoading, refetch: fetchProfile };
 };

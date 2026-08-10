@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { PROFILE_UPDATED_EVENT, notifyProfileUpdated } from '@/lib/profile-events';
 
 export interface ProfileCustomization {
   banner_url: string | null;
@@ -52,6 +53,12 @@ export const useProfileCustomization = () => {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    const handleProfileUpdated = () => void refresh();
+    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+    return () => window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+  }, [refresh]);
+
   const save = useCallback(
     async (patch: Partial<ProfileCustomization>) => {
       if (!userId || !storeId) throw new Error('not_ready');
@@ -63,6 +70,7 @@ export const useProfileCustomization = () => {
           .upsert({ user_id: userId, store_id: storeId, ...next }, { onConflict: 'user_id,store_id' });
         if (error) throw error;
         setCustomization(next);
+        notifyProfileUpdated();
         return next;
       } finally {
         setIsSaving(false);

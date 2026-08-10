@@ -88,7 +88,16 @@ const AdminUsuarios: React.FC = () => {
 
       if (vipError) throw vipError;
 
+      const { data: customizations, error: customizationsError } = await supabase
+        .from('profile_customizations')
+        .select('user_id, avatar_url')
+        .eq('store_id', storeId)
+        .in('user_id', userIds);
+
+      if (customizationsError) throw customizationsError;
+
       const vipUserIds = new Set(vipSubs?.map(s => s.user_id) || []);
+      const customAvatarMap = new Map((customizations || []).map((item) => [item.user_id, item.avatar_url]));
 
       const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
 
@@ -102,7 +111,7 @@ const AdminUsuarios: React.FC = () => {
           user_id: userId,
           display_name: profile?.display_name ?? null,
           handle: profile?.handle ?? null,
-          avatar_url: profile?.avatar_url ?? null,
+          avatar_url: customAvatarMap.get(userId) || profile?.avatar_url || null,
           created_at: profile?.created_at || storeUser?.created_at || new Date().toISOString(),
           isVIP: vipUserIds.has(userId),
           banned_at: storeUser?.banned_at || null,
@@ -120,7 +129,7 @@ const AdminUsuarios: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const displayName = user.display_name || user.handle || t('usersAdmin.user');
+    const displayName = user.handle ? `@${user.handle}` : user.display_name || t('usersAdmin.user');
     const matchesSearch = displayName.toLowerCase().includes(search.toLowerCase()) ||
                          (user.handle || '').toLowerCase().includes(search.toLowerCase());
     let matchesFilter = true;
@@ -244,7 +253,7 @@ const AdminUsuarios: React.FC = () => {
 
         <div className="space-y-4">
           {filteredUsers.map((user, index) => {
-            const displayName = user.display_name || user.handle || t('usersAdmin.user');
+            const displayName = user.handle ? `@${user.handle}` : user.display_name || t('usersAdmin.user');
             return (
               <motion.div
                 key={user.id}
@@ -274,11 +283,6 @@ const AdminUsuarios: React.FC = () => {
                         </div>
                         
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          {user.handle && (
-                            <span className="flex items-center gap-1">
-                              @{user.handle}
-                            </span>
-                          )}
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {t('usersAdmin.since', { date: formatDate(user.created_at) })}
