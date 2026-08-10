@@ -12,7 +12,7 @@ export type ReportReasonCode = (typeof REPORT_REASONS)[number]['code'];
 
 export const reportReasonLabel = (
   code: string,
-  t: (key: string, fallback?: string) => string,
+  t: (key: string, ...rest: unknown[]) => string,
 ) => {
   const found = REPORT_REASONS.find((r) => r.code === code);
   return found ? t(found.labelKey, found.fallback) : code;
@@ -30,7 +30,7 @@ export const BUG_CATEGORIES = [
 
 export const bugCategoryLabel = (
   code: string,
-  t: (key: string, fallback?: string) => string,
+  t: (key: string, ...rest: unknown[]) => string,
 ) => {
   const found = BUG_CATEGORIES.find((c) => c.code === code);
   return found ? t(found.labelKey, found.fallback) : code;

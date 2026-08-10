@@ -34,9 +34,11 @@ export const hasPersonalData = (text: string | null | undefined) => findPersonal
  * Validates several fields at once.
  * `t` is the i18n translate function so the message is localized.
  */
+export type Translate = (key: string, ...rest: unknown[]) => string;
+
 export const validateUserText = (
   values: Array<string | null | undefined>,
-  t: (key: string, fallback?: string) => string,
+  t: Translate,
 ): { ok: true } | { ok: false; violation: PersonalDataViolation; message: string } => {
   for (const value of values) {
     const violation = findPersonalData(value);
