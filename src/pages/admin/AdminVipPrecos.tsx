@@ -181,6 +181,52 @@ const AdminVipPrecos = () => {
           </div>
         </div>
 
+        {/* VIP banner */}
+        <GlassCard className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-primary" />
+            <div>
+              <h3 className="font-semibold">{t('vipPricing.bannerTitle', 'Banner do VIP')}</h3>
+              <p className="text-xs text-muted-foreground">{t('vipPricing.bannerDesc', 'Imagem exibida no topo da página VIP.')}</p>
+            </div>
+          </div>
+
+          {config.bannerUrl && (
+            <div className="rounded-xl overflow-hidden border border-border/50">
+              <img src={config.bannerUrl} alt="VIP banner" className="w-full h-40 object-cover" />
+            </div>
+          )}
+
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleBannerUpload}
+          />
+
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" disabled={isUploadingBanner} onClick={() => bannerInputRef.current?.click()}>
+              {isUploadingBanner
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('vipPricing.saving')}</>
+                : <><Upload className="w-4 h-4 mr-2" />{t('vipPricing.bannerUpload', 'Enviar banner')}</>}
+            </Button>
+            {config.bannerUrl && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive"
+                onClick={() => setConfig(prev => ({ ...prev, bannerUrl: undefined }))}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('vipPricing.bannerRemove', 'Remover banner')}
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{t('vipPricing.bannerHint', 'JPG, PNG, WEBP ou GIF. Recomendado 1200x400.')}</p>
+        </GlassCard>
+
+
         <div className="grid gap-6 md:grid-cols-2">
           {config.plans.map((plan, planIndex) => {
             const savings = calcSavings(plan);
