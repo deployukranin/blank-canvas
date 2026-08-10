@@ -20,6 +20,7 @@ import { HandleSelector } from '@/components/profile/HandleSelector';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import { useReputation, useLeaderboard } from '@/hooks/use-gamification';
 import { supabase } from '@/integrations/supabase/client';
+import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 
 const PerfilPage = () => {
   const { user, isAuthenticated, logout } = useAuth();
