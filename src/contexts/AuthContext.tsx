@@ -103,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const redirectUrl = redirectTo || `${getPublicOrigin()}/auth`;
 
-      // Email verification is temporarily disabled: create the account directly
-      // and let Supabase return an active session immediately.
+      // Email verification is enabled: signUp returns no session until the
+      // user confirms via the emailed link.
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
       }
 
-      // No confirmation step while verification is disabled.
+      // Requires email confirmation when no session is returned.
       return { success: true, needsConfirmation: !data.session };
     } catch (err) {
       return { success: false, error: "Erro ao criar conta" };
