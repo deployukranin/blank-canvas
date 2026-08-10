@@ -158,6 +158,12 @@ export const useVideoIdeas = () => {
 
       if (insertError) throw insertError;
 
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('handle, display_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       // Add to local state only if active (pending ideas don't appear publicly)
       const newIdea: VideoIdea = {
         id: data.id,
@@ -168,7 +174,7 @@ export const useVideoIdeas = () => {
         user_id: data.user_id,
         created_at: data.created_at,
         hasVoted: false,
-        authorName: user.username || 'Você',
+        authorName: myProfile?.handle ? `@${myProfile.handle}` : myProfile?.display_name || undefined,
       };
 
       if (newIdea.status === 'active') {
