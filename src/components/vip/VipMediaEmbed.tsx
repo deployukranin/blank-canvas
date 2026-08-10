@@ -34,6 +34,10 @@ export const VipMediaEmbed = ({ mediaRef, title, className = '' }: VipMediaEmbed
   const [kind, setKind] = useState<Kind>('other');
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  // Signed links are short-lived; re-sign transparently when one expires.
+  const refresh = () => setAttempt((n) => (n < 3 ? n + 1 : n));
 
   useEffect(() => {
     let active = true;
@@ -52,7 +56,8 @@ export const VipMediaEmbed = ({ mediaRef, title, className = '' }: VipMediaEmbed
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [mediaRef]);
+  }, [mediaRef, attempt]);
+
 
   return (
     <div className={`w-full overflow-hidden rounded-xl bg-black/40 ${className}`}>
