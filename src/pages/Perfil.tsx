@@ -128,11 +128,14 @@ const PerfilPage = () => {
         <PremiumProfileHeader
           isVIP={isVIP}
           vipPath={withBase('/vip')}
-          fallbackName={profile?.display_name || profile?.handle || user?.username || 'User'}
-          handle={profile?.handle}
+          fallbackName={profile?.display_name || handle || user?.username || t('profile.member', 'Member')}
+          handle={handle}
           fallbackAvatar={profile?.avatar_url || user?.avatar}
           reputation={reputation}
         />
+
+        {/* Handle — can only be chosen once */}
+        <HandleSelector currentHandle={handle} onHandleSet={(h) => setHandle(h)} />
 
         {/* Reputation & ranking */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
