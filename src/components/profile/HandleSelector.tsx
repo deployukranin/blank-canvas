@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AtSign, Check, Loader2, AlertCircle } from 'lucide-react';
+import { AtSign, Check, Loader2, AlertCircle, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,33 @@ interface HandleSelectorProps {
   onHandleSet: (handle: string) => void;
 }
 
+const NOTICE_KEY = 'profile:handleNoticeSeen';
+
+const readNoticeSeen = () => {
+  try {
+    return localStorage.getItem(NOTICE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorProps) => {
   const { t } = useTranslation();
   const [handle, setHandle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [justSet, setJustSet] = useState(false);
+  const [noticeSeen, setNoticeSeen] = useState(readNoticeSeen);
   const { toast } = useToast();
+
+  const dismissNotice = () => {
+    try {
+      localStorage.setItem(NOTICE_KEY, '1');
+    } catch { /* ignore */ }
+    setNoticeSeen(true);
+    setJustSet(false);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
