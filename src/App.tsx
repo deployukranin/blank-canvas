@@ -34,6 +34,7 @@ import Auth from "./pages/Auth";
 import ClientAuth from "./pages/ClientAuth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 
 // Admin Pages
 // AdminLogin removed — admin is now under /:slug/admin
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify" element={<VerifyEmail />} />
                 <Route path="/help" element={<Ajuda />} />
                 <Route path="/terms" element={<TermosDeUso />} />
                 <Route path="/privacy" element={<Privacidade />} />

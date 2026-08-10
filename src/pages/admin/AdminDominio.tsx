@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useEmailVerification } from '@/hooks/use-email-verification';
 
 const PRODUCTION_DOMAIN = 'www.mytinglebox.com';
 const VERCEL_NAMESERVERS = ['ns1.vercel-dns.com', 'ns2.vercel-dns.com'];
@@ -64,6 +65,7 @@ const AdminDominio: React.FC = () => {
     },
   }[lang];
   const { store: tenantStore, basePath } = useTenant();
+  const { verified: emailVerified } = useEmailVerification();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [ownStore, setOwnStore] = useState<typeof tenantStore>(null);
@@ -195,6 +197,14 @@ const AdminDominio: React.FC = () => {
   };
 
   const callDomainFunction = async (action: string, domainValue?: string) => {
+    if (!emailVerified && action !== 'status') {
+      toast({
+        title: t('adminDomain.emailVerificationRequired', 'Verifique seu email para gerenciar domínios.'),
+        variant: 'destructive',
+      });
+      return null;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {

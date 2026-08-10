@@ -2,40 +2,24 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MailCheck, MailWarning, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { getPublicOrigin } from "@/lib/public-url";
+import { useEmailVerification } from "@/hooks/use-email-verification";
 import { cn } from "@/lib/utils";
 
 const RESEND_COOLDOWN = 60;
 
 interface EmailVerificationBannerProps {
-  /** Force a specific email (used on /auth right after signup, when there is no session). */
+  /** Optional email override (used when there is no session yet). */
   email?: string;
   className?: string;
 }
 
 export const EmailVerificationBanner = ({ email, className }: EmailVerificationBannerProps) => {
   const { t } = useTranslation();
-  const [session, setSession] = useState<any>(null);
+  const { isLoading, authenticated, verified, email: sessionEmail, sendVerificationEmail } =
+    useEmailVerification();
   const [sending, setSending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active) setSession(data.session);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  const sessionEmail = session?.user?.email ?? undefined;
-  const confirmed = !!session?.user?.email_confirmed_at;
-  const targetEmail = email || sessionEmail;
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -43,20 +27,20 @@ export const EmailVerificationBanner = ({ email, className }: EmailVerificationB
     return () => clearTimeout(id);
   }, [cooldown]);
 
-  // Nothing to show: no email at all, or a signed-in user already verified.
-  if (!targetEmail) return null;
-  if (!email && confirmed) return null;
+  const targetEmail = email || sessionEmail;
+
+  if (isLoading || !authenticated || verified || !targetEmail) return null;
 
   const handleResend = async () => {
     if (sending || cooldown > 0) return;
     setSending(true);
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email: targetEmail,
-      options: { emailRedirectTo: `${getPublicOrigin()}/auth` },
-    });
+    const result = await sendVerificationEmail();
     setSending(false);
-    if (error) {
+    if (!result.success) {
+      if (result.error === "cooldown") {
+        setCooldown(RESEND_COOLDOWN);
+        return;
+      }
       toast.error(t("auth.verify.resendError", "Não foi possível reenviar o email. Tente novamente em instantes."));
       return;
     }

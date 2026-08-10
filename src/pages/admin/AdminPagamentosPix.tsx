@@ -27,6 +27,7 @@ import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenant } from '@/contexts/TenantContext';
 import { publicUrl } from '@/lib/public-url';
+import { useEmailVerification } from '@/hooks/use-email-verification';
 
 export type PaymentCurrency = 'BRL' | 'USD' | 'EUR';
 
@@ -64,6 +65,7 @@ const AdminPagamentosPix = () => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { store } = useTenant();
+  const { verified: emailVerified } = useEmailVerification();
   const storeId = store?.id ?? null;
   const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus>({ connected: false });
   const [stripeLoading, setStripeLoading] = useState(true);
@@ -125,6 +127,13 @@ const AdminPagamentosPix = () => {
 
 
   const handleConnectStripe = async () => {
+    if (!emailVerified) {
+      toast({
+        title: t('adminPayments.emailVerificationRequired', 'Verifique seu email para conectar pagamentos.'),
+        variant: 'destructive',
+      });
+      return;
+    }
     if (!storeId) {
       toast({ title: t('adminPayments.errors.storeNotFound'), variant: 'destructive' });
       return;

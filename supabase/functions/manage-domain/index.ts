@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { emailUnverifiedResponse } from "../_shared/email-verified.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -160,6 +161,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const user = { id: claimsData.claims.sub as string };
+
     const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", user.id);
 
     const userRoles = (roles || []).map((roleRow: { role: string }) => roleRow.role);
@@ -174,6 +176,12 @@ Deno.serve(async (req: Request) => {
 
     if (!store_id) {
       return jsonResponse({ success: false, error: "store_id required" }, 400);
+    }
+
+    // Email verification guard: read-only status stays available.
+    if (action !== "status") {
+      const unverified = await emailUnverifiedResponse(user.id, corsHeaders);
+      if (unverified) return unverified;
     }
 
     const { data: storeCheck } = await supabaseAdmin.from("stores").select("id, created_by").eq("id", store_id).single();

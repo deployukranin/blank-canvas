@@ -196,7 +196,13 @@
       "resend": "Reenviar email",
       "resendIn": "Reenviar em {{seconds}}s",
       "resendSuccess": "Email de confirmação reenviado.",
-      "resendError": "Não foi possível reenviar o email. Tente novamente em instantes."
+      "resendError": "Não foi possível reenviar o email. Tente novamente em instantes.",
+      "checking": "Confirmando seu email...",
+      "successTitle": "Email verificado",
+      "successBody": "Tudo pronto! Você já pode usar todos os recursos do painel.",
+      "errorTitle": "Não foi possível verificar",
+      "errorBody": "O link pode ter expirado. Entre no painel e reenvie o email de verificação.",
+      "backToPanel": "Ir para o painel"
     }
   },
   "admin": {
@@ -1468,7 +1474,8 @@
     },
     "pixManualConfigured": "PIX Manual configurado e ativado!",
     "refreshStatus": "Atualizar status",
-    "pendingRequirements": "Informações pendentes na Stripe:"
+    "pendingRequirements": "Informações pendentes na Stripe:",
+    "emailVerificationRequired": "Verifique seu email para conectar pagamentos."
   },
   "adminAffiliates": {
     "title": "Afiliados",
@@ -1693,5 +1700,8 @@
     "personal-attention": "Atenção Pessoal",
     "video-styles": "Estilos de Vídeo",
     "visual-misc": "Visual & Diversos"
+  },
+  "adminDomain": {
+    "emailVerificationRequired": "Verifique seu email para gerenciar domínios."
   }
 }
