@@ -29,7 +29,7 @@ function mediaViewerHtml(url: URL): string {
   const rawUrl = new URL(url.toString());
   rawUrl.searchParams.set('raw', '1');
   const safeRawUrl = escapeAttribute(`${rawUrl.pathname}${rawUrl.search}`);
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyTingleBox Media</title><meta name="theme-color" content="#0a0612"><link rel="shortcut icon" href="/favicon.ico?v=8"><link rel="icon" type="image/png" href="/favicon.png?v=8"><link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8"><style>html,body{width:100%;height:100%;margin:0;background:#09070d}body{display:grid;place-items:center}object{width:100%;height:100%;border:0}p{font:14px system-ui;color:#fff}a{color:#a78bfa}</style></head><body><object data="${safeRawUrl}"><p>Não foi possível exibir esta mídia. <a href="${safeRawUrl}">Abrir arquivo</a></p></object></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyTingleBox Media</title><meta name="theme-color" content="#0a0612"><link rel="shortcut icon" href="/favicon.ico?v=8"><link rel="icon" type="image/png" href="/favicon.png?v=8"><link rel="apple-touch-icon" href="/apple-touch-icon.png?v=8"><style>html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#09070d}body{overflow:hidden}iframe{display:block}</style></head><body><iframe src="${safeRawUrl}" title="Mídia MyTingleBox" allow="autoplay; fullscreen" referrerpolicy="same-origin"></iframe></body></html>`;
 }
 
 async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
