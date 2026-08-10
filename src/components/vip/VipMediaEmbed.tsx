@@ -74,19 +74,39 @@ export const VipMediaEmbed = ({ mediaRef, title, className = '' }: VipMediaEmbed
       )}
 
       {!loading && url && kind === 'video' && (
-        <video src={url} controls playsInline preload="metadata" className="w-full max-h-[70vh] bg-black" />
+        <video
+          src={url}
+          controls
+          playsInline
+          preload="metadata"
+          controlsList="nodownload"
+          onContextMenu={(e) => e.preventDefault()}
+          onError={refresh}
+          className="w-full max-h-[70vh] bg-black"
+        />
       )}
       {!loading && url && kind === 'image' && (
-        <img src={url} alt={title || ''} loading="lazy" className="w-full max-h-[70vh] object-contain bg-black" />
+        <img
+          src={url}
+          alt={title || ''}
+          loading="lazy"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          onError={refresh}
+          className="w-full max-h-[70vh] object-contain bg-black select-none"
+        />
       )}
       {!loading && url && kind === 'audio' && (
         <div className="w-full p-4">
-          <audio src={url} controls className="w-full" />
+          <audio src={url} controls controlsList="nodownload" onError={refresh} className="w-full" />
         </div>
       )}
       {!loading && url && kind === 'other' && (
-        <iframe src={url} title={title || 'media'} className="w-full h-[60vh] bg-black" />
+        <p className="text-xs text-muted-foreground p-6 text-center">
+          {t('storefront.vipMediaError', 'Could not load this content. Please try again.')}
+        </p>
       )}
+
     </div>
   );
 };
