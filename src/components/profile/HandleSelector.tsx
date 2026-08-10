@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AtSign, Check, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ interface HandleSelectorProps {
 }
 
 export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorProps) => {
+  const { t } = useTranslation();
   const [handle, setHandle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,9 +22,9 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!handle.trim()) {
-      setError('Digite um @ para continuar');
+      setError(t('profile.handle.required', 'Type a username to continue'));
       return;
     }
 
@@ -31,7 +33,7 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
 
     try {
       const { data, error: rpcError } = await supabase.rpc('set_user_handle', {
-        new_handle: handle.trim()
+        new_handle: handle.trim(),
       });
 
       if (rpcError) throw rpcError;
@@ -39,35 +41,37 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
       const result = data as { success: boolean; error?: string; handle?: string };
 
       if (!result.success) {
-        setError(result.error || 'Erro ao definir @');
+        setError(result.error || t('profile.handle.error', 'Could not set your username'));
         return;
       }
 
       toast({
-        title: '@ definido com sucesso!',
-        description: `Seu @ agora é @${result.handle}`,
+        title: t('profile.handle.successTitle', 'Username set!'),
+        description: t('profile.handle.successDesc', 'Your username is now @{{handle}}', { handle: result.handle }),
       });
 
       onHandleSet(result.handle!);
     } catch (err) {
       console.error('Error setting handle:', err);
-      setError('Erro ao definir @. Tente novamente.');
+      setError(t('profile.handle.error', 'Could not set your username'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // If handle is already set, show it
+  // Already defined — permanent, no editing allowed
   if (currentHandle) {
     return (
       <GlassCard className="p-4 bg-gradient-to-r from-primary/10 to-accent/5 border-primary/20">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Check className="w-5 h-5 text-white" />
+            <Check className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <p className="font-medium text-sm">Seu @</p>
-            <p className="text-xs text-muted-foreground">@{currentHandle}</p>
+            <p className="font-medium text-sm">@{currentHandle}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('profile.handle.locked', 'Your username is permanent and cannot be changed.')}
+            </p>
           </div>
         </div>
       </GlassCard>
@@ -75,36 +79,31 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <GlassCard className="p-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
-              <AtSign className="w-5 h-5 text-white" />
+              <AtSign className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex-1 space-y-3">
               <div>
-                <p className="font-medium text-sm">Escolha seu @</p>
+                <p className="font-medium text-sm">{t('profile.handle.title', 'Choose your username')}</p>
                 <p className="text-xs text-muted-foreground">
-                  3-20 caracteres • minúsculas, números e _
+                  {t('profile.handle.rules', '3-20 characters • lowercase, numbers and _')}
                 </p>
               </div>
 
               <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  @
-                </div>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</div>
                 <Input
                   value={handle}
                   onChange={(e) => {
                     setHandle(e.target.value.toLowerCase());
                     setError('');
                   }}
-                  placeholder="seuusuario"
-                  className="pl-8 bg-background/50 border-white/10"
+                  placeholder={t('profile.handle.placeholder', 'yourusername')}
+                  className="pl-8 bg-background/50"
                   disabled={isLoading}
                   maxLength={20}
                 />
@@ -117,20 +116,16 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
                 </div>
               )}
 
-              <Button
-                type="submit"
-                disabled={isLoading || !handle.trim()}
-                className="w-full gap-2"
-              >
+              <Button type="submit" disabled={isLoading || !handle.trim()} className="w-full gap-2">
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Definindo...
+                    {t('profile.handle.saving', 'Saving...')}
                   </>
                 ) : (
                   <>
                     <Check className="w-4 h-4" />
-                    Definir @ (única vez)
+                    {t('profile.handle.submit', 'Set username (only once)')}
                   </>
                 )}
               </Button>
