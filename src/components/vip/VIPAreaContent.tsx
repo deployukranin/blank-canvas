@@ -132,11 +132,10 @@ export const VIPAreaContent = () => {
               {item.description}
             </p>
             {item.video_url && (
-              <Button className="w-full" onClick={() => setViewerMedia({ ref: item.video_url, title: item.title })}>
-                {t('storefront.watchNow')}
-              </Button>
+              <VipMediaEmbed mediaRef={item.video_url} title={item.title} />
             )}
           </CardContent>
+
         </Card>
       ))}
       
