@@ -268,11 +268,17 @@ const AdminPlanos: React.FC = () => {
                   </div>
 
                   {getStorageLabel(plan) && (
-                    <div className="mb-5 flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2">
-                      <HardDrive className="w-4 h-4 text-primary shrink-0" />
-                      <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
+                    <div className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2.5">
+                      <div className="flex items-center justify-center gap-2">
+                        <HardDrive className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground">{getStorageLabel(plan)}</span>
+                      </div>
+                      <p className="mt-1 text-center text-xs text-muted-foreground">
+                        {t('admin.plans.storageHelp', 'Espaço para vídeos, áudios e imagens que você envia: conteúdo VIP, entregas de customs, banners e ícone da loja.')}
+                      </p>
                     </div>
                   )}
+
 
                   <ul className="space-y-2.5 mb-6">
                     {getPlanFeatures(plan).map((feature, i) => (
