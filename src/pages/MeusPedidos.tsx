@@ -429,33 +429,36 @@ const MeusPedidosPage = () => {
                           <h4 className="font-medium text-sm text-emerald-400 mb-2">
                             {t('orders.deliveryReady', 'Seu pedido está pronto!')}
                           </h4>
-                          {deliveryMedia && (deliveryMedia.mimeType?.startsWith('video') || deliveryMedia.mimeType?.startsWith('audio')) && (
-                            <div className="mb-3">
+                          {deliveryMedia ? (
+                            <div className="mb-1">
                               {deliveryMedia.mimeType?.startsWith('video') ? (
                                 <video
                                   src={deliveryMedia.url}
                                   controls
                                   playsInline
+                                  controlsList="nodownload"
+                                  onContextMenu={(e) => e.preventDefault()}
                                   className="w-full rounded-lg bg-black"
                                 />
+                              ) : deliveryMedia.mimeType?.startsWith('audio') ? (
+                                <audio src={deliveryMedia.url} controls controlsList="nodownload" className="w-full" />
                               ) : (
-                                <audio src={deliveryMedia.url} controls className="w-full" />
+                                <img
+                                  src={deliveryMedia.url}
+                                  alt=""
+                                  draggable={false}
+                                  onContextMenu={(e) => e.preventDefault()}
+                                  className="w-full rounded-lg bg-black object-contain select-none"
+                                />
                               )}
                             </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              {t('orders.loadingDelivery', 'Carregando conteúdo...')}
+                            </div>
                           )}
-                          <Button
-                            size="sm"
-                            className="gap-2"
-                            disabled={loadingDelivery}
-                            onClick={() => handleOpenDelivery(selectedOrder)}
-                          >
-                            {loadingDelivery ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Download className="w-4 h-4" />
-                            )}
-                            {t('orders.openDelivery', 'Abrir arquivo')}
-                          </Button>
+
                         </div>
                       </div>
                     </GlassCard>
