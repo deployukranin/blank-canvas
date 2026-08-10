@@ -356,7 +356,8 @@
         "vipSupport": "Dedicated VIP support",
         "premiumAnalytics": "Premium analytics",
         "dailyBackup": "Daily backup"
-      }
+      },
+      "storageHelp": "Space for the videos, audio and images you upload: VIP content, custom order deliveries, banners and your store icon."
     },
     "support": {
       "title": "Support",
@@ -728,7 +729,14 @@
     "noPlans": "No VIP plans registered",
     "createFirst": "Create First Plan",
     "savings": "Save {{percent}}%",
-    "equivalentMonth": "≈ {{value}}/mo"
+    "equivalentMonth": "≈ {{value}}/mo",
+    "bannerTitle": "VIP banner",
+    "bannerDesc": "Image shown at the top of the VIP page.",
+    "bannerUpload": "Upload banner",
+    "bannerRemove": "Remove banner",
+    "bannerHint": "JPG, PNG, WEBP or GIF. Recommended 1200x400.",
+    "bannerUploaded": "Banner updated",
+    "bannerError": "Could not upload the banner"
   },
   "orders": {
     "title": "Manage Orders",
@@ -1151,7 +1159,9 @@
     "ideasEmptyDesc": "Be the first to suggest something fresh using the form on the left.",
     "alreadyReported": "You already reported this content.",
     "vipMedia": "VIP media",
-    "vipMediaError": "Could not load this content. Please try again."
+    "vipMediaError": "Could not load this content. Please try again.",
+    "vipTeaser": "Unlock VIP",
+    "vipTeaserDesc": "Subscribe to VIP and get exclusive content, early videos and perks."
   },
   "customs": {
     "videos": "Videos",
