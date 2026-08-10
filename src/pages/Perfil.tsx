@@ -245,7 +245,18 @@ const PerfilPage = () => {
           </motion.div>
         )}
 
-        {/* Membership journey — conversion mechanic */}
+        {/* Membership journey — conversion mechanic (dismissible) */}
+        {journeyHidden || completed === steps.length ? (
+          completed === steps.length ? null : (
+            <button
+              type="button"
+              onClick={() => setJourneyHidden(false)}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+            >
+              {t('profile.journeyShow', 'Show your journey')}
+            </button>
+          )
+        ) : (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
           <GlassCard className="p-5 space-y-4">
             <div className="flex items-center justify-between">
@@ -255,8 +266,21 @@ const PerfilPage = () => {
                   {t('profile.journeySubtitle', 'Complete the steps and unlock exclusive perks')}
                 </p>
               </div>
-              <span className="text-sm font-bold text-primary">{completed}/{steps.length}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-primary">{completed}/{steps.length}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground"
+                  aria-label={t('profile.journeyHide', 'Hide journey')}
+                  onClick={() => setJourneyHidden(true)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
+
 
             <div className="h-2 rounded-full bg-white/5 overflow-hidden">
               <motion.div
