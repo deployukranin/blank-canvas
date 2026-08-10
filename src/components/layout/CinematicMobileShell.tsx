@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { translatePathLabel } from '@/lib/nav-i18n';
-import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 import { useProfile } from '@/hooks/use-profile';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
@@ -141,7 +140,6 @@ export const CinematicMobileShell = ({ children, title, showBack }: CinematicMob
                           {item.label}
                         </Link>
                       ))}
-                      <BugReportDialog />
                     </div>
                   </nav>
                 </div>
