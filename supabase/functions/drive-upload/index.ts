@@ -164,14 +164,15 @@ Deno.serve(async (req) => {
       await admin.storage.from(bucket).remove([rest.join('/')]);
 
       const migExp = Math.floor(Date.now() / 1000) + CONFIG_URL_TTL_SECONDS;
-      const migSig = await signMediaToken(migratedId, migExp);
+      const migSig = await signMediaToken(migratedId, migExp, 'config');
       return json({
         success: true,
         ref: `gdrive:${migratedId}`,
         fileId: migratedId,
         name: srcName,
-        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(migratedId)}&exp=${migExp}&sig=${migSig}`,
+        url: `${SUPABASE_URL}/functions/v1/drive-media?f=${encodeURIComponent(migratedId)}&exp=${migExp}&sig=${migSig}&k=config`,
       });
+
     }
 
     const form = await req.formData();
