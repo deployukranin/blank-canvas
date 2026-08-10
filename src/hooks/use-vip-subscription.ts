@@ -78,6 +78,7 @@ export const useVIPSubscription = () => {
 
         if (error) throw error;
 
+        vipCache.set(userId, (data as VIPSubscription) ?? null);
         if (data) {
           setSubscription(data as VIPSubscription);
           setIsVIP(true);
@@ -85,6 +86,7 @@ export const useVIPSubscription = () => {
           setSubscription(null);
           setIsVIP(false);
         }
+
       } catch (error) {
         console.error('Error fetching VIP subscription:', error);
         setSubscription(null);
