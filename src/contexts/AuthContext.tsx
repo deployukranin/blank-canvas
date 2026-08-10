@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, alreadyRegistered: true, error: "Este email já está cadastrado" };
       }
 
-      // No confirmation step while verification is disabled.
+      // Requires email confirmation when no session is returned.
       return { success: true, needsConfirmation: !data.session };
     } catch (err) {
       return { success: false, error: "Erro ao criar conta" };
