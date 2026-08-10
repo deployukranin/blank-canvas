@@ -12,6 +12,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { VipMediaViewer } from '@/components/vip/VipMediaViewer';
+import { VipMediaEmbed } from '@/components/vip/VipMediaEmbed';
 import { formatPriceForLang, displayCurrencyForLang } from '@/lib/currency';
 import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import {
