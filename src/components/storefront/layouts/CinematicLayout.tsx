@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, LogIn, Play, UserPlus } from 'lucide-react';
@@ -5,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { DynamicIcon } from '@/components/ui/DynamicIcon';
-import bannerStudio from '@/assets/banner-studio.jpg';
+import { DefaultBanner } from '@/components/layout/DefaultBanner';
 import { translatePathLabel } from '@/lib/nav-i18n';
 import { useTenant } from '@/contexts/TenantContext';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
@@ -64,7 +65,9 @@ export const CinematicLayout = ({
   const heroImage =
     config.banners?.find((b) => b.enabled && b.desktopUrl)?.desktopUrl ||
     config.bannerImage ||
-    bannerStudio;
+    '';
+  const [heroFailed, setHeroFailed] = useState(false);
+  const showDefaultBanner = !heroImage || heroFailed;
 
   return (
     <div className="space-y-10 md:space-y-16">
@@ -75,17 +78,18 @@ export const CinematicLayout = ({
         transition={{ duration: 0.6 }}
         className="relative h-[440px] md:h-[460px] rounded-[28px] md:rounded-[40px] overflow-hidden border border-border/50 shadow-2xl group"
       >
-        <img
-          src={heroImage}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (img.src !== bannerStudio) img.src = bannerStudio;
-          }}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
-        />
+        {showDefaultBanner ? (
+          <DefaultBanner />
+        ) : (
+          <img
+            src={heroImage}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            onError={() => setHeroFailed(true)}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
 

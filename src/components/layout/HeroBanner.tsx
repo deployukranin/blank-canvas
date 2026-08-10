@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DefaultBanner } from "@/components/layout/DefaultBanner";
 import type { BannerConfig } from "@/contexts/WhiteLabelContext";
 
 interface HeroBannerProps {
@@ -53,6 +54,7 @@ export function HeroBanner({
 
   return (
     <div className="relative w-full overflow-hidden" style={{ height: "65vh", minHeight: 380 }}>
+      {total === 0 && <DefaultBanner />}
       {resolvedImages.map((src, i) => (
         <div
           key={`${src}-${i}`}
@@ -61,7 +63,8 @@ export function HeroBanner({
         >
           <img
             src={src}
-            alt={`Banner ${i + 1}`}
+            alt=""
+            aria-hidden="true"
             className="h-full w-full object-cover"
             loading={i === 0 ? "eager" : "lazy"}
           />

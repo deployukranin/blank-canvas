@@ -9,7 +9,6 @@ import { HeroBanner } from '@/components/layout/HeroBanner';
 import { SocialLinksBar } from '@/components/social/SocialLinksBar';
 import { Button } from '@/components/ui/button';
 import { VideoGalleryCarousel } from '@/components/video/VideoGalleryCarousel';
-import bannerStudio from '@/assets/banner-studio.jpg';
 import type { StorefrontLayoutProps } from '../use-storefront-data';
 
 export const ClassicLayout = ({
@@ -22,7 +21,7 @@ export const ClassicLayout = ({
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <HeroBanner images={[bannerStudio]} banners={config.banners} greeting={greeting} subtitle={subtitle} />
+        <HeroBanner images={[]} banners={config.banners} greeting={greeting} subtitle={subtitle} />
       </motion.div>
 
       <div className="px-4 py-6 space-y-6">
