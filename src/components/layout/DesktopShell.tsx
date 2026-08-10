@@ -163,13 +163,16 @@ export const DesktopShell = ({ children, title, fullBleed }: DesktopShellProps) 
                 {isAuthenticated
                   ? profile?.handle
                     ? `@${profile.handle}`
-                    : t('profile.member', 'Member')
+                    : profileLoading
+                      ? '\u00A0'
+                      : t('profile.member', 'Member')
                   : t('storefront.signIn')}
               </p>
               <p className="text-[10px] uppercase font-bold tracking-tight text-muted-foreground">
                 {isAuthenticated ? t('nav.profile') : t('storefront.joinCommunity')}
               </p>
             </div>
+
           </Link>
         </div>
       </aside>
