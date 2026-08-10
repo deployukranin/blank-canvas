@@ -21,6 +21,8 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
