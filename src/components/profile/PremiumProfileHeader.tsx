@@ -4,11 +4,12 @@ import { Camera, Crown, ImagePlus, Loader2, Lock, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useProfileCustomization, MAX_PROFILE_MEDIA_BYTES } from '@/hooks/use-profile-customization';
 import type { ReputationSummary } from '@/lib/gamification';
+import defaultBanner from '@/assets/default-profile-banner.jpg.asset.json';
+import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
 
 interface PremiumProfileHeaderProps {
   isVIP: boolean;
@@ -28,25 +29,14 @@ export const PremiumProfileHeader = ({
   reputation,
 }: PremiumProfileHeaderProps) => {
   const { t } = useTranslation();
-  const { customization, save, uploadMedia, isSaving } = useProfileCustomization();
-  const [editing, setEditing] = useState(false);
+  const { customization, save, uploadMedia } = useProfileCustomization();
   const [uploading, setUploading] = useState<'banner' | 'avatar' | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [pronouns, setPronouns] = useState('');
-  const [statusText, setStatusText] = useState('');
   const bannerInput = useRef<HTMLInputElement>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
 
-  const banner = isVIP ? customization.banner_url : null;
-  const avatar = (isVIP ? customization.avatar_url : null) || fallbackAvatar || null;
-  const name = (isVIP ? customization.display_name : null) || fallbackName;
-
-  const openEditor = () => {
-    setDisplayName(customization.display_name || '');
-    setPronouns(customization.pronouns || '');
-    setStatusText(customization.status_text || '');
-    setEditing(true);
-  };
+  const banner = (isVIP ? customization.banner_url : null) || defaultBanner.url;
+  const avatar = (isVIP ? customization.avatar_url : null) || fallbackAvatar || defaultAvatar.url;
+  const name = handle ? `@${handle}` : fallbackName;
 
   const handleUpload = async (file: File | undefined, kind: 'banner' | 'avatar') => {
     if (!file) return;
@@ -71,25 +61,11 @@ export const PremiumProfileHeader = ({
     }
   };
 
-  const handleSaveText = async () => {
-    try {
-      await save({
-        display_name: displayName.trim() || null,
-        pronouns: pronouns.trim() || null,
-        status_text: statusText.trim() || null,
-      });
-      toast.success(t('profile.premium.saved', 'Profile updated!'));
-      setEditing(false);
-    } catch {
-      toast.error(t('profile.premium.saveError', 'Could not save your profile.'));
-    }
-  };
-
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl overflow-hidden border border-border/60 bg-card/60 backdrop-blur">
       {/* Banner */}
       <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/40 via-accent/30 to-primary/10">
-        {banner && <img src={banner} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+        <img src={banner} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
         {!isVIP && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
             <Link to={vipPath}>
@@ -110,23 +86,10 @@ export const PremiumProfileHeader = ({
           </button>
         )}
 
-        {/* Status bubble */}
-        {isVIP && customization.status_text && (
-          <div className="absolute left-28 right-4 top-1/2 -translate-y-1/2 hidden sm:block">
-            <div className="inline-block max-w-full rounded-2xl bg-background/90 px-4 py-2 text-sm shadow-lg border border-border/50">
-              {customization.status_text}
-            </div>
-          </div>
-        )}
-
         {/* Avatar */}
         <div className="absolute -bottom-8 left-4">
           <div className={`w-20 h-20 rounded-full overflow-hidden border-4 ${isVIP ? 'border-primary' : 'border-background'} bg-gradient-to-br from-primary to-accent flex items-center justify-center`}>
-            {avatar ? (
-              <img src={avatar} alt={name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-2xl font-bold text-primary-foreground">{name.charAt(0).toUpperCase()}</span>
-            )}
+            <img src={avatar} alt={name} loading="lazy" className="w-full h-full object-cover" />
           </div>
           {isVIP && (
             <button
@@ -145,20 +108,7 @@ export const PremiumProfileHeader = ({
 
       {/* Identity */}
       <div className="pt-10 px-4 pb-4 space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="font-display text-xl font-bold truncate">{name}</h2>
-            <p className="text-xs text-muted-foreground truncate">
-              {handle ? `@${handle}` : ''}
-              {isVIP && customization.pronouns ? ` • ${customization.pronouns}` : ''}
-            </p>
-          </div>
-          {isVIP && (
-            <Button variant="outline" size="sm" onClick={openEditor} className="shrink-0">
-              {t('profile.premium.edit', 'Edit')}
-            </Button>
-          )}
-        </div>
+        <h2 className="font-display text-xl font-bold truncate">{name}</h2>
 
         <div className="flex flex-wrap items-center gap-2">
           {isVIP ? (
@@ -173,30 +123,15 @@ export const PremiumProfileHeader = ({
           )}
         </div>
 
-        {!isVIP && (
+        {!isVIP ? (
           <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
             {t('profile.premium.teaser', 'VIP members can set a custom banner and avatar (image or GIF).')}
           </p>
-        )}
-
-        {editing && (
-          <div className="space-y-3 pt-3 border-t border-border/50">
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={40} placeholder={t('profile.premium.displayName', 'Display name')} />
-            <Input value={pronouns} onChange={(e) => setPronouns(e.target.value)} maxLength={24} placeholder={t('profile.premium.pronouns', 'Pronouns (they/them)')} />
-            <Input value={statusText} onChange={(e) => setStatusText(e.target.value)} maxLength={80} placeholder={t('profile.premium.status', 'Status message')} />
-            <div className="flex gap-2">
-              <Button size="sm" onClick={handleSaveText} disabled={isSaving}>
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save', 'Save')}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
-                {t('common.cancel', 'Cancel')}
-              </Button>
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              {t('profile.premium.limits', 'JPG, PNG, WEBP or GIF up to {{mb}}MB.', { mb: Math.round(MAX_PROFILE_MEDIA_BYTES / (1024 * 1024)) })}
-            </p>
-          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground pt-1">
+            {t('profile.premium.limits', 'JPG, PNG, WEBP or GIF up to {{mb}}MB.', { mb: Math.round(MAX_PROFILE_MEDIA_BYTES / (1024 * 1024)) })}
+          </p>
         )}
       </div>
 
