@@ -95,6 +95,7 @@ const VIPPage = () => {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [showAdultWarning, setShowAdultWarning] = useState(false);
   const [adultAccepted, setAdultAccepted] = useState(false);
+  const adultKey = resolvedStoreId ? `tinglebox:adult18:${resolvedStoreId}` : null;
   const [isAdultContent, setIsAdultContent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
