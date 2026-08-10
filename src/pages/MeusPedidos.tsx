@@ -26,7 +26,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
-import { getDeliverySignedUrl, getDriveMedia } from '@/lib/external-storage';
+import { getDriveMedia } from '@/lib/external-storage';
 
 import {
   Dialog,
@@ -117,7 +117,6 @@ const MeusPedidosPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [loadingDelivery, setLoadingDelivery] = useState(false);
   const [deliveryMedia, setDeliveryMedia] = useState<{ url: string; mimeType: string | null } | null>(null);
 
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
