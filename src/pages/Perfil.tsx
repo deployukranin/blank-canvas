@@ -97,15 +97,24 @@ const PerfilPage = () => {
 
       const [orders, ideas] = await Promise.all([ordersQuery, ideasQuery]);
       if (!active) return;
-      setHasOrder((orders.count ?? 0) > 0);
-      setHasIdea((ideas.count ?? 0) > 0);
+      const order = (orders.count ?? 0) > 0;
+      const idea = (ideas.count ?? 0) > 0;
+      setHasOrder(order);
+      setHasIdea(idea);
+      setJourneyLoaded(true);
+      if (journeyCacheKey) {
+        try {
+          localStorage.setItem(journeyCacheKey, JSON.stringify({ order, idea }));
+        } catch { /* ignore */ }
+      }
     };
 
     void load();
     return () => {
       active = false;
     };
-  }, [user?.id, store?.id]);
+  }, [user?.id, store?.id, journeyCacheKey]);
+
 
   const quickAccessItems = [
     { icon: Package, label: t('profile.myOrders', 'My Orders'), description: t('profile.trackVideos', 'Track your videos'), path: withBase('/orders'), gradient: 'from-purple-400 to-pink-500', badge: 'orders' as const },
