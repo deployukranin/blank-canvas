@@ -171,17 +171,23 @@ const PerfilPage = () => {
           reputation={reputation}
         />
 
-        {/* Handle — can only be chosen once */}
-        <HandleSelector
-          currentHandle={visibleHandle}
-          onHandleSet={(h) => {
-            setHandle(h);
-            void refetchProfile();
-          }}
-        />
+        {/* Handle — can only be chosen once (hidden until the profile resolves) */}
+        {!profileLoading && (
+          <HandleSelector
+            currentHandle={visibleHandle}
+            onHandleSet={(h) => {
+              setHandle(h);
+              void refetchProfile();
+            }}
+          />
+        )}
 
         {/* Reputation & ranking */}
+        {reputationLoading || !reputation ? (
+          <div className="h-44 rounded-2xl bg-white/[0.03] animate-pulse" />
+        ) : (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+
           <GlassCard className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div>
