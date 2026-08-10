@@ -23,8 +23,15 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!handle.trim()) {
+    const normalizedHandle = handle.trim().toLowerCase();
+
+    if (!normalizedHandle) {
       setError(t('profile.handle.required', 'Type a username to continue'));
+      return;
+    }
+
+    if (!/^[a-z0-9_]{3,20}$/.test(normalizedHandle)) {
+      setError(t('profile.handle.rules', '3-20 characters • lowercase, numbers and _'));
       return;
     }
 
@@ -33,7 +40,7 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
 
     try {
       const { data, error: rpcError } = await supabase.rpc('set_user_handle', {
-        new_handle: handle.trim(),
+        new_handle: normalizedHandle,
       });
 
       if (rpcError) throw rpcError;
@@ -45,12 +52,14 @@ export const HandleSelector = ({ currentHandle, onHandleSet }: HandleSelectorPro
         return;
       }
 
+      const savedHandle = result.handle || normalizedHandle;
+
       toast({
         title: t('profile.handle.successTitle', 'Username set!'),
-        description: t('profile.handle.successDesc', 'Your username is now @{{handle}}', { handle: result.handle }),
+        description: t('profile.handle.successDesc', 'Your username is now @{{handle}}', { handle: savedHandle }),
       });
 
-      onHandleSet(result.handle!);
+      onHandleSet(savedHandle);
     } catch (err) {
       console.error('Error setting handle:', err);
       setError(t('profile.handle.error', 'Could not set your username'));

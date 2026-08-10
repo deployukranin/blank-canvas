@@ -27,7 +27,7 @@ const PerfilPage = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const pendingOrdersCount = getPendingOrdersCount();
   const { unreadCount } = useCommunityNotifications();
-  const { profile } = useProfile();
+  const { profile, refetch: refetchProfile } = useProfile();
   const { customization } = useProfileCustomization();
   const { isAdmin: isAdminFn, isCEO: isCEOFn } = useUserRole();
   const isAdmin = isAdminFn();
@@ -135,7 +135,13 @@ const PerfilPage = () => {
         />
 
         {/* Handle — can only be chosen once */}
-        <HandleSelector currentHandle={handle} onHandleSet={(h) => setHandle(h)} />
+        <HandleSelector
+          currentHandle={handle}
+          onHandleSet={(h) => {
+            setHandle(h);
+            void refetchProfile();
+          }}
+        />
 
         {/* Reputation & ranking */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
