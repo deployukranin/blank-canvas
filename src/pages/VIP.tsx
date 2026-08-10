@@ -419,12 +419,15 @@ const VIPPage = () => {
               >
                 <Crown className="w-10 h-10 text-primary-foreground" />
               </motion.div>
-              <h2 className="font-display text-xl font-bold mb-2">You're VIP! 👑</h2>
-              <Badge className="bg-primary/20 text-primary mb-4 capitalize">{subscription.plan_type} Plan</Badge>
-              <p className="text-muted-foreground text-sm">{getDaysRemaining()} days remaining</p>
+              <h2 className="font-display text-xl font-bold mb-2">{t('vip.statusTitle')}</h2>
+              <Badge className="bg-primary/20 text-primary mb-4">
+                {t(`vip.plans.${subscription.plan_type}`, { defaultValue: subscription.plan_type })} {t('vip.planSuffix')}
+              </Badge>
+              <p className="text-muted-foreground text-sm">{t('vip.daysRemaining', { count: getDaysRemaining() })}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Expires {new Date(subscription.expires_at).toLocaleDateString()}
+                {t('vip.expiresOn', { date: new Date(subscription.expires_at).toLocaleDateString(i18n.language) })}
               </p>
+
             </GlassCard>
           </motion.div>
 
