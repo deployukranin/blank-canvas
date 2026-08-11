@@ -55,7 +55,6 @@ const AdminCustoms = () => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [isUploadingPreview, setIsUploadingPreview] = useState(false);
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handlePreviewUpload = async (file: File, target: 'video' | 'image') => {
