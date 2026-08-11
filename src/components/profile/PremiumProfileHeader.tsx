@@ -36,9 +36,11 @@ export const PremiumProfileHeader = ({
 
   // Existing premium media remains visible while VIP status is revalidated.
   // VIP still controls whether the editing controls are available.
-  const banner = customization.banner_url || defaultBanner.url;
-  const avatar = customization.avatar_url || fallbackAvatar || defaultAvatar.url;
+  // Non-VIP users always get the themed gradient banner (no custom media).
+  const banner = isVIP ? (customization.banner_url || '') : '';
+  const avatar = customization.avatar_url || fallbackAvatar || DEFAULT_AVATAR;
   const name = handle ? `@${handle}` : fallbackName;
+
   const [visibleBanner, setVisibleBanner] = useState(banner);
   const [visibleAvatar, setVisibleAvatar] = useState(avatar);
   const [bannerFailed, setBannerFailed] = useState(false);
