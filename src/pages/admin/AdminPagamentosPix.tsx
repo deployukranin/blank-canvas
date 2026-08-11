@@ -123,7 +123,13 @@ const AdminPagamentosPix = () => {
     };
   }, [checkStripeStatus]);
 
+  // Initial status check on mount
+  useEffect(() => {
+    checkStripeStatus();
+  }, [checkStripeStatus]);
+
   // Handle the redirect back from the Stripe OAuth flow
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get('stripe');
