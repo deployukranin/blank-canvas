@@ -1,6 +1,7 @@
 /// <reference lib="deno.ns" />
 
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { clientKey, rateLimit, tooManyRequests } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -335,6 +336,22 @@ Deno.serve(async (req) => {
       forceRefresh = url.searchParams.get("forceRefresh") === "true";
       action = url.searchParams.get("action") ?? "videos";
     }
+
+    // Public endpoint backed by a metered YouTube quota. Cached reads are cheap
+    // and stay generous; forced refreshes hit the upstream API, so they are tight.
+    const rlKey = await clientKey(req);
+    const rl = forceRefresh
+      ? await rateLimit(rlKey, "youtube-videos-refresh", 5, 60)
+      : await rateLimit(rlKey, "youtube-videos", 120, 10);
+    if (!rl.allowed) {
+      if (forceRefresh) {
+        // Fall back to serving the cache instead of failing the page.
+        forceRefresh = false;
+      } else {
+        return tooManyRequests(corsHeaders, rl.retry_after_seconds);
+      }
+    }
+
 
     // Handle "verify" action — resolve @handle to channel ID and return channel info
     if (action === "verify") {
