@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/stripe-connect-oauth-callback",
+      "destination": "https://lkwvlzcapuptcxvwukcm.supabase.co/functions/v1/stripe-connect-oauth-callback"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

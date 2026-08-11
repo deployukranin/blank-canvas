@@ -71,7 +71,11 @@ Deno.serve(servePrivate(async (req) => {
     }
 
     const state = await signState({ store_id, user_id: user.id, return_url }, stripeSecretKey);
-    const redirectUri = `${supabaseUrl}/functions/v1/stripe-connect-oauth-callback`;
+    // Allow a branded domain callback URI; if not configured, fall back to the
+    // Supabase Edge Function URL. Stripe requires the redirect_uri to match
+    // exactly what is registered in the platform settings.
+    const redirectUri = Deno.env.get("STRIPE_CONNECT_REDIRECT_URI") ||
+      `${supabaseUrl}/functions/v1/stripe-connect-oauth-callback`;
 
     const params = new URLSearchParams({
       response_type: "code",
