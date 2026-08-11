@@ -140,7 +140,7 @@ export const useVIPSubscription = () => {
 
   // Fetch VIP content (only works if user is VIP)
   const fetchVIPContent = useCallback(async () => {
-    if (!isVIP) {
+    if (!isVIP || !storeId) {
       setVIPContent([]);
       return;
     }
@@ -149,6 +149,7 @@ export const useVIPSubscription = () => {
       const { data, error } = await supabase
         .from('vip_content')
         .select('*')
+        .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -157,7 +158,8 @@ export const useVIPSubscription = () => {
       console.error('Error fetching VIP content:', error);
       setVIPContent([]);
     }
-  }, [isVIP]);
+  }, [isVIP, storeId]);
+
 
   useEffect(() => {
     if (isVIP) {

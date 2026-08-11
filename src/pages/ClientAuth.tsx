@@ -36,11 +36,36 @@ const ClientAuth = () => {
 
   const homePath = isTenantScope ? basePath : "/";
 
+  const { isMember, isLoading: membershipLoading } = useStoreMembership();
+  const [isJoining, setIsJoining] = useState(false);
+
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated && !authLoading && !membershipLoading && isMember) {
       navigate(homePath, { replace: true });
     }
-  }, [isAuthenticated, authLoading, navigate, homePath]);
+  }, [isAuthenticated, authLoading, membershipLoading, isMember, navigate, homePath]);
+
+  // Signed in with an account from another store: joining is an explicit action.
+  const handleJoinStore = async () => {
+    if (!store?.id) return;
+    setIsJoining(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("store_users").upsert(
+          { store_id: store.id, user_id: user.id },
+          { onConflict: "store_id,user_id" }
+        ).select();
+        await supabase.rpc("assign_client_role" as any, { p_store_id: store.id });
+      }
+      toast.success(t('storeAccess.joinSuccess'));
+      navigate(homePath, { replace: true });
+    } catch {
+      toast.error(t('common.error'));
+    }
+    setIsJoining(false);
+  };
+
 
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
