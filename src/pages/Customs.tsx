@@ -27,7 +27,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
-import { VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { isDriveRef, getVipMediaSignedUrl } from '@/lib/external-storage';
 import { 
   defaultVideoConfig,
@@ -130,8 +130,9 @@ const CustomsPage = () => {
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
 
-  // Resolve uploaded (Google Drive) preview image into a displayable URL.
+  // Resolve uploaded (Google Drive) preview media into displayable URLs.
   const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
+  const [previewVideoSrc, setPreviewVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -142,8 +143,9 @@ const CustomsPage = () => {
       if (active) set?.(url);
     };
     resolve(config?.previewImageUrl, setPreviewImageSrc);
+    resolve(config?.previewVideoUrl, setPreviewVideoSrc);
     return () => { active = false; };
-  }, [config?.previewImageUrl]);
+  }, [config?.previewImageUrl, config?.previewVideoUrl]);
 
 
   // Video handlers
@@ -401,7 +403,9 @@ const CustomsPage = () => {
               return (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <GlassCard className="overflow-hidden p-0">
-                  {previewImageSrc ? (
+                  {config.previewType === 'video' && previewVideoSrc ? (
+                    <VideoPlayer videoUrl={previewVideoSrc} title={previewTitle} description={previewDesc} />
+                  ) : previewImageSrc ? (
                     <div className="aspect-video bg-black">
                       <img src={previewImageSrc} alt={previewTitle} className="w-full h-full object-cover" />
                     </div>
