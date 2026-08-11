@@ -8,8 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import type { ReputationSummary } from '@/lib/gamification';
-import defaultBanner from '@/assets/default-profile-banner.jpg.asset.json';
-import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
+import { DefaultBanner } from '@/components/layout/DefaultBanner';
+
+// Served from /public so it also resolves on custom domains.
+const DEFAULT_AVATAR = '/default-avatar.svg';
+
 
 interface PremiumProfileHeaderProps {
   isVIP: boolean;
