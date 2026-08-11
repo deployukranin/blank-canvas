@@ -205,9 +205,10 @@ export default async function middleware(req: Request): Promise<Response> {
     html = injectTenantFavicon(html, bootstrap.avatarUrl, bootstrap.storeId);
   }
 
-  const headers = new Headers(assetRes.headers);
+  const headers = applySecurityHeaders(new Headers(assetRes.headers));
   headers.set('content-type', 'text/html; charset=utf-8');
   headers.set('cache-control', 'no-store, no-cache, must-revalidate');
+  headers.set('pragma', 'no-cache');
   headers.delete('content-length');
   return new Response(html, { status: 200, headers });
 }
