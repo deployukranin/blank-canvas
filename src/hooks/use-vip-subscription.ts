@@ -288,7 +288,7 @@ export const useVIPSubscription = () => {
 
       setSubscription(null);
       setIsVIP(false);
-      if (userId) writeVipCache(userId, null);
+      if (userId && storeId) writeVipCache(userId, storeId, null);
 
       toast({
         title: 'Assinatura cancelada',
