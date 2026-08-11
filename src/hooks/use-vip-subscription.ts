@@ -2,6 +2,8 @@ import { devLog } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+
 import { useToast } from '@/hooks/use-toast';
 
 export interface VIPSubscription {
