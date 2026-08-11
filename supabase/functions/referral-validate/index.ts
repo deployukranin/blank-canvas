@@ -1,4 +1,6 @@
 // Public endpoint: validate a referral code and return referrer store name
+import { clientKey, rateLimit, tooManyRequests } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -16,7 +18,11 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = (url.searchParams.get("code") || "").trim().toUpperCase();
-    if (!code || code.length !== 6) return json({ valid: false });
+    if (!code || code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) return json({ valid: false });
+
+    // Referral codes are only 6 chars: throttle to stop enumeration.
+    const rl = await rateLimit(await clientKey(req), "referral-validate", 20, 10);
+    if (!rl.allowed) return tooManyRequests(corsHeaders, rl.retry_after_seconds);
 
     const sUrl = Deno.env.get("SUPABASE_URL")!;
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
