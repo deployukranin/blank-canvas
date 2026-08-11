@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
 
@@ -37,7 +38,7 @@ const AdminAffiliates: React.FC = () => {
   const { t, i18n } = useTranslation();
   const ta = (k: string, opts?: any) => t(`adminAffiliates.${k}`, opts) as string;
   const { store } = useTenant();
-  const currency = i18n.language === 'pt-BR' ? 'BRL' : 'USD';
+  const currency = useStoreCurrency(store?.id ?? null);
   const localeCode = i18n.language === 'pt-BR' ? 'pt-BR' : i18n.language === 'es' ? 'es' : 'en-US';
   const fmt = (c: number) => new Intl.NumberFormat(localeCode, { style: 'currency', currency }).format((c || 0) / 100);
 

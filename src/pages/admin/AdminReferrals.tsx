@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { useTenant } from '@/contexts/TenantContext';
 import { toast } from 'sonner';
 
@@ -39,7 +40,7 @@ const AdminReferrals: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const locale = i18n.language?.startsWith('pt') ? 'pt-BR' : i18n.language?.startsWith('es') ? 'es-ES' : 'en-US';
-  const currency = i18n.language?.startsWith('pt') ? 'BRL' : 'USD';
+  const currency = useStoreCurrency(store?.id ?? null);
   const fmtMoney = useMemo(
     () => (cents: number) => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100),
     [locale, currency]
