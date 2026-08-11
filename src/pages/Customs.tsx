@@ -27,7 +27,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
-import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { isDriveRef, getVipMediaSignedUrl } from '@/lib/external-storage';
 import { 
   defaultVideoConfig,
@@ -130,8 +130,7 @@ const CustomsPage = () => {
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
 
-  // Resolve uploaded (Google Drive) preview assets into playable URLs.
-  const [previewVideoSrc, setPreviewVideoSrc] = useState<string | null>(null);
+  // Resolve uploaded (Google Drive) preview image into a displayable URL.
   const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -142,10 +141,9 @@ const CustomsPage = () => {
       const url = await getVipMediaSignedUrl(ref);
       if (active) set?.(url);
     };
-    resolve(config?.previewVideoUrl, setPreviewVideoSrc);
     resolve(config?.previewImageUrl, setPreviewImageSrc);
     return () => { active = false; };
-  }, [config?.previewVideoUrl, config?.previewImageUrl]);
+  }, [config?.previewImageUrl]);
 
 
   // Video handlers
@@ -403,13 +401,10 @@ const CustomsPage = () => {
               return (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <GlassCard className="overflow-hidden p-0">
-                  {config.previewType === 'video' && previewVideoSrc ? (
-                    <VideoPlayer videoUrl={previewVideoSrc} title={previewTitle} description={previewDesc} />
-                  ) : config.previewType === 'image' && previewImageSrc ? (
+                  {previewImageSrc ? (
                     <div className="aspect-video bg-black">
                       <img src={previewImageSrc} alt={previewTitle} className="w-full h-full object-cover" />
                     </div>
-
                   ) : (
                     <VideoPlaceholder title={previewTitle} description={previewDesc} />
                   )}
