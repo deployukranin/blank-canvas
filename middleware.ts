@@ -67,7 +67,6 @@ async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
   outHeaders.set('cache-control', 'private, no-store, max-age=0');
   return new Response(upstreamRes.body, { status: upstreamRes.status, headers: outHeaders });
 }
-}
 
 
 type ThemeConfig = {
