@@ -1,4 +1,6 @@
 // Public endpoint: validate an affiliate code for a given store
+import { clientKey, rateLimit, tooManyRequests } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -6,13 +8,19 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const url = new URL(req.url);
     const code = (url.searchParams.get("code") || "").trim().toUpperCase();
     const storeId = (url.searchParams.get("store_id") || "").trim();
-    if (!code || code.length !== 6 || !storeId) return json({ valid: false });
+    if (!code || !/^[A-Z0-9]{6}$/.test(code) || !UUID_RE.test(storeId)) return json({ valid: false });
+
+    // Affiliate codes are only 6 chars: throttle to stop enumeration.
+    const rl = await rateLimit(await clientKey(req), "affiliate-validate", 20, 10);
+    if (!rl.allowed) return tooManyRequests(corsHeaders, rl.retry_after_seconds);
 
     const sUrl = Deno.env.get("SUPABASE_URL")!;
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

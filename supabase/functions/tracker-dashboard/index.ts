@@ -1,4 +1,6 @@
 // Token-authenticated endpoint: returns isolated metrics for one tracker.
+import { clientKey, rateLimit, tooManyRequests } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -59,6 +61,15 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const token = String(body.token || "").trim();
     const authHeader = req.headers.get("Authorization");
+
+    // The dashboard token is a bearer secret in a URL: throttle per client so
+    // it cannot be brute-forced. Session-authenticated callers get more room.
+    const ip = await clientKey(req);
+    const rl = token
+      ? await rateLimit(ip, "tracker-dashboard-token", 30, 10)
+      : await rateLimit(ip, "tracker-dashboard-session", 120, 10);
+    if (!rl.allowed) return tooManyRequests(corsHeaders, rl.retry_after_seconds);
+
     const tracker = await resolveTracker(token, authHeader);
     if (!tracker) return json({ ok: false, error: "not found" }, 404);
     const tid = tracker.id;

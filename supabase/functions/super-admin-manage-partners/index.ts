@@ -14,19 +14,16 @@ const json = (body: unknown, status = 200) =>
 interface Claims { sub?: string }
 
 async function getClaims(token: string, url: string): Promise<Claims | null> {
-  // Use Supabase JWT endpoint to validate (basic claim parse)
+  // Identity is taken ONLY from the auth server response. Never decode the
+  // token locally: an unverified payload can be forged by the caller.
   try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
-    if (!payload?.sub) return null;
-    // Verify with auth endpoint to ensure not revoked
+    if (!token) return null;
     const res = await fetch(`${url}/auth/v1/user`, {
       headers: { Authorization: `Bearer ${token}`, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" },
     });
     if (!res.ok) return null;
     const u = await res.json();
-    return { sub: u?.id };
+    return u?.id ? { sub: u.id } : null;
   } catch { return null; }
 }
 
