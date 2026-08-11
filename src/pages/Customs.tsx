@@ -27,7 +27,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { onCustomOrder, trackEvent } from '@/lib/integrations';
 import { useTenant } from '@/contexts/TenantContext';
 import { addOrder, VideoOrder } from '@/lib/order-store';
-import { VideoPlaceholder } from '@/components/video/VideoPlayer';
+import { VideoPlayer, VideoPlaceholder } from '@/components/video/VideoPlayer';
 import { isDriveRef, getVipMediaSignedUrl } from '@/lib/external-storage';
 import { 
   defaultVideoConfig,
