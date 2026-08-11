@@ -54,9 +54,19 @@ export function usePixPayment() {
 
       if (error) {
         console.error('Supabase function error:', error);
+        let backendMessage = '';
+        const response = (error as { context?: Response }).context;
+        if (response) {
+          try {
+            const payload = await response.clone().json() as { error?: string; message?: string };
+            backendMessage = payload.message || payload.error || '';
+          } catch {
+            // Keep the SDK message when the response is not JSON.
+          }
+        }
         const result: PixChargeResult = {
           success: false,
-          error: error.message || 'Erro ao criar cobrança PIX',
+          error: backendMessage || error.message || 'Erro ao criar cobrança',
         };
         setChargeData(result);
         return result;

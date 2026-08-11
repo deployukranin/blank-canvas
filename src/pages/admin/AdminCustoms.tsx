@@ -51,6 +51,7 @@ const AdminCustoms = () => {
     localStorageKey: 'videoConfig',
     debounceMs: 2000,
     storeId: store?.id,
+    seedDefaultsIfMissing: true,
   });
 
   const [showPreview, setShowPreview] = useState(false);
