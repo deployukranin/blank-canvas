@@ -61,6 +61,16 @@ export const SocialLinksBar = () => {
 
   if (links.length === 0) return null;
 
+  /** Only http(s) links are rendered — blocks javascript:/data: URLs from config. */
+  function toSafeHttpUrl(raw: string): string | null {
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : null;
+    } catch {
+      return null;
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
