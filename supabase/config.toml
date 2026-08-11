@@ -44,4 +44,8 @@ verify_jwt = false
 [functions.stripe-connect-oauth-callback]
 verify_jwt = false
 
+[functions.stripe-connect-redirect-check]
+verify_jwt = false
+
+
 
