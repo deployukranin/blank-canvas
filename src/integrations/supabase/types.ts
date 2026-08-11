@@ -1982,6 +1982,7 @@ export type Database = {
         }[]
       }
       get_email_verification_status: { Args: never; Returns: Json }
+      get_store_currency: { Args: { p_store_id: string }; Returns: string }
       get_store_leaderboard: {
         Args: { p_limit?: number; p_store_id: string }
         Returns: {
