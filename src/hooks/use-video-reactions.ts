@@ -87,7 +87,8 @@ export function useVideoReactions(videoId: string) {
 
       const { error } = await supabase
         .from('video_reactions')
-        .upsert(row, { onConflict: conflict });
+        .upsert(row as any, { onConflict: conflict });
+
 
       if (error) throw error;
     } catch (err) {
