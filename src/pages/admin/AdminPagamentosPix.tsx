@@ -312,12 +312,18 @@ const AdminPagamentosPix = () => {
                     <Check className="w-3 h-3 mr-1" /> {t('adminPayments.connected')}
                   </Badge>
                 )}
+                {stripeStatus.account_connected && !stripeStatus.charges_enabled && (
+                  <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.chargesPending', 'Cobranças pendentes')}
+                  </Badge>
+                )}
                 {stripeStatus.onboarding_started && !stripeStatus.account_connected && (
                   <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
                     <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.pending')}
                   </Badge>
                 )}
                 {stripeStatus.onboarding_started && (
+
                   <Button
                     variant="ghost"
                     size="sm"
