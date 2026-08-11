@@ -142,6 +142,18 @@ const AdminPagamentosPix = () => {
     setConnectingStripe(true);
     try {
       const returnUrl = publicUrl(window.location.pathname);
+
+      // Preferred path: OAuth — the creator logs into the Stripe account they
+      // already have and authorizes in a couple of clicks.
+      const oauth = await supabase.functions.invoke('stripe-connect-oauth-start', {
+        body: { store_id: storeId, return_url: returnUrl },
+      });
+      if (!oauth.error && oauth.data?.url) {
+        window.location.href = oauth.data.url;
+        return;
+      }
+
+      // Fallback: hosted onboarding (also used to finish pending requirements)
       const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
         body: { store_id: storeId, return_url: returnUrl },
       });
@@ -160,6 +172,7 @@ const AdminPagamentosPix = () => {
       setConnectingStripe(false);
     }
   };
+
 
   const handleSavePix = async () => {
     if (!config.pixManual.key || !config.pixManual.receiverName || !config.pixManual.city) {
