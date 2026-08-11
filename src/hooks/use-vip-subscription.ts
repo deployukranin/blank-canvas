@@ -2,6 +2,8 @@ import { devLog } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+
 import { useToast } from '@/hooks/use-toast';
 
 export interface VIPSubscription {
@@ -40,36 +42,46 @@ export interface VIPChargeResult {
 
 // Cache (memory + localStorage) so the VIP status survives route changes AND
 // hard refreshes — otherwise the UI paints the "free" state before the query.
+// Keyed by user AND store: a VIP bought in one store never unlocks another.
 const vipCache = new Map<string, VIPSubscription | null>();
 const VIP_CACHE_PREFIX = 'tinglebox:vip:';
 
-const readVipCache = (userId: string): { hit: boolean; value: VIPSubscription | null } => {
-  if (vipCache.has(userId)) return { hit: true, value: vipCache.get(userId) ?? null };
+const cacheKey = (userId: string, storeId: string) => `${userId}:${storeId}`;
+
+const readVipCache = (userId: string, storeId: string): { hit: boolean; value: VIPSubscription | null } => {
+  const key = cacheKey(userId, storeId);
+  if (vipCache.has(key)) return { hit: true, value: vipCache.get(key) ?? null };
   try {
-    const stored = localStorage.getItem(`${VIP_CACHE_PREFIX}${userId}`);
+    const stored = localStorage.getItem(`${VIP_CACHE_PREFIX}${key}`);
     if (!stored) return { hit: false, value: null };
     const parsed = JSON.parse(stored) as VIPSubscription | null;
     // Expired cached subscriptions must not be trusted
     const value = parsed && new Date(parsed.expires_at).getTime() > Date.now() ? parsed : null;
-    vipCache.set(userId, value);
+    vipCache.set(key, value);
     return { hit: true, value };
   } catch {
     return { hit: false, value: null };
   }
 };
 
-const writeVipCache = (userId: string, value: VIPSubscription | null) => {
-  vipCache.set(userId, value);
+const writeVipCache = (userId: string, storeId: string, value: VIPSubscription | null) => {
+  const key = cacheKey(userId, storeId);
+  vipCache.set(key, value);
   try {
-    localStorage.setItem(`${VIP_CACHE_PREFIX}${userId}`, JSON.stringify(value));
+    localStorage.setItem(`${VIP_CACHE_PREFIX}${key}`, JSON.stringify(value));
   } catch { /* storage may be unavailable */ }
 };
 
+
 export const useVIPSubscription = () => {
   const { session } = useAuth();
+  const { store } = useTenant();
   const { toast } = useToast();
+  const storeId = store?.id;
   const cachedUserId = session?.user?.id;
-  const cachedEntry = cachedUserId ? readVipCache(cachedUserId) : { hit: false, value: null };
+  const cachedEntry = cachedUserId && storeId
+    ? readVipCache(cachedUserId, storeId)
+    : { hit: false, value: null };
   const hasCache = cachedEntry.hit;
   const cached = cachedEntry.value;
   const [subscription, setSubscription] = useState<VIPSubscription | null>(cached);
@@ -82,10 +94,10 @@ export const useVIPSubscription = () => {
   const isAuthenticated = !!session?.user;
 
 
-  // Fetch user's VIP subscription
+  // Fetch user's VIP subscription (always scoped to the current store)
   useEffect(() => {
     const fetchSubscription = async () => {
-      if (!isAuthenticated || !userId) {
+      if (!isAuthenticated || !userId || !storeId) {
         setSubscription(null);
         setIsVIP(false);
         setIsLoading(false);
@@ -97,13 +109,14 @@ export const useVIPSubscription = () => {
           .from('vip_subscriptions')
           .select('*')
           .eq('user_id', userId)
+          .eq('store_id', storeId)
           .eq('status', 'active')
           .gt('expires_at', new Date().toISOString())
           .maybeSingle();
 
         if (error) throw error;
 
-        writeVipCache(userId, (data as VIPSubscription) ?? null);
+        writeVipCache(userId, storeId, (data as VIPSubscription) ?? null);
         if (data) {
           setSubscription(data as VIPSubscription);
           setIsVIP(true);
@@ -122,11 +135,12 @@ export const useVIPSubscription = () => {
     };
 
     fetchSubscription();
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, storeId]);
+
 
   // Fetch VIP content (only works if user is VIP)
   const fetchVIPContent = useCallback(async () => {
-    if (!isVIP) {
+    if (!isVIP || !storeId) {
       setVIPContent([]);
       return;
     }
@@ -135,6 +149,7 @@ export const useVIPSubscription = () => {
       const { data, error } = await supabase
         .from('vip_content')
         .select('*')
+        .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -143,7 +158,8 @@ export const useVIPSubscription = () => {
       console.error('Error fetching VIP content:', error);
       setVIPContent([]);
     }
-  }, [isVIP]);
+  }, [isVIP, storeId]);
+
 
   useEffect(() => {
     if (isVIP) {
@@ -274,7 +290,7 @@ export const useVIPSubscription = () => {
 
       setSubscription(null);
       setIsVIP(false);
-      if (userId) writeVipCache(userId, null);
+      if (userId && storeId) writeVipCache(userId, storeId, null);
 
       toast({
         title: 'Assinatura cancelada',
@@ -305,12 +321,13 @@ export const useVIPSubscription = () => {
 
   // Refresh subscription data (call after payment confirmed)
   const refreshSubscription = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !storeId) return;
 
     const { data } = await supabase
       .from('vip_subscriptions')
       .select('*')
       .eq('user_id', userId)
+      .eq('store_id', storeId)
       .eq('status', 'active')
       .gt('expires_at', new Date().toISOString())
       .maybeSingle();
@@ -318,9 +335,10 @@ export const useVIPSubscription = () => {
     if (data) {
       setSubscription(data as VIPSubscription);
       setIsVIP(true);
-      writeVipCache(userId, data as VIPSubscription);
+      writeVipCache(userId, storeId, data as VIPSubscription);
     }
-  }, [userId]);
+  }, [userId, storeId]);
+
 
   return {
     subscription,

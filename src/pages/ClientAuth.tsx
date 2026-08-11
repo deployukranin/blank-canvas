@@ -14,9 +14,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackConversion } from "@/lib/tracking";
 import { getPublicOrigin, publicUrl } from '@/lib/public-url';
+import { useTranslation } from "react-i18next";
+import { useStoreMembership } from "@/hooks/use-store-membership";
+
 
 const ClientAuth = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const { store, basePath, isTenantScope } = useTenant();
@@ -36,11 +41,36 @@ const ClientAuth = () => {
 
   const homePath = isTenantScope ? basePath : "/";
 
+  const { isMember, isLoading: membershipLoading } = useStoreMembership();
+  const [isJoining, setIsJoining] = useState(false);
+
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated && !authLoading && !membershipLoading && isMember) {
       navigate(homePath, { replace: true });
     }
-  }, [isAuthenticated, authLoading, navigate, homePath]);
+  }, [isAuthenticated, authLoading, membershipLoading, isMember, navigate, homePath]);
+
+  // Signed in with an account from another store: joining is an explicit action.
+  const handleJoinStore = async () => {
+    if (!store?.id) return;
+    setIsJoining(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("store_users").upsert(
+          { store_id: store.id, user_id: user.id },
+          { onConflict: "store_id,user_id" }
+        ).select();
+        await supabase.rpc("assign_client_role" as any, { p_store_id: store.id });
+      }
+      toast.success(t('storeAccess.joinSuccess'));
+      navigate(homePath, { replace: true });
+    } catch {
+      toast.error(t('common.error'));
+    }
+    setIsJoining(false);
+  };
+
 
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -109,7 +139,7 @@ const ClientAuth = () => {
     setIsSubmitting(false);
   };
 
-  if (authLoading) {
+  if (authLoading || (isAuthenticated && membershipLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -117,7 +147,25 @@ const ClientAuth = () => {
     );
   }
 
+  if (isAuthenticated && !isMember) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+        <div className="w-full max-w-md glass rounded-2xl p-8 border border-primary/10 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+            <User className="w-7 h-7 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">{t('storeAccess.joinTitle')}</h2>
+          <p className="text-muted-foreground text-sm">{t('storeAccess.joinDescription')}</p>
+          <Button className="w-full" onClick={handleJoinStore} disabled={isJoining}>
+            {isJoining ? <Loader2 className="w-4 h-4 animate-spin" /> : t('storeAccess.joinCta')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const storeName = store?.name || "a comunidade";
+
 
   if (signupConfirmationSent) {
     return (

@@ -30,36 +30,8 @@ interface YTMetrics {
   fetched_at: string;
 }
 
-/** Demo/showcase data used only for the `februxry` storefront admin. */
-const DEMO_SLUG = 'februxry';
-const DEMO = {
-  stats: { totalUsers: 284, totalVIP: 76, totalOrders: 48, revenue: 6531, pendingOrders: 8, newUsersToday: 490 },
-  ideas: 84,
-  week: [
-    { orders: 4, revenue: 380 },
-    { orders: 6, revenue: 640 },
-    { orders: 3, revenue: 290 },
-    { orders: 9, revenue: 1180 },
-    { orders: 7, revenue: 860 },
-    { orders: 11, revenue: 1490 },
-    { orders: 8, revenue: 1010 },
-  ],
-  yt: {
-    subscriber_count: 148000,
-    total_video_count: 332,
-    total_view_count: 59900000,
-    views_last_30d: 2400000,
-    videos_last_30d: 9,
-    top_videos: [],
-    fetched_at: new Date().toISOString(),
-  } as YTMetrics,
-  pending: [
-    { id: 'demo-1', customer_name: 'Larissa M.', category_name: 'Custom Video', amount_cents: 24900 },
-    { id: 'demo-2', customer_name: 'Bruno S.', category_name: 'Custom Audio', amount_cents: 12900 },
-    { id: 'demo-3', customer_name: 'Kelly R.', category_name: 'Roleplay', amount_cents: 34900 },
-    { id: 'demo-4', customer_name: 'Diego A.', category_name: 'Custom Video', amount_cents: 19900 },
-  ],
-};
+
+
 
 
 const AdminDashboard: React.FC = () => {
@@ -358,20 +330,13 @@ const AdminDashboard: React.FC = () => {
     revenue: 0,
   }));
 
-  // Showcase data for the demo storefront
-  const isDemo = (slug ?? storeSlug) === DEMO_SLUG;
-  const displayStats = isDemo ? DEMO.stats : stats;
-  const displayPending = isDemo ? DEMO.pending : pendingOrders;
-  const displayYt = isDemo ? DEMO.yt : ytMetrics;
-  const displayIdeas = isDemo ? DEMO.ideas.toString() : '—';
-  const chartData = isDemo
-    ? buildEmptyWeek().map((b, i) => ({
-        name: t(`admin.days.${dayKeys[b.date.getDay()]}`),
-        orders: DEMO.week[i].orders,
-        revenue: DEMO.week[i].revenue,
-      }))
-    : baseChartData;
-  const displayLoading = isDemo ? false : isLoading;
+  const displayStats = stats;
+  const displayPending = pendingOrders;
+  const displayYt = ytMetrics;
+  const displayIdeas = '—';
+  const chartData = baseChartData;
+  const displayLoading = isLoading;
+
 
 
 
@@ -488,7 +453,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* YouTube Metrics */}
-        {(isDemo || config.youtube?.channelId) && (
+        {config.youtube?.channelId && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
               <div className="flex items-center gap-2">
@@ -499,7 +464,7 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-              {(!isDemo && ytLoading) ? (
+              {ytLoading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   {t('common.loading')}

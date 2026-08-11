@@ -13,6 +13,8 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import { SuperAdminRoute } from "@/components/auth/SuperAdminRoute";
 import { PartnerRoute } from "@/components/auth/PartnerRoute";
 import { TenantGate } from "@/components/tenant/TenantGate";
+import { StoreMemberRoute } from "@/components/tenant/StoreMemberRoute";
+
 import { MyOrdersRedirect } from "@/components/tenant/MyOrdersRedirect";
 import CustomDomainResolver from "@/components/tenant/CustomDomainResolver";
 import CustomDomainGate from "@/components/tenant/CustomDomainGate";
@@ -173,9 +175,10 @@ const App = () => (
                 <Route path="/:slug/ideas" element={<TenantGate><Ideias /></TenantGate>} />
                 <Route path="/:slug/vip" element={<TenantGate><VIP /></TenantGate>} />
                 <Route path="/:slug/gallery" element={<TenantGate><GaleriaVideos /></TenantGate>} />
-                <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><Perfil /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><MeusPedidos /></ProtectedRoute></TenantGate>} />
-                <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><Notificacoes /></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/profile" element={<TenantGate><ProtectedRoute><StoreMemberRoute><Perfil /></StoreMemberRoute></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/orders" element={<TenantGate><ProtectedRoute><StoreMemberRoute><MeusPedidos /></StoreMemberRoute></ProtectedRoute></TenantGate>} />
+                <Route path="/:slug/notifications" element={<TenantGate><ProtectedRoute><StoreMemberRoute><Notificacoes /></StoreMemberRoute></ProtectedRoute></TenantGate>} />
+
                 <Route path="/:slug/help" element={<TenantGate><Ajuda /></TenantGate>} />
                 <Route path="/:slug/terms" element={<TenantGate><TermosDeUso /></TenantGate>} />
                 <Route path="/:slug/privacy" element={<TenantGate><Privacidade /></TenantGate>} />

@@ -1,60 +1,82 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/contexts/TenantContext";
 
+export interface StoreMembershipStatus {
+  isMember: boolean;
+  isBanned: boolean;
+  isLoading: boolean;
+}
+
 /**
- * Ensures the authenticated user is registered as a member of the current store.
- * Runs on every tenant page (not only on the login form), so users that confirm
- * their email and land directly on the storefront still show up in /admin/users.
+ * Reads (never creates) the membership of the authenticated user in the current
+ * store. Memberships are only created when the user actually signs in / signs up
+ * through that store's own login page, so visiting another store never links the
+ * account to it.
  */
-export function useStoreMembership() {
+export function useStoreMembership(): StoreMembershipStatus {
   const { user } = useAuth();
   const { store } = useTenant();
-  const doneRef = useRef<string | null>(null);
+  const [status, setStatus] = useState<StoreMembershipStatus>({
+    isMember: false,
+    isBanned: false,
+    isLoading: true,
+  });
+  const profileRef = useRef<string | null>(null);
 
   useEffect(() => {
     const storeId = store?.id;
     const userId = user?.id;
-    if (!storeId || !userId) return;
 
-    const key = `${storeId}:${userId}`;
-    if (doneRef.current === key) return;
-    doneRef.current = key;
+    if (!storeId || !userId) {
+      setStatus({ isMember: false, isBanned: false, isLoading: false });
+      return;
+    }
+
+    let cancelled = false;
+    setStatus((prev) => ({ ...prev, isLoading: true }));
 
     (async () => {
       try {
-        const { data: existing } = await supabase
+        const { data } = await supabase
           .from("store_users")
-          .select("id")
+          .select("id, banned_at")
           .eq("store_id", storeId)
           .eq("user_id", userId)
           .maybeSingle();
 
-        if (!existing) {
-          await supabase
-            .from("store_users")
-            .insert({ store_id: storeId, user_id: userId });
-          await supabase.rpc("assign_client_role" as any, { p_store_id: storeId });
-        }
+        if (cancelled) return;
 
-        // Make sure a profile row exists so the user shows up with a name in
-        // the admin panel (the @ handle is still chosen by the user later).
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("user_id", userId)
-          .maybeSingle();
+        const isMember = !!data && !data.banned_at;
+        setStatus({ isMember, isBanned: !!data?.banned_at, isLoading: false });
 
-        if (!profile) {
-          const fallbackName = (user?.email || "").split("@")[0] || null;
-          await supabase
+        // Members should always have a profile row so they show up with a name
+        // in the store admin panel.
+        if (isMember && profileRef.current !== userId) {
+          profileRef.current = userId;
+          const { data: profile } = await supabase
             .from("profiles")
-            .insert({ user_id: userId, display_name: fallbackName });
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (!profile) {
+            const fallbackName = (user?.email || "").split("@")[0] || null;
+            await supabase
+              .from("profiles")
+              .insert({ user_id: userId, display_name: fallbackName });
+          }
         }
       } catch {
-        // membership registration is best-effort
+        if (!cancelled) setStatus({ isMember: false, isBanned: false, isLoading: false });
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [store?.id, user?.id, user?.email]);
+
+  return status;
 }
