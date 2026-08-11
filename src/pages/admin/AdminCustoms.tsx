@@ -329,22 +329,6 @@ const AdminCustoms = () => {
                 <Switch checked={config.previewEnabled} onCheckedChange={(checked) => setConfig({ ...config, previewEnabled: checked })} />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg mb-4">
-                <div className="flex items-center gap-3">
-                  {config.previewType === 'video' ? <Video className="w-5 h-5 text-primary" /> : <ImageIcon className="w-5 h-5 text-primary" />}
-                  <div>
-                    <span className="font-medium text-sm">{t('customsAdmin.mediaType', 'Tipo de Mídia')}</span>
-                    <p className="text-xs text-muted-foreground">
-                      {config.previewType === 'video' ? 'YouTube' : t('customsAdmin.image', 'Imagem')}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{t('customsAdmin.image', 'Imagem')}</span>
-                  <Switch checked={config.previewType === 'video'} onCheckedChange={(checked) => setConfig({ ...config, previewType: checked ? 'video' : 'image' })} disabled={!config.previewEnabled} />
-                  <span className="text-xs text-muted-foreground">{t('customsAdmin.videoLabel', 'Vídeo')}</span>
-                </div>
-              </div>
 
               <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                 <div>
