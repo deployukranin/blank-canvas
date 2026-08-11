@@ -20,6 +20,8 @@ import { useStoreMembership } from "@/hooks/use-store-membership";
 
 const ClientAuth = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [searchParams] = useSearchParams();
   const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const { store, basePath, isTenantScope } = useTenant();
