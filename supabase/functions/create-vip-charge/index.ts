@@ -179,32 +179,39 @@ Deno.serve(async (req) => {
     }
 
     // ─── Load store's VIP prices ───
-    // Charge currency follows the buyer's language (pt → BRL, en/es → USD).
+    // Currency ALWAYS follows what the creator configured in the admin panel.
+    // The buyer's language never changes the currency nor converts the amount.
     const BRL_PER_USD = 5.4;
-    const requestedCurrency = String((body as any).currency || 'BRL').toLowerCase() === 'usd' ? 'usd' : 'brl';
     let amountCents: number;
-    let planCurrency: 'brl' | 'usd' = requestedCurrency;
+    let planCurrency: 'brl' | 'usd' = 'brl';
     if (storeId) {
-      const { data: vipCfg } = await supabase
-        .from('app_configurations')
-        .select('config_value')
-        .eq('config_key', 'vip_config')
-        .eq('store_id', storeId)
-        .maybeSingle();
+      const [vipCfgRes, payCfgCurrencyRes] = await Promise.all([
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'vip_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+        supabase
+          .from('app_configurations')
+          .select('config_value')
+          .eq('config_key', 'payment_config')
+          .eq('store_id', storeId)
+          .maybeSingle(),
+      ]);
 
-      const plans = (vipCfg?.config_value as any)?.plans || [];
+      const plans = (vipCfgRes.data?.config_value as any)?.plans || [];
       const matchingPlan = plans.find((p: any) => p.type === body.planType);
       amountCents = matchingPlan ? Math.round(matchingPlan.price * 100) : 1990;
-      const storedCurrency = (matchingPlan?.currency || 'BRL').toString().toLowerCase() === 'usd' ? 'usd' : 'brl';
-      if (storedCurrency !== planCurrency) {
-        amountCents = planCurrency === 'usd'
-          ? Math.round(amountCents / BRL_PER_USD)
-          : Math.round(amountCents * BRL_PER_USD);
-      }
+      const configuredCurrency = (
+        matchingPlan?.currency
+        || (payCfgCurrencyRes.data?.config_value as any)?.currency
+        || 'BRL'
+      ).toString().toLowerCase();
+      planCurrency = configuredCurrency === 'usd' ? 'usd' : 'brl';
     } else {
       const defaultPrices: Record<string, number> = { monthly: 1990, quarterly: 4990, yearly: 19990 };
       amountCents = defaultPrices[body.planType] || 1990;
-      if (planCurrency === 'usd') amountCents = Math.round(amountCents / BRL_PER_USD);
     }
 
 
@@ -215,6 +222,7 @@ Deno.serve(async (req) => {
     if (!Number.isFinite(amountCents) || amountCents < minCents || amountCents > maxCents) {
       return jsonResponse({ success: false, error: 'Configured plan price is out of allowed range' }, 400);
     }
+
 
     const correlationID = `vip_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -293,12 +301,26 @@ Deno.serve(async (req) => {
       if (!stripeAccountId) {
         return jsonResponse({ success: false, error: 'Store has not connected Stripe yet' }, 400);
       }
+      // Verify the connected account can actually accept charges.
+      const acctRes = await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` },
+      });
+      const acct = await acctRes.json();
+      if (!acctRes.ok || acct?.charges_enabled !== true) {
+        return jsonResponse({
+          success: false,
+          error: 'stripe_account_not_ready',
+          message: 'A conta Stripe da loja ainda não está habilitada para receber pagamentos. Conclua o cadastro na Stripe.',
+        }, 400);
+      }
+
       const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
       const successUrl = body.successUrl || `${origin}/vip?payment=success`;
       const cancelUrl = body.cancelUrl || `${origin}/vip?payment=cancelled`;
       if (!isSafeRedirectUrl(successUrl) || !isSafeRedirectUrl(cancelUrl)) {
         return jsonResponse({ success: false, error: 'Invalid redirect URLs' }, 400);
       }
+
 
       const params = new URLSearchParams({
         mode: 'subscription',
@@ -337,8 +359,11 @@ Deno.serve(async (req) => {
       if (!sessionRes.ok) {
         const errBody = await sessionRes.text();
         console.error('Stripe VIP checkout error:', errBody);
-        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session' }, 500);
+        let stripeMsg = '';
+        try { stripeMsg = JSON.parse(errBody)?.error?.message || ''; } catch { /* ignore */ }
+        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session', message: stripeMsg }, 500);
       }
+
 
       const session = await sessionRes.json();
       stripeCheckoutUrl = session.url;

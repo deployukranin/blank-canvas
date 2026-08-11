@@ -15,7 +15,8 @@ import {
   Pause
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { displayCurrencyForLang, formatPriceForLang } from '@/lib/currency';
+import { formatPriceForLang } from '@/lib/currency';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -95,11 +96,10 @@ const CustomsPage = () => {
   });
   const config: VideoConfig | null = isConfigLoading ? null : loadedConfig;
 
-  // Currency follows the selected language: pt → BRL, en/es → USD
-  const storeCurrency = displayCurrencyForLang(i18n.language);
+  // Currency always follows the creator's admin panel configuration.
+  const storeCurrency = useStoreCurrency(store?.id ?? null);
 
-  // Prices are configured in BRL; convert for display when showing USD.
-  const formatCurrency = (value: number) => formatPriceForLang(value, 'BRL', i18n.language);
+  const formatCurrency = (value: number) => formatPriceForLang(value, storeCurrency, i18n.language);
 
 
   // Video state
