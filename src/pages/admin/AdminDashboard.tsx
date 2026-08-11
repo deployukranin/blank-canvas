@@ -453,7 +453,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* YouTube Metrics */}
-        {(isDemo || config.youtube?.channelId) && (
+        {config.youtube?.channelId && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <GlassCard className="p-5">
               <div className="flex items-center gap-2">
@@ -464,7 +464,7 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-              {(!isDemo && ytLoading) ? (
+              {ytLoading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   {t('common.loading')}
