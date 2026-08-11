@@ -195,13 +195,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "app_configurations_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       audit_logs: {
@@ -285,13 +278,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "bug_reports_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       content_reports: {
@@ -343,13 +329,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "content_reports_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -513,13 +492,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "custom_orders_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       custom_orders_tamper_attempts: {
@@ -610,13 +582,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "drive_files_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       feed_posts: {
@@ -695,13 +660,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invite_codes_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -787,13 +745,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_customizations_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -928,24 +879,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "referral_commissions_referred_store_id_fkey"
-            columns: ["referred_store_id"]
-            isOneToOne: true
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "referral_commissions_referrer_store_id_fkey"
             columns: ["referrer_store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referral_commissions_referrer_store_id_fkey"
-            columns: ["referrer_store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -986,13 +923,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "reputation_events_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       store_admins: {
@@ -1020,13 +950,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "store_admins_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1089,13 +1012,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "store_users_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1182,13 +1098,6 @@ export type Database = {
             columns: ["referred_by_store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "stores_referred_by_store_id_fkey"
-            columns: ["referred_by_store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1295,13 +1204,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_tickets_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1533,13 +1435,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "video_chat_messages_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       video_idea_votes: {
@@ -1611,13 +1506,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "video_ideas_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1730,13 +1618,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "vip_content_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       vip_subscriptions: {
@@ -1788,13 +1669,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vip_subscriptions_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1880,13 +1754,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "youtube_channel_changes_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       youtube_channel_metrics: {
@@ -1940,13 +1807,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "youtube_channel_metrics_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       youtube_metrics_history: {
@@ -1994,13 +1854,6 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "youtube_metrics_history_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       youtube_videos_cache: {
@@ -2041,69 +1894,7 @@ export type Database = {
       }
     }
     Views: {
-      stores_public: {
-        Row: {
-          avatar_url: string | null
-          banner_url: string | null
-          created_at: string | null
-          custom_domain: string | null
-          description: string | null
-          domain_added_at: string | null
-          domain_verified: boolean | null
-          id: string | null
-          name: string | null
-          onboarding_completed: boolean | null
-          plan_expires_at: string | null
-          plan_type: string | null
-          slug: string | null
-          status: string | null
-          suspended_at: string | null
-          updated_at: string | null
-          url: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          banner_url?: string | null
-          created_at?: string | null
-          custom_domain?: string | null
-          description?: string | null
-          domain_added_at?: string | null
-          domain_verified?: boolean | null
-          id?: string | null
-          name?: string | null
-          onboarding_completed?: boolean | null
-          plan_expires_at?: string | null
-          plan_type?: string | null
-          slug?: string | null
-          status?: string | null
-          suspended_at?: string | null
-          updated_at?: string | null
-          url?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          banner_url?: string | null
-          created_at?: string | null
-          custom_domain?: string | null
-          description?: string | null
-          domain_added_at?: string | null
-          domain_verified?: boolean | null
-          id?: string | null
-          name?: string | null
-          onboarding_completed?: boolean | null
-          plan_expires_at?: string | null
-          plan_type?: string | null
-          slug?: string | null
-          status?: string | null
-          suspended_at?: string | null
-          updated_at?: string | null
-          url?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       affiliate_mark_eligible: { Args: never; Returns: number }
@@ -2168,6 +1959,20 @@ export type Database = {
           handle: string
           total_points: number
           user_id: string
+        }[]
+      }
+      get_store_public: {
+        Args: { _domain?: string; _slug?: string }
+        Returns: {
+          avatar_url: string
+          banner_url: string
+          description: string
+          id: string
+          name: string
+          plan_expires_at: string
+          plan_type: string
+          slug: string
+          status: string
         }[]
       }
       get_store_storage_quota: { Args: { p_store_id: string }; Returns: Json }
