@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackConversion } from "@/lib/tracking";
 import { getPublicOrigin, publicUrl } from '@/lib/public-url';
+import { useTranslation } from "react-i18next";
+import { useStoreMembership } from "@/hooks/use-store-membership";
+
 
 const ClientAuth = () => {
   const navigate = useNavigate();
