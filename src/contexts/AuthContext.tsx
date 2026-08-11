@@ -74,8 +74,10 @@ const getFriendlyAuthEmailError = (error?: string) => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
+
 
   useEffect(() => {
     // Set up auth state listener FIRST
