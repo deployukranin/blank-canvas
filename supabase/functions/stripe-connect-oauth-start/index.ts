@@ -21,11 +21,15 @@ Deno.serve(servePrivate(async (req) => {
 
   try {
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const connectClientId = Deno.env.get("STRIPE_CONNECT_CLIENT_ID");
+    // Secret forms can accidentally preserve a leading space or `+` when the
+    // value is copied from a URL. Never pass those characters to Stripe.
+    const connectClientId = Deno.env.get("STRIPE_CONNECT_CLIENT_ID")
+      ?.trim()
+      .replace(/^\++/, "");
     if (!stripeSecretKey) return json({ error: "Stripe not configured" }, 500);
     // A malformed client id makes Stripe answer "No application matches the
     // supplied client identifier". Fall back to hosted onboarding instead.
-    if (!connectClientId || !/^ca_[A-Za-z0-9]+$/.test(connectClientId.trim())) {
+    if (!connectClientId || !/^ca_[A-Za-z0-9]+$/.test(connectClientId)) {
       return json({ error: "oauth_unavailable" }, 501);
     }
 
