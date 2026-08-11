@@ -76,14 +76,21 @@ Deno.serve(servePrivate(async (req) => {
     }
 
     const account = await accountRes.json();
-    // The configured redirect URI lives under settings.connect.redirect_uri for the platform.
-    const configuredUri = account?.settings?.connect?.redirect_uri ?? account?.settings?.connect?.redirect_uris?.[0] ?? null;
+    console.log("Stripe account settings.connect:", JSON.stringify(account?.settings?.connect ?? null));
 
-    if (!configuredUri) {
+    // The configured redirect URI lives under settings.connect.redirect_uri for the platform.
+    const connectSettings = account?.settings?.connect ?? {};
+    let configuredUris: string[] = [];
+    if (Array.isArray(connectSettings.redirect_uris)) {
+      configuredUris = connectSettings.redirect_uris;
+    } else if (connectSettings.redirect_uri) {
+      configuredUris = [connectSettings.redirect_uri];
+    }
+
+    if (configuredUris.length === 0) {
       return json({ status: "missing", expected: EXPECTED_REDIRECT_URI, configured: null }, 200);
     }
 
-    const configuredUris = Array.isArray(configuredUri) ? configuredUri : [configuredUri];
     const exactMatch = configuredUris.includes(EXPECTED_REDIRECT_URI);
 
     return json({
