@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, Crown, Sparkles, Loader2, TrendingDown, Upload, Image as ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '@/contexts/TenantContext';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const AdminVipPrecos = () => {
   const { t, i18n } = useTranslation();
   const isBR = i18n.language?.startsWith('pt');
   const { store } = useTenant();
+  const storeCurrency = useStoreCurrency(store?.id);
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
@@ -67,9 +69,10 @@ const AdminVipPrecos = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, i18n.language]);
 
-  const formatCurrency = (value: number, currency: 'BRL' | 'USD' = 'BRL') => {
-    const locale = currency === 'BRL' ? 'pt-BR' : 'en-US';
-    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
+  // Moeda única da loja, definida em /admin (pagamentos). O idioma não altera.
+  const formatCurrency = (value: number) => {
+    const locale = storeCurrency === 'BRL' ? 'pt-BR' : 'en-US';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: storeCurrency }).format(value);
   };
 
   // Find the monthly plan price as baseline for savings calculation
@@ -115,7 +118,7 @@ const AdminVipPrecos = () => {
       name: isBR ? 'Novo Plano' : 'New Plan',
       type: 'monthly',
       price: 29.90,
-      currency: isBR ? 'BRL' : 'USD',
+      currency: storeCurrency,
       description: isBR ? 'Descrição do plano' : 'Plan description',
       features: [isBR ? 'Recurso 1' : 'Feature 1', isBR ? 'Recurso 2' : 'Feature 2'],
     };
@@ -303,23 +306,10 @@ const AdminVipPrecos = () => {
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="col-span-1">
-                        <label className="text-sm font-medium mb-1 block">{t('vipPricing.currency', 'Moeda')}</label>
-                        <Select
-                          value={plan.currency || 'BRL'}
-                          onValueChange={(value: 'BRL' | 'USD') => updatePlan(planIndex, 'currency', value)}
-                        >
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="BRL">BRL (R$)</SelectItem>
-                            <SelectItem value="USD">USD ($)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-2">
+                    <div>
+                      <div>
                         <label className="text-sm font-medium mb-1 block">
-                          {t('vipPricing.price')} ({plan.currency || 'BRL'})
+                          {t('vipPricing.price')} ({storeCurrency})
                         </label>
                         <Input
                           type="number"
@@ -383,7 +373,7 @@ const AdminVipPrecos = () => {
                     <p className="text-xs text-muted-foreground mb-2">{t('vipPricing.preview')}:</p>
                     <div className="text-center p-3 bg-muted/30 rounded-lg">
                       <p className="font-semibold">{plan.name}</p>
-                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price, plan.currency || 'BRL')}</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(plan.price)}</p>
                       <p className="text-xs text-muted-foreground">{periodLabel(plan.type)}</p>
                       {savings && (
                         <div className="mt-2 flex flex-col items-center gap-1">
@@ -392,7 +382,7 @@ const AdminVipPrecos = () => {
                             {t('vipPricing.savings', { percent: savings.percent })}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth, plan.currency || 'BRL') })}
+                            {t('vipPricing.equivalentMonth', { value: formatCurrency(savings.perMonth) })}
                           </span>
                         </div>
                       )}
