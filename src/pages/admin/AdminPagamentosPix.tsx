@@ -72,13 +72,6 @@ const AdminPagamentosPix = () => {
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [pixKeyError, setPixKeyError] = useState<string | null>(null);
-  const [redirectCheck, setRedirectCheck] = useState<{
-    status: 'idle' | 'loading' | 'configured' | 'missing' | 'mismatch' | 'unknown';
-    expected?: string;
-    configured?: string[] | null;
-    error?: string;
-    stripeError?: string;
-  }>({ status: 'idle' });
 
   const {
     config,
