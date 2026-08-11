@@ -10,7 +10,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { QRCodeSVG } from 'qrcode.react';
 import { usePixPayment, type OrderStatus } from '@/hooks/use-pix-payment';
+
 
 interface PixPaymentModalProps {
   isOpen: boolean;
