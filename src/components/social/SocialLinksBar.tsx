@@ -70,10 +70,12 @@ export const SocialLinksBar = () => {
       {links.map((link) => {
         const platform = PLATFORM_ICONS[link.platform];
         if (!platform) return null;
+        const safeUrl = toSafeHttpUrl(link.url);
+        if (!safeUrl) return null;
         return (
           <a
             key={link.id}
-            href={link.url}
+            href={safeUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 rounded-xl bg-card/50 border border-border/30 flex items-center justify-center hover:scale-110 hover:bg-primary/10 transition-all duration-200 group"
