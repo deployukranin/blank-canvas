@@ -14,7 +14,7 @@ import { translatePathLabel } from '@/lib/nav-i18n';
 import { useProfile } from '@/hooks/use-profile';
 import { useVIPSubscription } from '@/hooks/use-vip-subscription';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
-import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
+const defaultAvatar = { url: '/default-avatar.svg' };
 
 interface CinematicMobileShellProps {
   children: ReactNode;

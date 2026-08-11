@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { LegacyTenantRedirect } from "@/components/tenant/LegacyTenantRedirect";
+
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhiteLabelProvider } from "@/contexts/WhiteLabelContext";
 import { TenantProvider } from "@/contexts/TenantContext";
@@ -144,7 +146,26 @@ const App = () => (
                 <Route path="/admin/affiliates" element={<CustomDomainGate><AdminRoute requiredRole="admin"><AdminAffiliates /></AdminRoute></CustomDomainGate>} />
                 <Route path="/affiliate" element={<CustomDomainGate><ProtectedRoute><ClientAffiliate /></ProtectedRoute></CustomDomainGate>} />
 
+                {/* ↩️ Aliases de rotas antigas em português */}
+                <Route path="/perfil" element={<Navigate to="/profile" replace />} />
+                <Route path="/comunidade" element={<Navigate to="/community" replace />} />
+                <Route path="/ideias" element={<Navigate to="/ideas" replace />} />
+                <Route path="/galeria" element={<Navigate to="/gallery" replace />} />
+                <Route path="/pedidos" element={<Navigate to="/orders" replace />} />
+                <Route path="/ajuda" element={<Navigate to="/help" replace />} />
+                <Route path="/termos" element={<Navigate to="/terms" replace />} />
+                <Route path="/privacidade" element={<Navigate to="/privacy" replace />} />
+                <Route path="/:slug/perfil" element={<LegacyTenantRedirect to="profile" />} />
+                <Route path="/:slug/comunidade" element={<LegacyTenantRedirect to="community" />} />
+                <Route path="/:slug/ideias" element={<LegacyTenantRedirect to="ideas" />} />
+                <Route path="/:slug/galeria" element={<LegacyTenantRedirect to="gallery" />} />
+                <Route path="/:slug/pedidos" element={<LegacyTenantRedirect to="orders" />} />
+                <Route path="/:slug/ajuda" element={<LegacyTenantRedirect to="help" />} />
+                <Route path="/:slug/termos" element={<LegacyTenantRedirect to="terms" />} />
+                <Route path="/:slug/privacidade" element={<LegacyTenantRedirect to="privacy" />} />
+
                 {/* 🏪 Rotas TENANT (Loja do Criador via slug) */}
+
                 <Route path="/:slug" element={<TenantGate><Index /></TenantGate>} />
                 <Route path="/:slug/login" element={<TenantGate><ClientAuth /></TenantGate>} />
                 <Route path="/:slug/customs" element={<TenantGate><Customs /></TenantGate>} />

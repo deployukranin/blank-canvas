@@ -235,7 +235,16 @@ Deno.serve(async (req) => {
     const chargeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     // ─── Determine payment gateway ───
-    const activeGateway = paymentConfig?.activeGateway || null;
+    // Safety net: if the store never picked a gateway explicitly but has
+    // complete manual PIX data, treat manual PIX as the active gateway.
+    const pixManualComplete = Boolean(
+      paymentConfig?.pixManual?.key &&
+      paymentConfig?.pixManual?.receiverName &&
+      paymentConfig?.pixManual?.city
+    );
+    const activeGateway = paymentConfig?.activeGateway
+      || (pixManualComplete ? 'pix_manual' : null);
+
 
     let qrCodeImage: string | null = null;
     let brCode: string | null = null;

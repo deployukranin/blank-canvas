@@ -8,8 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useProfileCustomization } from '@/hooks/use-profile-customization';
 import type { ReputationSummary } from '@/lib/gamification';
-import defaultBanner from '@/assets/default-profile-banner.jpg.asset.json';
-import defaultAvatar from '@/assets/default-profile-avatar.jpg.asset.json';
+import { DefaultBanner } from '@/components/layout/DefaultBanner';
+
+// Served from /public so it also resolves on custom domains.
+const DEFAULT_AVATAR = '/default-avatar.svg';
+
 
 interface PremiumProfileHeaderProps {
   isVIP: boolean;
@@ -36,9 +39,11 @@ export const PremiumProfileHeader = ({
 
   // Existing premium media remains visible while VIP status is revalidated.
   // VIP still controls whether the editing controls are available.
-  const banner = customization.banner_url || defaultBanner.url;
-  const avatar = customization.avatar_url || fallbackAvatar || defaultAvatar.url;
+  // Non-VIP users always get the themed gradient banner (no custom media).
+  const banner = isVIP ? (customization.banner_url || '') : '';
+  const avatar = customization.avatar_url || fallbackAvatar || DEFAULT_AVATAR;
   const name = handle ? `@${handle}` : fallbackName;
+
   const [visibleBanner, setVisibleBanner] = useState(banner);
   const [visibleAvatar, setVisibleAvatar] = useState(avatar);
   const [bannerFailed, setBannerFailed] = useState(false);
@@ -79,8 +84,9 @@ export const PremiumProfileHeader = ({
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl overflow-hidden border border-border/60 bg-card/60 backdrop-blur">
       {/* Banner */}
-      <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/40 via-accent/30 to-primary/10">
-        {!bannerFailed && (
+      <div className="relative h-32 sm:h-40 overflow-hidden">
+        <DefaultBanner />
+        {visibleBanner && !bannerFailed && (
           <img
             src={visibleBanner}
             alt=""
@@ -88,6 +94,7 @@ export const PremiumProfileHeader = ({
             onError={() => setBannerFailed(true)}
           />
         )}
+
         {!isVIP && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
             <Link to={vipPath}>

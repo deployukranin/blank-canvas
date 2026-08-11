@@ -250,7 +250,14 @@ Deno.serve(async (req) => {
       storeName = storeRes.data.name || storeName;
     }
 
-    const activeGateway = paymentConfig?.activeGateway || null;
+    const pixManualComplete = Boolean(
+      paymentConfig?.pixManual?.key &&
+      paymentConfig?.pixManual?.receiverName &&
+      paymentConfig?.pixManual?.city
+    );
+    const activeGateway = paymentConfig?.activeGateway
+      || (pixManualComplete ? 'pix_manual' : null);
+
     const chargeExpiresAt = new Date();
     chargeExpiresAt.setMinutes(chargeExpiresAt.getMinutes() + 30);
 

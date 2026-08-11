@@ -96,10 +96,11 @@ const AdminPagamentosPix = () => {
       });
       if (!error && data) {
         setStripeStatus(data);
-        // If connected and charges enabled, auto-set gateway
-        if (data.connected && data.charges_enabled) {
+        // Once the account is linked, Stripe becomes the active gateway
+        if (data.account_connected || data.connected) {
           setConfig(prev => (prev.activeGateway === 'stripe' ? prev : { ...prev, activeGateway: 'stripe' as const }));
         }
+
       }
     } catch (err) {
       console.error('Error checking Stripe status:', err);
@@ -171,10 +172,12 @@ const AdminPagamentosPix = () => {
       toast({ title: error, variant: 'destructive' });
       return;
     }
-    setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
-    await saveNow();
-    toast({ title: t('adminPayments.pixManualConfigured') });
+    // Persist the gateway together with the PIX data in a single write
+    const next = { ...config, activeGateway: 'pix_manual' as const };
+    const ok = await saveNow(next);
+    if (ok) toast({ title: t('adminPayments.pixManualConfigured') });
   };
+
 
   const pixKeyLabels: Record<string, string> = {
     cpf: t('adminPayments.pixKeyLabels.cpf'),
@@ -309,12 +312,18 @@ const AdminPagamentosPix = () => {
                     <Check className="w-3 h-3 mr-1" /> {t('adminPayments.connected')}
                   </Badge>
                 )}
+                {stripeStatus.account_connected && !stripeStatus.charges_enabled && (
+                  <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.chargesPending', 'Cobranças pendentes')}
+                  </Badge>
+                )}
                 {stripeStatus.onboarding_started && !stripeStatus.account_connected && (
                   <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
                     <Clock className="w-3 h-3 mr-1" /> {t('adminPayments.pending')}
                   </Badge>
                 )}
                 {stripeStatus.onboarding_started && (
+
                   <Button
                     variant="ghost"
                     size="sm"
