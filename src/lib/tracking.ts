@@ -70,7 +70,7 @@ export function getAttributionCode(): string | null {
 export function clearAttribution() {
   try {
     localStorage.removeItem(ATTR_KEY);
-    document.cookie = `${ATTR_KEY}=;path=/;max-age=0`;
+    document.cookie = `${ATTR_KEY}=;path=/;max-age=0${cookieFlags()}`;
   } catch {
     /* ignore */
   }
