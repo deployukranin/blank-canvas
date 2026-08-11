@@ -23,6 +23,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { useNotifications } from '@/hooks/use-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { OrderChat } from '@/components/orders/OrderChat';
@@ -108,7 +109,7 @@ const MeusPedidosPage = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { isAuthenticated, user } = useAuth();
-  const { basePath, isTenantScope } = useTenant();
+  const { basePath, isTenantScope, store } = useTenant();
   const { permission, isSupported, requestPermission } = useNotifications();
   const [orders, setOrders] = useState<DBOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +123,7 @@ const MeusPedidosPage = () => {
   const profilePath = isTenantScope ? `${basePath}/profile` : '/profile';
 
   const isBR = i18n.language?.startsWith('pt');
+  const storeCurrency = useStoreCurrency(store?.id);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -188,7 +190,7 @@ const MeusPedidosPage = () => {
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat(isBR ? 'pt-BR' : 'en-US', {
       style: 'currency',
-      currency: isBR ? 'BRL' : 'USD',
+      currency: storeCurrency,
     }).format(cents / 100);
   };
 
