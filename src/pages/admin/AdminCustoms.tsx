@@ -56,6 +56,7 @@ const AdminCustoms = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isUploadingPreview, setIsUploadingPreview] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handlePreviewUpload = async (file: File, target: 'video' | 'image') => {
     if (!store?.id) return;
@@ -64,8 +65,8 @@ const AdminCustoms = () => {
       const { ref } = await uploadPreviewMedia(file, store.id);
       setConfig({
         ...config,
-        previewType: 'image',
-        previewVideoUrl: '',
+        previewType: target,
+        previewVideoUrl: target === 'video' ? ref : config.previewVideoUrl,
         previewImageUrl: target === 'image' ? ref : config.previewImageUrl,
       });
       toast({ title: t('common.save', 'Salvo'), description: file.name });
