@@ -1,46 +1,44 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CheckCircle2, Loader2, MailWarning } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEmailVerification } from "@/hooks/use-email-verification";
-import { supabase } from "@/integrations/supabase/client";
 
 type Status = "loading" | "success" | "error";
 
 /**
- * Landing page for the verification link. The link signs the user in, so we
- * simply mark the profile as verified and send them back to the panel.
+ * Landing page for the verification link. The confirmation itself happens on
+ * the server (platform-domain endpoint), which redirects back here with a
+ * status. No auth session is required.
  */
 const VerifyEmail = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { markVerified } = useEmailVerification();
-  const [status, setStatus] = useState<Status>("loading");
+  const [params] = useSearchParams();
+  const { refresh } = useEmailVerification();
+
+  const initial = useMemo<Status>(() => {
+    const s = params.get("status");
+    if (s === "success") return "success";
+    if (s) return "error";
+    return "loading";
+  }, [params]);
+
+  const [status, setStatus] = useState<Status>(initial);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const run = async () => {
-      // Give supabase-js a moment to consume the tokens from the URL hash.
-      for (let i = 0; i < 6; i++) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) break;
-        await new Promise((r) => setTimeout(r, 400));
-      }
-      const ok = await markVerified();
-      if (cancelled) return;
-      setStatus(ok ? "success" : "error");
-      if (ok) {
-        setTimeout(() => navigate("/auth?verified=1", { replace: true }), 2200);
-      }
-    };
-
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [markVerified, navigate]);
+    if (initial === "success") {
+      refresh();
+      const id = setTimeout(() => navigate("/auth?verified=1", { replace: true }), 2200);
+      return () => clearTimeout(id);
+    }
+    if (initial === "loading") {
+      // Reached without a status param — nothing to confirm here.
+      const id = setTimeout(() => setStatus("error"), 800);
+      return () => clearTimeout(id);
+    }
+  }, [initial, navigate, refresh]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-5">
