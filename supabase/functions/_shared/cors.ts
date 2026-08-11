@@ -52,3 +52,24 @@ export function privateCors(req: Request): Record<string, string> {
   // unaffected: they never enforce CORS.
   return { ...BASE_HEADERS };
 }
+
+/**
+ * Wraps a handler so every response carries the restricted CORS headers and
+ * OPTIONS preflights are answered consistently. Applied to private endpoints
+ * only; it never replaces the auth/role checks inside the handler.
+ */
+export function servePrivate(
+  handler: (req: Request) => Response | Promise<Response>,
+): (req: Request) => Promise<Response> {
+  return async (req: Request) => {
+    const cors = privateCors(req);
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: cors });
+    }
+    const res = await handler(req);
+    const headers = new Headers(res.headers);
+    for (const [k, v] of Object.entries(cors)) headers.set(k, v);
+    if (!cors["Access-Control-Allow-Origin"]) headers.delete("Access-Control-Allow-Origin");
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  };
+}

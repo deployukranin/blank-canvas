@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -23,7 +24,7 @@ const randToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(24)))
     .map((b) => b.toString(16).padStart(2, "0")).join("");
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const authHeader = req.headers.get("Authorization");
@@ -171,4 +172,4 @@ Deno.serve(async (req) => {
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
-});
+}));

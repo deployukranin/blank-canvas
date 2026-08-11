@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -15,7 +16,7 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
 const ignoredConfigWrite = (error: string, extra: Record<string, unknown> = {}) =>
   jsonResponse({ success: false, ignored: true, error, ...extra }, 200);
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -203,4 +204,4 @@ Deno.serve(async (req) => {
     console.error("Error in save-app-config:", err);
     return jsonResponse({ success: false, error: "Erro interno do servidor" }, 500);
   }
-});
+}));
