@@ -24,7 +24,6 @@ export const AdminRoute = ({ children, requiredRole = "admin" }: AdminRouteProps
   const { hasAccess: isStoreOwner, isLoading: isCheckingAccess } = useStoreAccess({
     storeId: store?.id,
     userId: user?.id,
-    storeCreatedBy: store?.created_by,
     enabled: isTenantScope && !isSuper,
   });
 

@@ -12,7 +12,6 @@ export interface StoreInfo {
   avatar_url: string | null;
   banner_url: string | null;
   status: string;
-  created_by: string | null;
   plan_type: string;
   plan_expires_at: string | null;
 }
@@ -114,21 +113,15 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsLoading(true);
       setError(null);
 
-      let query = supabase
-        .from('stores_public')
-        .select('id, name, slug, description, avatar_url, banner_url, status, created_by, plan_type, plan_expires_at');
+      const { data, error: dbError } = await supabase.rpc('get_store_public', {
+        _slug: effectiveSlug || null,
+        _domain: isCustomDomain ? hostname : null,
+      }).single();
 
-      if (effectiveSlug) {
-        query = query.eq('slug', effectiveSlug);
-      } else if (isCustomDomain) {
-        query = query.eq('custom_domain', hostname);
-      }
-
-      const { data, error: dbError } = await query.maybeSingle();
 
       if (cancelled) return;
 
-      if (dbError) {
+      if (dbError && dbError.code !== 'PGRST116') {
         console.error('Error loading store:', dbError);
         setError('Erro ao carregar loja');
         setStore(null);
@@ -148,6 +141,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // Each tenant owns its favicon. Installed idempotently (and cached for
         // the pre-paint script) so it doesn't blink on reload.
         applyTenantFavicon(data.avatar_url, data.id, data.slug);
+
 
 
         // Resolve theme color from cached whitelabel config

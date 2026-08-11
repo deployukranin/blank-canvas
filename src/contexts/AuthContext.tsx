@@ -19,6 +19,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
+  isAnonymous: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean; alreadyRegistered?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -30,9 +31,13 @@ interface AuthContextType {
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
 
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User | null => {
+  // Anonymous users exist in the session but are not "authenticated app users".
+  if (supabaseUser.is_anonymous) return null;
+
   const baseUser: User = {
     id: supabaseUser.id,
     email: supabaseUser.email || "",
@@ -57,6 +62,7 @@ const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
   return baseUser;
 };
 
+
 const getFriendlyAuthEmailError = (error?: string) => {
   const normalized = (error || "").toLowerCase();
   if (normalized.includes("weak") || normalized.includes("easy to guess") || normalized.includes("password")) {
@@ -68,19 +74,23 @@ const getFriendlyAuthEmailError = (error?: string) => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
+
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        const anon = newSession?.user?.is_anonymous ?? false;
         setSession(newSession);
+        setIsAnonymous(anon);
         setUser(newSession?.user ? mapSupabaseUserToUser(newSession.user) : null);
         setIsLoading(false);
 
         // Execute pending callback if user just logged in
-        if (event === "SIGNED_IN" && pendingCallback) {
+        if (event === "SIGNED_IN" && pendingCallback && !anon) {
           setTimeout(() => {
             pendingCallback();
             setPendingCallback(null);
@@ -89,19 +99,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      setUser(existingSession?.user ? mapSupabaseUserToUser(existingSession.user) : null);
-      setIsLoading(false);
+    // THEN check for existing session and ensure guests always have an anonymous session
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+      if (!existingSession) {
+        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+        if (anonError) {
+          console.error('Anonymous sign-in failed:', anonError);
+          setIsLoading(false);
+          return;
+        }
+        const anonSession = anonData.session;
+        setSession(anonSession);
+        setIsAnonymous(anonSession?.user?.is_anonymous ?? false);
+        setUser(anonSession?.user ? mapSupabaseUserToUser(anonSession.user) : null);
+        setIsLoading(false);
+      } else {
+        const anon = existingSession.user?.is_anonymous ?? false;
+        setSession(existingSession);
+        setIsAnonymous(anon);
+        setUser(existingSession.user ? mapSupabaseUserToUser(existingSession.user) : null);
+        setIsLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [pendingCallback]);
 
+
   const signUp = useCallback(async (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => {
     try {
       const redirectUrl = redirectTo || `${getPublicOrigin()}/auth`;
+
+      // If there is an anonymous session, sign it out first so the signup
+      // creates a permanent account instead of converting the guest.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user.is_anonymous) {
+        await supabase.auth.signOut();
+      }
 
       // Email verification is enabled: signUp returns no session until the
       // user confirms via the emailed link.
@@ -131,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: "Erro ao criar conta" };
     }
   }, []);
+
 
 
   const resetPassword = useCallback(async (email: string) => {
@@ -163,6 +198,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
+      // If there is an anonymous session, sign it out first so the login
+      // replaces the guest with the real account.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user.is_anonymous) {
+        await supabase.auth.signOut();
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -181,11 +223,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    // Return the visitor to an anonymous session so they can still use
+    // guest features (reactions, watch history) without needing to log in.
+    await supabase.auth.signInAnonymously();
   }, []);
+
 
   const logout = useCallback(() => {
     signOut();
@@ -222,7 +267,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         session,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !isAnonymous,
+        isAnonymous,
         isLoading,
         signUp,
         signIn,
@@ -239,6 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -251,6 +298,7 @@ export const useAuth = (): AuthContextType => {
       user: null,
       session: null,
       isAuthenticated: false,
+      isAnonymous: false,
       isLoading: false,
       signUp: asyncNoop,
       signIn: asyncNoop,
@@ -261,6 +309,7 @@ export const useAuth = (): AuthContextType => {
       requireAuth: noop,
       applyLocalProfile: noop,
     };
+
   }
   return context;
 };

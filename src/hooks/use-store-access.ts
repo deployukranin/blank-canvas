@@ -9,25 +9,38 @@ import { supabase } from "@/integrations/supabase/client";
 export function useStoreAccess(params: {
   storeId: string | null | undefined;
   userId: string | null | undefined;
-  storeCreatedBy?: string | null;
   enabled?: boolean;
 }) {
-  const { storeId, userId, storeCreatedBy, enabled = true } = params;
-
-  const isOwner = !!storeId && !!userId && storeCreatedBy === userId;
+  const { storeId, userId, enabled = true } = params;
 
   const query = useQuery({
     queryKey: ["store-access", storeId, userId],
-    enabled: enabled && !!storeId && !!userId && !isOwner,
+    enabled: enabled && !!storeId && !!userId,
     staleTime: 1000 * 60 * 10, // 10 min
     gcTime: 1000 * 60 * 30,
     queryFn: async (): Promise<boolean> => {
+      // First check if the user is the store owner. This requires an
+      // authenticated query against the stores table; the owner/admin policy
+      // allows this read. Non-owners will get no data and fall through to the
+      // store_admins check.
+      const { data: ownerRow, error: ownerError } = await supabase
+        .from("stores")
+        .select("created_by")
+        .eq("id", storeId!)
+        .maybeSingle();
+
+      if (!ownerError && ownerRow?.created_by === userId) {
+        return true;
+      }
+
+      // Otherwise, check if the user is an assigned store admin.
       const { data, error } = await supabase
         .from("store_admins")
         .select("id")
         .eq("store_id", storeId!)
         .eq("user_id", userId!)
         .maybeSingle();
+
       if (error) return false;
       return !!data;
     },
@@ -35,9 +48,6 @@ export function useStoreAccess(params: {
 
   if (!storeId || !userId) {
     return { hasAccess: false, isLoading: false } as const;
-  }
-  if (isOwner) {
-    return { hasAccess: true, isLoading: false } as const;
   }
   return {
     hasAccess: !!query.data,

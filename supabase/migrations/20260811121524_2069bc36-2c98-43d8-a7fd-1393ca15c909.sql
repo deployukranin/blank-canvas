@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can view active or trial stores" ON public.stores;

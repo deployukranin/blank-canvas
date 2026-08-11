@@ -13,27 +13,19 @@ export interface VideoReaction {
   created_at: string;
 }
 
-const GUEST_ID_KEY = 'asmr-guest-id';
-
-function getOrCreateGuestId(): string {
-  let guestId = localStorage.getItem(GUEST_ID_KEY);
-  if (!guestId) {
-    guestId = `guest_${crypto.randomUUID()}`;
-    localStorage.setItem(GUEST_ID_KEY, guestId);
-  }
-  return guestId;
-}
-
 export function useVideoReactions(videoId: string) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, session, isAnonymous } = useAuth();
   const [userReaction, setUserReaction] = useState<ReactionType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const guestId = useMemo(() => {
-    if (isAuthenticated && user?.id) return null;
-    return getOrCreateGuestId();
-  }, [isAuthenticated, user?.id]);
+  const authId = user?.id || session?.user?.id || null;
+
+  const ownerColumn = useMemo(() => {
+    if (user?.id) return 'user_id' as const;
+    if (isAnonymous && session?.user?.id) return 'guest_id' as const;
+    return null;
+  }, [user?.id, isAnonymous, session?.user?.id]);
 
   // Load user's current reaction
   useEffect(() => {
@@ -43,21 +35,17 @@ export function useVideoReactions(videoId: string) {
       setIsLoading(true);
       
       try {
-        let query = supabase
-          .from('video_reactions')
-          .select('reaction_type')
-          .eq('video_id', videoId);
-
-        if (user?.id) {
-          query = query.eq('user_id', user.id);
-        } else if (guestId) {
-          query = query.eq('guest_id', guestId);
-        } else {
-          setIsLoading(false);
+        if (!ownerColumn || !authId) {
+          if (isMounted) setIsLoading(false);
           return;
         }
 
-        const { data, error } = await query.maybeSingle();
+        const { data, error } = await supabase
+          .from('video_reactions')
+          .select('reaction_type')
+          .eq('video_id', videoId)
+          .eq(ownerColumn, authId)
+          .maybeSingle();
 
         if (!error && data && isMounted) {
           setUserReaction(data.reaction_type as ReactionType);
@@ -76,10 +64,10 @@ export function useVideoReactions(videoId: string) {
     return () => {
       isMounted = false;
     };
-  }, [videoId, user?.id, guestId]);
+  }, [videoId, authId, ownerColumn]);
 
   const setReaction = useCallback(async (reactionType: ReactionType) => {
-    if (isSaving) return;
+    if (isSaving || !ownerColumn || !authId) return;
     
     // If same reaction, remove it
     if (userReaction === reactionType) {
@@ -91,67 +79,40 @@ export function useVideoReactions(videoId: string) {
     setUserReaction(reactionType); // Optimistic update
 
     try {
-      if (user?.id) {
-        // Upsert for authenticated user
-        const { error } = await supabase
-          .from('video_reactions')
-          .upsert(
-            {
-              video_id: videoId,
-              user_id: user.id,
-              reaction_type: reactionType,
-            },
-            {
-              onConflict: 'video_id,user_id',
-            }
-          );
+      const row = ownerColumn === 'user_id'
+        ? { video_id: videoId, user_id: authId, reaction_type: reactionType }
+        : { video_id: videoId, guest_id: authId, reaction_type: reactionType };
 
-        if (error) throw error;
-      } else if (guestId) {
-        // Upsert for guest
-        const { error } = await supabase
-          .from('video_reactions')
-          .upsert(
-            {
-              video_id: videoId,
-              guest_id: guestId,
-              reaction_type: reactionType,
-            },
-            {
-              onConflict: 'video_id,guest_id',
-            }
-          );
+      const conflict = ownerColumn === 'user_id' ? 'video_id,user_id' : 'video_id,guest_id';
 
-        if (error) throw error;
-      }
+      const { error } = await supabase
+        .from('video_reactions')
+        .upsert(row as any, { onConflict: conflict });
+
+
+      if (error) throw error;
     } catch (err) {
       console.error('Error saving reaction:', err);
       setUserReaction(previousReaction); // Rollback
     } finally {
       setIsSaving(false);
     }
-  }, [videoId, user?.id, guestId, userReaction, isSaving]);
+  }, [videoId, authId, ownerColumn, userReaction, isSaving]);
 
   const removeReaction = useCallback(async () => {
-    if (isSaving || !userReaction) return;
+    if (isSaving || !userReaction || !ownerColumn || !authId) return;
 
     setIsSaving(true);
     const previousReaction = userReaction;
     setUserReaction(null); // Optimistic update
 
     try {
-      let query = supabase
+      const { error } = await supabase
         .from('video_reactions')
         .delete()
-        .eq('video_id', videoId);
+        .eq('video_id', videoId)
+        .eq(ownerColumn, authId);
 
-      if (user?.id) {
-        query = query.eq('user_id', user.id);
-      } else if (guestId) {
-        query = query.eq('guest_id', guestId);
-      }
-
-      const { error } = await query;
       if (error) throw error;
     } catch (err) {
       console.error('Error removing reaction:', err);
@@ -159,7 +120,7 @@ export function useVideoReactions(videoId: string) {
     } finally {
       setIsSaving(false);
     }
-  }, [videoId, user?.id, guestId, userReaction, isSaving]);
+  }, [videoId, authId, ownerColumn, userReaction, isSaving]);
 
   return {
     userReaction,
