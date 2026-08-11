@@ -83,12 +83,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        const anon = newSession?.user?.is_anonymous ?? false;
         setSession(newSession);
+        setIsAnonymous(anon);
         setUser(newSession?.user ? mapSupabaseUserToUser(newSession.user) : null);
         setIsLoading(false);
 
         // Execute pending callback if user just logged in
-        if (event === "SIGNED_IN" && pendingCallback) {
+        if (event === "SIGNED_IN" && pendingCallback && !anon) {
           setTimeout(() => {
             pendingCallback();
             setPendingCallback(null);
@@ -97,15 +99,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      setUser(existingSession?.user ? mapSupabaseUserToUser(existingSession.user) : null);
-      setIsLoading(false);
+    // THEN check for existing session and ensure guests always have an anonymous session
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+      if (!existingSession) {
+        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+        if (anonError) {
+          console.error('Anonymous sign-in failed:', anonError);
+          setIsLoading(false);
+          return;
+        }
+        const anonSession = anonData.session;
+        setSession(anonSession);
+        setIsAnonymous(anonSession?.user?.is_anonymous ?? false);
+        setUser(anonSession?.user ? mapSupabaseUserToUser(anonSession.user) : null);
+        setIsLoading(false);
+      } else {
+        const anon = existingSession.user?.is_anonymous ?? false;
+        setSession(existingSession);
+        setIsAnonymous(anon);
+        setUser(existingSession.user ? mapSupabaseUserToUser(existingSession.user) : null);
+        setIsLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [pendingCallback]);
+
 
   const signUp = useCallback(async (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => {
     try {
