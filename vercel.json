@@ -5,6 +5,11 @@
       "destination": "https://lkwvlzcapuptcxvwukcm.supabase.co/functions/v1/stripe-connect-oauth-callback"
     },
     {
+      "source": "/api/verify-email",
+      "destination": "https://lkwvlzcapuptcxvwukcm.supabase.co/functions/v1/verify-email"
+    },
+
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
