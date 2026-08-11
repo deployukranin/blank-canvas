@@ -301,12 +301,26 @@ Deno.serve(async (req) => {
       if (!stripeAccountId) {
         return jsonResponse({ success: false, error: 'Store has not connected Stripe yet' }, 400);
       }
+      // Verify the connected account can actually accept charges.
+      const acctRes = await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` },
+      });
+      const acct = await acctRes.json();
+      if (!acctRes.ok || acct?.charges_enabled !== true) {
+        return jsonResponse({
+          success: false,
+          error: 'stripe_account_not_ready',
+          message: 'A conta Stripe da loja ainda não está habilitada para receber pagamentos. Conclua o cadastro na Stripe.',
+        }, 400);
+      }
+
       const origin = req.headers.get('origin') || 'https://www.mytinglebox.com';
       const successUrl = body.successUrl || `${origin}/vip?payment=success`;
       const cancelUrl = body.cancelUrl || `${origin}/vip?payment=cancelled`;
       if (!isSafeRedirectUrl(successUrl) || !isSafeRedirectUrl(cancelUrl)) {
         return jsonResponse({ success: false, error: 'Invalid redirect URLs' }, 400);
       }
+
 
       const params = new URLSearchParams({
         mode: 'subscription',
