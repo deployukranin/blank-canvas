@@ -5,6 +5,8 @@ import { Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { useTenant } from '@/contexts/TenantContext';
+import { useTranslation } from 'react-i18next';
+import { translatePathLabel } from '@/lib/nav-i18n';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/mytinglebox-logo.png';
 import {
@@ -16,12 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const navItems = [
-  { path: '/', label: 'Início' },
-  { path: '/ideas', label: 'Ideias' },
-  
+  { path: '/', label: 'Home' },
+  { path: '/ideas', label: 'Ideas' },
   { path: '/vip', label: 'VIP', isVIP: true },
   { path: '/customs', label: "Custom's" },
-  { path: '/community', label: 'Comunidade' },
+  { path: '/community', label: 'Community' },
 ];
 
 export const Header = () => {
@@ -29,6 +30,7 @@ export const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { profile } = useProfile();
   const { basePath, isTenantScope } = useTenant();
+  const { t } = useTranslation();
   const location = useLocation();
 
   const displayName = profile?.handle ? `@${profile.handle}` : user?.username;
@@ -63,7 +65,7 @@ export const Header = () => {
                   } ${item.isVIP ? 'text-vip' : ''}`}
                 >
                   {item.isVIP && <span className="mr-1">👑</span>}
-                  {item.label}
+                  {translatePathLabel(t, item.path, item.label)}
                 </Link>
               ))}
             </nav>
@@ -86,7 +88,7 @@ export const Header = () => {
                   <DropdownMenuContent align="end" className="glass w-48">
                     <DropdownMenuItem className="flex items-center gap-2">
                       <User className="w-4 h-4" />
-                      Meu Perfil
+                      {t('nav.profile', 'Profile')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
@@ -94,7 +96,7 @@ export const Header = () => {
                       onClick={logout}
                     >
                       <LogOut className="w-4 h-4" />
-                      Sair
+                      {t('common.logout', 'Logout')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -102,12 +104,12 @@ export const Header = () => {
                 <div className="hidden sm:flex items-center gap-2">
                   <Link to={loginPath}>
                     <Button variant="ghost" size="sm">
-                      Entrar
+                      {t('common.login', 'Login')}
                     </Button>
                   </Link>
                   <Link to={signupPath}>
                     <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
-                      Cadastrar
+                      {t('common.signUp', 'Sign Up')}
                     </Button>
                   </Link>
                 </div>
@@ -147,7 +149,7 @@ export const Header = () => {
                   } ${item.isVIP ? 'text-vip' : ''}`}
                 >
                   {item.isVIP && <span className="mr-1">👑</span>}
-                  {item.label}
+                  {translatePathLabel(t, item.path, item.label)}
                 </Link>
               ))}
               
@@ -155,12 +157,12 @@ export const Header = () => {
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
                   <Link to={loginPath} onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full">
-                      Entrar
+                      {t('common.login', 'Login')}
                     </Button>
                   </Link>
                   <Link to={signupPath} onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
-                      Cadastrar
+                      {t('common.signUp', 'Sign Up')}
                     </Button>
                   </Link>
                 </div>
