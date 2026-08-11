@@ -1,4 +1,6 @@
 // Token-authenticated endpoint: returns isolated metrics for one tracker.
+import { clientKey, rateLimit, tooManyRequests } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
