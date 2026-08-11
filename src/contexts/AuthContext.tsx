@@ -267,7 +267,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         session,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !isAnonymous,
+        isAnonymous,
         isLoading,
         signUp,
         signIn,
@@ -283,6 +284,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
