@@ -13,7 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { VipMediaViewer } from '@/components/vip/VipMediaViewer';
 import { VipMediaEmbed } from '@/components/vip/VipMediaEmbed';
-import { formatPriceForLang, displayCurrencyForLang } from '@/lib/currency';
+import { formatPriceForLang } from '@/lib/currency';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { useAffiliateCapture, getAffiliateCode } from '@/hooks/use-affiliate-capture';
 import {
   Dialog,
@@ -271,8 +272,10 @@ const VIPPage = () => {
     }
   }, [chargeData?.correlationId, showPaymentDialog, userId, resolvedStoreId]);
 
+  const storeCurrency = useStoreCurrency(resolvedStoreId);
+
   const formatCurrency = (value: number, currency?: 'BRL' | 'USD') =>
-    formatPriceForLang(value, currency, i18n.language);
+    formatPriceForLang(value, currency || storeCurrency, i18n.language);
 
 
   const getPlanLabel = (type: string) => {
@@ -311,7 +314,7 @@ const VIPPage = () => {
         body: {
           planType: selectedPlan.type,
           storeId: resolvedStoreId,
-          currency: displayCurrencyForLang(i18n.language),
+          currency: storeCurrency,
           affiliateCode: getAffiliateCode(resolvedStoreId) || undefined,
           successUrl: `${getPublicOrigin()}${window.location.pathname}?payment=success`,
           cancelUrl: `${getPublicOrigin()}${window.location.pathname}?payment=cancelled`,
