@@ -315,7 +315,44 @@ Deno.serve(async (req) => {
       if (cleared) slog('preflight_orphan_cleared', { email: maskEmail(email) })
     }
 
+    // 'verify' uses our own single-use token served from the platform domain,
+    // so the backend host never appears in the email and the link can't be
+    // invalidated by GoTrue one-time-token races.
+    if (type === 'verify') {
+      const user = await findUserByEmail(email)
+      if (!user) {
+        slogErr('verify_user_not_found', { email: maskEmail(email) })
+        return jsonResponse({ success: false, error: 'Conta não encontrada' }, 404)
+      }
+      const raw = (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, '')
+      const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw))
+      const tokenHash = Array.from(new Uint8Array(hashBuf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+
+      const ins = await adminFetch(`/rest/v1/email_verification_tokens`, {
+        method: 'POST',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ user_id: user.id, email, token_hash: tokenHash }),
+      })
+      if (!ins.ok) {
+        slogErr('verify_token_insert_failed', { status: ins.status })
+        return jsonResponse({ success: false, error: 'Falha ao gerar link' }, 500)
+      }
+
+      const link = `https://mytinglebox.com/api/verify-email?token=${raw}`
+      const built = buildEmail('verify', link)
+      const sent = await sendViaResend(email, built.subject, built.html)
+      if (sent.error) {
+        slogErr('resend_failed', { type, email: maskEmail(email), error: sent.error })
+        return jsonResponse({ success: false, error: 'Falha ao enviar o email. Tente novamente.' }, 502)
+      }
+      slog('email_sent', { type, email: maskEmail(email), user_id: user.id })
+      return jsonResponse({ success: true })
+    }
+
     const linkResult = await generateLink({ type, email, password, redirectTo, metadata })
+
 
     if (linkResult.alreadyRegistered) {
       slog('already_registered', { type, email: maskEmail(email) })
