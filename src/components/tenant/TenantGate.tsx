@@ -1,6 +1,7 @@
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStoreMembership } from '@/hooks/use-store-membership';
+import { useStoreAccess } from '@/hooks/use-store-access';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { StoreOffline } from './StoreOffline';
@@ -34,7 +35,13 @@ export const TenantGate: React.FC<{ children: React.ReactNode }> = ({ children }
   const { user } = useAuth();
   useStoreMembership();
 
-  if (isLoading) {
+  const { hasAccess: isStoreOwnerOrAdmin, isLoading: isCheckingAccess } = useStoreAccess({
+    storeId: store?.id,
+    userId: user?.id,
+    enabled: !!store?.id && !!user?.id,
+  });
+
+  if (isLoading || isCheckingAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -48,8 +55,7 @@ export const TenantGate: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // If trial expired, only allow store creator/admin through (for admin panel)
   if (isTrialExpired(store)) {
-    const isStoreOwner = user?.id && store.created_by === user.id;
-    if (!isStoreOwner) {
+    if (!isStoreOwnerOrAdmin) {
       return <StoreOffline />;
     }
   }

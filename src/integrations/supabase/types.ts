@@ -2046,9 +2046,9 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           created_at: string | null
-          created_by: string | null
           custom_domain: string | null
           description: string | null
+          domain_added_at: string | null
           domain_verified: boolean | null
           id: string | null
           name: string | null
@@ -2057,6 +2057,7 @@ export type Database = {
           plan_type: string | null
           slug: string | null
           status: string | null
+          suspended_at: string | null
           updated_at: string | null
           url: string | null
           username: string | null
@@ -2065,9 +2066,9 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           created_at?: string | null
-          created_by?: string | null
           custom_domain?: string | null
           description?: string | null
+          domain_added_at?: string | null
           domain_verified?: boolean | null
           id?: string | null
           name?: string | null
@@ -2076,6 +2077,7 @@ export type Database = {
           plan_type?: string | null
           slug?: string | null
           status?: string | null
+          suspended_at?: string | null
           updated_at?: string | null
           url?: string | null
           username?: string | null
@@ -2084,9 +2086,9 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           created_at?: string | null
-          created_by?: string | null
           custom_domain?: string | null
           description?: string | null
+          domain_added_at?: string | null
           domain_verified?: boolean | null
           id?: string | null
           name?: string | null
@@ -2095,6 +2097,7 @@ export type Database = {
           plan_type?: string | null
           slug?: string | null
           status?: string | null
+          suspended_at?: string | null
           updated_at?: string | null
           url?: string | null
           username?: string | null
