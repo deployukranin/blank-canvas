@@ -298,6 +298,7 @@ export const useAuth = (): AuthContextType => {
       user: null,
       session: null,
       isAuthenticated: false,
+      isAnonymous: false,
       isLoading: false,
       signUp: asyncNoop,
       signIn: asyncNoop,
@@ -308,6 +309,7 @@ export const useAuth = (): AuthContextType => {
       requireAuth: noop,
       applyLocalProfile: noop,
     };
+
   }
   return context;
 };
