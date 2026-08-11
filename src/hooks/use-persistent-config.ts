@@ -101,6 +101,12 @@ export function usePersistentConfig<T>({
     loadFromDb();
   }, [configKey, localStorageKey, storeId]);
 
+  // Keep the ref in sync with the rendered state
+  useEffect(() => {
+    latestConfigRef.current = config;
+  }, [config]);
+
+
   // Debounced save to database
   const debouncedSave = useCallback(async (newConfig: T) => {
     if (!initialLoadDoneRef.current) return;
