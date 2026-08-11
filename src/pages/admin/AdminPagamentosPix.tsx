@@ -11,9 +11,8 @@ import {
   Link2Off,
   ShieldCheck,
   RefreshCw,
-  CheckCircle,
-  AlertCircle,
 } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
