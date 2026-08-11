@@ -62,7 +62,11 @@ async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
   if (!headers.has('origin')) headers.set('origin', url.origin);
   if (!headers.has('referer')) headers.set('referer', `${url.origin}/`);
 
-  return fetch(upstream, { method: req.method, headers, redirect: 'follow' });
+  const upstreamRes = await fetch(upstream, { method: req.method, headers, redirect: 'follow' });
+  const outHeaders = applySecurityHeaders(new Headers(upstreamRes.headers));
+  outHeaders.set('cache-control', 'private, no-store, max-age=0');
+  return new Response(upstreamRes.body, { status: upstreamRes.status, headers: outHeaders });
+}
 }
 
 
