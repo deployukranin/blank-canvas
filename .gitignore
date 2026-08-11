@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local/private env files (.env holds only public publishable keys and stays versioned)
+.env.local
+.env.*.local
+.env.production

@@ -26,14 +26,14 @@ Este documento lista todas as chaves secretas e tokens necessários para o funci
 
 ### SUPABASE_ANON_KEY (PUBLISHABLE)
 - **Descrição**: Chave pública/anônima do Supabase
-- **Formato**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+- **Formato**: `<your-publishable-key>`
 - **Onde encontrar**: Supabase Dashboard > Settings > API > anon/public
 - **Uso**: Frontend, cliente JavaScript
 - **Segurança**: ✅ Pode ser exposta publicamente
 
 ### SUPABASE_SERVICE_ROLE_KEY (SECRETO!)
 - **Descrição**: Chave de serviço com acesso total ao banco
-- **Formato**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+- **Formato**: `<your-service-role-key>`
 - **Onde encontrar**: Supabase Dashboard > Settings > API > service_role
 - **Uso**: Edge Functions que precisam bypass de RLS
 - **Segurança**: ⚠️ NUNCA expor no frontend!
@@ -44,14 +44,14 @@ Este documento lista todas as chaves secretas e tokens necessários para o funci
 
 ### YOUTUBE_API_KEY
 - **Descrição**: Chave da YouTube Data API v3
-- **Formato**: `AIza...` (39 caracteres)
+- **Formato**: `<your-youtube-api-key>`
 - **Onde encontrar**: Google Cloud Console > Credenciais
 - **Uso**: Buscar vídeos do canal do influenciador
 
 ### Configuração no Supabase
 
 ```bash
-supabase secrets set YOUTUBE_API_KEY="AIza..."
+supabase secrets set YOUTUBE_API_KEY="<your-youtube-api-key>"
 ```
 
 ---
@@ -60,7 +60,7 @@ supabase secrets set YOUTUBE_API_KEY="AIza..."
 
 ### STRIPE_SECRET_KEY
 - **Descrição**: Chave secreta da conta Stripe
-- **Formato**: `sk_live_...` ou `sk_test_...`
+- **Formato**: `<your-stripe-secret-key>` (`sk_live_…` / `sk_test_…`)
 - **Onde encontrar**: Stripe Dashboard > Developers > API Keys
 - **Uso**: Processar pagamentos via Stripe Connect
 
@@ -73,10 +73,11 @@ Arquivo `.env` na raiz do projeto:
 ```env
 # Supabase (obrigatório)
 VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_PUBLISHABLE_KEY=<your-publishable-key>
 VITE_SUPABASE_PROJECT_ID=xxxx
 
 # Nota: Apenas chaves PUBLISHABLE podem ir aqui!
+# NUNCA coloque a service_role (ou qualquer secret) em variáveis VITE_*.
 # Secrets vão nas Edge Functions via `supabase secrets set`
 ```
 

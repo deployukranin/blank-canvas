@@ -25,8 +25,8 @@ Este guia explica como fazer o deploy do projeto em um ambiente externo (fora do
 4. Aguarde a criação (~2 minutos)
 5. Anote as seguintes informações (Settings > API):
    - **Project URL**: `https://xxxx.supabase.co`
-   - **Anon/Public Key**: `eyJhbGciOiJI...`
-   - **Service Role Key**: `eyJhbGciOiJI...` (mantenha esta em segredo!)
+   - **Anon/Public Key**: `<your-publishable-key>` (pública, protegida por RLS)
+   - **Service Role Key**: `<your-service-role-key>` (secreto — nunca versionar, nunca em `VITE_*`)
 
 ---
 
@@ -54,10 +54,10 @@ supabase functions deploy youtube-channel-metrics
 
 ```bash
 # YouTube
-supabase secrets set YOUTUBE_API_KEY=SUA_CHAVE_YOUTUBE
+supabase secrets set YOUTUBE_API_KEY=<your-youtube-api-key>
 
 # Stripe (se usar pagamentos via Stripe Connect)
-supabase secrets set STRIPE_SECRET_KEY=SUA_CHAVE_STRIPE
+supabase secrets set STRIPE_SECRET_KEY=<your-stripe-secret-key>
 
 # As variáveis SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são definidas automaticamente
 ```
@@ -70,7 +70,7 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_PUBLISHABLE_KEY=<your-publishable-key>
 VITE_SUPABASE_PROJECT_ID=SEU_PROJECT_ID
 ```
 

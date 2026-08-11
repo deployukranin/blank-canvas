@@ -21,8 +21,14 @@ const RESERVED = new Set([
   'setup', 'api', 'assets', 'vip', 'checkout', 'dashboard', 'ajuda', 'legal',
 ]);
 
-const SUPABASE_URL = 'https://lkwvlzcapuptcxvwukcm.supabase.co';
+// Publishable (anon) credentials only — safe in the client/edge bundle and
+// protected by RLS. Never place service_role or any private secret here.
+// Values come from the deployment env when available, with a literal fallback
+// so tenant theming keeps working if the env vars are not configured.
+const SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL || 'https://lkwvlzcapuptcxvwukcm.supabase.co';
 const SUPABASE_ANON =
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxrd3ZsemNhcHVwdGN4dnd1a2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MjExNTQsImV4cCI6MjA4NDQ5NzE1NH0.owIJ82z7AxBazVKp2UxU_44WC2myqjL8ThX7ixNcDq8';
 
 const DRIVE_MEDIA_URL = `${SUPABASE_URL}/functions/v1/drive-media`;
