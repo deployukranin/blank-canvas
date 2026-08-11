@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { usePersistentConfig } from '@/hooks/use-persistent-config';
 import { useTenant } from '@/contexts/TenantContext';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
 import { uploadPreviewMedia } from '@/lib/external-storage';
 import {
   defaultVideoConfig,
@@ -39,6 +40,7 @@ const AdminCustoms = () => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { store } = useTenant();
+  const storeCurrency = useStoreCurrency(store?.id);
   const { 
     config, 
     setConfig, 
@@ -85,7 +87,7 @@ const AdminCustoms = () => {
     }
   };
 
-  const currencySymbol = i18n.language?.startsWith('pt') ? 'R$' : '$';
+  const currencySymbol = storeCurrency === 'BRL' ? 'R$' : '$';
   const supportedLanguages = ['pt-BR', 'en', 'es'] as const;
 
   const getKnownTranslations = (translationKey: string) => {
