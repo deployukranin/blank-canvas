@@ -49,6 +49,7 @@ const AdminDashboard: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
+  const storeCurrency = useStoreCurrency(storeId);
   const [storePlan, setStorePlan] = useState<{ type: string; expiresAt: string | null } | null>(null);
   const [storeInfo, setStoreInfo] = useState<{ name: string; description: string | null; avatar_url: string | null } | null>(null);
   const [ytMetrics, setYtMetrics] = useState<YTMetrics | null>(null);
