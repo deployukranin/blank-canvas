@@ -198,6 +198,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
+      // If there is an anonymous session, sign it out first so the login
+      // replaces the guest with the real account.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user.is_anonymous) {
+        await supabase.auth.signOut();
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -215,6 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: "Erro ao fazer login" };
     }
   }, []);
+
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
