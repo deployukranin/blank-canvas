@@ -2184,6 +2184,10 @@ export type Database = {
         Args: { p_store_id: string }
         Returns: Json
       }
+      has_active_vip_for_store: {
+        Args: { _store_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
