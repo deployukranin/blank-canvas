@@ -96,10 +96,11 @@ const AdminPagamentosPix = () => {
       });
       if (!error && data) {
         setStripeStatus(data);
-        // If connected and charges enabled, auto-set gateway
-        if (data.connected && data.charges_enabled) {
+        // Once the account is linked, Stripe becomes the active gateway
+        if (data.account_connected || data.connected) {
           setConfig(prev => (prev.activeGateway === 'stripe' ? prev : { ...prev, activeGateway: 'stripe' as const }));
         }
+
       }
     } catch (err) {
       console.error('Error checking Stripe status:', err);
