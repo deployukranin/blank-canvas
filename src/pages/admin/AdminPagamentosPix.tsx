@@ -459,16 +459,6 @@ const AdminPagamentosPix = () => {
                       </div>
                     </div>
                   </div>
-                  {!!stripeStatus.requirements_due?.length && (
-                    <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-                      <p className="text-xs font-medium text-amber-500 mb-1">{t('adminPayments.pendingRequirements')}</p>
-                      <ul className="text-[11px] text-muted-foreground list-disc pl-4 space-y-0.5">
-                        {stripeStatus.requirements_due.slice(0, 8).map((r) => (
-                          <li key={r}>{r.replace(/_/g, ' ')}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                   <Button onClick={handleConnectStripe} disabled={connectingStripe} className="w-full">
                     {connectingStripe ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
