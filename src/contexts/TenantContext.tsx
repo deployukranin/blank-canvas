@@ -113,17 +113,11 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsLoading(true);
       setError(null);
 
-      let query = supabase
-        .from('stores_public')
-        .select('id, name, slug, description, avatar_url, banner_url, status, plan_type, plan_expires_at');
+      const { data, error: dbError } = await supabase.rpc('get_store_public', {
+        _slug: effectiveSlug || null,
+        _domain: isCustomDomain ? hostname : null,
+      }).single();
 
-      if (effectiveSlug) {
-        query = query.eq('slug', effectiveSlug);
-      } else if (isCustomDomain) {
-        query = query.eq('custom_domain', hostname);
-      }
-
-      const { data, error: dbError } = await query.maybeSingle();
 
       if (cancelled) return;
 
