@@ -64,42 +64,42 @@ Deno.serve(servePrivate(async (req) => {
       return json({ error: "Not authorized for this store" }, 403);
     }
 
-    // Read the platform account settings from Stripe.
-    const accountRes = await fetch("https://api.stripe.com/v1/account", {
-      headers: { Authorization: `Bearer ${stripeSecretKey}` },
+    // Read the platform account settings from Stripe. The Connect redirect URI
+    // is not exposed via the Account API, so we do a lightweight OAuth probe:
+    // we hit the authorize endpoint with the expected URI and follow the first
+    // redirect. Stripe redirects back to the URI with an error if it is not
+    // registered; otherwise it goes to the consent/login page.
+    const connectClientId = Deno.env.get("STRIPE_CONNECT_CLIENT_ID");
+    if (!connectClientId) {
+      return json({ status: "unknown", expected: EXPECTED_REDIRECT_URI, error: "STRIPE_CONNECT_CLIENT_ID not configured" }, 500);
+    }
+
+    const probeParams = new URLSearchParams({
+      response_type: "code",
+      client_id: connectClientId,
+      scope: "read_write",
+      redirect_uri: EXPECTED_REDIRECT_URI,
+      state: "probe",
     });
+    const probeUrl = `https://connect.stripe.com/oauth/authorize?${probeParams.toString()}`;
+    const probeRes = await fetch(probeUrl, { redirect: "manual" });
 
-    if (!accountRes.ok) {
-      const errBody = await accountRes.text();
-      console.error("Stripe platform account read error:", errBody);
-      return json({ status: "unknown", expected: EXPECTED_REDIRECT_URI, error: "Failed to read Stripe platform settings" }, 502);
+    const location = probeRes.headers.get("Location") ?? "";
+    const locationUrl = location ? new URL(location) : null;
+    const errorCode = locationUrl?.searchParams.get("error");
+
+    if (probeRes.status === 302 && location.startsWith(EXPECTED_REDIRECT_URI) && errorCode) {
+      return json({ status: "missing", expected: EXPECTED_REDIRECT_URI, configured: null, stripe_error: errorCode }, 200);
     }
 
-    const account = await accountRes.json();
-    console.log("Stripe account keys:", Object.keys(account).join(","));
-    console.log("Stripe account settings keys:", Object.keys(account?.settings ?? {}).join(","));
-    console.log("Stripe account settings.connect:", JSON.stringify(account?.settings?.connect ?? null));
-
-    // The configured redirect URI lives under settings.connect.redirect_uri for the platform.
-    const connectSettings = account?.settings?.connect ?? {};
-    let configuredUris: string[] = [];
-    if (Array.isArray(connectSettings.redirect_uris)) {
-      configuredUris = connectSettings.redirect_uris;
-    } else if (connectSettings.redirect_uri) {
-      configuredUris = [connectSettings.redirect_uri];
+    // If Stripe accepted the URI, it will either redirect to the consent page
+    // or return the login/authorize page (not back to our URI with an error).
+    const accepted = probeRes.status === 302 && !location.startsWith(EXPECTED_REDIRECT_URI);
+    if (!accepted && probeRes.status !== 200) {
+      return json({ status: "unknown", expected: EXPECTED_REDIRECT_URI, error: `OAuth probe failed: ${probeRes.status}` }, 502);
     }
 
-    if (configuredUris.length === 0) {
-      return json({ status: "missing", expected: EXPECTED_REDIRECT_URI, configured: null }, 200);
-    }
-
-    const exactMatch = configuredUris.includes(EXPECTED_REDIRECT_URI);
-
-    return json({
-      status: exactMatch ? "configured" : "mismatch",
-      expected: EXPECTED_REDIRECT_URI,
-      configured: configuredUris,
-    }, 200);
+    return json({ status: "configured", expected: EXPECTED_REDIRECT_URI, configured: [EXPECTED_REDIRECT_URI] }, 200);
   } catch (error) {
     console.error("Stripe redirect URI check error:", error);
     return json({ status: "unknown", expected: EXPECTED_REDIRECT_URI, error: error instanceof Error ? error.message : "Unknown error" }, 500);
