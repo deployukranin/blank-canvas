@@ -130,6 +130,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const redirectUrl = redirectTo || `${getPublicOrigin()}/auth`;
 
+      // If there is an anonymous session, sign it out first so the signup
+      // creates a permanent account instead of converting the guest.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user.is_anonymous) {
+        await supabase.auth.signOut();
+      }
+
       // Email verification is enabled: signUp returns no session until the
       // user confirms via the emailed link.
       const { data, error } = await supabase.auth.signUp({
@@ -158,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: "Erro ao criar conta" };
     }
   }, []);
+
 
 
   const resetPassword = useCallback(async (email: string) => {
