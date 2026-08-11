@@ -32,6 +32,9 @@ export function usePersistentConfig<T>({
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingConfigRef = useRef<T | null>(null);
   const initialLoadDoneRef = useRef(false);
+  // Always mirrors the latest state so saveNow() never persists a stale value
+  const latestConfigRef = useRef<T>(defaultValue);
+
 
   // Load configuration from database on mount
   useEffect(() => {
