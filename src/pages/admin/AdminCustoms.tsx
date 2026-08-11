@@ -347,85 +347,48 @@ const AdminCustoms = () => {
               </div>
 
               <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                {config.previewType === 'video' ? (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      {t('customsAdmin.videoFile', 'Arquivo de vídeo')}
-                    </label>
-                    <input
-                      ref={videoInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handlePreviewUpload(f, 'video');
-                        e.target.value = '';
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      disabled={isUploadingPreview}
-                      onClick={() => videoInputRef.current?.click()}
-                    >
-                      {isUploadingPreview ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.uploading', 'Enviando...')}</>
-                      ) : (
-                        <><Upload className="w-4 h-4 mr-2" /> {t('customsAdmin.uploadVideo', 'Enviar vídeo')}</>
-                      )}
-                    </Button>
-                    {config.previewVideoUrl && (
-                      <p className="text-xs text-muted-foreground mt-2 truncate">
-                        {t('customsAdmin.currentFile', 'Arquivo atual')}: {config.previewVideoUrl}
-                      </p>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t('customsAdmin.imageFile', 'Arquivo de imagem')}
+                  </label>
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handlePreviewUpload(f, 'image');
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isUploadingPreview}
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    {isUploadingPreview ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.uploading', 'Enviando...')}</>
+                    ) : (
+                      <><Upload className="w-4 h-4 mr-2" /> {t('customsAdmin.uploadImage', 'Enviar imagem')}</>
                     )}
-                  </div>
-                ) : (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      {t('customsAdmin.imageFile', 'Arquivo de imagem')}
-                    </label>
-                    <input
-                      ref={imageInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handlePreviewUpload(f, 'image');
-                        e.target.value = '';
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      disabled={isUploadingPreview}
-                      onClick={() => imageInputRef.current?.click()}
-                    >
-                      {isUploadingPreview ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.uploading', 'Enviando...')}</>
-                      ) : (
-                        <><Upload className="w-4 h-4 mr-2" /> {t('customsAdmin.uploadImage', 'Enviar imagem')}</>
-                      )}
-                    </Button>
-                    {config.previewImageUrl && (
-                      <p className="text-xs text-muted-foreground mt-2 truncate">
-                        {t('customsAdmin.currentFile', 'Arquivo atual')}: {config.previewImageUrl}
-                      </p>
-                    )}
-                  </div>
-                )}
+                  </Button>
+                  {config.previewImageUrl && (
+                    <p className="text-xs text-muted-foreground mt-2 truncate">
+                      {t('customsAdmin.currentFile', 'Arquivo atual')}: {config.previewImageUrl}
+                    </p>
+                  )}
+                </div>
 
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.titleLabel', 'Título')}</label>
-                  <Input value={getLocalizedConfigValue(config.previewTitle, 'customs.previewTitleDefault')} onChange={e => setConfig({ ...config, previewTitle: e.target.value })} />
+                  <Input value={getLocalizedConfigValue(config.previewTitle, 'customs.previewTitleDefault')} onChange={e => setConfig({ ...config, previewTitle: e.target.value, previewType: 'image', previewVideoUrl: '' })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.descLabel', 'Descrição')}</label>
-                  <Textarea value={getLocalizedConfigValue(config.previewDescription, 'customs.previewDescDefault')} onChange={e => setConfig({ ...config, previewDescription: e.target.value })} className="min-h-[80px]" />
+                  <Textarea value={getLocalizedConfigValue(config.previewDescription, 'customs.previewDescDefault')} onChange={e => setConfig({ ...config, previewDescription: e.target.value, previewType: 'image', previewVideoUrl: '' })} className="min-h-[80px]" />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.deliveryDays', 'Prazo de Entrega (dias)')}</label>
