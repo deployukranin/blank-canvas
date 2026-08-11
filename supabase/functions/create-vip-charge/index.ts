@@ -359,8 +359,11 @@ Deno.serve(async (req) => {
       if (!sessionRes.ok) {
         const errBody = await sessionRes.text();
         console.error('Stripe VIP checkout error:', errBody);
-        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session' }, 500);
+        let stripeMsg = '';
+        try { stripeMsg = JSON.parse(errBody)?.error?.message || ''; } catch { /* ignore */ }
+        return jsonResponse({ success: false, error: 'Failed to create Stripe checkout session', message: stripeMsg }, 500);
       }
+
 
       const session = await sessionRes.json();
       stripeCheckoutUrl = session.url;
