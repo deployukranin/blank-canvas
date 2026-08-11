@@ -59,9 +59,9 @@ export interface VideoConfig {
 
 // Default configuration - will be replaced with database values
 export const defaultVideoConfig: VideoConfig = {
-  previewVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+  previewVideoUrl: '',
   previewImageUrl: '',
-  previewType: 'video',
+  previewType: 'image',
   previewTitle: 'Como funcionam os vídeos personalizados?',
   previewDescription: 'Assista este vídeo explicativo para entender como funciona o processo de compra, personalização e entrega do seu vídeo ASMR exclusivo.',
   previewEnabled: true,
