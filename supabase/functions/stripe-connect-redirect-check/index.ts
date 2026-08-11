@@ -76,6 +76,8 @@ Deno.serve(servePrivate(async (req) => {
     }
 
     const account = await accountRes.json();
+    console.log("Stripe account keys:", Object.keys(account).join(","));
+    console.log("Stripe account settings keys:", Object.keys(account?.settings ?? {}).join(","));
     console.log("Stripe account settings.connect:", JSON.stringify(account?.settings?.connect ?? null));
 
     // The configured redirect URI lives under settings.connect.redirect_uri for the platform.
