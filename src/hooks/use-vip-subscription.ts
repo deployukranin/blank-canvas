@@ -319,12 +319,13 @@ export const useVIPSubscription = () => {
 
   // Refresh subscription data (call after payment confirmed)
   const refreshSubscription = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !storeId) return;
 
     const { data } = await supabase
       .from('vip_subscriptions')
       .select('*')
       .eq('user_id', userId)
+      .eq('store_id', storeId)
       .eq('status', 'active')
       .gt('expires_at', new Date().toISOString())
       .maybeSingle();
@@ -332,9 +333,10 @@ export const useVIPSubscription = () => {
     if (data) {
       setSubscription(data as VIPSubscription);
       setIsVIP(true);
-      writeVipCache(userId, data as VIPSubscription);
+      writeVipCache(userId, storeId, data as VIPSubscription);
     }
-  }, [userId]);
+  }, [userId, storeId]);
+
 
   return {
     subscription,
