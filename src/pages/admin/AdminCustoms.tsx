@@ -334,6 +334,57 @@ const AdminCustoms = () => {
 
 
               <div className={`space-y-4 ${!config.previewEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div>
+                    <span className="font-medium text-sm">{t('customsAdmin.mediaType', 'Tipo de mídia')}</span>
+                    <p className="text-xs text-muted-foreground">
+                      {config.previewType === 'video'
+                        ? t('customsAdmin.videoLabel', 'Vídeo')
+                        : t('customsAdmin.imageLabel', 'Imagem')}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={config.previewType === 'video'}
+                    onCheckedChange={(checked) => setConfig({ ...config, previewType: checked ? 'video' : 'image' })}
+                  />
+                </div>
+
+                {config.previewType === 'video' ? (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {t('customsAdmin.videoFile', 'Arquivo de vídeo')}
+                    </label>
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handlePreviewUpload(f, 'video');
+                        e.target.value = '';
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      disabled={isUploadingPreview}
+                      onClick={() => videoInputRef.current?.click()}
+                    >
+                      {isUploadingPreview ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('common.uploading', 'Enviando...')}</>
+                      ) : (
+                        <><Upload className="w-4 h-4 mr-2" /> {t('customsAdmin.uploadVideo', 'Enviar vídeo')}</>
+                      )}
+                    </Button>
+                    {config.previewVideoUrl && (
+                      <p className="text-xs text-muted-foreground mt-2 truncate">
+                        {t('customsAdmin.currentFile', 'Arquivo atual')}: {config.previewVideoUrl}
+                      </p>
+                    )}
+                  </div>
+                ) : (
                 <div>
                   <label className="text-sm font-medium mb-2 block">
                     {t('customsAdmin.imageFile', 'Arquivo de imagem')}
@@ -368,14 +419,15 @@ const AdminCustoms = () => {
                     </p>
                   )}
                 </div>
+                )}
 
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.titleLabel', 'Título')}</label>
-                  <Input value={getLocalizedConfigValue(config.previewTitle, 'customs.previewTitleDefault')} onChange={e => setConfig({ ...config, previewTitle: e.target.value, previewType: 'image', previewVideoUrl: '' })} />
+                  <Input value={getLocalizedConfigValue(config.previewTitle, 'customs.previewTitleDefault')} onChange={e => setConfig({ ...config, previewTitle: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.descLabel', 'Descrição')}</label>
-                  <Textarea value={getLocalizedConfigValue(config.previewDescription, 'customs.previewDescDefault')} onChange={e => setConfig({ ...config, previewDescription: e.target.value, previewType: 'image', previewVideoUrl: '' })} className="min-h-[80px]" />
+                  <Textarea value={getLocalizedConfigValue(config.previewDescription, 'customs.previewDescDefault')} onChange={e => setConfig({ ...config, previewDescription: e.target.value })} className="min-h-[80px]" />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">{t('customsAdmin.deliveryDays', 'Prazo de Entrega (dias)')}</label>
