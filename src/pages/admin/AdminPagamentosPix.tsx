@@ -11,9 +11,8 @@ import {
   Link2Off,
   ShieldCheck,
   RefreshCw,
-  CheckCircle,
-  AlertCircle,
 } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -72,13 +71,6 @@ const AdminPagamentosPix = () => {
   const [stripeLoading, setStripeLoading] = useState(true);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [pixKeyError, setPixKeyError] = useState<string | null>(null);
-  const [redirectCheck, setRedirectCheck] = useState<{
-    status: 'idle' | 'loading' | 'configured' | 'missing' | 'mismatch' | 'unknown';
-    expected?: string;
-    configured?: string[] | null;
-    error?: string;
-    stripeError?: string;
-  }>({ status: 'idle' });
 
   const {
     config,
@@ -117,33 +109,6 @@ const AdminPagamentosPix = () => {
     }
   }, [storeId, setConfig]);
 
-  const checkRedirectUri = useCallback(async () => {
-    if (!storeId) return;
-    setRedirectCheck(prev => ({ ...prev, status: 'loading' }));
-    try {
-      const { data, error } = await supabase.functions.invoke('stripe-connect-redirect-check', {
-        body: { store_id: storeId },
-      });
-      if (error || !data) {
-        setRedirectCheck({ status: 'unknown', error: error?.message || 'Check failed' });
-      } else {
-        setRedirectCheck({
-          status: data.status as typeof redirectCheck.status,
-          expected: data.expected,
-          configured: data.configured,
-          error: data.error,
-          stripeError: data.stripe_error,
-        });
-      }
-    } catch (err) {
-      console.error('Error checking Stripe redirect URI:', err);
-      setRedirectCheck({ status: 'unknown', error: err instanceof Error ? err.message : 'Unknown error' });
-    }
-  }, [storeId]);
-
-  useEffect(() => {
-    checkRedirectUri();
-  }, [checkRedirectUri]);
 
   // Re-check when the user comes back from the Stripe onboarding tab
   useEffect(() => {
@@ -158,7 +123,13 @@ const AdminPagamentosPix = () => {
     };
   }, [checkStripeStatus]);
 
+  // Initial status check on mount
+  useEffect(() => {
+    checkStripeStatus();
+  }, [checkStripeStatus]);
+
   // Handle the redirect back from the Stripe OAuth flow
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get('stripe');
@@ -407,61 +378,6 @@ const AdminPagamentosPix = () => {
                 </div>
               </div>
 
-              {/* Redirect URI validation */}
-              <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    {redirectCheck.status === 'loading' ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground mt-0.5" />
-                    ) : redirectCheck.status === 'configured' ? (
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-                    )}
-                    <div>
-                      <p className="font-medium text-sm">
-                        {redirectCheck.status === 'loading' && t('adminPayments.redirectCheck.loading', 'Verificando redirect URI...')}
-                        {redirectCheck.status === 'configured' && t('adminPayments.redirectCheck.configured', 'Redirect URI configurado')}
-                        {redirectCheck.status === 'missing' && t('adminPayments.redirectCheck.missing', 'Redirect URI não configurado')}
-                        {redirectCheck.status === 'mismatch' && t('adminPayments.redirectCheck.mismatch', 'Redirect URI diferente')}
-                        {redirectCheck.status === 'unknown' && t('adminPayments.redirectCheck.unknown', 'Não foi possível verificar')}
-                        {redirectCheck.status === 'idle' && t('adminPayments.redirectCheck.title', 'Validação do redirect URI')}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('adminPayments.redirectCheck.description', 'A Stripe exige que o domínio mytinglebox.com esteja cadastrado como redirect URI.')}
-                      </p>
-                      {redirectCheck.expected && (
-                        <code className="block mt-2 text-xs font-mono bg-background/80 px-2 py-1 rounded border border-border break-all">
-                          {redirectCheck.expected}
-                        </code>
-                      )}
-                      {redirectCheck.status === 'missing' && redirectCheck.stripeError && (
-                        <p className="text-xs text-amber-500 mt-2">
-                          {t('adminPayments.redirectCheck.registerInStripe', 'Cadastre exatamente este endereço em Stripe → Settings → Connect → Platform settings → Redirects.')}
-                        </p>
-                      )}
-                      {redirectCheck.status === 'mismatch' && redirectCheck.configured && redirectCheck.configured.length > 0 && (
-                        <p className="text-xs text-amber-500 mt-2">
-                          {t('adminPayments.redirectCheck.configuredUri', 'URI configurado:')} {redirectCheck.configured.join(', ')}
-                        </p>
-                      )}
-                      {redirectCheck.status === 'unknown' && redirectCheck.error && (
-                        <p className="text-xs text-muted-foreground mt-2">{redirectCheck.error}</p>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={checkRedirectUri}
-                    disabled={redirectCheck.status === 'loading'}
-                    className="gap-1.5 text-xs shrink-0"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${redirectCheck.status === 'loading' ? 'animate-spin' : ''}`} />
-                    {t('adminPayments.redirectCheck.checkAgain', 'Verificar')}
-                  </Button>
-                </div>
-              </div>
 
               {stripeLoading ? (
                 <div className="flex items-center justify-center py-8">
