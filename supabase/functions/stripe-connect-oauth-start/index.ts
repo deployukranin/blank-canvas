@@ -28,10 +28,6 @@ Deno.serve(servePrivate(async (req) => {
     if (!connectClientId || !/^ca_[A-Za-z0-9]+$/.test(connectClientId.trim())) {
       return json({ error: "oauth_unavailable" }, 501);
     }
-    // The OAuth application lives in the same mode as the API key in use.
-    const isLiveKey = stripeSecretKey.startsWith("sk_live_");
-    const isTestClient = connectClientId.startsWith("ca_test_");
-    if (isLiveKey === isTestClient) return json({ error: "oauth_mode_mismatch" }, 501);
 
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
