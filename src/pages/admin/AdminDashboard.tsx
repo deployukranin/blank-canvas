@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { TrialCountdown } from '@/components/tenant/TrialCountdown';
+import { useStoreCurrency } from '@/hooks/use-store-currency';
+import { formatPriceForLang } from '@/lib/currency';
 
 
 interface YTMetrics {
@@ -361,6 +363,8 @@ const AdminDashboard: React.FC = () => {
     itemStyle: { color: chartColorLight },
   };
 
+  const formatMoney = (v: number) => formatPriceForLang(v, storeCurrency, i18n.language);
+
   const formatNumber = (n: number) => {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
@@ -449,7 +453,7 @@ const AdminDashboard: React.FC = () => {
           <MetricCard label={t('admin.totalUsers')} value={displayStats.totalUsers.toLocaleString()} icon={Users} />
           <MetricCard label={t('admin.vipMembers')} value={displayStats.totalVIP} icon={Crown} />
           <MetricCard label={t('admin.orders')} value={displayStats.totalOrders} sub={`${displayStats.pendingOrders} ${t('admin.pending').toLowerCase()}`} icon={ShoppingCart} />
-          <MetricCard label={t('admin.revenue')} value={new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(displayStats.revenue)} icon={DollarSign} />
+          <MetricCard label={t('admin.revenue')} value={formatMoney(displayStats.revenue)} icon={DollarSign} />
         </div>
 
         {/* YouTube Metrics */}
@@ -558,7 +562,7 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-[10px] text-foreground/30">{order.customer_name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-xs text-foreground/80">{new Intl.NumberFormat(i18n.language?.startsWith('pt') ? 'pt-BR' : 'en-US', { style: 'currency', currency: i18n.language?.startsWith('pt') ? 'BRL' : 'USD' }).format(order.amount_cents / 100)}</p>
+                      <p className="font-medium text-xs text-foreground/80">{formatMoney(order.amount_cents / 100)}</p>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{t('admin.pending')}</span>
                     </div>
                   </motion.div>
