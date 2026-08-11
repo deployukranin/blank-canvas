@@ -126,6 +126,30 @@ const AdminPagamentosPix = () => {
     };
   }, [checkStripeStatus]);
 
+  // Handle the redirect back from the Stripe OAuth flow
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get('stripe');
+    if (!result) return;
+    if (result === 'connected') {
+      toast({ title: t('adminPayments.stripeConnectedToast', 'Conta Stripe conectada com sucesso.') });
+      checkStripeStatus({ silent: true });
+    } else if (result === 'cancelled') {
+      toast({ title: t('adminPayments.stripeCancelledToast', 'Conexão com a Stripe cancelada.') });
+    } else if (result === 'account_in_use') {
+      toast({
+        title: t('adminPayments.stripeAccountInUse', 'Esta conta Stripe já está vinculada a outra loja.'),
+        variant: 'destructive',
+      });
+    } else {
+      toast({ title: t('adminPayments.errors.stripeConnectError'), variant: 'destructive' });
+    }
+    params.delete('stripe');
+    const qs = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleConnectStripe = async () => {
     if (!emailVerified) {
@@ -142,6 +166,18 @@ const AdminPagamentosPix = () => {
     setConnectingStripe(true);
     try {
       const returnUrl = publicUrl(window.location.pathname);
+
+      // Preferred path: OAuth — the creator logs into the Stripe account they
+      // already have and authorizes in a couple of clicks.
+      const oauth = await supabase.functions.invoke('stripe-connect-oauth-start', {
+        body: { store_id: storeId, return_url: returnUrl },
+      });
+      if (!oauth.error && oauth.data?.url) {
+        window.location.href = oauth.data.url;
+        return;
+      }
+
+      // Fallback: hosted onboarding (also used to finish pending requirements)
       const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
         body: { store_id: storeId, return_url: returnUrl },
       });
@@ -160,6 +196,7 @@ const AdminPagamentosPix = () => {
       setConnectingStripe(false);
     }
   };
+
 
   const handleSavePix = async () => {
     if (!config.pixManual.key || !config.pixManual.receiverName || !config.pixManual.city) {

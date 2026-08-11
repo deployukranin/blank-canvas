@@ -118,7 +118,18 @@ Deno.serve(async (req) => {
 
     let accountId = store.stripe_account_id;
 
-    // Create Stripe account if doesn't exist
+    // When Connect OAuth is available, never create a fresh Standard account
+    // here — creators link the account they already have through OAuth and this
+    // endpoint only generates links to finish pending requirements.
+    const oauthAvailable = Boolean(Deno.env.get("STRIPE_CONNECT_CLIENT_ID"));
+    if (!accountId && oauthAvailable) {
+      return new Response(
+        JSON.stringify({ error: "use_oauth" }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create Stripe account if doesn't exist (legacy fallback)
     if (!accountId) {
       const createRes = await fetch("https://api.stripe.com/v1/accounts", {
         method: "POST",
@@ -151,6 +162,7 @@ Deno.serve(async (req) => {
         .update({ stripe_account_id: accountId })
         .eq("id", store_id);
     }
+
 
     // Create Account Link for Connect Onboarding
     const linkRes = await fetch("https://api.stripe.com/v1/account_links", {
