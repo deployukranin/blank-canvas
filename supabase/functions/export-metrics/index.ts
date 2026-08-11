@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -95,7 +96,7 @@ function getPeriodStart(periodLabel: string): Date {
   }
 }
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -624,4 +625,4 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
     );
   }
-});
+}));

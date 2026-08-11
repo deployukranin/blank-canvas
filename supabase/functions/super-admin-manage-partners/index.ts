@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 // Super-admin only — create/list/delete Partner sub-accounts and (un)assign stores
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,7 @@ async function sb(path: string, init: RequestInit = {}) {
   return { ok: res.ok, status: res.status, data };
 }
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -259,4 +260,4 @@ Deno.serve(async (req) => {
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }
-});
+}));

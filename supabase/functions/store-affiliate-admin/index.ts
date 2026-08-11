@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -7,7 +8,7 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -162,4 +163,4 @@ Deno.serve(async (req) => {
     console.error(e);
     return json({ error: "Internal error" }, 500);
   }
-});
+}));

@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { emailUnverifiedResponse } from "../_shared/email-verified.ts";
 
@@ -134,7 +135,7 @@ const getDomainStatus = async (domain: string, vercelDomain: Record<string, unkn
   };
 };
 
-Deno.serve(async (req: Request) => {
+Deno.serve(servePrivate(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -364,4 +365,4 @@ Deno.serve(async (req: Request) => {
     const message = error instanceof Error ? error.message : "Internal error";
     return jsonResponse({ success: false, error: message }, 500);
   }
-});
+}));

@@ -1,3 +1,4 @@
+import { servePrivate } from "../_shared/cors.ts";
 // Super-admin only: manage referral commissions
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +29,7 @@ async function sb(path: string, init: RequestInit = {}) {
   catch { return { ok: res.ok, status: res.status, data: text }; }
 }
 
-Deno.serve(async (req) => {
+Deno.serve(servePrivate(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const sUrl = Deno.env.get("SUPABASE_URL")!;
@@ -207,4 +208,4 @@ Deno.serve(async (req) => {
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }
-});
+}));
