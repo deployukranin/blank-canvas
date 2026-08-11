@@ -117,33 +117,6 @@ const AdminPagamentosPix = () => {
     }
   }, [storeId, setConfig]);
 
-  const checkRedirectUri = useCallback(async () => {
-    if (!storeId) return;
-    setRedirectCheck(prev => ({ ...prev, status: 'loading' }));
-    try {
-      const { data, error } = await supabase.functions.invoke('stripe-connect-redirect-check', {
-        body: { store_id: storeId },
-      });
-      if (error || !data) {
-        setRedirectCheck({ status: 'unknown', error: error?.message || 'Check failed' });
-      } else {
-        setRedirectCheck({
-          status: data.status as typeof redirectCheck.status,
-          expected: data.expected,
-          configured: data.configured,
-          error: data.error,
-          stripeError: data.stripe_error,
-        });
-      }
-    } catch (err) {
-      console.error('Error checking Stripe redirect URI:', err);
-      setRedirectCheck({ status: 'unknown', error: err instanceof Error ? err.message : 'Unknown error' });
-    }
-  }, [storeId]);
-
-  useEffect(() => {
-    checkRedirectUri();
-  }, [checkRedirectUri]);
 
   // Re-check when the user comes back from the Stripe onboarding tab
   useEffect(() => {
