@@ -9,6 +9,8 @@
  * public/theme-init.js can seed localStorage for subsequent loads.
  */
 
+import { applySecurityHeaders } from './security-headers';
+
 export const config = {
   // Match any path that doesn't contain a dot (no extensions) and isn't /api or /assets
   matcher: ['/((?!api/|assets/|_vercel/|.*\\..*).*)'],
