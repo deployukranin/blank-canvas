@@ -9,6 +9,12 @@ interface Attribution {
   ts: number;
 }
 
+/** Secure + SameSite=Lax, scoped to this site only. Secure is dropped on http localhost. */
+function cookieFlags(): string {
+  const secure = typeof location !== "undefined" && location.protocol === "https:" ? ";Secure" : "";
+  return `;SameSite=Lax${secure}`;
+}
+
 export function getVisitorId(): string {
   try {
     let v = localStorage.getItem(VISITOR_KEY);
