@@ -927,6 +927,17 @@
     "noCategories": "Nenhuma categoria de áudio cadastrada",
     "clickAdd": "Clique em \"Adicionar\" para criar uma nova categoria"
   },
+  "storeAccess": {
+    "title": "Você não é membro desta loja",
+    "description": "Cada loja tem seus próprios cadastros. Entre ou crie uma conta nesta loja para acessar esta área.",
+    "cta": "Entrar nesta loja",
+    "browse": "Continuar navegando",
+    "banned": "Seu acesso a esta loja foi suspenso.",
+    "joinTitle": "Entrar nesta loja",
+    "joinDescription": "Você está conectado com outra conta. Continue para se tornar membro desta loja.",
+    "joinCta": "Entrar agora",
+    "joinSuccess": "Agora você é membro desta loja."
+  },
   "storefront": {
     "joinCommunity": "Junte-se à comunidade! 🎉",
     "joinCommunityDesc": "Crie sua conta para comprar customs e participar da comunidade.",

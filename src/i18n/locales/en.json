@@ -927,6 +927,17 @@
     "noCategories": "No audio categories configured",
     "clickAdd": "Click \"Add\" to create a new category"
   },
+  "storeAccess": {
+    "title": "You are not a member of this store",
+    "description": "Each store has its own accounts. Sign in or create an account for this store to access this area.",
+    "cta": "Sign in to this store",
+    "browse": "Keep browsing",
+    "banned": "Your access to this store has been suspended.",
+    "joinTitle": "Join this store",
+    "joinDescription": "You are signed in with another account. Continue to become a member of this store.",
+    "joinCta": "Join now",
+    "joinSuccess": "You are now a member of this store."
+  },
   "storefront": {
     "joinCommunity": "Join the community! 🎉",
     "joinCommunityDesc": "Create your account to buy customs and join the community.",
