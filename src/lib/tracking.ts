@@ -26,7 +26,7 @@ export function setAttribution(code: string) {
   try {
     const data: Attribution = { code, ts: Date.now() };
     localStorage.setItem(ATTR_KEY, JSON.stringify(data));
-    document.cookie = `${ATTR_KEY}=${encodeURIComponent(code)};path=/;max-age=${ATTR_TTL_DAYS * 86400}`;
+    document.cookie = `${ATTR_KEY}=${encodeURIComponent(code)};path=/;max-age=${ATTR_TTL_DAYS * 86400}${cookieFlags()}`;
   } catch {
     /* ignore */
   }
