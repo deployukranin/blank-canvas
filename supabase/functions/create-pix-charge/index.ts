@@ -285,20 +285,33 @@ Deno.serve(async (req) => {
 
       const productLabel = `${storeRow.name || 'Custom'} - ${productType === 'audio' ? 'Áudio' : 'Vídeo'} ${String(rawBody.categoryName || category)} ${durationMinutes ? `(${durationMinutes}min)` : ''}`.trim().substring(0, 200);
 
-      // Prices are configured in BRL. Charge currency follows the buyer's language
-      // (pt → BRL, en/es → USD), converting the amount with a fixed rate.
-      const BRL_PER_USD = 5.4;
-      const requestedCurrency = String(rawBody.currency || 'BRL').toLowerCase();
-      const stripeCurrency = requestedCurrency === 'usd' ? 'usd' : 'brl';
-      const chargeAmountCents = stripeCurrency === 'usd'
-        ? Math.max(50, Math.round(amountCents / BRL_PER_USD))
-        : amountCents;
+      // Currency ALWAYS follows the admin panel configuration (payment_config.currency).
+      // The buyer's language never changes the charged currency or amount.
+      const stripeCurrency = String(paymentConfig?.currency || 'BRL').toLowerCase() === 'usd' ? 'usd' : 'brl';
+      const chargeAmountCents = amountCents;
+
+      // Verify the connected account can actually accept charges before creating a session.
+      const acctRes = await fetch(`https://api.stripe.com/v1/accounts/${storeRow.stripe_account_id}`, {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` },
+      });
+      const acct = await acctRes.json();
+      if (!acctRes.ok || acct?.charges_enabled !== true) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'stripe_account_not_ready',
+            message: 'A conta Stripe da loja ainda não está habilitada para receber pagamentos. Conclua o cadastro na Stripe.',
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
       const params = new URLSearchParams({
         mode: 'payment',
         'line_items[0][price_data][currency]': stripeCurrency,
         'line_items[0][price_data][product_data][name]': productLabel,
         'line_items[0][price_data][unit_amount]': String(chargeAmountCents),
+
         'line_items[0][quantity]': '1',
         success_url: successUrl,
         cancel_url: cancelUrl,
