@@ -139,7 +139,7 @@ const ClientAuth = () => {
     setIsSubmitting(false);
   };
 
-  if (authLoading) {
+  if (authLoading || (isAuthenticated && membershipLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -147,7 +147,25 @@ const ClientAuth = () => {
     );
   }
 
+  if (isAuthenticated && !isMember) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+        <div className="w-full max-w-md glass rounded-2xl p-8 border border-primary/10 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto">
+            <User className="w-7 h-7 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">{t('storeAccess.joinTitle')}</h2>
+          <p className="text-muted-foreground text-sm">{t('storeAccess.joinDescription')}</p>
+          <Button className="w-full" onClick={handleJoinStore} disabled={isJoining}>
+            {isJoining ? <Loader2 className="w-4 h-4 animate-spin" /> : t('storeAccess.joinCta')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const storeName = store?.name || "a comunidade";
+
 
   if (signupConfirmationSent) {
     return (
