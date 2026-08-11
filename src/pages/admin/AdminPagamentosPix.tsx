@@ -172,10 +172,12 @@ const AdminPagamentosPix = () => {
       toast({ title: error, variant: 'destructive' });
       return;
     }
-    setConfig(prev => ({ ...prev, activeGateway: 'pix_manual' as const }));
-    await saveNow();
-    toast({ title: t('adminPayments.pixManualConfigured') });
+    // Persist the gateway together with the PIX data in a single write
+    const next = { ...config, activeGateway: 'pix_manual' as const };
+    const ok = await saveNow(next);
+    if (ok) toast({ title: t('adminPayments.pixManualConfigured') });
   };
+
 
   const pixKeyLabels: Record<string, string> = {
     cpf: t('adminPayments.pixKeyLabels.cpf'),
