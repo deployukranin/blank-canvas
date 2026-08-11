@@ -37,7 +37,7 @@ export interface VideoRules {
 }
 
 export interface VideoConfig {
-  // Video preview settings
+  // Preview settings (image only; legacy video preview removed)
   previewVideoUrl: string;
   previewImageUrl: string;
   previewType: 'video' | 'image';
