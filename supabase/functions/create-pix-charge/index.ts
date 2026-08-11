@@ -338,11 +338,14 @@ Deno.serve(async (req) => {
       if (!sessionRes.ok) {
         const errBody = await sessionRes.text();
         console.error('Stripe custom checkout error:', errBody);
+        let stripeMsg = '';
+        try { stripeMsg = JSON.parse(errBody)?.error?.message || ''; } catch { /* ignore */ }
         return new Response(
-          JSON.stringify({ success: false, error: 'Failed to create Stripe checkout session' }),
+          JSON.stringify({ success: false, error: 'Failed to create Stripe checkout session', message: stripeMsg }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
 
       const session = await sessionRes.json();
       checkoutUrl = session.url;
