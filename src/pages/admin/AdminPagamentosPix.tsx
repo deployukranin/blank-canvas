@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   CreditCard, 
   QrCode,
-  
   Check,
   Clock,
   Save,
@@ -12,6 +11,8 @@ import {
   Link2Off,
   ShieldCheck,
   RefreshCw,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from './AdminLayout';
