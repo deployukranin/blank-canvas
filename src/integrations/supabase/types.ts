@@ -1927,6 +1927,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_mark_email_verified: { Args: { p_user_id: string }; Returns: Json }
       affiliate_mark_eligible: { Args: never; Returns: number }
       assign_client_role: { Args: { p_store_id: string }; Returns: Json }
       assign_creator_role: { Args: { p_store_id: string }; Returns: Json }

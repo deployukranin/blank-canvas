@@ -56,11 +56,14 @@ Deno.serve(async (req) => {
     if (row.used_at) return redirect('success')
     if (new Date(row.expires_at).getTime() < Date.now()) return redirect('expired')
 
-    await adminFetch(`/rest/v1/profiles?user_id=eq.${row.user_id}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ email_verified_at: new Date().toISOString() }),
+    // Verification columns are protected by a trigger; the admin RPC is the
+    // only supported way to flip them.
+    const marked = await adminFetch(`/rest/v1/rpc/admin_mark_email_verified`, {
+      method: 'POST',
+      body: JSON.stringify({ p_user_id: row.user_id }),
     })
+    if (!marked.ok) return redirect('invalid')
+
 
     await adminFetch(`/rest/v1/email_verification_tokens?id=eq.${row.id}`, {
       method: 'PATCH',
