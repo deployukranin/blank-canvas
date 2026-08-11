@@ -312,7 +312,7 @@ const AdminCustoms = () => {
             {/* Preview Section Config */}
             <GlassCard className="p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Video className="w-5 h-5 text-primary" />
+                <ImageIcon className="w-5 h-5 text-primary" />
                 {t('customsAdmin.howItWorks', 'Seção "Como Funciona"')}
               </h3>
               
