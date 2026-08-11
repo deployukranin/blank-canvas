@@ -130,8 +130,9 @@ const CustomsPage = () => {
   // Current tab
   const [activeTab, setActiveTab] = useState('videos');
 
-  // Resolve uploaded (Google Drive) preview image into a displayable URL.
+  // Resolve uploaded (Google Drive) preview media into displayable URLs.
   const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
+  const [previewVideoSrc, setPreviewVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -142,8 +143,9 @@ const CustomsPage = () => {
       if (active) set?.(url);
     };
     resolve(config?.previewImageUrl, setPreviewImageSrc);
+    resolve(config?.previewVideoUrl, setPreviewVideoSrc);
     return () => { active = false; };
-  }, [config?.previewImageUrl]);
+  }, [config?.previewImageUrl, config?.previewVideoUrl]);
 
 
   // Video handlers
