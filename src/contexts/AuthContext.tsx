@@ -226,9 +226,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    // Return the visitor to an anonymous session so they can still use
+    // guest features (reactions, watch history) without needing to log in.
+    await supabase.auth.signInAnonymously();
   }, []);
+
 
   const logout = useCallback(() => {
     signOut();
