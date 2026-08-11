@@ -41,14 +41,10 @@ const BLOCKED_HTML =
 async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
   const dest = (req.headers.get('sec-fetch-dest') || '').toLowerCase();
   if (!dest || ['document', 'iframe', 'frame', 'object', 'embed'].includes(dest)) {
-    return new Response(BLOCKED_HTML, {
-      status: 403,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': 'no-store, no-cache, must-revalidate',
-        'x-content-type-options': 'nosniff',
-      },
-    });
+    const blockedHeaders = applySecurityHeaders(new Headers());
+    blockedHeaders.set('content-type', 'text/html; charset=utf-8');
+    blockedHeaders.set('cache-control', 'no-store, no-cache, must-revalidate');
+    return new Response(BLOCKED_HTML, { status: 403, headers: blockedHeaders });
   }
 
   const upstream = new URL(DRIVE_MEDIA_URL);
