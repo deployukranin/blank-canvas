@@ -155,11 +155,17 @@ export function PixPaymentModal({
                 animate={{ scale: 1, opacity: 1 }}
                 className="relative"
               >
-                <img
-                  src={qrCodeImage}
-                  alt="QR Code PIX"
-                  className="w-48 h-48 rounded-lg bg-white p-2"
-                />
+                {brCode ? (
+                  <div className="w-48 h-48 rounded-lg bg-white p-2 flex items-center justify-center">
+                    <QRCodeSVG value={brCode} size={176} level="M" />
+                  </div>
+                ) : (
+                  <img
+                    src={qrCodeImage}
+                    alt="QR Code PIX"
+                    className="w-48 h-48 rounded-lg bg-white p-2"
+                  />
+                )}
                 {isChecking && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                     <Loader2 className="w-8 h-8 animate-spin text-white" />
@@ -167,6 +173,7 @@ export function PixPaymentModal({
                 )}
               </motion.div>
             )}
+
           </div>
 
           {/* Timer */}
