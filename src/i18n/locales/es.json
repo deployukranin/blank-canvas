@@ -1490,7 +1490,19 @@
     "pixManualConfigured": "¡PIX Manual configurado y activado!",
     "refreshStatus": "Actualizar estado",
     "pendingRequirements": "Información pendiente en Stripe:",
-    "emailVerificationRequired": "Verifica tu email para conectar pagos."
+    "emailVerificationRequired": "Verifica tu email para conectar pagos.",
+    "redirectCheck": {
+      "title": "Validación del redirect URI",
+      "description": "Stripe exige que el dominio mytinglebox.com esté registrado como redirect URI.",
+      "loading": "Verificando redirect URI...",
+      "configured": "Redirect URI configurado",
+      "missing": "Redirect URI no configurado",
+      "mismatch": "Redirect URI diferente",
+      "unknown": "No se pudo verificar",
+      "registerInStripe": "Registra exactamente esta URL en Stripe → Settings → Connect → Platform settings → Redirects.",
+      "configuredUri": "URI configurado:",
+      "checkAgain": "Verificar"
+    }
   },
   "adminAffiliates": {
     "title": "Afiliados",
