@@ -275,6 +275,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             <div className="flex items-center gap-2 ml-auto shrink-0">
               <BugReportDialog variant="ghost" className="hidden sm:flex" />
               <LanguageSelector variant="minimal" />
+              <CurrencySelector variant="minimal" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 h-8 pl-1.5 pr-2 rounded-lg hover:bg-foreground/[0.05] transition-colors">
