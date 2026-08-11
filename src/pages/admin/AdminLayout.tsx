@@ -14,6 +14,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useTranslation } from 'react-i18next';
 import { BugReportDialog } from '@/components/bugs/BugReportDialog';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { CurrencySelector } from '@/components/ui/CurrencySelector';
 import { expiresAtMs, isTrialExpired as checkTrialExpired } from '@/lib/trial';
 import { provisionStoreDrive } from '@/lib/external-storage';
 import {
