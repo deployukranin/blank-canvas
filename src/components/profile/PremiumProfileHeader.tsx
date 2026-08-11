@@ -84,8 +84,9 @@ export const PremiumProfileHeader = ({
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl overflow-hidden border border-border/60 bg-card/60 backdrop-blur">
       {/* Banner */}
-      <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/40 via-accent/30 to-primary/10">
-        {!bannerFailed && (
+      <div className="relative h-32 sm:h-40 overflow-hidden">
+        <DefaultBanner />
+        {visibleBanner && !bannerFailed && (
           <img
             src={visibleBanner}
             alt=""
@@ -93,6 +94,7 @@ export const PremiumProfileHeader = ({
             onError={() => setBannerFailed(true)}
           />
         )}
+
         {!isVIP && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
             <Link to={vipPath}>
