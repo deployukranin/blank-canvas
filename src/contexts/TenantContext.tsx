@@ -121,7 +121,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       if (cancelled) return;
 
-      if (dbError) {
+      if (dbError && dbError.code !== 'PGRST116') {
         console.error('Error loading store:', dbError);
         setError('Erro ao carregar loja');
         setStore(null);
@@ -141,6 +141,7 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // Each tenant owns its favicon. Installed idempotently (and cached for
         // the pre-paint script) so it doesn't blink on reload.
         applyTenantFavicon(data.avatar_url, data.id, data.slug);
+
 
 
         // Resolve theme color from cached whitelabel config
