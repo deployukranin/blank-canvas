@@ -9,6 +9,8 @@
  * public/theme-init.js can seed localStorage for subsequent loads.
  */
 
+import { applySecurityHeaders } from './security-headers';
+
 export const config = {
   // Match any path that doesn't contain a dot (no extensions) and isn't /api or /assets
   matcher: ['/((?!api/|assets/|_vercel/|.*\\..*).*)'],
@@ -39,14 +41,10 @@ const BLOCKED_HTML =
 async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
   const dest = (req.headers.get('sec-fetch-dest') || '').toLowerCase();
   if (!dest || ['document', 'iframe', 'frame', 'object', 'embed'].includes(dest)) {
-    return new Response(BLOCKED_HTML, {
-      status: 403,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': 'no-store, no-cache, must-revalidate',
-        'x-content-type-options': 'nosniff',
-      },
-    });
+    const blockedHeaders = applySecurityHeaders(new Headers());
+    blockedHeaders.set('content-type', 'text/html; charset=utf-8');
+    blockedHeaders.set('cache-control', 'no-store, no-cache, must-revalidate');
+    return new Response(BLOCKED_HTML, { status: 403, headers: blockedHeaders });
   }
 
   const upstream = new URL(DRIVE_MEDIA_URL);
@@ -62,7 +60,10 @@ async function handleMediaRequest(req: Request, url: URL): Promise<Response> {
   if (!headers.has('origin')) headers.set('origin', url.origin);
   if (!headers.has('referer')) headers.set('referer', `${url.origin}/`);
 
-  return fetch(upstream, { method: req.method, headers, redirect: 'follow' });
+  const upstreamRes = await fetch(upstream, { method: req.method, headers, redirect: 'follow' });
+  const outHeaders = applySecurityHeaders(new Headers(upstreamRes.headers));
+  outHeaders.set('cache-control', 'private, no-store, max-age=0');
+  return new Response(upstreamRes.body, { status: upstreamRes.status, headers: outHeaders });
 }
 
 
@@ -204,9 +205,10 @@ export default async function middleware(req: Request): Promise<Response> {
     html = injectTenantFavicon(html, bootstrap.avatarUrl, bootstrap.storeId);
   }
 
-  const headers = new Headers(assetRes.headers);
+  const headers = applySecurityHeaders(new Headers(assetRes.headers));
   headers.set('content-type', 'text/html; charset=utf-8');
   headers.set('cache-control', 'no-store, no-cache, must-revalidate');
+  headers.set('pragma', 'no-cache');
   headers.delete('content-length');
   return new Response(html, { status: 200, headers });
 }

@@ -9,6 +9,12 @@ interface Attribution {
   ts: number;
 }
 
+/** Secure + SameSite=Lax, scoped to this site only. Secure is dropped on http localhost. */
+function cookieFlags(): string {
+  const secure = typeof location !== "undefined" && location.protocol === "https:" ? ";Secure" : "";
+  return `;SameSite=Lax${secure}`;
+}
+
 export function getVisitorId(): string {
   try {
     let v = localStorage.getItem(VISITOR_KEY);
@@ -26,7 +32,7 @@ export function setAttribution(code: string) {
   try {
     const data: Attribution = { code, ts: Date.now() };
     localStorage.setItem(ATTR_KEY, JSON.stringify(data));
-    document.cookie = `${ATTR_KEY}=${encodeURIComponent(code)};path=/;max-age=${ATTR_TTL_DAYS * 86400}`;
+    document.cookie = `${ATTR_KEY}=${encodeURIComponent(code)};path=/;max-age=${ATTR_TTL_DAYS * 86400}${cookieFlags()}`;
   } catch {
     /* ignore */
   }
@@ -64,7 +70,7 @@ export function getAttributionCode(): string | null {
 export function clearAttribution() {
   try {
     localStorage.removeItem(ATTR_KEY);
-    document.cookie = `${ATTR_KEY}=;path=/;max-age=0`;
+    document.cookie = `${ATTR_KEY}=;path=/;max-age=0${cookieFlags()}`;
   } catch {
     /* ignore */
   }
