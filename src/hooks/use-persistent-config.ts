@@ -142,20 +142,29 @@ export function usePersistentConfig<T>({
   const setConfig = useCallback((updater: T | ((prev: T) => T)) => {
     setConfigState(prev => {
       const newConfig = typeof updater === 'function' ? (updater as (prev: T) => T)(prev) : updater;
+      latestConfigRef.current = newConfig;
       debouncedSave(newConfig);
       return newConfig;
     });
   }, [debouncedSave]);
 
-  // Force immediate save
-  const saveNow = useCallback(async () => {
+  // Force immediate save (always persists the freshest value, or an explicit override)
+  const saveNow = useCallback(async (override?: T) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
     }
-    
+
+    const configToSave = override ?? pendingConfigRef.current ?? latestConfigRef.current;
+    pendingConfigRef.current = null;
+    if (override) {
+      latestConfigRef.current = override;
+      setConfigState(override);
+    }
+
     setIsSaving(true);
     try {
-      const success = await saveConfig(configKey, config, storeId);
+      const success = await saveConfig(configKey, configToSave, storeId);
       if (success) {
         setLastSaved(new Date());
         toast({
@@ -181,7 +190,8 @@ export function usePersistentConfig<T>({
     } finally {
       setIsSaving(false);
     }
-  }, [configKey, config, toast]);
+  }, [configKey, storeId, toast]);
+
 
   // Cleanup timeout on unmount
   useEffect(() => {
