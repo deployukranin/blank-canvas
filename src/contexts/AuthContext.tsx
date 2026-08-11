@@ -19,6 +19,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAuthenticated: boolean;
+  isAnonymous: boolean;
   isLoading: boolean;
   signUp: (email: string, password: string, redirectTo?: string, metadata?: Record<string, unknown>) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean; alreadyRegistered?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -29,6 +30,7 @@ interface AuthContextType {
   requireAuth: (callback: () => void, authPath?: string) => void;
   applyLocalProfile: (patch: { displayName?: string; avatarDataUrl?: string }) => void;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
