@@ -23,7 +23,12 @@ Deno.serve(servePrivate(async (req) => {
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
     const connectClientId = Deno.env.get("STRIPE_CONNECT_CLIENT_ID");
     if (!stripeSecretKey) return json({ error: "Stripe not configured" }, 500);
-    if (!connectClientId) return json({ error: "oauth_unavailable" }, 501);
+    // A malformed client id makes Stripe answer "No application matches the
+    // supplied client identifier". Fall back to hosted onboarding instead.
+    if (!connectClientId || !/^ca_[A-Za-z0-9]+$/.test(connectClientId.trim())) {
+      return json({ error: "oauth_unavailable" }, 501);
+    }
+
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
