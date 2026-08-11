@@ -126,6 +126,30 @@ const AdminPagamentosPix = () => {
     };
   }, [checkStripeStatus]);
 
+  // Handle the redirect back from the Stripe OAuth flow
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get('stripe');
+    if (!result) return;
+    if (result === 'connected') {
+      toast({ title: t('adminPayments.stripeConnectedToast', 'Conta Stripe conectada com sucesso.') });
+      checkStripeStatus({ silent: true });
+    } else if (result === 'cancelled') {
+      toast({ title: t('adminPayments.stripeCancelledToast', 'Conexão com a Stripe cancelada.') });
+    } else if (result === 'account_in_use') {
+      toast({
+        title: t('adminPayments.stripeAccountInUse', 'Esta conta Stripe já está vinculada a outra loja.'),
+        variant: 'destructive',
+      });
+    } else {
+      toast({ title: t('adminPayments.errors.stripeConnectError'), variant: 'destructive' });
+    }
+    params.delete('stripe');
+    const qs = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleConnectStripe = async () => {
     if (!emailVerified) {
