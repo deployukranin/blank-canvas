@@ -34,7 +34,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User | null => {
+  // Anonymous users exist in the session but are not "authenticated app users".
+  if (supabaseUser.is_anonymous) return null;
+
   const baseUser: User = {
     id: supabaseUser.id,
     email: supabaseUser.email || "",
@@ -58,6 +61,7 @@ const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
 
   return baseUser;
 };
+
 
 const getFriendlyAuthEmailError = (error?: string) => {
   const normalized = (error || "").toLowerCase();
