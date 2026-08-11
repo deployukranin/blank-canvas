@@ -40,30 +40,36 @@ export interface VIPChargeResult {
 
 // Cache (memory + localStorage) so the VIP status survives route changes AND
 // hard refreshes — otherwise the UI paints the "free" state before the query.
+// Keyed by user AND store: a VIP bought in one store never unlocks another.
 const vipCache = new Map<string, VIPSubscription | null>();
 const VIP_CACHE_PREFIX = 'tinglebox:vip:';
 
-const readVipCache = (userId: string): { hit: boolean; value: VIPSubscription | null } => {
-  if (vipCache.has(userId)) return { hit: true, value: vipCache.get(userId) ?? null };
+const cacheKey = (userId: string, storeId: string) => `${userId}:${storeId}`;
+
+const readVipCache = (userId: string, storeId: string): { hit: boolean; value: VIPSubscription | null } => {
+  const key = cacheKey(userId, storeId);
+  if (vipCache.has(key)) return { hit: true, value: vipCache.get(key) ?? null };
   try {
-    const stored = localStorage.getItem(`${VIP_CACHE_PREFIX}${userId}`);
+    const stored = localStorage.getItem(`${VIP_CACHE_PREFIX}${key}`);
     if (!stored) return { hit: false, value: null };
     const parsed = JSON.parse(stored) as VIPSubscription | null;
     // Expired cached subscriptions must not be trusted
     const value = parsed && new Date(parsed.expires_at).getTime() > Date.now() ? parsed : null;
-    vipCache.set(userId, value);
+    vipCache.set(key, value);
     return { hit: true, value };
   } catch {
     return { hit: false, value: null };
   }
 };
 
-const writeVipCache = (userId: string, value: VIPSubscription | null) => {
-  vipCache.set(userId, value);
+const writeVipCache = (userId: string, storeId: string, value: VIPSubscription | null) => {
+  const key = cacheKey(userId, storeId);
+  vipCache.set(key, value);
   try {
-    localStorage.setItem(`${VIP_CACHE_PREFIX}${userId}`, JSON.stringify(value));
+    localStorage.setItem(`${VIP_CACHE_PREFIX}${key}`, JSON.stringify(value));
   } catch { /* storage may be unavailable */ }
 };
+
 
 export const useVIPSubscription = () => {
   const { session } = useAuth();
