@@ -64,7 +64,9 @@ const AdminCustoms = () => {
       const { ref } = await uploadPreviewMedia(file, store.id);
       setConfig({
         ...config,
-        ...(target === 'video' ? { previewVideoUrl: ref } : { previewImageUrl: ref }),
+        previewType: 'image',
+        previewVideoUrl: '',
+        previewImageUrl: target === 'image' ? ref : config.previewImageUrl,
       });
       toast({ title: t('common.save', 'Salvo'), description: file.name });
     } catch (err) {
